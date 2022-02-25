@@ -277,7 +277,7 @@ plot_alphas <- function(x,
   cv_alpha <- lapply(x$outer_result, '[[', 'cv_alpha')
   coln <- length(cv_alpha)
   cols <- rainbow(coln)
-  plot(cv_alpha[[1]], type = 'l', x = cva$alphaSet,
+  plot(cv_alpha[[1]], type = 'l', x = x$alphaSet,
        ylim = range(unlist(cv_alpha)),
        xlab = xlab,
        ylab = ylab,
