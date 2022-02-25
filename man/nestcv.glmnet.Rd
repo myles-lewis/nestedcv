@@ -12,7 +12,7 @@ nestcv.glmnet(
   n_inner_folds = 10,
   alphaSet = seq(0.8, 1, 0.05),
   min_1se = 0,
-  keep_innerCV_pred = TRUE,
+  keep = TRUE,
   cores = 1,
   filterArgs = NULL,
   ...
@@ -36,9 +36,9 @@ character vector with names of filtered predictors.}
 \item{min_1se}{Value from 0 to 1 specifying choice of optimal lambda from
 0=lambda.min to 1=lambda.1se}
 
-\item{keep_innerCV_pred}{Logical indicating whether inner CV predictions are
-retained for calculating left-out inner CV fold accuracy etc. See \code{keep} in
-\link{cv.glmnet}.}
+\item{keep}{Logical indicating whether inner CV predictions are
+retained for calculating left-out inner CV fold accuracy etc. See argument
+\code{keep} in \link{cv.glmnet}.}
 
 \item{cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}

@@ -170,9 +170,9 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
 #' @param alphaSet Vector of alphas to be tuned
 #' @param min_1se Value from 0 to 1 specifying choice of optimal lambda from 
 #' 0=lambda.min to 1=lambda.1se
-#' @param keep_innerCV_pred Logical indicating whether inner CV predictions are 
-#' retained for calculating left-out inner CV fold accuracy etc. See `keep` in 
-#' [cv.glmnet].
+#' @param keep Logical indicating whether inner CV predictions are 
+#' retained for calculating left-out inner CV fold accuracy etc. See argument 
+#' `keep` in [cv.glmnet].
 #' @param cores Number of cores for parallel processing. Note this currently 
 #' uses [parallel::mclapply].
 #' @param ... Optional arguments passed to [cv.glmnet]
@@ -190,7 +190,7 @@ nestcv.glmnet <- function(y, x,
                        n_inner_folds = 10,
                        alphaSet = seq(0.8, 1, 0.05),
                        min_1se = 0,
-                       keep_innerCV_pred = TRUE,
+                       keep = TRUE,
                        cores = 1, 
                        filterArgs = NULL,
                        ...) {
@@ -208,7 +208,7 @@ nestcv.glmnet <- function(y, x,
     fit <- lapply(alphaSet, function(alpha) {
       cv.glmnet(x = filtx[trainIndex, ], y = y[trainIndex], 
                 alpha = alpha, nfolds = n_inner_folds, foldid = foldid, 
-                keep = keep_innerCV_pred, ...)
+                keep = keep, ...)
     })
     alphas <- unlist(lapply(fit, function(fitx) {
       w <- which.min(fitx$cvm)
