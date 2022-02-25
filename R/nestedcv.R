@@ -261,23 +261,29 @@ nestcv.glmnet <- function(y, x,
 #' 
 #' Plot of cross-validated glmnet alpha parameter against deviance.
 #' 
+#' @param x Fitted "nestcv.glmnet" object
+#' @param xlab x axis label
+#' @param ylab y axis label
+#' @param ... other arguments passed to plot
 #' @return No return value
 #' @importFrom graphics lines
 #' @importFrom grDevices rainbow
 #' @export
 #' 
-plot_alphas <- function(cva, ...) {
-  cv_alpha <- lapply(cva$outer_result, '[[', 'cv_alpha')
+plot_alphas <- function(x,
+                        xlab = 'Alpha',
+                        ylab = 'Deviance',
+                        ...) {
+  cv_alpha <- lapply(x$outer_result, '[[', 'cv_alpha')
   coln <- length(cv_alpha)
   cols <- rainbow(coln)
   plot(cv_alpha[[1]], type = 'l', x = cva$alphaSet,
        ylim = range(unlist(cv_alpha)),
-       xlab = 'Elastic net alpha',
-       ylab = 'Binomial deviance',
-       col = cols[1],
-       las = 1, bty = 'l', ...)
-  for (i in 2:10) {
-    lines(cv_alpha[[i]], x = cva$alphaSet, col = cols[i])
+       xlab = xlab,
+       ylab = ylab,
+       col = cols[1], ...)
+  for (i in 2:length(cv_alpha)) {
+    lines(cv_alpha[[i]], x = x$alphaSet, col = cols[i])
   }
 }
 
@@ -289,7 +295,7 @@ plot_alphas <- function(cva, ...) {
 #' @param cva Fitted `"nestcv.glmnet"` object 
 #' @param direction Passed to [pROC::roc]
 #' @param ... Other arguments passed to [pROC::roc]
-#' @return `"roc"` object
+#' @return `"roc"` object, see [pROC::roc]
 #' @importFrom pROC roc auc
 #' @export
 #' 
