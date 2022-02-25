@@ -18,15 +18,18 @@
 #' @importFrom Rfast ttests
 #' @export
 #' 
-uni_filter <- function(y, data, nfilter = NULL, p_cutoff = 0.05, 
-                    return = "names") {
+uni_filter <- function(y,
+                       data,
+                       nfilter = NULL,
+                       p_cutoff = 0.05,
+                       return = "names") {
   indx1 <- as.numeric(y) == 1
   indx2 <- as.numeric(y) == 2
   res <- Rfast::ttests(data[indx1, ], data[indx2, ])
   rownames(res) <- colnames(data)
   if (return == "full") return(res[, 'stat'])
   out <- res[, 'pvalue']
-  out <- sort(out[out < p_uni_cutoff])
+  out <- sort(out[out < p_cutoff])
   if (!is.null(nfilter)) out <- out[1:nfilter]
   names(out)
 }
@@ -40,7 +43,8 @@ uni_filter <- function(y, data, nfilter = NULL, p_cutoff = 0.05,
 #' @param fit A [cv.glmnet] fitted model object.
 #' @param s Value of lambda. See [coef.glmnet] and [predict.cv.glmnet]
 #' @return Vector of coefficients ordered with the intercept first, followed 
-#' by highest absolute value to lowest, 
+#' by highest absolute value to lowest.
+#' @importFrom stats coef
 #' @export
 #' 
 glmnet_coefs <- function(fit, s) {
@@ -161,8 +165,8 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
 #' character vector with names of filtered predictors.
 #' @param filterArgs Optional list of additional arguments to be passed to a 
 #' function specified by `filterFUN`.
-#' @param n_outer_folders Number of outer CV folds
-#' @param n_inner_folders Number of inner CV folds
+#' @param n_outer_folds Number of outer CV folds
+#' @param n_inner_folds Number of inner CV folds
 #' @param alphaSet Vector of alphas to be tuned
 #' @param min_1se Value from 0 to 1 specifying choice of optimal lambda from 
 #' 0=lambda.min to 1=lambda.1se
@@ -173,9 +177,11 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
 #' uses [parallel::mclapply].
 #' @param ... Optional arguments passed to [cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet"
-#' @importFrom caret createFolds
+#' @importFrom caret createFolds confusionMatrix
+#' @importFrom data.table rbindlist
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom parallel mclapply
+#' @importFrom stats predict setNames
 #' @export
 #' 
 nestcv.glmnet <- function(y, x,
@@ -235,7 +241,7 @@ nestcv.glmnet <- function(y, x,
   output <- as.data.frame(output)
   cm <- table(output$predy, output$testy)
   acc <- setNames(sum(diag(cm))/ sum(cm), "Accuracy")
-  b_acc <- confusionMatrix(cm)$byClass[11]
+  b_acc <- caret::confusionMatrix(cm)$byClass[11]
   glmnet.roc <- pROC::roc(output$testy, output[, 2], direction = "<")
   auc <- glmnet.roc$auc
   # fit final glmnet

@@ -5,7 +5,7 @@ Authors@R:
     c(person(given = "Myles",family = "Lewis",
     role = c("aut", "cre"),
     email = "myles.lewis@qmul.ac.uk",
-    comment = c(ORCID = "0000-0001-9365-5345"))
+    comment = c(ORCID = "0000-0001-9365-5345")))
 Maintainer: Myles Lewis <myles.lewis@qmul.ac.uk>
 Description: Nested cross-validation for the 'glmnet' package, including 
     cross-validation of alpha parameter and filter functions to reduce number 
@@ -15,6 +15,7 @@ Encoding: UTF-8
 Imports:
     caret,
     CORElearn,
+    data.table,
     glmnet,
     parallel,
     pROC,
