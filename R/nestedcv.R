@@ -281,20 +281,21 @@ plot_alphas <- function(cva, ...) {
   }
 }
 
-#' Extract ROC curve from left-out folds from inner CV
+#' Build ROC curve from left-out folds from inner CV
 #' 
-#' Extract ROC (receiver operating characteristic) curve from left-out folds 
-#' from inner CV.
+#' Build ROC (receiver operating characteristic) curve from left-out folds 
+#' from inner CV. Object can be plotted or passed to functions [auc] etc.
 #' 
 #' @param cva Fitted `"nestcv.glmnet"` object 
 #' @param direction Passed to [pROC::roc]
+#' @param ... Other arguments passed to [pROC::roc]
 #' @return `"roc"` object
-#' @importFrom pROC roc
+#' @importFrom pROC roc auc
 #' @export
 #' 
-innercv_roc <- function(cva, direction = "<") {
+innercv_roc <- function(cva, direction = "<", ...) {
   innerpreds <- unlist(lapply(cva$outer_result, '[[', 'innerCV_preds'))
   ytrain <- unlist(lapply(cva$outer_result, '[[', 'ytrain'))
-  pROC::roc(ytrain, innerpreds, direction = direction)
+  pROC::roc(ytrain, innerpreds, direction = direction, ...)
 }
 
