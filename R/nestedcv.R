@@ -167,11 +167,12 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
 #' @param min_1se Value from 0 to 1 specifying choice of optimal lambda from 
 #' 0=lambda.min to 1=lambda.1se
 #' @param keep_innerCV_pred Logical indicating whether inner CV predictions are 
-#' retained for calculating left-out inner CV fold accuracy etc.
+#' retained for calculating left-out inner CV fold accuracy etc. See `keep` in 
+#' [cv.glmnet].
 #' @param cores Number of cores for parallel processing. Note this currently 
 #' uses [parallel::mclapply].
 #' @param ... Optional arguments passed to [cv.glmnet]
-#' @return 
+#' @return An object with S3 class "nestcv.glmnet"
 #' @importFrom caret createFolds
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom parallel mclapply
@@ -193,13 +194,15 @@ nestcv.glmnet <- function(y, x,
     foldid <- sample(rep(seq_len(n_inner_folds), length = length(trainIndex)))
     # expand data with interactions
     filtx <- if (is.null(filterFUN)) x else {
-      fset <- filterFUN(y[trainIndex], x[trainIndex, ], ...)
+      args <- list(y = y[trainIndex], x = x[trainIndex, ])
+      args <- append(args, filterArgs)
+      fset <- do.call(filterFUN, args)
       x[, fset]
     }
     fit <- lapply(alphaSet, function(alpha) {
-      cv.glmnet(x = filtx[trainIndex, ], y = y[trainIndex], family = "binomial", 
+      cv.glmnet(x = filtx[trainIndex, ], y = y[trainIndex], 
                 alpha = alpha, nfolds = n_inner_folds, foldid = foldid, 
-                keep = keep_innerCV_pred)
+                keep = keep_innerCV_pred, ...)
     })
     alphas <- unlist(lapply(fit, function(fitx) {
       w <- which.min(fitx$cvm)
@@ -254,7 +257,15 @@ nestcv.glmnet <- function(y, x,
        summary = setNames(c(auc, acc, b_acc), c("auc", "accuracy", "bal_accuracy")))
 }
 
-# plot cv alphas against deviance
+#' Plot cross-validated glmnet alpha
+#' 
+#' Plot of cross-validated glmnet alpha parameter against deviance.
+#' 
+#' @return No return value
+#' @importFrom graphics lines
+#' @importFrom grDevices rainbow
+#' @export
+#' 
 plot_alphas <- function(cva, ...) {
   cv_alpha <- lapply(cva$outer_result, '[[', 'cv_alpha')
   coln <- length(cv_alpha)
@@ -270,7 +281,17 @@ plot_alphas <- function(cva, ...) {
   }
 }
 
-# extract roc from LO folds from inner CV
+#' Extract ROC curve from left-out folds from inner CV
+#' 
+#' Extract ROC (receiver operating characteristic) curve from left-out folds 
+#' from inner CV.
+#' 
+#' @param cva Fitted `"nestcv.glmnet"` object 
+#' @param direction Passed to [pROC::roc]
+#' @return `"roc"` object
+#' @importFrom pROC roc
+#' @export
+#' 
 innercv_roc <- function(cva, direction = "<") {
   innerpreds <- unlist(lapply(cva$outer_result, '[[', 'innerCV_preds'))
   ytrain <- unlist(lapply(cva$outer_result, '[[', 'ytrain'))
