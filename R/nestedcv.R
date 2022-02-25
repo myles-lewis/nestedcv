@@ -188,7 +188,7 @@ nestcv.glmnet <- function(y, x,
                        filterFUN = NULL,
                        n_outer_folds = 10,
                        n_inner_folds = 10,
-                       alphaSet = seq(0.8, 1, 0.05),
+                       alphaSet = seq(0, 1, 0.1),
                        min_1se = 0,
                        keep = TRUE,
                        cores = 1, 
@@ -252,7 +252,7 @@ nestcv.glmnet <- function(y, x,
     x[, fset]
   }
   
-  fit <- glmnet(filtx, y, family = "binomial", alpha = alph)
+  fit <- glmnet(filtx, y, alpha = alph, ...)
   list(output = output,
        outer_result = outer_res,
        mean_lambda = lam,
