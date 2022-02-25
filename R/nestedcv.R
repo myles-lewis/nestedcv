@@ -1,9 +1,24 @@
 # nestedcv
-# Myles Lewis
+# by Myles Lewis
 # 24-02-2022
 
-# univariate t-test filter
-unifilt <- function(y, data, nfilter = NULL, p_uni_cutoff = 0.05, 
+#' Univariate filter
+#' 
+#' Simple univariate filter using t-test or anova.
+#' 
+#' @param y Response vector
+#' @param data Matrix of predictors
+#' @param nfilter Number of predictors to return. If `NULL` all predictors with 
+#' p values < `p_cutoff` are returned.
+#' @param p_cutoff p value cut-off
+#' @param return Type of vector returned. Default "names" returns predictor 
+#' names, "full" returns a named vector of p values.
+#' @return Ordered vector of names of filtered parameters. If `return` is 
+#' `"full"` a named vector of p values is returned.
+#' @importFrom Rfast ttests
+#' @export
+#' 
+uni_filter <- function(y, data, nfilter = NULL, p_cutoff = 0.05, 
                     return = "names") {
   indx1 <- as.numeric(y) == 1
   indx2 <- as.numeric(y) == 2
@@ -16,10 +31,20 @@ unifilt <- function(y, data, nfilter = NULL, p_uni_cutoff = 0.05,
   names(out)
 }
 
-# obtains coefficients from a cv.glmnet model
-# needs lambda to be specified
-glmnet_coefs <- function(fit, lambda) {
-  cf <- coef(fit, s = lambda)
+#' glmnet coefficients
+#' 
+#' Convenience function for retrieving coefficients from a [cv.glmnet] model at 
+#' a specified lambda. Sparsity is removed and non-intercept coefficients are 
+#' ranked by absolute value.
+#' 
+#' @param fit A [cv.glmnet] fitted model object.
+#' @param s Value of lambda. See [coef.glmnet] and [predict.cv.glmnet]
+#' @return Vector of coefficients ordered with the intercept first, followed 
+#' by highest absolute value to lowest, 
+#' @export
+#' 
+glmnet_coefs <- function(fit, s) {
+  cf <- coef(fit, s = s)
   cf <- as.matrix(cf)
   cf <- cf[cf != 0, ]
   cf2 <- cf[-1]
@@ -27,6 +52,29 @@ glmnet_coefs <- function(fit, lambda) {
   c(cf[1], cf2)  # keep intercept first
 }
 
+#' Random forest filter
+#' 
+#' Fits a random forest model and ranks variables by variable importance. 
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param nfilter Number of predictors to return. If `NULL` all predictors are 
+#' returned.
+#' @param return Type of vector returned. Default "names" returns predictor 
+#' names, "full" returns a named vector of variable importance.
+#' @param ntree Number of trees to grow. See [randomForest].
+#' @param mtry Number of predictors randomly sampled as candidates at each 
+#' split. See [randomForest].
+#' @param ... Optional arguments passed to [randomForest].
+#' @return Ordered vector of names of filtered parameters. If `return` is 
+#' `"full"` a named vector of variable importance is returned.
+#' @details
+#' This filter uses the [randomForest] function from the randomForest package.
+#' Variable importance is calculated using the [importance] function, specifying
+#' type 1 = mean decrease in accuracy. See [importance].
+#' @importFrom randomForest randomForest importance
+#' @export
+#' 
 rf_filter <- function(y, x, nfilter = NULL, return = "names",
                       ntree = 1000,
                       mtry = ncol(x) * 0.2,
@@ -42,6 +90,24 @@ rf_filter <- function(y, x, nfilter = NULL, return = "names",
   names(vi)
 }
 
+#' ReliefF filter
+#' 
+#' Uses ReliefF algorithm from the CORElearn package to rank predictors in order 
+#' of importance.
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param nfilter Number of predictors to return. If `NULL` all predictors are 
+#' returned.
+#' @param estimator Type of algorithm used, see [CORElearn::attrEval]
+#' @param return Type of vector returned. Default "names" returns predictor 
+#' names, "full" returns a named vector of variable importance.
+#' @param ... Other arguments passed to [CORElearn::attrEval]
+#' @return Ordered vector of names of filtered parameters. If `return` is 
+#' `"full"` a named vector of variable importance is returned.
+#' @importFrom CORElearn attrEval
+#' @export
+#'
 relieff_filter <- function(y, x, nfilter = NULL, 
                            estimator = "ReliefFequalK",
                            return = "names", ...) {
@@ -55,8 +121,26 @@ relieff_filter <- function(y, x, nfilter = NULL,
   names(ref)
 }
 
+#' Combo filter
+#' 
+#' Filter combining univariate filtering and reliefF filtering in equal measure.
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param nfilter Number of predictors to return, using 1/2 from `uni_filter` 
+#' and 1/2 from `relieff_filter`. Since `unique` is applied, the final number 
+#' returned may be less than `nfilter`.
+#' @param return Type of output returned. Default "names" returns predictor 
+#' names, "full" returns full output.
+#' @param ... Optional arguments passed via [relieff_filter] to 
+#' [CORElearn::attrEval]
+#' @return Ordered vector of names of filtered parameters. If `return` is 
+#' `"full"` a list of 2 vectors of full output from both [uni_filter] 
+#' and [relieff_filter] is returned.
+#' @export
+#' 
 combo_filter <- function(y, x, nfilter, return = "names", ...) {
-  uni_set <- unifilt(y, x, nfilter, return = return)
+  uni_set <- uni_filter(y, x, nfilter, return = return)
   relf_set <- relieff_filter(y, x, nfilter, return = return, ...)
   if (return == "full") {
     return(list(unifilt = uni_set, relieff_filter = relf_set))
@@ -65,14 +149,44 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
   unique(c(uni_set[1:n], relf_set[1:n]))
 }
 
-cv2.glmnet <- function(y, x,
+#' Nested cross-validation with glmnet
+#' 
+#' Nested cross-validation (CV) with glmnet including tuning of elastic net 
+#' alpha parameter and embedding of a filter function within the nested CV.
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param filterFUN Filter function, e.g. [uni_filter] or [relieff_filter]. 
+#' Any function can be provided and is passed `y` and `x`. Must return a 
+#' character vector with names of filtered predictors.
+#' @param filterArgs Optional list of additional arguments to be passed to a 
+#' function specified by `filterFUN`.
+#' @param n_outer_folders Number of outer CV folds
+#' @param n_inner_folders Number of inner CV folds
+#' @param alphaSet Vector of alphas to be tuned
+#' @param min_1se Value from 0 to 1 specifying choice of optimal lambda from 
+#' 0=lambda.min to 1=lambda.1se
+#' @param keep_innerCV_pred Logical indicating whether inner CV predictions are 
+#' retained for calculating left-out inner CV fold accuracy etc.
+#' @param cores Number of cores for parallel processing. Note this currently 
+#' uses [parallel::mclapply].
+#' @param ... Optional arguments passed to [cv.glmnet]
+#' @return 
+#' @importFrom caret createFolds
+#' @importFrom glmnet cv.glmnet glmnet
+#' @importFrom parallel mclapply
+#' @export
+#' 
+nestcv.glmnet <- function(y, x,
                        filterFUN = NULL,
                        n_outer_folds = 10,
                        n_inner_folds = 10,
                        alphaSet = seq(0.8, 1, 0.05),
                        min_1se = 0,
                        keep_innerCV_pred = TRUE,
-                       cores = 8, ...) {
+                       cores = 1, 
+                       filterArgs = NULL,
+                       ...) {
   outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
   outer_res <- mclapply(1:n_outer_folds, function(i) {
     trainIndex <- outer_folds[[i]]

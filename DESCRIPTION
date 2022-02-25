@@ -1,12 +1,24 @@
 Package: nestedcv
-Title: What the Package Does (One Line, Title Case)
+Title: Nested Cross-validation with 'Glmnet'
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    c(person(given = "Myles",family = "Lewis",
+    role = c("aut", "cre"),
+    email = "myles.lewis@qmul.ac.uk",
+    comment = c(ORCID = "0000-0001-9365-5345"))
+Maintainer: Myles Lewis <myles.lewis@qmul.ac.uk>
+Description: Nested cross-validation for the 'glmnet' package, including 
+    cross-validation of alpha parameter and filter functions to reduce number 
+    of predictors in "wide" data (P>>n).
+License: MIT + file LICENSE
 Encoding: UTF-8
+Imports:
+    caret,
+    CORElearn,
+    glmnet,
+    parallel,
+    pROC,
+    randomForest,
+    Rfast
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
