@@ -248,10 +248,11 @@ nestcv.glmnet <- function(y, x,
   lam <- mean(unlist(lapply(outer_res, '[[', 'lambda')))
   alph <- mean(unlist(lapply(outer_res, '[[', 'alpha')))
   filtx <- if (is.null(filterFUN)) x else {
-    fset <- filterFUN(y, x, ...)
+    args <- list(y = y, x = x)
+    args <- append(args, filterArgs)
+    fset <- do.call(filterFUN, args)
     x[, fset]
   }
-  
   fit <- glmnet(filtx, y, alpha = alph, ...)
   list(output = output,
        outer_result = outer_res,
