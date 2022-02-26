@@ -15,7 +15,6 @@ nestcv.glmnet(
   min_1se = 0,
   keep = TRUE,
   cores = 1,
-  filterArgs = NULL,
   ...
 )
 }
@@ -47,10 +46,8 @@ retained for calculating left-out inner CV fold accuracy etc. See argument
 \item{cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}
 
-\item{filterArgs}{Optional list of additional arguments to be passed to a
-function specified by \code{filterFUN}.}
-
-\item{...}{Optional arguments passed to \link{cv.glmnet}}
+\item{...}{Optional arguments passed both to \link{cv.glmnet} as well as the
+filter function specified by \code{filterFUN}}
 }
 \value{
 An object with S3 class "nestcv.glmnet"

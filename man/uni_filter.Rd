@@ -4,12 +4,12 @@
 \alias{uni_filter}
 \title{Univariate filter}
 \usage{
-uni_filter(y, data, nfilter = NULL, p_cutoff = 0.05, return = "names")
+uni_filter(y, x, nfilter = NULL, p_cutoff = 0.05, return = "names")
 }
 \arguments{
 \item{y}{Response vector}
 
-\item{data}{Matrix of predictors}
+\item{x}{Matrix of predictors}
 
 \item{nfilter}{Number of predictors to return. If \code{NULL} all predictors with
 p values < \code{p_cutoff} are returned.}

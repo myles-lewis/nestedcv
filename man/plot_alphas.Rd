@@ -4,14 +4,12 @@
 \alias{plot_alphas}
 \title{Plot cross-validated glmnet alpha}
 \usage{
-plot_alphas(x, xlab = "Alpha", ylab = "Deviance", ...)
+plot_alphas(x, col = NULL, ...)
 }
 \arguments{
 \item{x}{Fitted "nestcv.glmnet" object}
 
-\item{xlab}{x axis label}
-
-\item{ylab}{y axis label}
+\item{col}{Optional vector of line colours for each fold}
 
 \item{...}{other arguments passed to plot}
 }

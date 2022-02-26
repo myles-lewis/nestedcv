@@ -7,7 +7,7 @@
 #' Simple univariate filter using t-test or anova.
 #' 
 #' @param y Response vector
-#' @param data Matrix of predictors
+#' @param x Matrix of predictors
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with 
 #' p values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
@@ -19,14 +19,14 @@
 #' @export
 #' 
 uni_filter <- function(y,
-                       data,
+                       x,
                        nfilter = NULL,
                        p_cutoff = 0.05,
                        return = "names") {
   indx1 <- as.numeric(y) == 1
   indx2 <- as.numeric(y) == 2
-  res <- Rfast::ttests(data[indx1, ], data[indx2, ])
-  rownames(res) <- colnames(data)
+  res <- Rfast::ttests(x[indx1, ], x[indx2, ])
+  rownames(res) <- colnames(x)
   if (return == "full") return(res[, 'stat'])
   out <- res[, 'pvalue']
   out <- sort(out[out < p_cutoff])
@@ -165,8 +165,6 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
 #' @param filterFUN Filter function, e.g. [uni_filter] or [relieff_filter]. 
 #' Any function can be provided and is passed `y` and `x`. Must return a 
 #' character vector with names of filtered predictors.
-#' @param filterArgs Optional list of additional arguments to be passed to a 
-#' function specified by `filterFUN`.
 #' @param n_outer_folds Number of outer CV folds
 #' @param n_inner_folds Number of inner CV folds
 #' @param alphaSet Vector of alphas to be tuned
@@ -177,7 +175,8 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
 #' `keep` in [cv.glmnet].
 #' @param cores Number of cores for parallel processing. Note this currently 
 #' uses [parallel::mclapply].
-#' @param ... Optional arguments passed to [cv.glmnet]
+#' @param ... Optional arguments passed both to [cv.glmnet] as well as the 
+#' filter function specified by `filterFUN`
 #' @return An object with S3 class "nestcv.glmnet"
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
@@ -194,18 +193,16 @@ nestcv.glmnet <- function(y, x,
                           alphaSet = seq(0, 1, 0.1),
                           min_1se = 0,
                           keep = TRUE,
-                          cores = 1, 
-                          filterArgs = NULL,
+                          cores = 1,
                           ...) {
+  
   outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
   outer_res <- mclapply(1:n_outer_folds, function(i) {
     trainIndex <- outer_folds[[i]]
     foldid <- sample(rep(seq_len(n_inner_folds), length = length(trainIndex)))
     # expand data with interactions
     filtx <- if (is.null(filterFUN)) x else {
-      args <- list(y = y[trainIndex], x = x[trainIndex, ])
-      args <- append(args, filterArgs)
-      fset <- do.call(filterFUN, args)
+      fset <- filterFUN(y[trainIndex], x[trainIndex, ], ...)
       x[, fset]
     }
     fit <- lapply(alphaSet, function(alpha) {
@@ -266,9 +263,7 @@ nestcv.glmnet <- function(y, x,
   lam <- mean(unlist(lapply(outer_res, '[[', 'lambda')))
   alph <- mean(unlist(lapply(outer_res, '[[', 'alpha')))
   filtx <- if (is.null(filterFUN)) x else {
-    args <- list(y = y, x = x)
-    args <- append(args, filterArgs)
-    fset <- do.call(filterFUN, args)
+    fset <- filterFUN(y, x, ...)
     x[, fset]
   }
   fit <- glmnet(filtx, y, alpha = alph, family = family, ...)
@@ -311,14 +306,12 @@ plot_alphas <- function(x,
        type = 'l',
        ylim = range(unlist(cv_alpha)),
        xlab = 'Alpha',
-       ylab = x$outer_result[[1]]$name,
+       ylab = x$outer_result[[1]]$cvfit$name,
        col = col[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call(plot, plot.args)
-  if (n > 1) {
-    for (i in 2:n) {
-      lines(cv_alpha[[i]], x = x$alphaSet, col = col[i])
-    }
+  for (i in 2:n) {
+    lines(cv_alpha[[i]], x = x$alphaSet, col = col[i])
   }
 }
 
