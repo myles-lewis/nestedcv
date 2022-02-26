@@ -289,8 +289,7 @@ nestcv.glmnet <- function(y, x,
 #' Plot of cross-validated glmnet alpha parameter against deviance.
 #' 
 #' @param x Fitted "nestcv.glmnet" object
-#' @param xlab x axis label
-#' @param ylab y axis label
+#' @param col Optional vector of line colours for each fold
 #' @param ... other arguments passed to plot
 #' @return No return value
 #' @importFrom graphics lines
@@ -298,19 +297,28 @@ nestcv.glmnet <- function(y, x,
 #' @export
 #' 
 plot_alphas <- function(x,
-                        xlab = 'Alpha',
-                        ylab = 'Deviance',
+                        col = NULL,
                         ...) {
   cv_alpha <- lapply(x$outer_result, '[[', 'cv_alpha')
-  coln <- length(cv_alpha)
-  cols <- rainbow(coln)
-  plot(cv_alpha[[1]], type = 'l', x = x$alphaSet,
+  n <- length(cv_alpha)
+  if (is.null(col)) {
+    col <- rainbow(n)
+  } else {
+    col <- rep_len(col, n)
+  }
+  new.args <- list(...)
+  plot.args <- list(y = cv_alpha[[1]], x = x$alphaSet,
+       type = 'l',
        ylim = range(unlist(cv_alpha)),
-       xlab = xlab,
-       ylab = ylab,
-       col = cols[1], ...)
-  for (i in 2:length(cv_alpha)) {
-    lines(cv_alpha[[i]], x = x$alphaSet, col = cols[i])
+       xlab = 'Alpha',
+       ylab = x$outer_result[[1]]$name,
+       col = col[1])
+  if (length(new.args)) plot.args[names(new.args)] <- new.args
+  do.call(plot, plot.args)
+  if (n > 1) {
+    for (i in 2:n) {
+      lines(cv_alpha[[i]], x = x$alphaSet, col = col[i])
+    }
   }
 }
 
