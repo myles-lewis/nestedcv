@@ -325,7 +325,7 @@ plot_alphas <- function(x,
 #' @param col Optional vector of line colours for each fold
 #' @param ... other arguments passed to plot
 #' @return No return value
-#' @importFrom graphics lines
+#' @importFrom graphics lines abline
 #' @importFrom grDevices rainbow
 #' @export
 #' 
