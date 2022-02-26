@@ -160,6 +160,8 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
 #' 
 #' @param y Response vector
 #' @param x Matrix of predictors
+#' @param family Either a character string representing one of the built-in 
+#' families, or else a `glm()` family object. Passed to [cv.glmnet] and [glmnet]
 #' @param filterFUN Filter function, e.g. [uni_filter] or [relieff_filter]. 
 #' Any function can be provided and is passed `y` and `x`. Must return a 
 #' character vector with names of filtered predictors.
@@ -185,15 +187,16 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
 #' @export
 #' 
 nestcv.glmnet <- function(y, x,
-                       filterFUN = NULL,
-                       n_outer_folds = 10,
-                       n_inner_folds = 10,
-                       alphaSet = seq(0, 1, 0.1),
-                       min_1se = 0,
-                       keep = TRUE,
-                       cores = 1, 
-                       filterArgs = NULL,
-                       ...) {
+                          family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
+                          filterFUN = NULL,
+                          n_outer_folds = 10,
+                          n_inner_folds = 10,
+                          alphaSet = seq(0, 1, 0.1),
+                          min_1se = 0,
+                          keep = TRUE,
+                          cores = 1, 
+                          filterArgs = NULL,
+                          ...) {
   outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
   outer_res <- mclapply(1:n_outer_folds, function(i) {
     trainIndex <- outer_folds[[i]]
@@ -208,7 +211,7 @@ nestcv.glmnet <- function(y, x,
     fit <- lapply(alphaSet, function(alpha) {
       cv.glmnet(x = filtx[trainIndex, ], y = y[trainIndex], 
                 alpha = alpha, nfolds = n_inner_folds, foldid = foldid, 
-                keep = keep, ...)
+                keep = keep, family = family, ...)
     })
     alphas <- unlist(lapply(fit, function(fitx) {
       w <- which.min(fitx$cvm)
@@ -228,7 +231,7 @@ nestcv.glmnet <- function(y, x,
                 cv_alpha = alphas,
                 nfilter = ncol(filtx))
     # inner CV predictions
-    if (keep_innerCV_pred) {
+    if (keep) {
       ind <- fit[[alpha.x]]$index["min", ]
       innerCV_preds <- fit[[alpha.x]]$fit.preval[, ind]
       ytrain <- y[trainIndex]
@@ -240,22 +243,25 @@ nestcv.glmnet <- function(y, x,
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
   
-  if (inherits(y, "numeric")) {
-    df <- data.frame(obs = output$testy, pred = output$predy)
-    summary <- caret::defaultSummary(df)
-  } else {
+  if (family == "binomial") {
     cm <- table(output$predy, output$testy)
-    acc <- setNames(sum(diag(cm))/ sum(cm), "Accuracy")
+    acc <- sum(diag(cm))/ sum(cm)
     ccm <- caret::confusionMatrix(cm)
     b_acc <- ccm$byClass[11]
-    if (nlevels(y) == 2) {
-      glmnet.roc <- pROC::roc(output$testy, output[, 2], direction = "<")
-      auc <- glmnet.roc$auc
-      summary <- setNames(c(auc, acc, b_acc), c("auc", "accuracy", "bal_accuracy")))
-    } else {
-      summary <- setNames(c(acc, b_acc), c("accuracy", "bal_accuracy")))
-    }
+    glmnet.roc <- pROC::roc(output$testy, output[, 2], direction = "<")
+    auc <- glmnet.roc$auc
+    summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Bal_accuracy"))
+  } else if (family == "multinomial") {
+    cm <- table(output$predy, output$testy)
+    acc <- sum(diag(cm))/ sum(cm)
+    ccm <- caret::confusionMatrix(cm)
+    b_acc <- ccm$byClass[11]
+    summary <- setNames(c(acc, b_acc), c("Accuracy", "Bal_accuracy"))
+  } else {
+    df <- data.frame(obs = output$testy, pred = output$predy)
+    summary <- caret::defaultSummary(df)
   }
+  
   # fit final glmnet
   lam <- mean(unlist(lapply(outer_res, '[[', 'lambda')))
   alph <- mean(unlist(lapply(outer_res, '[[', 'alpha')))
@@ -265,7 +271,7 @@ nestcv.glmnet <- function(y, x,
     fset <- do.call(filterFUN, args)
     x[, fset]
   }
-  fit <- glmnet(filtx, y, alpha = alph, ...)
+  fit <- glmnet(filtx, y, alpha = alph, family = family, ...)
   out <- list(output = output,
               outer_result = outer_res,
               mean_lambda = lam,

@@ -7,10 +7,11 @@
 nestcv.glmnet(
   y,
   x,
+  family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
   filterFUN = NULL,
   n_outer_folds = 10,
   n_inner_folds = 10,
-  alphaSet = seq(0.8, 1, 0.05),
+  alphaSet = seq(0, 1, 0.1),
   min_1se = 0,
   keep = TRUE,
   cores = 1,
@@ -22,6 +23,9 @@ nestcv.glmnet(
 \item{y}{Response vector}
 
 \item{x}{Matrix of predictors}
+
+\item{family}{Either a character string representing one of the built-in
+families, or else a \code{glm()} family object. Passed to \link{cv.glmnet} and \link{glmnet}}
 
 \item{filterFUN}{Filter function, e.g. \link{uni_filter} or \link{relieff_filter}.
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
