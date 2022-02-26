@@ -177,7 +177,7 @@ combo_filter <- function(y, x, nfilter, return = "names", ...) {
 #' uses [parallel::mclapply].
 #' @param ... Optional arguments passed to [cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet"
-#' @importFrom caret createFolds confusionMatrix
+#' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom parallel mclapply
@@ -239,11 +239,23 @@ nestcv.glmnet <- function(y, x,
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
-  cm <- table(output$predy, output$testy)
-  acc <- setNames(sum(diag(cm))/ sum(cm), "Accuracy")
-  b_acc <- caret::confusionMatrix(cm)$byClass[11]
-  glmnet.roc <- pROC::roc(output$testy, output[, 2], direction = "<")
-  auc <- glmnet.roc$auc
+  
+  if (inherits(y, "numeric")) {
+    df <- data.frame(obs = output$testy, pred = output$predy)
+    summary <- caret::defaultSummary(df)
+  } else {
+    cm <- table(output$predy, output$testy)
+    acc <- setNames(sum(diag(cm))/ sum(cm), "Accuracy")
+    ccm <- caret::confusionMatrix(cm)
+    b_acc <- ccm$byClass[11]
+    if (nlevels(y) == 2) {
+      glmnet.roc <- pROC::roc(output$testy, output[, 2], direction = "<")
+      auc <- glmnet.roc$auc
+      summary <- setNames(c(auc, acc, b_acc), c("auc", "accuracy", "bal_accuracy")))
+    } else {
+      summary <- setNames(c(acc, b_acc), c("accuracy", "bal_accuracy")))
+    }
+  }
   # fit final glmnet
   lam <- mean(unlist(lapply(outer_res, '[[', 'lambda')))
   alph <- mean(unlist(lapply(outer_res, '[[', 'alpha')))
@@ -254,14 +266,16 @@ nestcv.glmnet <- function(y, x,
     x[, fset]
   }
   fit <- glmnet(filtx, y, alpha = alph, ...)
-  list(output = output,
-       outer_result = outer_res,
-       mean_lambda = lam,
-       mean_alpha = alph,
-       final_fit = fit,
-       roc = glmnet.roc,
-       alphaSet = alphaSet,
-       summary = setNames(c(auc, acc, b_acc), c("auc", "accuracy", "bal_accuracy")))
+  out <- list(output = output,
+              outer_result = outer_res,
+              mean_lambda = lam,
+              mean_alpha = alph,
+              final_fit = fit,
+              roc = glmnet.roc,
+              alphaSet = alphaSet,
+              summary = summary)
+  class(out) <- "nestcv.glmnet"
+  out
 }
 
 #' Plot cross-validated glmnet alpha
