@@ -4,7 +4,8 @@
 
 #' Univariate filter
 #' 
-#' Simple univariate filter using t-test or anova.
+#' Simple univariate filter using t-test or anova (Welch's F-test) using the 
+#' Rfast package for speed.
 #' 
 #' @param y Response vector
 #' @param x Matrix of predictors
@@ -15,7 +16,7 @@
 #' names, "full" returns a named vector of p values.
 #' @return Ordered vector of names of filtered parameters. If `return` is 
 #' `"full"` a named vector of p values is returned.
-#' @importFrom Rfast ttests
+#' @importFrom Rfast ttests ftests
 #' @export
 #' 
 uni_filter <- function(y,
@@ -23,12 +24,17 @@ uni_filter <- function(y,
                        nfilter = NULL,
                        p_cutoff = 0.05,
                        return = "names") {
-  indx1 <- as.numeric(y) == 1
-  indx2 <- as.numeric(y) == 2
-  res <- Rfast::ttests(x[indx1, ], x[indx2, ])
+  y <- factor(y)
+  if (nlevels(y) == 2) {
+    indx1 <- as.numeric(y) == 1
+    indx2 <- as.numeric(y) == 2
+    res <- Rfast::ttests(x[indx1, ], x[indx2, ])
+  } else {
+    res <- Rfast::ftests(x, y)
+  }
   rownames(res) <- colnames(x)
-  if (return == "full") return(res[, 'stat'])
-  out <- res[, 'pvalue']
+  if (return == "full") return(res)
+  out <- res[, grep("pval", colnames(res))]
   out <- sort(out[out < p_cutoff])
   if (!is.null(nfilter)) out <- out[1:nfilter]
   names(out)

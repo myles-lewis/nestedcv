@@ -24,5 +24,6 @@ Ordered vector of names of filtered parameters. If \code{return} is
 \code{"full"} a named vector of p values is returned.
 }
 \description{
-Simple univariate filter using t-test or anova.
+Simple univariate filter using t-test or anova (Welch's F-test) using the
+Rfast package for speed.
 }
