@@ -8,8 +8,8 @@ Authors@R:
     comment = c(ORCID = "0000-0001-9365-5345")))
 Maintainer: Myles Lewis <myles.lewis@qmul.ac.uk>
 Description: Nested cross-validation for the 'glmnet' package, including 
-    cross-validation of alpha parameter and filter functions to reduce number 
-    of predictors in "wide" data (P>>n).
+    cross-validation of alpha parameter and filter functions for feature 
+    selection.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
