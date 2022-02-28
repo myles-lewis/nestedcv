@@ -33,8 +33,9 @@ uni_filter <- function(y,
   rownames(res) <- colnames(x)
   if (return == "full") return(res)
   out <- res[, grep("pval", colnames(res))]
-  out <- sort(out[out < p_cutoff])
+  out <- sort(out)
   if (!is.null(nfilter)) out <- out[1:nfilter]
+  if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
   names(out)
 }
 
