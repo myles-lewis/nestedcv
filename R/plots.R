@@ -1,0 +1,118 @@
+# nestedcv plots
+
+#' Plot cross-validated glmnet alpha
+#' 
+#' Plot of cross-validated glmnet alpha parameter against deviance.
+#' 
+#' @param x Fitted "nestcv.glmnet" object
+#' @param col Optional vector of line colours for each fold
+#' @param ... other arguments passed to plot
+#' @return No return value
+#' @importFrom graphics lines
+#' @importFrom grDevices rainbow
+#' @export
+#' 
+plot_alphas <- function(x,
+                        col = NULL,
+                        ...) {
+  cv_alpha <- lapply(x$outer_result, '[[', 'cv_alpha')
+  n <- length(cv_alpha)
+  if (is.null(col)) {
+    col <- rainbow(n)
+  } else {
+    col <- rep_len(col, n)
+  }
+  new.args <- list(...)
+  plot.args <- list(y = cv_alpha[[1]], x = x$alphaSet,
+                    type = 'l',
+                    ylim = range(unlist(cv_alpha)),
+                    xlab = 'Alpha',
+                    ylab = x$outer_result[[1]]$cvfit$name,
+                    col = col[1])
+  if (length(new.args)) plot.args[names(new.args)] <- new.args
+  do.call(plot, plot.args)
+  for (i in 2:n) {
+    lines(cv_alpha[[i]], x = x$alphaSet, col = col[i])
+  }
+}
+
+
+#' Plot cross-validated glmnet lambdas across outer folds
+#' 
+#' Plot of cross-validated glmnet lambda parameter against deviance for each 
+#' outer CV fold.
+#' 
+#' @param x Fitted "nestcv.glmnet" object
+#' @param col Optional vector of line colours for each fold
+#' @param ... other arguments passed to plot
+#' @return No return value
+#' @importFrom graphics lines abline
+#' @importFrom grDevices rainbow
+#' @export
+#' 
+plot_lambdas <- function(x,
+                         col = NULL,
+                         ...) {
+  cvms <- lapply(x$outer_result, function(fold) fold$cvfit$cvm)
+  lambdas <- lapply(x$outer_result, function(fold) fold$cvfit$lambda)
+  n <- length(cvms)
+  if (is.null(col)) {
+    col <- rainbow(n)
+  } else {
+    col <- rep_len(col, n)
+  }
+  new.args <- list(...)
+  plot.args <- list(y = cvms[[1]], x = log(lambdas[[1]]),
+                    type = 'l',
+                    ylim = range(unlist(cvms)),
+                    xlim = range(log(unlist(lambdas))),
+                    xlab = expression(Log(lambda)),
+                    ylab = x$outer_result[[1]]$cvfit$name,
+                    col = col[1])
+  if (length(new.args)) plot.args[names(new.args)] <- new.args
+  do.call(plot, plot.args)
+  for (i in 2:n) {
+    lines(cvms[[i]], x = log(lambdas[[i]]), col = col[i])
+  }
+  abline(v = log(x$mean_lambda), lty = 2, col = 'grey')
+}
+
+
+#' Boxplot model predictors
+#' 
+#' Boxplots to show range of model predictors to identify exceptional predictors
+#' with excessively low or high values.
+#' 
+#' @param fit nestedcv object
+#' @param x matrix of predictors
+#' @param cols colour scheme
+#' @param palette palette name (one of `hcl.pals()`) which is passed to 
+#' [hcl.colors]
+#' @param ... other arguments passed to [boxplot].
+#' @importFrom graphics boxplot par
+#' @importFrom grDevices hcl.colors
+#' @export
+#' 
+boxplot_model <- function(fit, x,
+                          cols = NULL, palette = "Dark 3", ...) {
+  m <- glmnet_coefs(fit$final_fit, fit$mean_lambda)
+  m <- names(m[-1])
+  df <- data.frame(vars = rep(m, each = nrow(x)), 
+                   y = unlist(lapply(m, function(i) x[, i])))
+  x_med <- Rfast::colMedians(x[, m])
+  names(x_med) <- m
+  x_med <- sort(x_med, decreasing = TRUE)
+  df$vars <- factor(df$vars, levels = names(x_med))
+  if (is.null(cols)) cols <- hcl.colors(length(m), palette)
+  new.args <- list(...)
+  plot.args <- list(formula = formula(df$y ~ df$vars),
+                    xlab = "", ylab = "",
+                    boxcol = cols, medcol = cols,
+                    whiskcol = cols, staplecol = cols, outcol = cols,
+                    col = NA,
+                    las = 2, outpch = 20, outcex = 0.5,
+                    whisklty = 1, 
+                    cex.lab = 0.75, cex.axis = 0.75)
+  if (length(new.args)) plot.args[names(new.args)] <- new.args
+  do.call(boxplot, plot.args)
+}
