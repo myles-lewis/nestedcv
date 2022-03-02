@@ -214,7 +214,7 @@ outercv.rf <- function(y, x,
       fset <- filterFUN(y[trainIndex], x[trainIndex, ], ...)
       x[, fset]
     }
-    fit <- randomForest(x = filtx, y = y, ...)
+    fit <- randomForest(x = filtx[trainIndex, ], y = y[trainIndex], ...)
     # test on outer CV
     predy <- as.vector(predict(fit, newdata = filtx[-trainIndex, ], type = "response"))
     predyp <- as.vector(predict(fit, newdata = filtx[-trainIndex, ], type = "prob")[,2])
