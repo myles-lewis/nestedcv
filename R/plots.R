@@ -154,9 +154,3 @@ plot_caret <- function(x, error.col = "darkgrey", ...) {
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call(points, plot.args)
 }
-
-# infix function %||%
-`%||%` <- function(lhs, rhs) {
-  if (!is.null(lhs)) lhs else rhs
-}
-
