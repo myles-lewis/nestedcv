@@ -32,6 +32,7 @@
 #' @importFrom data.table rbindlist
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom parallel mclapply
+#' @importFrom pROC roc
 #' @importFrom stats predict setNames
 #' @export
 #' 
@@ -90,6 +91,7 @@ nestcv.glmnet <- function(y, x,
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
   
+  glmnet.roc <- NULL
   if (family == "binomial") {
     cm <- table(output$predy, output$testy)
     acc <- sum(diag(cm))/ sum(cm)
@@ -171,3 +173,91 @@ innercv_roc <- function(cva, direction = "<", ...) {
   pROC::roc(ytrain, innerpreds, direction = direction, ...)
 }
 
+
+
+
+
+#' Outer cross-validation with randomForest
+#' 
+#' Outer cross-validation (CV) with randomForest. Note, no tuning of 
+#' parameters is performed. If tuning of parameters is required, use nestedcv.
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param filterFUN Filter function, e.g. [uni_filter] or [relieff_filter]. 
+#' Any function can be provided and is passed `y` and `x`. Must return a 
+#' character vector with names of filtered predictors.
+#' @param n_outer_folds Number of outer CV folds
+#' @param cores Number of cores for parallel processing. Note this currently 
+#' uses [parallel::mclapply].
+#' @param ... Optional arguments passed both to [randomForest] as well as the 
+#' filter function specified by `filterFUN`
+#' @return An object with S3 class "outercv.rf"
+#' @importFrom caret createFolds confusionMatrix defaultSummary
+#' @importFrom data.table rbindlist
+#' @importFrom parallel mclapply
+#' @importFrom pROC roc
+#' @importFrom randomForest randomForest
+#' @importFrom stats predict setNames
+#' @export
+#' 
+outercv.rf <- function(y, x,
+                          filterFUN = NULL,
+                          n_outer_folds = 10,
+                          cores = 1,
+                          ...) {
+  reg <- !(is.factor(y) | is.character(y))  # y = regression
+  outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
+  outer_res <- mclapply(1:n_outer_folds, function(i) {
+    trainIndex <- outer_folds[[i]]
+    filtx <- if (is.null(filterFUN)) x else {
+      fset <- filterFUN(y[trainIndex], x[trainIndex, ], ...)
+      x[, fset]
+    }
+    fit <- randomForest(x = filtx, y = y, ...)
+    # test on outer CV
+    predy <- as.vector(predict(fit, newdata = filtx[-trainIndex, ], type = "response"))
+    predyp <- as.vector(predict(fit, newdata = filtx[-trainIndex, ], type = "prob")[,2])
+    preds <- data.frame(predy=predy, predyp=predyp, testy=y[-trainIndex])
+    rownames(preds) <- rownames(x[-trainIndex, ])
+    list(preds = preds,
+                rf = fit,
+                nfilter = ncol(filtx))
+  }, mc.cores = cores)
+  predslist <- lapply(outer_res, '[[', 'preds')
+  output <- data.table::rbindlist(predslist)
+  output <- as.data.frame(output)
+  
+  if (reg) {
+    df <- data.frame(obs = output$testy, pred = output$predy)
+    summary <- caret::defaultSummary(df)
+  } else if (nlevels(y) == 2) {
+    cm <- table(output$predy, output$testy)
+    acc <- sum(diag(cm))/ sum(cm)
+    ccm <- caret::confusionMatrix(cm)
+    b_acc <- ccm$byClass[11]
+    rf.roc <- pROC::roc(output$testy, output[, 2], direction = "<")
+    auc <- rf.roc$auc
+    summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Bal_accuracy"))
+  } else {
+    cm <- table(output$predy, output$testy)
+    acc <- sum(diag(cm))/ sum(cm)
+    ccm <- caret::confusionMatrix(cm)
+    b_acc <- ccm$byClass[11]
+    summary <- setNames(c(acc, b_acc), c("Accuracy", "Bal_accuracy"))
+  }
+  
+  # fit final rf
+  filtx <- if (is.null(filterFUN)) x else {
+    fset <- filterFUN(y, x, ...)
+    x[, fset]
+  }
+  fit <- randomForest(filtx, y, ...)
+  out <- list(output = output,
+              outer_result = outer_res,
+              final_fit = fit,
+              roc = rf.roc,
+              summary = summary)
+  class(out) <- "outercv.rf"
+  out
+}

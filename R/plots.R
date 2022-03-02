@@ -91,6 +91,7 @@ plot_lambdas <- function(x,
 #' @param ... other arguments passed to [boxplot].
 #' @importFrom graphics boxplot par
 #' @importFrom grDevices hcl.colors
+#' @importFrom stats formula
 #' @export
 #' 
 boxplot_model <- function(fit, x,
