@@ -130,7 +130,7 @@ boxplot_model <- function(fit, x,
 plot_caret <- function(x, ...) {
   res <- x$results
   nrepeat <- x$control$number * x$control$repeats
-  w <- switch(x$method, "glmnet" = "lambda", "rf" = 1)
+  w <- switch(x$method, glmnet = "lambda", 1)
   x1 <- res[, w]
   y <- res[, x$metric]
   sem <- res[, paste0(x$metric, "SD")] / sqrt(nrepeat)
