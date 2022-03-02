@@ -4,7 +4,15 @@
 \alias{outercv.rf}
 \title{Outer cross-validation with randomForest}
 \usage{
-outercv.rf(y, x, filterFUN = NULL, n_outer_folds = 10, cores = 1, ...)
+outercv.rf(
+  y,
+  x,
+  filterFUN = NULL,
+  filter_options = NULL,
+  n_outer_folds = 10,
+  cores = 1,
+  ...
+)
 }
 \arguments{
 \item{y}{Response vector}
@@ -15,18 +23,21 @@ outercv.rf(y, x, filterFUN = NULL, n_outer_folds = 10, cores = 1, ...)
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
 character vector with names of filtered predictors.}
 
+\item{filter_options}{List of additional arguments passed to the filter
+function specified by \code{filterFUN}.}
+
 \item{n_outer_folds}{Number of outer CV folds}
 
 \item{cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}
 
-\item{...}{Optional arguments passed both to \link{randomForest} as well as the
-filter function specified by \code{filterFUN}}
+\item{...}{Optional arguments passed to \link{randomForest}.}
 }
 \value{
 An object with S3 class "outercv.rf"
 }
 \description{
 Outer cross-validation (CV) with randomForest. Note, no tuning of
-parameters is performed. If tuning of parameters is required, use nestedcv.
+parameters is performed. If tuning of parameters is required, this will
+require full nested CV.
 }

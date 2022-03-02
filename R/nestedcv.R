@@ -188,11 +188,12 @@ innercv_roc <- function(cva, direction = "<", ...) {
 #' @param filterFUN Filter function, e.g. [uni_filter] or [relieff_filter]. 
 #' Any function can be provided and is passed `y` and `x`. Must return a 
 #' character vector with names of filtered predictors.
+#' @param filter_options List of additional arguments passed to the filter 
+#' function specified by `filterFUN`. 
 #' @param n_outer_folds Number of outer CV folds
 #' @param cores Number of cores for parallel processing. Note this currently 
 #' uses [parallel::mclapply].
-#' @param ... Optional arguments passed both to [randomForest] as well as the 
-#' filter function specified by `filterFUN`
+#' @param ... Optional arguments passed to [randomForest].
 #' @return An object with S3 class "outercv.rf"
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
@@ -203,16 +204,19 @@ innercv_roc <- function(cva, direction = "<", ...) {
 #' @export
 #' 
 outercv.rf <- function(y, x,
-                          filterFUN = NULL,
-                          n_outer_folds = 10,
-                          cores = 1,
-                          ...) {
+                       filterFUN = NULL,
+                       filter_options = NULL,
+                       n_outer_folds = 10,
+                       cores = 1,
+                       ...) {
   reg <- !(is.factor(y) | is.character(y))  # y = regression
   outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
   outer_res <- mclapply(1:n_outer_folds, function(i) {
     trainIndex <- outer_folds[[i]]
     filtx <- if (is.null(filterFUN)) x else {
-      fset <- filterFUN(y[trainIndex], x[trainIndex, ], ...)
+      args <- list(y = y[trainIndex], x = x[trainIndex, ])
+      args <- append(args, filter_options)
+      fset <- do.call(filterFUN, args)
       x[, fset]
     }
     fit <- randomForest(x = filtx[trainIndex, ], y = y[trainIndex], ...)
@@ -250,7 +254,9 @@ outercv.rf <- function(y, x,
   
   # fit final rf
   filtx <- if (is.null(filterFUN)) x else {
-    fset <- filterFUN(y, x, ...)
+    args <- list(y = y, x = x)
+    args <- append(args, filter_options)
+    fset <- do.call(filterFUN, args)
     x[, fset]
   }
   fit <- randomForest(filtx, y, ...)
@@ -261,4 +267,37 @@ outercv.rf <- function(y, x,
               summary = summary)
   class(out) <- "outercv.rf"
   out
+}
+
+#' Inner CV for random forest
+#' 
+#' Using caret.
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param nfolds Number of folds for cross-validation
+#' @param repeats Number of repeats for repeated CV
+#' @param mtry Vector of possible values of `mtry` to tune. `mtry` is the 
+#' number of predictors tried at each split, see [randomForest]
+#' @param ... other arguments passed to [caret::train] or [randomForest]
+#' @importFrom caret trainControl train
+#' @importFrom randomForest randomForest
+#' @export
+#' 
+cv.rf <- function(y, x,
+                  nfolds = 10, repeats = 1,
+                  mtry = if (!is.null(y) && !is.factor(y))
+                    max(floor(ncol(x)/3), 1) else floor(sqrt(ncol(x))),
+                  ...) {
+  if (length(mtry) == 1) {
+    return(randomForest(y = y, x = x, mtry = mtry, ...))
+  }
+  trCtrl <- caret::trainControl(method = "repeatedcv", number = nfolds,
+                                repeats = repeats)
+  tuneGrid <- expand.grid(mtry = mtry)
+  fit <- caret::train(x = x, y = y,
+                      method = "rf",
+                      trControl = trCtrl,
+                      tuneGrid = tuneGrid, ...)
+  fit
 }
