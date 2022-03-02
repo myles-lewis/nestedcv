@@ -180,7 +180,8 @@ innercv_roc <- function(cva, direction = "<", ...) {
 #' Outer cross-validation with randomForest
 #' 
 #' Outer cross-validation (CV) with randomForest. Note, no tuning of 
-#' parameters is performed. If tuning of parameters is required, use nestedcv.
+#' parameters is performed. If tuning of parameters is required, this will 
+#' require full nested CV.
 #' 
 #' @param y Response vector
 #' @param x Matrix of predictors
