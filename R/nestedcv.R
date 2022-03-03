@@ -171,28 +171,6 @@ glmnet_coefs <- function(fit, s) {
 }
 
 
-#' Build ROC curve from left-out folds from inner CV
-#' 
-#' Build ROC (receiver operating characteristic) curve from left-out folds 
-#' from inner CV. Object can be plotted or passed to functions [auc] etc.
-#' 
-#' @param cva Fitted `"nestcv.glmnet"` object 
-#' @param direction Passed to [pROC::roc]
-#' @param ... Other arguments passed to [pROC::roc]
-#' @return `"roc"` object, see [pROC::roc]
-#' @importFrom pROC roc auc
-#' @export
-#' 
-innercv_roc <- function(cva, direction = "<", ...) {
-  innerpreds <- unlist(lapply(cva$outer_result, '[[', 'innerCV_preds'))
-  ytrain <- unlist(lapply(cva$outer_result, '[[', 'ytrain'))
-  pROC::roc(ytrain, innerpreds, direction = direction, ...)
-}
-
-
-
-
-
 #' Outer cross-validation with randomForest
 #' 
 #' Outer cross-validation (CV) with randomForest. Note, no tuning of 
@@ -459,21 +437,3 @@ nestedcv.train <- function(y, x,
   out
 }
 
-
-#' Build ROC curve from left-out folds from inner CV
-#' 
-#' Build ROC (receiver operating characteristic) curve from left-out folds 
-#' from inner CV. Object can be plotted or passed to functions [auc] etc.
-#' 
-#' @param x Fitted `"nestcv.train"` object 
-#' @param direction Passed to [pROC::roc]
-#' @param ... Other arguments passed to [pROC::roc]
-#' @return `"roc"` object, see [pROC::roc]
-#' @importFrom pROC roc auc
-#' @export
-#' 
-innercv_roc2 <- function(x, direction = "<", ...) {
-  innerpreds <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
-  ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
-  pROC::roc(ytrain, innerpreds, direction = direction, ...)
-}
