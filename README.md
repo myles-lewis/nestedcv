@@ -15,5 +15,5 @@ library(nestedcv)
 # Known issues
 
 * The filter functions return a character vector of column names, rather than a 
-true index. This causes problems if the column names of the matrix of predictors 
-are pure numbers or non-unique.
+true index. Suspect this might cause problems with subsetting.
+* glmnet_coefs needs to be updated to work with multiclass models
