@@ -30,7 +30,7 @@ plot_alphas <- function(x,
                     ylab = x$outer_result[[1]]$cvfit$name,
                     col = col[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
-  do.call(plot, plot.args)
+  do.call("plot", plot.args)
   for (i in 2:n) {
     lines(cv_alpha[[i]], x = x$alphaSet, col = col[i])
   }
@@ -70,7 +70,7 @@ plot_lambdas <- function(x,
                     ylab = x$outer_result[[1]]$cvfit$name,
                     col = col[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
-  do.call(plot, plot.args)
+  do.call("plot", plot.args)
   for (i in 2:n) {
     lines(cvms[[i]], x = log(lambdas[[i]]), col = col[i])
   }
@@ -115,7 +115,7 @@ boxplot_model <- function(fit, x,
                     whisklty = 1, 
                     cex.lab = 0.75, cex.axis = 0.75)
   if (length(new.args)) plot.args[names(new.args)] <- new.args
-  do.call(boxplot, plot.args)
+  do.call("boxplot", plot.args)
 }
 
 #' Plot caret tuning
@@ -146,11 +146,11 @@ plot_caret <- function(x, error.col = "darkgrey", ...) {
                    ylab = x$metric,
                    ylim = range(c(y - sem, y + sem)))
   if (length(new.args)) plot.args[names(new.args)] <- new.args
-  do.call(plot, plot.args)
+  do.call("plot", plot.args)
   arrows(x1, y - sem, x1, y + sem,
          length = 0.025, angle = 90, code = 3, col = error.col)
   plot.args = list(x = x1, y = y,
                    pch = 21, bg = "white")
   if (length(new.args)) plot.args[names(new.args)] <- new.args
-  do.call(points, plot.args)
+  do.call("points", plot.args)
 }
