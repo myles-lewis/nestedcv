@@ -339,6 +339,7 @@ cv.rf <- function(y, x,
 #' @importFrom caret createFolds train trainControl mnLogLoss confusionMatrix
 #' defaultSummary
 #' @importFrom data.table rbindlist
+#' @importFrom parallel mclapply
 #' @importFrom pROC roc
 #' @importFrom stats predict setNames
 #' @export
@@ -361,7 +362,7 @@ nestedcv.train <- function(y, x,
     } else trainControl()
   }
   outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
-  outer_res <- lapply(1:n_outer_folds, function(i) {
+  outer_res <- mclapply(1:n_outer_folds, function(i) {
     trainIndex <- outer_folds[[i]]
     filtx <- if (is.null(filterFUN)) x else {
       args <- list(y = y[trainIndex], x = x[trainIndex, ])
@@ -383,7 +384,7 @@ nestedcv.train <- function(y, x,
                 fit = fit,
                 nfilter = ncol(filtx))
     ret
-  })
+  }, mc.cores = cores)
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
