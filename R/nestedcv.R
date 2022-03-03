@@ -153,6 +153,16 @@ nestcv.glmnet <- function(y, x,
 #' 
 glmnet_coefs <- function(fit, s) {
   cf <- coef(fit, s = s)
+  if (is.list(cf)) {
+    cf <- lapply(cf, function(i) {
+      cf <- as.matrix(i)
+      cf <- cf[cf != 0, ]
+      cf2 <- cf[-1]
+      cf2 <- cf2[order(abs(cf2), decreasing = TRUE)]
+      c(cf[1], cf2)
+    })
+    return(cf)
+  } 
   cf <- as.matrix(cf)
   cf <- cf[cf != 0, ]
   cf2 <- cf[-1]
