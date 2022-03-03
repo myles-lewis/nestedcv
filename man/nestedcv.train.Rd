@@ -14,11 +14,12 @@ nestedcv.train(
   metric = ifelse(is.factor(y), "logLoss", "RMSE"),
   trControl = NULL,
   tuneGrid = NULL,
+  savePredictions = FALSE,
   ...
 )
 }
 \arguments{
-\item{y}{Response vector}
+\item{y}{Response vector. For classification this should be a factor.}
 
 \item{x}{Matrix of predictors}
 
@@ -44,6 +45,10 @@ in caret which uses "Accuracy" for classification. See details.}
 performed. See http://topepo.github.io/caret/using-your-own-model-in-train.html.}
 
 \item{tuneGrid}{Data frame of tuning values, see \link[caret:train]{caret::train}}
+
+\item{savePredictions}{Indicates whether hold-out predictions for
+each inner CV fold should be saved for ROC curves, accuracy etc
+see \link[caret:trainControl]{caret::trainControl}}
 
 \item{...}{Arguments passed to \link[caret:train]{caret::train}}
 }

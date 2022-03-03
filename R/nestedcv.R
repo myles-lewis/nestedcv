@@ -327,7 +327,7 @@ cv.rf <- function(y, x,
 #' Wrapper function for applying nested CV and predictor filtering followed by 
 #' training using `caret`.
 #' 
-#' @param y Response vector
+#' @param y Response vector. For classification this should be a factor.
 #' @param x Matrix of predictors
 #' @param filterFUN Filter function, e.g. [uni_filter] or [relieff_filter]. 
 #' Any function can be provided and is passed `y` and `x`. Must return a 
@@ -343,6 +343,9 @@ cv.rf <- function(y, x,
 #' [trainControl]. This defines how inner CV training through `caret` is 
 #' performed. See http://topepo.github.io/caret/using-your-own-model-in-train.html.
 #' @param tuneGrid Data frame of tuning values, see [caret::train]
+#' @param savePredictions Indicates whether hold-out predictions for 
+#' each inner CV fold should be saved for ROC curves, accuracy etc
+#' see [caret::trainControl]
 #' @param cores Number of cores for parallel processing. Note this currently 
 #' uses `parallel::mclapply`.
 #' @param ... Arguments passed to [caret::train]
@@ -368,12 +371,14 @@ nestedcv.train <- function(y, x,
                            metric = ifelse(is.factor(y), "logLoss", "RMSE"),
                            trControl = NULL,
                            tuneGrid = NULL,
+                           savePredictions = FALSE,
                            ...) {
   if (is.null(trControl)) {
     trControl <- if (is.factor(y)) {
       trainControl(method = "repeatedcv", 
                    number = 10, repeats = 1,
                    classProbs = TRUE,
+                   savePredictions = savePredictions,
                    summaryFunction = mnLogLoss)
     } else trainControl()
   }
@@ -452,4 +457,23 @@ nestedcv.train <- function(y, x,
               summary = summary)
   class(out) <- "nestcv.train"
   out
+}
+
+
+#' Build ROC curve from left-out folds from inner CV
+#' 
+#' Build ROC (receiver operating characteristic) curve from left-out folds 
+#' from inner CV. Object can be plotted or passed to functions [auc] etc.
+#' 
+#' @param x Fitted `"nestcv.train"` object 
+#' @param direction Passed to [pROC::roc]
+#' @param ... Other arguments passed to [pROC::roc]
+#' @return `"roc"` object, see [pROC::roc]
+#' @importFrom pROC roc auc
+#' @export
+#' 
+innercv_roc2 <- function(x, direction = "<", ...) {
+  innerpreds <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
+  ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
+  pROC::roc(ytrain, innerpreds, direction = direction, ...)
 }
