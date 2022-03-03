@@ -1,13 +1,14 @@
-# Inner CV ROC curve
+# Extract inner CV ROC curve
 
 
 #' Build ROC curve from left-out folds from inner CV
 #' 
 #' Build ROC (receiver operating characteristic) curve from left-out folds 
-#' from inner CV. Object can be plotted or passed to functions [auc] etc.
+#' from inner CV. Object can be plotted using `plot()` or passed to functions 
+#' [auc()] etc.
 #' 
-#' @param x Fitted `"nestcv.glmnet"` object 
-#' @param direction Passed to [pROC::roc]
+#' @param x Fitted `nestedcv` object 
+#' @param direction Set ROC directionality [pROC::roc]
 #' @param ... Other arguments passed to [pROC::roc]
 #' @return `"roc"` object, see [pROC::roc]
 #' @export innercv_roc

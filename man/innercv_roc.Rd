@@ -13,16 +13,17 @@ innercv_roc(x, ...)
 \method{innercv_roc}{nestcv.train}(x, direction = "<", ...)
 }
 \arguments{
-\item{x}{Fitted \code{"nestcv.glmnet"} object}
+\item{x}{Fitted \code{nestedcv} object}
 
 \item{...}{Other arguments passed to \link[pROC:roc]{pROC::roc}}
 
-\item{direction}{Passed to \link[pROC:roc]{pROC::roc}}
+\item{direction}{Set ROC directionality \link[pROC:roc]{pROC::roc}}
 }
 \value{
 \code{"roc"} object, see \link[pROC:roc]{pROC::roc}
 }
 \description{
 Build ROC (receiver operating characteristic) curve from left-out folds
-from inner CV. Object can be plotted or passed to functions \link{auc} etc.
+from inner CV. Object can be plotted using \code{plot()} or passed to functions
+\code{\link[=auc]{auc()}} etc.
 }
