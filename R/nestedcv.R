@@ -146,8 +146,8 @@ nestcv.glmnet <- function(y, x,
 #' 
 #' @param fit A [cv.glmnet] fitted model object.
 #' @param s Value of lambda. See [coef.glmnet] and [predict.cv.glmnet]
-#' @return Vector of coefficients ordered with the intercept first, followed 
-#' by highest absolute value to lowest.
+#' @return Vector or list of coefficients ordered with the intercept first, 
+#' followed by highest absolute value to lowest.
 #' @importFrom stats coef
 #' @export
 #' 

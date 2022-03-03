@@ -12,8 +12,8 @@ glmnet_coefs(fit, s)
 \item{s}{Value of lambda. See \link{coef.glmnet} and \link{predict.cv.glmnet}}
 }
 \value{
-Vector of coefficients ordered with the intercept first, followed
-by highest absolute value to lowest.
+Vector or list of coefficients ordered with the intercept first,
+followed by highest absolute value to lowest.
 }
 \description{
 Convenience function for retrieving coefficients from a \link{cv.glmnet} model at
