@@ -36,6 +36,7 @@ uni_filter <- function(y,
   out <- sort(out)
   if (!is.null(nfilter)) out <- out[1:nfilter]
   if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
+  if (length(out) == 0) stop("No predictors selected. Try changing `p_cutoff`")
   names(out)
 }
 
