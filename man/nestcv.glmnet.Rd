@@ -9,6 +9,7 @@ nestcv.glmnet(
   x,
   family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
   filterFUN = NULL,
+  filter_options = NULL,
   n_outer_folds = 10,
   n_inner_folds = 10,
   alphaSet = seq(0, 1, 0.1),
@@ -30,6 +31,9 @@ families, or else a \code{glm()} family object. Passed to \link{cv.glmnet} and \
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
 character vector with names of filtered predictors.}
 
+\item{filter_options}{List of additional arguments passed to the filter
+function specified by \code{filterFUN}.}
+
 \item{n_outer_folds}{Number of outer CV folds}
 
 \item{n_inner_folds}{Number of inner CV folds}
@@ -46,8 +50,7 @@ retained for calculating left-out inner CV fold accuracy etc. See argument
 \item{cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}
 
-\item{...}{Optional arguments passed both to \link{cv.glmnet} as well as the
-filter function specified by \code{filterFUN}}
+\item{...}{Optional arguments passed to \link{cv.glmnet}}
 }
 \value{
 An object with S3 class "nestcv.glmnet"
