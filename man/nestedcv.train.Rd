@@ -51,3 +51,11 @@ performed. See http://topepo.github.io/caret/using-your-own-model-in-train.html.
 Wrapper function for applying nested CV and predictor filtering followed by
 training using \code{caret}.
 }
+\details{
+Parallelisation is performed on the outer folds using \code{mclapply}.
+For classification \code{metric} defaults to using 'logLoss' with the \code{trControl}
+arguments \verb{classProbs = TRUE, summaryFunction = mnLogLoss}, rather than
+'Accuracy' which is the default classification metric in \code{caret}. See
+\link{trainControl}. LogLoss is arguably more consistent than Accuracy for tuning
+parameters in datasets with small sample size.
+}

@@ -336,6 +336,12 @@ cv.rf <- function(y, x,
 #' @param cores Number of cores for parallel processing. Note this currently 
 #' uses `parallel::mclapply`.
 #' @param ... Arguments passed to [caret::train]
+#' @details Parallelisation is performed on the outer folds using `mclapply`. 
+#' For classification `metric` defaults to using 'logLoss' with the `trControl` 
+#' arguments `classProbs = TRUE, summaryFunction = mnLogLoss`, rather than 
+#' 'Accuracy' which is the default classification metric in `caret`. See 
+#' [trainControl]. LogLoss is arguably more consistent than Accuracy for tuning 
+#' parameters in datasets with small sample size.
 #' @importFrom caret createFolds train trainControl mnLogLoss confusionMatrix
 #' defaultSummary
 #' @importFrom data.table rbindlist
