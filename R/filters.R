@@ -79,7 +79,7 @@ rf_filter <- function(y, x, nfilter = NULL,
                                     ntree = ntree, mtry = mtry, ...)
   vi <- as.vector(importance(fit, type = 1))
   names(vi) <- if (type == "index") 1:ncol(x) else colnames(x)
-  if (return == "full") return(vi)
+  if (type == "full") return(vi)
   vi <- sort(vi, decreasing = TRUE)
   vi <- vi[vi != 0]
   if (!is.null(nfilter)) vi <- vi[1:min(nfilter, length(vi))]
@@ -116,7 +116,7 @@ relieff_filter <- function(y, x, nfilter = NULL,
   df$y <- y
   ref <- CORElearn::attrEval('y', df, estimator = estimator, ...)
   names(ref) <- if (type == "index") 1:ncol(x) else colnames(x)
-  if (return == "full") return(ref)
+  if (type == "full") return(ref)
   ref <- sort(ref, decreasing = TRUE)
   if (!is.null(nfilter)) ref <- ref[1:min(nfilter, length(ref))]
   out <- names(ref)

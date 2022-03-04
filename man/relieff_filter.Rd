@@ -9,7 +9,7 @@ relieff_filter(
   x,
   nfilter = NULL,
   estimator = "ReliefFequalK",
-  return = "names",
+  type = c("index", "names", "full"),
   ...
 )
 }
@@ -23,14 +23,16 @@ returned.}
 
 \item{estimator}{Type of algorithm used, see \link[CORElearn:attrEval]{CORElearn::attrEval}}
 
-\item{return}{Type of vector returned. Default "names" returns predictor
-names, "full" returns a named vector of variable importance.}
+\item{type}{Type of vector returned. Default "index" returns indices,
+"names" returns predictor names, "full" returns a named vector of variable
+importance.}
 
 \item{...}{Other arguments passed to \link[CORElearn:attrEval]{CORElearn::attrEval}}
 }
 \value{
-Ordered vector of names of filtered parameters. If \code{return} is
-\code{"full"} a named vector of variable importance is returned.
+Integer vector of indices of filtered parameters (type = "index") or
+character vector of names (type = "names") of filtered parameters. If
+\code{type} is \code{"full"} a named vector of variable importance is returned.
 }
 \description{
 Uses ReliefF algorithm from the CORElearn package to rank predictors in order

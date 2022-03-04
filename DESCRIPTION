@@ -1,6 +1,6 @@
 Package: nestedcv
 Title: Nested Cross-validation with 'Glmnet' and 'caret'
-Version: 0.0.0.9102
+Version: 0.0.0.9103
 Authors@R: 
     c(person(given = "Myles",family = "Lewis",
     role = c("aut", "cre"),

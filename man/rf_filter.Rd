@@ -8,7 +8,7 @@ rf_filter(
   y,
   x,
   nfilter = NULL,
-  return = "names",
+  type = c("index", "names", "full"),
   ntree = 1000,
   mtry = ncol(x) * 0.2,
   ...
@@ -22,8 +22,9 @@ rf_filter(
 \item{nfilter}{Number of predictors to return. If \code{NULL} all predictors are
 returned.}
 
-\item{return}{Type of vector returned. Default "names" returns predictor
-names, "full" returns a named vector of variable importance.}
+\item{type}{Type of vector returned. Default "index" returns indices,
+"names" returns predictor names, "full" returns a named vector of variable
+importance.}
 
 \item{ntree}{Number of trees to grow. See \link{randomForest}.}
 
@@ -33,8 +34,9 @@ split. See \link{randomForest}.}
 \item{...}{Optional arguments passed to \link{randomForest}.}
 }
 \value{
-Ordered vector of names of filtered parameters. If \code{return} is
-\code{"full"} a named vector of variable importance is returned.
+Integer vector of indices of filtered parameters (type = "index") or
+character vector of names (type = "names") of filtered parameters. If
+\code{type} is \code{"full"} a named vector of variable importance is returned.
 }
 \description{
 Fits a random forest model and ranks variables by variable importance.

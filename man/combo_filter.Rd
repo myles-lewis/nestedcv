@@ -4,7 +4,7 @@
 \alias{combo_filter}
 \title{Combo filter}
 \usage{
-combo_filter(y, x, nfilter, return = "names", ...)
+combo_filter(y, x, nfilter, type = c("index", "names", "full"), ...)
 }
 \arguments{
 \item{y}{Response vector}
@@ -15,16 +15,17 @@ combo_filter(y, x, nfilter, return = "names", ...)
 and 1/2 from \code{relieff_filter}. Since \code{unique} is applied, the final number
 returned may be less than \code{nfilter}.}
 
-\item{return}{Type of output returned. Default "names" returns predictor
-names, "full" returns full output.}
+\item{type}{Type of vector returned. Default "index" returns indices,
+"names" returns predictor names, "full" returns full output.}
 
 \item{...}{Optional arguments passed via \link{relieff_filter} to
 \link[CORElearn:attrEval]{CORElearn::attrEval}}
 }
 \value{
-Ordered vector of names of filtered parameters. If \code{return} is
-\code{"full"} a list of 2 vectors of full output from both \link{uni_filter}
-and \link{relieff_filter} is returned.
+Integer vector of indices of filtered parameters (type = "index") or
+character vector of names (type = "names") of filtered parameters. If \code{type}
+is \code{"full"} a list containing full outputs from both \link{uni_filter} and
+\link{relieff_filter} is returned.
 }
 \description{
 Filter combining univariate filtering and reliefF filtering in equal measure.

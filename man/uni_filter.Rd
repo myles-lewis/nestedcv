@@ -4,7 +4,13 @@
 \alias{uni_filter}
 \title{Univariate filter}
 \usage{
-uni_filter(y, x, nfilter = NULL, p_cutoff = 0.05, return = "names")
+uni_filter(
+  y,
+  x,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  type = c("index", "names", "full")
+)
 }
 \arguments{
 \item{y}{Response vector}
@@ -16,12 +22,13 @@ p values < \code{p_cutoff} are returned.}
 
 \item{p_cutoff}{p value cut-off}
 
-\item{return}{Type of vector returned. Default "names" returns predictor
-names, "full" returns a named vector of p values.}
+\item{type}{Type of vector returned. Default "index" returns indices,
+"names" returns predictor names, "full" returns a matrix of p values.}
 }
 \value{
-Ordered vector of names of filtered parameters. If \code{return} is
-\code{"full"} a named vector of p values is returned.
+Integer vector of indices of filtered parameters (type = "index") or
+character vector of names (type = "names") of filtered parameters. If
+\code{type} is \code{"full"} full output from \link[Rfast:ttests]{Rfast::ttests} is returned.
 }
 \description{
 Simple univariate filter using t-test or anova (Welch's F-test) using the
