@@ -341,7 +341,7 @@ cv.rf <- function(y, x,
 #' @importFrom stats predict setNames
 #' @export
 #' 
-nestedcv.train <- function(y, x,
+nestcv.train <- function(y, x,
                            filterFUN = NULL,
                            filter_options = NULL, 
                            n_outer_folds = 10,
