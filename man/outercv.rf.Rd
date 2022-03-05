@@ -19,7 +19,7 @@ outercv.rf(
 
 \item{x}{Matrix of predictors}
 
-\item{filterFUN}{Filter function, e.g. \link{uni_filter} or \link{relieff_filter}.
+\item{filterFUN}{Filter function, e.g. \link{ttest_filter} or \link{relieff_filter}.
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
 character vector with names of filtered predictors.}
 

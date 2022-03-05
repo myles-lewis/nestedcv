@@ -11,9 +11,9 @@ combo_filter(y, x, nfilter, type = c("index", "names", "full"), ...)
 
 \item{x}{Matrix of predictors}
 
-\item{nfilter}{Number of predictors to return, using 1/2 from \code{uni_filter}
-and 1/2 from \code{relieff_filter}. Since \code{unique} is applied, the final number
-returned may be less than \code{nfilter}.}
+\item{nfilter}{Number of predictors to return, using 1/2 from \code{ttest_filter}
+or \code{anova_filter} and 1/2 from \code{relieff_filter}. Since \code{unique} is applied,
+the final number returned may be less than \code{nfilter}.}
 
 \item{type}{Type of vector returned. Default "index" returns indices,
 "names" returns predictor names, "full" returns full output.}
@@ -24,9 +24,10 @@ returned may be less than \code{nfilter}.}
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
 character vector of names (type = "names") of filtered parameters. If \code{type}
-is \code{"full"} a list containing full outputs from both \link{uni_filter} and
-\link{relieff_filter} is returned.
+is \code{"full"} a list containing full outputs from either \link{ttest_filter} or
+\link{anova_filter} and \link{relieff_filter} is returned.
 }
 \description{
-Filter combining univariate filtering and reliefF filtering in equal measure.
+Filter combining univariate (t-test or anova) filtering and reliefF filtering
+in equal measure.
 }

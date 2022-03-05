@@ -17,6 +17,7 @@ Imports:
     CORElearn,
     data.table,
     glmnet,
+    matrixTests,
     parallel,
     pROC,
     randomForest,

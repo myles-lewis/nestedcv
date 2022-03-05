@@ -12,7 +12,7 @@
 #' @param x Matrix of predictors
 #' @param family Either a character string representing one of the built-in 
 #' families, or else a `glm()` family object. Passed to [cv.glmnet] and [glmnet]
-#' @param filterFUN Filter function, e.g. [uni_filter] or [relieff_filter]. 
+#' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter]. 
 #' Any function can be provided and is passed `y` and `x`. Must return a 
 #' character vector with names of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter 
@@ -179,7 +179,7 @@ glmnet_coefs <- function(fit, s) {
 #' 
 #' @param y Response vector
 #' @param x Matrix of predictors
-#' @param filterFUN Filter function, e.g. [uni_filter] or [relieff_filter]. 
+#' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter]. 
 #' Any function can be provided and is passed `y` and `x`. Must return a 
 #' character vector with names of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter 
@@ -307,7 +307,7 @@ cv.rf <- function(y, x,
 #' 
 #' @param y Response vector. For classification this should be a factor.
 #' @param x Matrix of predictors
-#' @param filterFUN Filter function, e.g. [uni_filter] or [relieff_filter]. 
+#' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter]. 
 #' Any function can be provided and is passed `y` and `x`. Must return a 
 #' character vector with names of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter 
