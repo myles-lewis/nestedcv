@@ -10,6 +10,7 @@ wilcoxon_filter(
   nfilter = NULL,
   p_cutoff = 0.05,
   type = c("index", "names", "full"),
+  exact = FALSE,
   ...
 )
 }
@@ -24,9 +25,12 @@ p values < \code{p_cutoff} are returned.}
 \item{p_cutoff}{p value cut-off}
 
 \item{type}{Type of vector returned. Default "index" returns indices,
-"names" returns predictor names, "full" returns a matrix of p values.}
+"names" returns predictor names, "full" returns a matrix of p-values.}
 
-\item{...}{args}
+\item{exact}{Logical whether exact or approximate p-value is calculated.
+Default is \code{FALSE} for speed.}
+
+\item{...}{Further arguments passed to \link[matrixTests:wilcoxon]{matrixTests::row_wilcoxon_twosample}}
 }
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
@@ -35,5 +39,6 @@ character vector of names (type = "names") of filtered parameters. If
 is returned.
 }
 \description{
-Simple univariate filter using Wilcoxon test using the matrixTests package.
+Simple univariate filter using Wilcoxon (Mann-Whitney) test using the
+matrixTests package.
 }

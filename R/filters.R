@@ -81,7 +81,8 @@ anova_filter <- function(y,
 
 #' Wilcoxon test filter
 #' 
-#' Simple univariate filter using Wilcoxon test using the matrixTests package.
+#' Simple univariate filter using Wilcoxon (Mann-Whitney) test using the 
+#' matrixTests package.
 #' 
 #' @param y Response vector
 #' @param x Matrix of predictors
