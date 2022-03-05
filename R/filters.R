@@ -231,7 +231,8 @@ relieff_filter <- function(y, x, nfilter = NULL,
 combo_filter <- function(y, x,
                          nfilter,
                          type = c("index", "names", "full"), ...) {
-  uni_set <- if (nlevels(y) == 2) {ttest_filter(y, x, nfilter, type = type)
+  uni_set <- if (nlevels(y) == 2) {
+    ttest_filter(y, x, nfilter, type = type)
   } else anova_filter(y, x, nfilter, type = type)
   relf_set <- relieff_filter(y, x, nfilter, type = type, ...)
   if (type == "full") {
