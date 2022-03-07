@@ -129,6 +129,90 @@ wilcoxon_filter <- function(y,
 }
 
 
+#' Correlation between a vector and a matrix
+#'
+#' Fast pearson/spearman correlation where y is vector, x is matrix, adapted 
+#' from [stats::cor.test].
+#' 
+#' @param y Numerical vector
+#' @param x Matrix
+#' @param method Type of correlation, either "pearson" or "spearman".
+#' @param use Optional character string giving a method for computing 
+#' covariances in the presence of missing values. See [cor]
+#' @details For speed, p-values for Spearman's test are computed by 
+#' asymptotic t approximation, equivalent to [cor.test] with `exact = FALSE`.
+#' @importFrom Rfast Rank colRanks
+#' @importFrom stats complete.cases cor pt
+#' @export
+#' 
+correls2 <- function(y, x,
+                    method = "pearson",
+                    use = "complete.obs") {
+  ok <- complete.cases(x, y)
+  x <- x[ok, ]
+  y <- y[ok]
+  n <- length(y)
+  df <- n - 2
+  if (method == "spearman") {
+    r <- as.vector( cor(Rfast::Rank(y), Rfast::colRanks(x)) )
+    q <- (n^3 - n) * (1 - r) / 6  # AS 89 algorithm
+    den <- (n*(n^2-1))/6
+    r <- 1 - q/den
+    pval <- 2 * pt(abs(r) / sqrt((1 - r^2)/df), df, lower.tail=FALSE)
+    rname <- 'rho'
+  } else {
+    r <- as.vector(cor(y, x, use = use))
+    STATISTIC <- sqrt(df) * r / sqrt(1 - r^2)
+    pval <- 2 * pt(abs(STATISTIC), df, lower.tail = FALSE)  # two-tailed
+    rname <- 'r'
+  }
+  res <- cbind(r, pval)
+  colnames(res) <- c(rname, 'p-value')
+  rownames(res) <- colnames(x)
+  res
+}
+
+
+#' Correlation filter
+#' 
+#' Filter using correlation (Pearson or Spearman) for ranking variables.
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param nfilter Number of predictors to return. If `NULL` all predictors with 
+#' p values < `p_cutoff` are returned.
+#' @param p_cutoff p value cut-off
+#' @param type Type of vector returned. Default "index" returns indices,
+#' "names" returns predictor names, "full" returns a matrix of p-values.
+#' @param method Type of correlation, either "pearson" or "spearman".
+#' @param ... Further arguments passed to [correls]
+#' @return Integer vector of indices of filtered parameters (type = "index") or 
+#' character vector of names (type = "names") of filtered parameters. If 
+#' `type` is `"full"` full output from [correls] is returned.
+#' @export
+#' 
+correl_filter <- function(y,
+                      x,
+                      nfilter = NULL,
+                      p_cutoff = 0.05,
+                      method = "pearson",
+                      type = c("index", "names", "full"),
+                      ...) {
+  type <- match.arg(type)
+  res <- correls2(y, x, method = method, ...)
+  if (type == "full") return(res)
+  out <- res[, "pvalue"]
+  names(out) <- if (type == "index") 1:ncol(x) else colnames(x)
+  out <- sort(out)
+  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
+  if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
+  out <- names(out)
+  if (length(out) == 0) stop("No predictors selected")
+  if (type == "index") out <- as.integer(out)
+  out
+}
+
+
 #' Random forest filter
 #' 
 #' Fits a random forest model and ranks variables by variable importance. 
