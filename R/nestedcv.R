@@ -370,7 +370,8 @@ cv.rf <- function(y, x,
 #' @param tuneGrid Data frame of tuning values, see [caret::train]
 #' @param savePredictions Indicates whether hold-out predictions for 
 #' each inner CV fold should be saved for ROC curves, accuracy etc
-#' see [caret::trainControl]
+#' see [caret::trainControl].Set to `"final"` to capture predictions for inner 
+#' CV ROC.
 #' @param cores Number of cores for parallel processing. Note this currently 
 #' uses `parallel::mclapply`.
 #' @param ... Arguments passed to [caret::train]
