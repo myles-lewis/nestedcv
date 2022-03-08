@@ -4,7 +4,7 @@
 \alias{plot_lambdas}
 \title{Plot cross-validated glmnet lambdas across outer folds}
 \usage{
-plot_lambdas(x, cols = NULL, palette = "Dark 3", ...)
+plot_lambdas(x, cols = NULL, palette = "Dark 3", showLegend = "topright", ...)
 }
 \arguments{
 \item{x}{Fitted "nestcv.glmnet" object}
@@ -13,6 +13,9 @@ plot_lambdas(x, cols = NULL, palette = "Dark 3", ...)
 
 \item{palette}{palette name (one of \code{hcl.pals()}) which is passed to
 \link{hcl.colors}}
+
+\item{showLegend}{Either a keyword to position the legend or \code{FALSE} to hide
+the legend.}
 
 \item{...}{other arguments passed to plot. Use \code{type = 'p'} to plot a
 scatter plot instead of a line plot.}

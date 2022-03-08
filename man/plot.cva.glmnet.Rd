@@ -4,7 +4,7 @@
 \alias{plot.cva.glmnet}
 \title{Plot lambda across range of alphas}
 \usage{
-\method{plot}{cva.glmnet}(x, cols = NULL, palette = "Dark 3", ...)
+\method{plot}{cva.glmnet}(x, cols = NULL, palette = "Dark 3", showLegend = "topright", ...)
 }
 \arguments{
 \item{x}{Object of class 'cva.glmnet'}
@@ -13,6 +13,9 @@
 
 \item{palette}{palette name (one of \code{hcl.pals()}) which is passed to
 \link{hcl.colors}}
+
+\item{showLegend}{Either a keyword to position the legend or \code{FALSE} to hide
+the legend.}
 
 \item{...}{Other arguments passed to \link{plot}. Use \code{type = 'p'} to plot a
 scatter plot instead of a line plot.}

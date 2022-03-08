@@ -48,6 +48,8 @@ plot_alphas <- function(x,
 #' @param cols colour scheme
 #' @param palette palette name (one of `hcl.pals()`) which is passed to 
 #' [hcl.colors]
+#' @param showLegend Either a keyword to position the legend or `FALSE` to hide 
+#' the legend.
 #' @param ... other arguments passed to plot. Use `type = 'p'` to plot a 
 #' scatter plot instead of a line plot.
 #' @return No return value
@@ -59,6 +61,7 @@ plot_alphas <- function(x,
 plot_lambdas <- function(x,
                          cols = NULL,
                          palette = "Dark 3",
+                         showLegend = "topright",
                          ...) {
   cvms <- lapply(x$outer_result, function(fold) fold$cvafit$fits[[fold$cvafit$which_alpha]]$cvm)
   lambdas <- lapply(x$outer_result, function(fold) fold$cvafit$fits[[fold$cvafit$which_alpha]]$lambda)
@@ -80,16 +83,18 @@ plot_lambdas <- function(x,
     do.call("lines", lines.args)
   }
   abline(v = log(x$mean_lambda), lty = 2, col = 'grey')
-  if (plot.args$type == 'p') {
-    legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
-    legend('topright', bty = 'n',
-           legend = paste("Fold", 1:n),
-           col = cols, pch = legend.pch)
-  } else {
-    legend.lwd <- if (is.null(plot.args$lwd)) par("lwd") else plot.args$lwd
-    legend('topright', bty = 'n',
-           legend = paste("Fold", 1:n),
-           col = cols, lty = 1, lwd = legend.lwd)
+  if (!is.null(showLegend)) {
+    if (plot.args$type == 'p') {
+      legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
+      legend(showLegend, bty = 'n',
+             legend = paste("Fold", 1:n),
+             col = cols, pch = legend.pch)
+    } else {
+      legend.lwd <- if (is.null(plot.args$lwd)) par("lwd") else plot.args$lwd
+      legend(showLegend, bty = 'n',
+             legend = paste("Fold", 1:n),
+             col = cols, lty = 1, lwd = legend.lwd)
+    }
   }
 }
 
@@ -105,6 +110,8 @@ plot_lambdas <- function(x,
 #' @param cols colour scheme
 #' @param palette palette name (one of `hcl.pals()`) which is passed to 
 #' [hcl.colors]
+#' @param showLegend Either a keyword to position the legend or `FALSE` to hide 
+#' the legend.
 #' @param ... Other arguments passed to [plot]. Use `type = 'p'` to plot a 
 #' scatter plot instead of a line plot.
 #' @return No return value
@@ -116,6 +123,7 @@ plot_lambdas <- function(x,
 plot.cva.glmnet <- function(x,
                             cols = NULL,
                             palette = "Dark 3",
+                            showLegend = "topright",
                             ...) {
   cvms <- lapply(x$fits, function(i) i$cvm)
   lambdas <- lapply(x$fits, function(i) i$lambda)
@@ -136,16 +144,18 @@ plot.cva.glmnet <- function(x,
     if (length(new.args)) lines.args[names(new.args)] <- new.args
     do.call("lines", lines.args)
   }
-  if (plot.args$type == 'p') {
-    legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
-    legend('topright', bty = 'n',
-           legend = parse(text = paste("alpha ==", x$alphaSet)),
-           col = cols, pch = legend.pch)
-  } else {
-    legend.lwd <- if (is.null(plot.args$lwd)) par("lwd") else plot.args$lwd
-    legend('topright', bty = 'n',
-           legend = parse(text = paste("alpha ==", x$alphaSet)),
-           col = cols, lty = 1, lwd = legend.lwd)
+  if (!is.null(showLegend)) {
+    if (plot.args$type == 'p') {
+      legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
+      legend(showLegend, bty = 'n',
+             legend = parse(text = paste("alpha ==", x$alphaSet)),
+             col = cols, pch = legend.pch)
+    } else {
+      legend.lwd <- if (is.null(plot.args$lwd)) par("lwd") else plot.args$lwd
+      legend(showLegend, bty = 'n',
+             legend = parse(text = paste("alpha ==", x$alphaSet)),
+             col = cols, lty = 1, lwd = legend.lwd)
+    }
   }
 }
 
