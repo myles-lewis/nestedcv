@@ -48,11 +48,10 @@ nestcv.glmnet <- function(y, x,
                           keep = TRUE,
                           cores = 1,
                           ...) {
-  
+  family <- match.arg(family)
   outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
   outer_res <- mclapply(1:n_outer_folds, function(i) {
     trainIndex <- outer_folds[[i]]
-    foldid <- sample(rep(seq_len(n_inner_folds), length = length(trainIndex)))
     # expand data with interactions
     filtx <- if (is.null(filterFUN)) x else {
       args <- list(y = y[trainIndex], x = x[trainIndex, ])
@@ -60,39 +59,28 @@ nestcv.glmnet <- function(y, x,
       fset <- do.call(filterFUN, args)
       x[, fset]
     }
-    fit <- lapply(alphaSet, function(alpha) {
-      cv.glmnet(x = filtx[trainIndex, ], y = y[trainIndex], 
-                alpha = alpha, nfolds = n_inner_folds, foldid = foldid, 
+    cvafit <- cva.glmnet(x = filtx[trainIndex, ], y = y[trainIndex], 
+                alphaSet = alphaSet, nfolds = n_inner_folds,
                 keep = keep, family = family, ...)
-    })
-    cvafits <- list(fits = fit, alphaSet = alphaSet)
-    class(cvafits) <- "cva.glmnet"
-    alphas <- unlist(lapply(fit, function(fitx) {
-      w <- which.min(fitx$cvm)
-      fitx$cvm[w]
-    }))
-    alpha.x <- which.min(alphas)
-    s <- exp((log(fit[[alpha.x]]$lambda.min) * (1-min_1se) + log(fit[[alpha.x]]$lambda.1se) * min_1se))
-    cf <- as.matrix(coef(fit[[alpha.x]], s = s))
+    alphafit <- cvafit$fits[[cvafit$which_alpha]]
+    s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
+    cf <- as.matrix(coef(alphafit, s = s))
     cf <- cf[cf != 0, ]
     # test on outer CV
-    predy <- as.vector(predict(fit[[alpha.x]], newx = filtx[-trainIndex, ], s = s, type = "class"))
-    predyp <- as.vector(predict(fit[[alpha.x]], newx = filtx[-trainIndex, ], s = s))
+    predy <- as.vector(predict(alphafit, newx = filtx[-trainIndex, ], s = s, type = "class"))
+    predyp <- as.vector(predict(alphafit, newx = filtx[-trainIndex, ], s = s))
     preds <- data.frame(predy=predy, predyp=predyp, testy=y[-trainIndex])
     rownames(preds) <- rownames(x[-trainIndex, ])
     ret <- list(preds = preds,
-                alpha = alphaSet[[alpha.x]],
-                which_alpha = alpha.x,
                 lambda = s,
+                alpha = cvafit$best_alpha,
                 coef = cf,
-                cvfit = fit[[alpha.x]],
-                cv_alpha = alphas,
-                cvafits = cvafits,
+                cvafit = cvafit,
                 nfilter = ncol(filtx))
     # inner CV predictions
     if (keep) {
-      ind <- fit[[alpha.x]]$index["min", ]
-      innerCV_preds <- fit[[alpha.x]]$fit.preval[, ind]
+      ind <- alphafit$index["min", ]
+      innerCV_preds <- alphafit$fit.preval[, ind]
       ytrain <- y[trainIndex]
       ret <- append(ret, list(ytrain = ytrain, innerCV_preds = innerCV_preds))
     }
@@ -139,10 +127,49 @@ nestcv.glmnet <- function(y, x,
               mean_alpha = alph,
               final_fit = fit,
               roc = glmnet.roc,
-              alphaSet = alphaSet,
               summary = summary)
   class(out) <- "nestcv.glmnet"
   out
+}
+
+
+#' Cross-validation of alpha for glmnet
+#' 
+#' Performs k-fold cross-validation for glmnet, including alpha mixing parameter.
+#' 
+#' @param x Matrix of predictors
+#' @param y Response vector
+#' @param nfolds Number of folds (default 10)
+#' @param alphaSet Sequence of alpha values to cross-validate
+#' @param ... Other arguments passed to [cv.glmnet]
+#' @return Object of class "cva.glmnet", which is a list of the cv.glmnet 
+#' objects for each value of alpha and `alphaSet`.
+#' \item{fits}{List of fitted [cv.glmnet] objects}
+#' \item{alphaSet}{Sequence of alpha values used}
+#' \item{alpha_cvm}{The mean cross-validated error - a vector of length 
+#' `length(alphaSet)`.}
+#' \item{best_alpha}{Value of alpha giving lowest `alpha_cvm`.}
+#' \item{which_alpha}{Index of `alphaSet` with lowest `alpha_cvm`}
+#' @seealso [cv.glmnet], [glmnet]
+#' @importFrom glmnet cv.glmnet
+#' @export
+#' 
+cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...) {
+  foldid <- sample(rep(seq_len(nfolds), length = length(y)))
+  fits <- lapply(alphaSet, function(alpha) {
+    cv.glmnet(x = x, y = y, 
+              alpha = alpha, foldid = foldid, ...)
+  })
+  alpha_cvm <- unlist(lapply(fits, function(i) min(i$cvm)))
+  which_alpha <- which.min(alpha_cvm)
+  best_alpha <- alphaSet[which_alpha]
+  cvafit <- list(fits = fits,
+                  alphaSet = alphaSet,
+                  alpha_cvm = alpha_cvm,
+                  best_alpha = best_alpha,
+                  which_alpha = which_alpha)
+  class(cvafit) <- "cva.glmnet"
+  cvafit
 }
 
 

@@ -16,7 +16,8 @@
 plot_alphas <- function(x,
                         col = NULL,
                         ...) {
-  cv_alpha <- lapply(x$outer_result, '[[', 'cv_alpha')
+  cv_alpha <- lapply(x$outer_result, function(i) i$cvafit$alpha_cvm)
+  alphaSet <- x$outer_result[[1]]$cvafit$alphaSet
   n <- length(cv_alpha)
   if (is.null(col)) {
     col <- rainbow(n)
@@ -24,16 +25,16 @@ plot_alphas <- function(x,
     col <- rep_len(col, n)
   }
   new.args <- list(...)
-  plot.args <- list(y = cv_alpha[[1]], x = x$alphaSet,
+  plot.args <- list(y = cv_alpha[[1]], x = alphaSet,
                     type = 'l',
                     ylim = range(unlist(cv_alpha)),
                     xlab = 'Alpha',
-                    ylab = x$outer_result[[1]]$cvfit$name,
+                    ylab = x$outer_result[[1]]$cvafit$fits[[1]]$name,
                     col = col[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
   for (i in 2:n) {
-    lines(cv_alpha[[i]], x = x$alphaSet, col = col[i])
+    lines(cv_alpha[[i]], x = alphaSet, col = col[i])
   }
 }
 
@@ -59,8 +60,8 @@ plot_lambdas <- function(x,
                          cols = NULL,
                          palette = "Dark 3",
                          ...) {
-  cvms <- lapply(x$outer_result, function(fold) fold$cvfit$cvm)
-  lambdas <- lapply(x$outer_result, function(fold) fold$cvfit$lambda)
+  cvms <- lapply(x$outer_result, function(fold) fold$cvafit$fits[[fold$cvafit$which_alpha]]$cvm)
+  lambdas <- lapply(x$outer_result, function(fold) fold$cvafit$fits[[fold$cvafit$which_alpha]]$lambda)
   n <- length(cvms)
   if (is.null(cols)) cols <- hcl.colors(n, palette)
   new.args <- list(...)
@@ -69,7 +70,7 @@ plot_lambdas <- function(x,
                     ylim = range(unlist(cvms)),
                     xlim = range(log(unlist(lambdas))),
                     xlab = expression(Log(lambda)),
-                    ylab = x$outer_result[[1]]$cvfit$name,
+                    ylab = x$outer_result[[1]]$cvafit$fits[[1]]$name,
                     col = cols[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
