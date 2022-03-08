@@ -4,14 +4,18 @@
 \alias{plot_lambdas}
 \title{Plot cross-validated glmnet lambdas across outer folds}
 \usage{
-plot_lambdas(x, col = NULL, ...)
+plot_lambdas(x, cols = NULL, palette = "Dark 3", ...)
 }
 \arguments{
 \item{x}{Fitted "nestcv.glmnet" object}
 
-\item{col}{Optional vector of line colours for each fold}
+\item{cols}{colour scheme}
 
-\item{...}{other arguments passed to plot}
+\item{palette}{palette name (one of \code{hcl.pals()}) which is passed to
+\link{hcl.colors}}
+
+\item{...}{other arguments passed to plot. Use \code{type = 'p'} to plot a
+scatter plot instead of a line plot.}
 }
 \value{
 No return value

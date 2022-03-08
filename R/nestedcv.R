@@ -65,6 +65,8 @@ nestcv.glmnet <- function(y, x,
                 alpha = alpha, nfolds = n_inner_folds, foldid = foldid, 
                 keep = keep, family = family, ...)
     })
+    cvafits <- list(fits = fit, alphaSet = alphaSet)
+    class(cvafits) <- "cva.glmnet"
     alphas <- unlist(lapply(fit, function(fitx) {
       w <- which.min(fitx$cvm)
       fitx$cvm[w]
@@ -79,8 +81,13 @@ nestcv.glmnet <- function(y, x,
     preds <- data.frame(predy=predy, predyp=predyp, testy=y[-trainIndex])
     rownames(preds) <- rownames(x[-trainIndex, ])
     ret <- list(preds = preds,
-                alpha = alphaSet[[alpha.x]], lambda = s, coef = cf, cvfit = fit[[alpha.x]],
+                alpha = alphaSet[[alpha.x]],
+                which_alpha = alpha.x,
+                lambda = s,
+                coef = cf,
+                cvfit = fit[[alpha.x]],
                 cv_alpha = alphas,
+                cvafits = cvafits,
                 nfilter = ncol(filtx))
     # inner CV predictions
     if (keep) {
@@ -127,6 +134,7 @@ nestcv.glmnet <- function(y, x,
   fit <- glmnet(filtx, y, alpha = alph, family = family, ...)
   out <- list(output = output,
               outer_result = outer_res,
+              outer_folds = outer_folds,
               mean_lambda = lam,
               mean_alpha = alph,
               final_fit = fit,

@@ -43,24 +43,24 @@ plot_alphas <- function(x,
 #' outer CV fold.
 #' 
 #' @param x Fitted "nestcv.glmnet" object
-#' @param col Optional vector of line colours for each fold
-#' @param ... other arguments passed to plot
+#' @param cols colour scheme
+#' @param palette palette name (one of `hcl.pals()`) which is passed to 
+#' [hcl.colors]
+#' @param ... other arguments passed to plot. Use `type = 'p'` to plot a 
+#' scatter plot instead of a line plot.
 #' @return No return value
-#' @importFrom graphics lines abline
-#' @importFrom grDevices rainbow
+#' @importFrom graphics lines abline par legend
+#' @importFrom grDevices hcl.colors
 #' @export
 #' 
 plot_lambdas <- function(x,
-                         col = NULL,
+                         cols = NULL,
+                         palette = "Dark 3",
                          ...) {
   cvms <- lapply(x$outer_result, function(fold) fold$cvfit$cvm)
   lambdas <- lapply(x$outer_result, function(fold) fold$cvfit$lambda)
   n <- length(cvms)
-  if (is.null(col)) {
-    col <- rainbow(n)
-  } else {
-    col <- rep_len(col, n)
-  }
+  if (is.null(cols)) cols <- hcl.colors(n, palette)
   new.args <- list(...)
   plot.args <- list(y = cvms[[1]], x = log(lambdas[[1]]),
                     type = 'l',
@@ -68,13 +68,81 @@ plot_lambdas <- function(x,
                     xlim = range(log(unlist(lambdas))),
                     xlab = expression(Log(lambda)),
                     ylab = x$outer_result[[1]]$cvfit$name,
-                    col = col[1])
+                    col = cols[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
   for (i in 2:n) {
-    lines(cvms[[i]], x = log(lambdas[[i]]), col = col[i])
+    lines.args <- list(y = cvms[[i]], x = log(lambdas[[i]]), col = cols[i])
+    if (length(new.args)) lines.args[names(new.args)] <- new.args
+    do.call("lines", lines.args)
   }
   abline(v = log(x$mean_lambda), lty = 2, col = 'grey')
+  if (plot.args$type == 'p') {
+    legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
+    legend('topright', bty = 'n',
+           legend = paste("Fold", 1:n),
+           col = cols, pch = legend.pch)
+  } else {
+    legend.lwd <- if (is.null(plot.args$lwd)) par("lwd") else plot.args$lwd
+    legend('topright', bty = 'n',
+           legend = paste("Fold", 1:n),
+           col = cols, lty = 1, lwd = legend.lwd)
+  }
+}
+
+
+#' Plot lambda across range of alphas
+#' 
+#' Plot showing cross-validated tuning of alpha and lambda from elastic net 
+#' regression via [glmnet]. Log lambda is on the x axis while the tuning metric 
+#' (log loss, deviance, accuracy, AUC etc) is on the y axis. Multiple alpha 
+#' values are shown by different colours.
+#' 
+#' @param x Object of class 'cva.glmnet'
+#' @param cols colour scheme
+#' @param palette palette name (one of `hcl.pals()`) which is passed to 
+#' [hcl.colors]
+#' @param ... Other arguments passed to [plot]. Use `type = 'p'` to plot a 
+#' scatter plot instead of a line plot.
+#' @return No return value
+#' @importFrom graphics lines legend par
+#' @importFrom grDevices hcl.colors
+#' @export
+#' 
+plot.cva.glmnet <- function(x,
+                            cols = NULL,
+                            palette = "Dark 3",
+                            ...) {
+  cvms <- lapply(x$fits, function(i) i$cvm)
+  lambdas <- lapply(x$fits, function(i) i$lambda)
+  n <- length(cvms)
+  if (is.null(cols)) cols <- hcl.colors(n, palette)
+  new.args <- list(...)
+  plot.args <- list(y = cvms[[1]], x = log(lambdas[[1]]),
+                    type = 'l',
+                    ylim = range(unlist(cvms)),
+                    xlim = range(log(unlist(lambdas))),
+                    xlab = expression(Log(lambda)),
+                    ylab = x$fits[[1]]$name,
+                    col = cols[1])
+  if (length(new.args)) plot.args[names(new.args)] <- new.args
+  do.call("plot", plot.args)
+  for (i in 2:n) {
+    lines.args <- list(y = cvms[[i]], x = log(lambdas[[i]]), col = cols[i])
+    if (length(new.args)) lines.args[names(new.args)] <- new.args
+    do.call("lines", lines.args)
+  }
+  if (plot.args$type == 'p') {
+    legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
+    legend('topright', bty = 'n',
+           legend = parse(text = paste("alpha ==", x$alphaSet)),
+           col = cols, pch = legend.pch)
+  } else {
+    legend.lwd <- if (is.null(plot.args$lwd)) par("lwd") else plot.args$lwd
+    legend('topright', bty = 'n',
+           legend = parse(text = paste("alpha ==", x$alphaSet)),
+           col = cols, lty = 1, lwd = legend.lwd)
+  }
 }
 
 
@@ -154,3 +222,5 @@ plot_caret <- function(x, error.col = "darkgrey", ...) {
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("points", plot.args)
 }
+
+
