@@ -48,7 +48,7 @@ plot_alphas <- function(x,
 #' @param cols colour scheme
 #' @param palette palette name (one of `hcl.pals()`) which is passed to 
 #' [hcl.colors]
-#' @param showLegend Either a keyword to position the legend or `FALSE` to hide 
+#' @param showLegend Either a keyword to position the legend or `NULL` to hide 
 #' the legend.
 #' @param ... other arguments passed to plot. Use `type = 'p'` to plot a 
 #' scatter plot instead of a line plot.
@@ -110,7 +110,7 @@ plot_lambdas <- function(x,
 #' @param cols colour scheme
 #' @param palette palette name (one of `hcl.pals()`) which is passed to 
 #' [hcl.colors]
-#' @param showLegend Either a keyword to position the legend or `FALSE` to hide 
+#' @param showLegend Either a keyword to position the legend or `NULL` to hide 
 #' the legend.
 #' @param ... Other arguments passed to [plot]. Use `type = 'p'` to plot a 
 #' scatter plot instead of a line plot.

@@ -14,7 +14,7 @@ plot_lambdas(x, cols = NULL, palette = "Dark 3", showLegend = "topright", ...)
 \item{palette}{palette name (one of \code{hcl.pals()}) which is passed to
 \link{hcl.colors}}
 
-\item{showLegend}{Either a keyword to position the legend or \code{FALSE} to hide
+\item{showLegend}{Either a keyword to position the legend or \code{NULL} to hide
 the legend.}
 
 \item{...}{other arguments passed to plot. Use \code{type = 'p'} to plot a

@@ -14,7 +14,7 @@
 \item{palette}{palette name (one of \code{hcl.pals()}) which is passed to
 \link{hcl.colors}}
 
-\item{showLegend}{Either a keyword to position the legend or \code{FALSE} to hide
+\item{showLegend}{Either a keyword to position the legend or \code{NULL} to hide
 the legend.}
 
 \item{...}{Other arguments passed to \link{plot}. Use \code{type = 'p'} to plot a
