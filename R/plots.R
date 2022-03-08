@@ -34,7 +34,9 @@ plot_alphas <- function(x,
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
   for (i in 2:n) {
-    lines(cv_alpha[[i]], x = alphaSet, col = col[i])
+    lines.args <- list(y = cv_alpha[[i]], x = alphaSet, col = col[i])
+    if (length(new.args)) lines.args[names(new.args)] <- new.args
+    do.call("lines", lines.args)
   }
 }
 
