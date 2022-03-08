@@ -29,6 +29,18 @@
 #' uses [parallel::mclapply].
 #' @param ... Optional arguments passed to [cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet"
+#' \item{output}{Predictions on the left-out outer folds}
+#' \item{outer_result}{List object of results from each outer fold containing 
+#' predictions on left-out outer folds, best lambda, best alpha, fitted glmnet 
+#' coefficients, list object of inner fitted cv.glmnet and number of filtered 
+#' predictors at each fold.}
+#' \item{outer_folds}{List of indices of outer training folds}
+#' \item{mean_lambda}{Final mean best lambda from each fold}
+#' \item{mean_alpha}{Final mean best alpha from each fold}
+#' \item{final_fit}{Final fitted glmnet model}
+#' \item{roc}{ROC AUC for binary classification where available.}
+#' \item{summary}{Overall performance summary. Accuracy and balanced accuracy 
+#' for classification. ROC AUC for binary classification. RMSE for regression.}
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
 #' @importFrom glmnet cv.glmnet glmnet
@@ -142,7 +154,7 @@ nestcv.glmnet <- function(y, x,
 #' @param nfolds Number of folds (default 10)
 #' @param alphaSet Sequence of alpha values to cross-validate
 #' @param ... Other arguments passed to [cv.glmnet]
-#' @return Object of class "cva.glmnet", which is a list of the cv.glmnet 
+#' @return Object of S3 class "cva.glmnet", which is a list of the cv.glmnet 
 #' objects for each value of alpha and `alphaSet`.
 #' \item{fits}{List of fitted [cv.glmnet] objects}
 #' \item{alphaSet}{Sequence of alpha values used}

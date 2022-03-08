@@ -18,7 +18,7 @@ cva.glmnet(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...)
 \item{...}{Other arguments passed to \link{cv.glmnet}}
 }
 \value{
-Object of class "cva.glmnet", which is a list of the cv.glmnet
+Object of S3 class "cva.glmnet", which is a list of the cv.glmnet
 objects for each value of alpha and \code{alphaSet}.
 \item{fits}{List of fitted \link{cv.glmnet} objects}
 \item{alphaSet}{Sequence of alpha values used}

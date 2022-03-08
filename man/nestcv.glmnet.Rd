@@ -54,6 +54,18 @@ uses \link[parallel:mclapply]{parallel::mclapply}.}
 }
 \value{
 An object with S3 class "nestcv.glmnet"
+\item{output}{Predictions on the left-out outer folds}
+\item{outer_result}{List object of results from each outer fold containing
+predictions on left-out outer folds, best lambda, best alpha, fitted glmnet
+coefficients, list object of inner fitted cv.glmnet and number of filtered
+predictors at each fold.}
+\item{outer_folds}{List of indices of outer training folds}
+\item{mean_lambda}{Final mean best lambda from each fold}
+\item{mean_alpha}{Final mean best alpha from each fold}
+\item{final_fit}{Final fitted glmnet model}
+\item{roc}{ROC AUC for binary classification where available.}
+\item{summary}{Overall performance summary. Accuracy and balanced accuracy
+for classification. ROC AUC for binary classification. RMSE for regression.}
 }
 \description{
 Nested cross-validation (CV) with glmnet including tuning of elastic net
