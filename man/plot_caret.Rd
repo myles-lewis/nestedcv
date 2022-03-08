@@ -13,6 +13,9 @@ plot_caret(x, error.col = "darkgrey", ...)
 
 \item{...}{Other arguments passed to \code{\link[=plot]{plot()}}}
 }
+\value{
+No return value
+}
 \description{
 Plots the main tuning parameter in models built using \link[caret:train]{caret::train}
 }

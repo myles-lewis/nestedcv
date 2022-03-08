@@ -26,3 +26,6 @@ regression via \link{glmnet}. Log lambda is on the x axis while the tuning metri
 (log loss, deviance, accuracy, AUC etc) is on the y axis. Multiple alpha
 values are shown by different colours.
 }
+\seealso{
+\link{nestcv.glmnet}
+}

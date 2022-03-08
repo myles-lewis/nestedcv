@@ -24,3 +24,6 @@ No return value
 Plot of cross-validated glmnet lambda parameter against deviance for each
 outer CV fold.
 }
+\seealso{
+\link{nestcv.glmnet}
+}

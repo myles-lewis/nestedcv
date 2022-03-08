@@ -19,3 +19,6 @@ No return value
 \description{
 Plot of cross-validated glmnet alpha parameter against deviance.
 }
+\seealso{
+\link{nestcv.glmnet}
+}

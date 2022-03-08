@@ -7,7 +7,7 @@
 boxplot_model(fit, x, cols = NULL, palette = "Dark 3", ...)
 }
 \arguments{
-\item{fit}{nestedcv object}
+\item{fit}{"nestedcv" object}
 
 \item{x}{matrix of predictors}
 
@@ -18,7 +18,13 @@ boxplot_model(fit, x, cols = NULL, palette = "Dark 3", ...)
 
 \item{...}{other arguments passed to \link{boxplot}.}
 }
+\value{
+No return value
+}
 \description{
 Boxplots to show range of model predictors to identify exceptional predictors
 with excessively low or high values.
+}
+\seealso{
+\link{nestcv.glmnet}
 }
