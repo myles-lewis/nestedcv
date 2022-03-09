@@ -48,7 +48,8 @@ performed. See http://topepo.github.io/caret/using-your-own-model-in-train.html.
 
 \item{savePredictions}{Indicates whether hold-out predictions for
 each inner CV fold should be saved for ROC curves, accuracy etc
-see \link[caret:trainControl]{caret::trainControl}}
+see \link[caret:trainControl]{caret::trainControl}.Set to \code{"final"} to capture predictions for inner
+CV ROC.}
 
 \item{...}{Arguments passed to \link[caret:train]{caret::train}}
 }
