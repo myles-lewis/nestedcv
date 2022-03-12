@@ -10,6 +10,7 @@ nestcv.glmnet(
   family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
   filterFUN = NULL,
   filter_options = NULL,
+  outer_method = c("cv", "loocv"),
   n_outer_folds = 10,
   n_inner_folds = 10,
   alphaSet = seq(0, 1, 0.1),
@@ -33,6 +34,9 @@ character vector with names of filtered predictors.}
 
 \item{filter_options}{List of additional arguments passed to the filter
 function specified by \code{filterFUN}.}
+
+\item{outer_method}{String of either \code{"cv"} or \code{"loocv"} specifying whether to
+do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
 \item{n_outer_folds}{Number of outer CV folds}
 

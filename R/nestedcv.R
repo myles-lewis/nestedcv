@@ -17,6 +17,8 @@
 #' character vector with names of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter 
 #' function specified by `filterFUN`.
+#' @param outer_method String of either `"cv"` or `"loocv"` specifying whether to 
+#' do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
 #' @param n_inner_folds Number of inner CV folds
 #' @param alphaSet Vector of alphas to be tuned
@@ -53,6 +55,7 @@ nestcv.glmnet <- function(y, x,
                           family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
                           filterFUN = NULL,
                           filter_options = NULL,
+                          outer_method = c("cv", "loocv"),
                           n_outer_folds = 10,
                           n_inner_folds = 10,
                           alphaSet = seq(0, 1, 0.1),
@@ -61,17 +64,20 @@ nestcv.glmnet <- function(y, x,
                           cores = 1,
                           ...) {
   family <- match.arg(family)
-  outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
-  outer_res <- mclapply(1:n_outer_folds, function(i) {
-    trainIndex <- outer_folds[[i]]
+  outer_method <- match.arg(outer_method)
+  outer_folds <- switch(outer_method,
+                        cv = createFolds(y, k = n_outer_folds),
+                        loocv = 1:length(y))
+  outer_res <- mclapply(1:length(outer_folds), function(i) {
+    test <- outer_folds[[i]]
     # expand data with interactions
     filtx <- if (is.null(filterFUN)) x else {
-      args <- list(y = y[trainIndex], x = x[trainIndex, ])
+      args <- list(y = y[-test], x = x[-test, ])
       args <- append(args, filter_options)
       fset <- do.call(filterFUN, args)
       x[, fset]
     }
-    cvafit <- cva.glmnet(x = filtx[trainIndex, ], y = y[trainIndex], 
+    cvafit <- cva.glmnet(x = filtx[-test, ], y = y[-test], 
                 alphaSet = alphaSet, nfolds = n_inner_folds,
                 keep = keep, family = family, ...)
     alphafit <- cvafit$fits[[cvafit$which_alpha]]
@@ -79,10 +85,10 @@ nestcv.glmnet <- function(y, x,
     cf <- as.matrix(coef(alphafit, s = s))
     cf <- cf[cf != 0, ]
     # test on outer CV
-    predy <- as.vector(predict(alphafit, newx = filtx[-trainIndex, ], s = s, type = "class"))
-    predyp <- as.vector(predict(alphafit, newx = filtx[-trainIndex, ], s = s))
-    preds <- data.frame(predy=predy, predyp=predyp, testy=y[-trainIndex])
-    rownames(preds) <- rownames(x[-trainIndex, ])
+    predy <- as.vector(predict(alphafit, newx = filtx[test, ], s = s, type = "class"))
+    predyp <- as.vector(predict(alphafit, newx = filtx[test, ], s = s))
+    preds <- data.frame(predy=predy, predyp=predyp, testy=y[test])
+    rownames(preds) <- rownames(x[test, ])
     ret <- list(preds = preds,
                 lambda = s,
                 alpha = cvafit$best_alpha,
@@ -93,7 +99,7 @@ nestcv.glmnet <- function(y, x,
     if (keep) {
       ind <- alphafit$index["min", ]
       innerCV_preds <- alphafit$fit.preval[, ind]
-      ytrain <- y[trainIndex]
+      ytrain <- y[-test]
       ret <- append(ret, list(ytrain = ytrain, innerCV_preds = innerCV_preds))
     }
     ret
@@ -134,6 +140,7 @@ nestcv.glmnet <- function(y, x,
   fit <- glmnet(filtx, y, alpha = alph, family = family, ...)
   out <- list(output = output,
               outer_result = outer_res,
+              outer_method = outer_method,
               outer_folds = outer_folds,
               mean_lambda = lam,
               mean_alpha = alph,
