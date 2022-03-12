@@ -4,7 +4,13 @@
 \alias{plot_lambdas}
 \title{Plot cross-validated glmnet lambdas across outer folds}
 \usage{
-plot_lambdas(x, cols = NULL, palette = "Dark 3", showLegend = "topright", ...)
+plot_lambdas(
+  x,
+  cols = NULL,
+  palette = "Dark 3",
+  showLegend = if (x$outer_method == "cv") "topright" else NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{Fitted "nestcv.glmnet" object}

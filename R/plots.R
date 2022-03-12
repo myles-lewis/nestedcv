@@ -63,7 +63,7 @@ plot_alphas <- function(x,
 plot_lambdas <- function(x,
                          cols = NULL,
                          palette = "Dark 3",
-                         showLegend = "topright",
+                         showLegend = if(x$outer_method == "cv") "topright" else NULL,
                          ...) {
   cvms <- lapply(x$outer_result, function(fold) fold$cvafit$fits[[fold$cvafit$which_alpha]]$cvm)
   lambdas <- lapply(x$outer_result, function(fold) fold$cvafit$fits[[fold$cvafit$which_alpha]]$lambda)
