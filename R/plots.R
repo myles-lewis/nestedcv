@@ -111,6 +111,8 @@ plot_lambdas <- function(x,
 #' @param x Object of class 'cva.glmnet'
 #' @param xaxis String specifying what is plotted on the x axis, either log 
 #' lambda or the number of non-zero coefficients.
+#' @param pchMin plotting 'character' for the minimum point of each curve. Not 
+#' shown if set to `NULL`. See [points]
 #' @param cols colour scheme
 #' @param palette palette name (one of `hcl.pals()`) which is passed to 
 #' [hcl.colors]
@@ -126,6 +128,7 @@ plot_lambdas <- function(x,
 #' 
 plot.cva.glmnet <- function(x,
                             xaxis = c('lambda', 'nvar'),
+                            pchMin = NULL,
                             cols = NULL,
                             palette = "zissou",
                             showLegend = "bottomright",
@@ -158,6 +161,13 @@ plot.cva.glmnet <- function(x,
                                      nvar = 'p'))
     if (length(new.args)) lines.args[names(new.args)] <- new.args
     do.call("lines", lines.args)
+  }
+  # show minima
+  if (!is.null(pchMin)) {
+    wy <- unlist(lapply(cvms, which.min))
+    for (i in 1:n) {
+      points(x = px[[i]][wy[i]], y = cvms[[i]][wy[i]], col = cols[i], pch = pchMin)
+    }
   }
   if (!is.null(showLegend)) {
     if (plot.args$type == 'p') {
