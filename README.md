@@ -20,7 +20,8 @@ Using R4RA data to predict CDAI 50% response to rituximab.
 # set up data
 load("/Users/myles/R/R4RA_shiny_pw7_update/1_raw_data/R4RA_270821.RData")
 
-index <- r4ra.meta$Outliers_Detected_On_PCA != "outlier" & r4ra.meta$Visit == 3 & !is.na(r4ra.meta$Visit)
+index <- r4ra.meta$Outliers_Detected_On_PCA != "outlier" & r4ra.meta$Visit == 3 
+          & !is.na(r4ra.meta$Visit)
 metadata <- r4ra.meta[index, ]
 dim(metadata)  # 133 individuals
 
@@ -63,6 +64,9 @@ The tuning of alpha for each outer fold can be plotted.
 
 ```
 plot(res.rtx$outer_result[[1]]$cvafit, showLegend = "bottomright")
+
+# scatter plot
+plot(res.rtx$outer_result[[1]]$cvafit, type = 'p', showLegend = "bottomright")
 ```
 
 ROC curves from left-out folds from both outer and inner CV can be plotted.
