@@ -9,6 +9,7 @@
 #' @param ... other arguments passed to plot
 #' @return No return value
 #' @seealso [nestcv.glmnet]
+#' @author Myles Lewis
 #' @importFrom graphics lines
 #' @importFrom grDevices rainbow
 #' @export
@@ -56,6 +57,7 @@ plot_alphas <- function(x,
 #' scatter plot instead of a line plot.
 #' @return No return value
 #' @seealso [nestcv.glmnet]
+#' @author Myles Lewis
 #' @importFrom graphics lines abline par legend
 #' @importFrom grDevices hcl.colors
 #' @export
@@ -122,6 +124,7 @@ plot_lambdas <- function(x,
 #' scatter plot instead of a line plot.
 #' @return No return value
 #' @seealso [nestcv.glmnet]
+#' @author Myles Lewis
 #' @importFrom graphics lines legend par
 #' @importFrom grDevices hcl.colors
 #' @export
@@ -198,6 +201,7 @@ plot.cva.glmnet <- function(x,
 #' @param ... other arguments passed to [boxplot].
 #' @return No return value
 #' @seealso [nestcv.glmnet]
+#' @author Myles Lewis
 #' @importFrom graphics boxplot par
 #' @importFrom grDevices hcl.colors
 #' @importFrom stats formula
