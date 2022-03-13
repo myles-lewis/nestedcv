@@ -1,6 +1,6 @@
 # nestedcv
 
-Nested cross-validation for the 'glmnet' package, including cross-validation 
+Nested cross-validation (CV) for the 'glmnet' package, including cross-validation 
 of elastic net alpha parameter and filter functions for feature selection.
 
 # Installation
@@ -104,6 +104,19 @@ coef(res.rtx)
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = relieff_filter,
                          filter_options = list(nfilter = 300),
                          family = "binomial", cores = 8, 
+                         alphaSet = seq(0.7, 1, 0.05))
+summary(res.rtx)
+coef(res.rtx)
+```
+
+Leave-one-out cross-validation (LOOCV) can be performed on the outer folds.
+
+```
+# outer LOOCV
+res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
+                         filter_options = list(nfilter = 300, p_cutoff = NULL),
+                         outer_method = "loocv",
+                         family = "binomial", cores = 8,
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
 coef(res.rtx)
