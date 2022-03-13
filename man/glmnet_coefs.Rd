@@ -4,12 +4,14 @@
 \alias{glmnet_coefs}
 \title{glmnet coefficients}
 \usage{
-glmnet_coefs(fit, s)
+glmnet_coefs(fit, s, ...)
 }
 \arguments{
 \item{fit}{A \link{cv.glmnet} fitted model object.}
 
 \item{s}{Value of lambda. See \link{coef.glmnet} and \link{predict.cv.glmnet}}
+
+\item{...}{Other arguments passed to \link{coef.glmnet}}
 }
 \value{
 Vector or list of coefficients ordered with the intercept first,

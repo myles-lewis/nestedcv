@@ -116,13 +116,13 @@ nestcv.glmnet <- function(y, x,
     b_acc <- ccm$byClass[11]
     glmnet.roc <- pROC::roc(output$testy, output[, 2], direction = "<")
     auc <- glmnet.roc$auc
-    summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Bal_accuracy"))
+    summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
   } else if (family == "multinomial") {
     cm <- table(output$predy, output$testy)
     acc <- sum(diag(cm))/ sum(cm)
     ccm <- caret::confusionMatrix(cm)
     b_acc <- ccm$byClass[11]
-    summary <- setNames(c(acc, b_acc), c("Accuracy", "Bal_accuracy"))
+    summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
   } else {
     df <- data.frame(obs = output$testy, pred = output$predy)
     summary <- caret::defaultSummary(df)
@@ -200,13 +200,14 @@ cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...) {
 #' 
 #' @param fit A [cv.glmnet] fitted model object.
 #' @param s Value of lambda. See [coef.glmnet] and [predict.cv.glmnet]
+#' @param ... Other arguments passed to [coef.glmnet]
 #' @return Vector or list of coefficients ordered with the intercept first, 
 #' followed by highest absolute value to lowest.
 #' @importFrom stats coef
 #' @export
 #' 
-glmnet_coefs <- function(fit, s) {
-  cf <- coef(fit, s = s)
+glmnet_coefs <- function(fit, s, ...) {
+  cf <- coef(fit, s = s, ...)
   if (is.list(cf)) {
     cf <- lapply(cf, function(i) {
       cf <- as.matrix(i)
@@ -222,6 +223,27 @@ glmnet_coefs <- function(fit, s) {
   cf2 <- cf[-1]
   cf2 <- cf2[order(abs(cf2), decreasing = TRUE)]
   c(cf[1], cf2)  # keep intercept first
+}
+
+
+#' Extract coefficients from nestcv.glmnet object
+#' 
+#' Extracts coefficients from the final fit of a `"nestcv.glmnet"` object.
+#' 
+#' @param object Object of class `"nestcv.glmnet"`
+#' @param s Value of penalty parameter lambda. Default is the mean of lambdas 
+#' with lowest deviance across outer folds.
+#' @param ... Other arguments passed to [coef.glmnet]
+#' @export
+#'
+coef.nestcv.glmnet <- function(object, s = object$mean_lambda, ...) {
+  glmnet_coefs(object$final_fit, s = s, ...)
+}
+
+
+#' @export
+summary.nestcv.glmnet <- function(object, ...) {
+  object$summary
 }
 
 
