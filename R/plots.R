@@ -109,6 +109,8 @@ plot_lambdas <- function(x,
 #' values are shown by different colours.
 #' 
 #' @param x Object of class 'cva.glmnet'
+#' @param xaxis String specifying what is plotted on the x axis, either log 
+#' lambda or the number of non-zero coefficients.
 #' @param cols colour scheme
 #' @param palette palette name (one of `hcl.pals()`) which is passed to 
 #' [hcl.colors]
@@ -123,26 +125,37 @@ plot_lambdas <- function(x,
 #' @export
 #' 
 plot.cva.glmnet <- function(x,
+                            xaxis = c('lambda', 'nvar'),
                             cols = NULL,
-                            palette = "Dark 3",
-                            showLegend = "topright",
+                            palette = "zissou",
+                            showLegend = "bottomright",
                             ...) {
+  xaxis <- match.arg(xaxis)
   cvms <- lapply(x$fits, function(i) i$cvm)
-  lambdas <- lapply(x$fits, function(i) i$lambda)
   n <- length(cvms)
   if (is.null(cols)) cols <- hcl.colors(n, palette)
   new.args <- list(...)
-  plot.args <- list(y = cvms[[1]], x = log(lambdas[[1]]),
-                    type = 'l',
+  px <- switch(xaxis,
+               lambda = lapply(x$fits, function(i) log(i$lambda)),
+               nvar = lapply(x$fits, function(i) i$nzero))
+  plot.args <- list(y = cvms[[1]], x = px[[1]],
+                    type = switch(xaxis,
+                                  lambda = 'l',
+                                  nvar = 'p'),
                     ylim = range(unlist(cvms)),
-                    xlim = range(log(unlist(lambdas))),
-                    xlab = expression(Log(lambda)),
+                    xlim = range(unlist(px)),
+                    xlab = switch(xaxis,
+                                  lambda = expression(Log(lambda)),
+                                  nvar = "Number of non-zero coefficients"),
                     ylab = x$fits[[1]]$name,
                     col = cols[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
   for (i in 2:n) {
-    lines.args <- list(y = cvms[[i]], x = log(lambdas[[i]]), col = cols[i])
+    lines.args <- list(y = cvms[[i]], x = px[[i]], col = cols[i],
+                       type = switch(xaxis,
+                                     lambda = 'l',
+                                     nvar = 'p'))
     if (length(new.args)) lines.args[names(new.args)] <- new.args
     do.call("lines", lines.args)
   }

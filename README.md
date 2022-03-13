@@ -63,10 +63,13 @@ plot_lambdas(res.rtx)
 The tuning of alpha for each outer fold can be plotted.
 
 ```
-plot(res.rtx$outer_result[[1]]$cvafit, showLegend = "bottomright")
+plot(res.rtx$outer_result[[1]]$cvafit)
 
 # scatter plot
-plot(res.rtx$outer_result[[1]]$cvafit, type = 'p', showLegend = "bottomright")
+plot(res.rtx$outer_result[[1]]$cvafit, type = 'p')
+
+# number of non-zero coefficients
+plot(res.rtx$outer_result[[1]]$cvafit, xaxis = 'nvar')
 ```
 
 ROC curves from left-out folds from both outer and inner CV can be plotted.

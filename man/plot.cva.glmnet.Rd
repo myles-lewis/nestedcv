@@ -4,10 +4,20 @@
 \alias{plot.cva.glmnet}
 \title{Plot lambda across range of alphas}
 \usage{
-\method{plot}{cva.glmnet}(x, cols = NULL, palette = "Dark 3", showLegend = "topright", ...)
+\method{plot}{cva.glmnet}(
+  x,
+  xaxis = c("lambda", "nvar"),
+  cols = NULL,
+  palette = "zissou",
+  showLegend = "topright",
+  ...
+)
 }
 \arguments{
 \item{x}{Object of class 'cva.glmnet'}
+
+\item{xaxis}{String specifying what is plotted on the x axis, either log
+lambda or the number of non-zero coefficients.}
 
 \item{cols}{colour scheme}
 
