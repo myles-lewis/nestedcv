@@ -1,4 +1,29 @@
-# nestedcv
+---
+title: "nestedcv"
+author: "Myles Lewis"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 3
+    number_sections: true
+fig_width: 6
+vignette: >
+  %\VignetteIndexEntry{nestedcv}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(nestedcv)
+```
+
+# Introduction
 
 Nested cross-validation (CV) for the glmnet and caret packages. With glmnet this
 includes cross-validation of elastic net alpha parameter. A number of filter
@@ -12,16 +37,19 @@ in caret.
 
 Install from Github (requires API token).
 
-```
+```{r eval = FALSE}
 devtools::install_github("myles-lewis/nestedcv", auth_token = "API token...")
 library(nestedcv)
 ```
 
-# Example
+# Nested CV with glmnet
 
 Using R4RA data to predict CDAI 50% response to rituximab.
 
-```
+```{r eval = FALSE}
+# Data for this example can be downloaded from:
+# DOI: 10.6084/m9.figshare.19336679
+
 # set up data
 load("/../R4RA_270821.RData")
 
@@ -53,7 +81,7 @@ can be used to show the coefficients of the final fitted model.
 Filters can be used by setting the `filterFUN` argument. Options for the filter 
 function are passed as a list through `filter_options`.
 
-```
+```{r eval = FALSE}
 # t-test filter
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
                          filter_options = list(nfilter = 300, p_cutoff = NULL),
@@ -65,14 +93,14 @@ summary(res.rtx)
 Output from the nested CV with glmnet can be plotted to show how deviance is 
 affected by alpha and lambda.
 
-```
+```{r eval = FALSE}
 plot_alphas(res.rtx)
 plot_lambdas(res.rtx)
 ```
 
 The tuning of alpha for each outer fold can be plotted.
 
-```
+```{r eval = FALSE}
 plot(res.rtx$outer_result[[1]]$cvafit)
 
 # scatter plot
@@ -84,7 +112,7 @@ plot(res.rtx$outer_result[[1]]$cvafit, xaxis = 'nvar')
 
 ROC curves from left-out folds from both outer and inner CV can be plotted.
 
-```
+```{r eval = FALSE}
 # Outer CV ROC
 plot(res.rtx$roc)
 
@@ -97,14 +125,14 @@ pROC::auc(rtx.inroc)
 The overall expression level of each gene selected in the final model can be 
 compared with a boxplot.
 
-```
+```{r eval = FALSE}
 boxplot_model(res.rtx, data.rtx, ylab = "VST")
 ```
 
 Other filters include wilcoxon (Mann-Whitney) test, Pearson or Spearman 
 correlation for regression modelling, random forest and ReliefF filters.
 
-```
+```{r eval = FALSE}
 # random forest filter
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0.5, filterFUN = rf_filter,
                          filter_options = list(nfilter = 300),
@@ -122,7 +150,7 @@ summary(res.rtx)
 
 Leave-one-out cross-validation (LOOCV) can be performed on the outer folds.
 
-```
+```{r eval = FALSE}
 # outer LOOCV
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
                          filter_options = list(nfilter = 300, p_cutoff = NULL),
@@ -132,10 +160,12 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_
 summary(res.rtx)
 ```
 
+# Nested CV with caret
+
 Nested CV can also be performed using the caret package framework. Here we use
 caret for tuning glmnet.
 
-```
+```{r eval = FALSE}
 # nested CV using caret
 tg <- expand.grid(lambda = exp(seq(log(2e-3), log(1e0), length.out = 100)),
                   alpha = seq(0.8, 1, 0.1))
