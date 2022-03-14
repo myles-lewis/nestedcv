@@ -71,9 +71,9 @@ commonly the development of diagnostic or biomarker tests, for which reducing
 the number of predictors is typically a practical necessity.
 
 Several filter functions (t-test, Wilcoxon test, anova, Pearson/Spearman
-correlation, random forest, and ReliefF from the `CORElearn` package) for
-feature selection are provided, and can be embedded within the outer loop of the
-nested CV.
+correlation, random forest variable importance, and ReliefF from the `CORElearn`
+package) for feature selection are provided, and can be embedded within the
+outer loop of the nested CV.
 
 # Installation
 
@@ -86,7 +86,17 @@ library(nestedcv)
 
 # Nested CV with glmnet
 
-Using R4RA data to predict CDAI 50% response to rituximab.
+In the example below, RNA-Sequencing gene expression data from synovial biopsies
+from patients with rheumatoid arthritis in the R4RA randomised clinical trial
+(Humby et al, 2021) is used to predict clinical response to the biologic drug
+rituximab. Treatment response is determined by a clinical measure, namely
+Clinical Disease Activity Index (CDAI) 50% response, which has a binary outcome:
+treatment success or failure (response or non-response). This dataset contains
+gene expression on over 50,000 genes in arthritic synovial tissue from 133
+individuals, who were randomised to two drugs (rituximab and tocilizumab).
+First, we remove genes of low expression using a median cut-off (this still
+leaves >16,000 genes), and we subset the dataset to the rituximab treated
+individuals (n=68).
 
 ```{r eval = FALSE}
 # Data for this example can be downloaded from:
@@ -245,5 +255,11 @@ glmnet_coefs(ncv$final_fit$finalModel, s = ncv$finalTune$lambda)
 
 # References
 
+Humby F, Durez P, Buch MH, et al. Rituximab versus tocilizumab in anti-TNF
+inadequate responder patients with rheumatoid arthritis (R4RA): 16-week outcomes
+of a stratified, biopsy-driven, multicentre, open-label, phase 4 randomised
+controlled trial. Lancet. 2021;397(10271):305-317.
+
 Vabalas A, Gowen E, Poliakoff E, Casson AJ. Machine learning algorithm
 validation with a limited sample size. PloS one. 2019;14(11):e0224365.
+
