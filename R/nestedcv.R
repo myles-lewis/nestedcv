@@ -251,7 +251,7 @@ coef.nestcv.glmnet <- function(object, s = object$final_param["lambda"], ...) {
 #' @export
 print.nestcv.glmnet <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
   cat("Nested cross-validation with glmnet\n")
-  if (exists(x$call$filterFUN)) 
+  if (!is.null(x$call$filterFUN)) 
     cat("Filter: ", x$call$filterFUN, "\n") else cat("No filter\n")
   cat("\nFinal parameters:\n")
   print(x$final_param, digits = digits, print.gap = 2L)

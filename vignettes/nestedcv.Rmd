@@ -7,7 +7,7 @@ output:
     toc_float:
       collapsed: false
     toc_depth: 3
-    number_sections: true
+    number_sections: false
 fig_width: 6
 vignette: >
   %\VignetteIndexEntry{nestedcv}
@@ -64,11 +64,14 @@ give the mean best parameters across all outer folds. A final model is fitted
 across the whole data using these final hyperparameters and can be used for
 prediction with external data.
 
+### Variable selection
+
 While some models such as `glmnet` allow for sparsity and have variable
-selection built-in, many models overfit or become unmanageable without variable
-selection. In addition, in medicine one of the goals of predictive modelling is
-commonly the development of diagnostic or biomarker tests, for which reducing
-the number of predictors is typically a practical necessity.
+selection built-in, many models fail to fit when given massive numbers of
+predictors, or perform poorly due to overfitting without variable selection. In
+addition, in medicine one of the goals of predictive modelling is commonly the
+development of diagnostic or biomarker tests, for which reducing the number of
+predictors is typically a practical necessity.
 
 Several filter functions (t-test, Wilcoxon test, anova, Pearson/Spearman
 correlation, random forest variable importance, and ReliefF from the `CORElearn`
@@ -84,7 +87,9 @@ devtools::install_github("myles-lewis/nestedcv", auth_token = "API token...")
 library(nestedcv)
 ```
 
-# Nested CV with glmnet
+# Examples
+
+### Nested CV with glmnet
 
 In the example below, RNA-Sequencing gene expression data from synovial biopsies
 from patients with rheumatoid arthritis in the R4RA randomised clinical trial
@@ -122,10 +127,32 @@ yrtx <- factor(yrtx)
 data.rtx <- data[metadata$Randomised.medication == "Rituximab", ]
 
 # no filter
-res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0.5,
+res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx,
                          family = "binomial", cores = 8,
                          alphaSet = seq(0.7, 1, 0.05))
 res.rtx
+```
+
+<!-- previous output -->
+```
+## Nested cross-validation with glmnet
+## No filter
+## 
+## Final parameters:
+## lambda   alpha  
+## 0.1511  0.7950  
+## 
+## Final coefficients:
+## (Intercept)  AC016582.3       PCBP3    TMEM170B      EIF4E3     SEC14L6       CEP85        APLF 
+##   0.8898659  -0.2676580  -0.2667770   0.2456329   0.2042326  -0.1992225   0.1076051  -0.1072684 
+##       EARS2        PTK7       EFNA5        MEST      IQANK1    MTATP6P1       GSK3B       STK40 
+##  -0.1036846  -0.0919594  -0.0882686   0.0769173  -0.0708992   0.0545392   0.0469272   0.0316988 
+##     SUV39H2  AC005670.2      ZNF773        XIST       STAU2      DIRAS3 
+##   0.0297370   0.0184851  -0.0170861  -0.0100934   0.0016182  -0.0009975 
+## 
+## Result:
+##               AUC           Accuracy  Balanced accuracy  
+##            0.7648             0.7059             0.6773
 ```
 
 Use `summary()` to see full information from the nested model fitting. `coef()`
@@ -135,7 +162,7 @@ function are passed as a list through `filter_options`.
 
 ```{r eval = FALSE}
 # t-test filter
-res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
+res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, filterFUN = ttest_filter,
                          filter_options = list(nfilter = 300, p_cutoff = NULL),
                          family = "binomial", cores = 8,
                          alphaSet = seq(0.7, 1, 0.05))
@@ -150,15 +177,26 @@ plot_alphas(res.rtx)
 plot_lambdas(res.rtx)
 ```
 
+```{r, out.width='100%', fig.align="center", echo=FALSE}
+knitr::include_graphics("plot_alpha_lam.png")
+```
+
 The tuning of alpha for each outer fold can be plotted.
 
 ```{r eval = FALSE}
+# Fold 1
 plot(res.rtx$outer_result[[1]]$cvafit)
 
-# scatter plot
+# Scatter plot
 plot(res.rtx$outer_result[[1]]$cvafit, type = 'p')
+```
 
-# number of non-zero coefficients
+```{r, out.width='70%', fig.align="center", echo=FALSE}
+knitr::include_graphics("plot_cva.png")
+```
+
+```{r eval = FALSE}
+# Number of non-zero coefficients
 plot(res.rtx$outer_result[[1]]$cvafit, xaxis = 'nvar')
 ```
 
@@ -166,12 +204,16 @@ ROC curves from left-out folds from both outer and inner CV can be plotted.
 
 ```{r eval = FALSE}
 # Outer CV ROC
-plot(res.rtx$roc)
+plot(res.rtx$roc, main = "Outer fold ROC", font.main = 1, col = 'blue')
+legend("bottomright", legend = paste0("AUC = ", signif(pROC::auc(res.rtx$roc), 3)), bty = 'n')
 
 # Inner CV ROC
-rtx.inroc <- innercv_roc(res.rtx)
-plot(rtx.inroc)
-pROC::auc(rtx.inroc)
+plot(rtx.inroc, main = "Inner fold ROC", font.main = 1, col = 'red')
+legend("bottomright", legend = paste0("AUC = ", signif(pROC::auc(rtx.inroc), 3)), bty = 'n')
+```
+
+```{r, out.width='100%', fig.align="center", echo=FALSE}
+knitr::include_graphics("roc.png")
 ```
 
 The overall expression level of each gene selected in the final model can be 
@@ -181,11 +223,15 @@ compared with a boxplot.
 boxplot_model(res.rtx, data.rtx, ylab = "VST")
 ```
 
-Other filters include wilcoxon (Mann-Whitney) test, Pearson or Spearman 
+```{r, out.width='70%', fig.align="center", echo=FALSE}
+knitr::include_graphics("boxplot.png")
+```
+
+Other filters include Wilcoxon (Mann-Whitney) test, Pearson or Spearman 
 correlation for regression modelling, random forest and ReliefF filters.
 
 ```{r eval = FALSE}
-# random forest filter
+# Random forest filter
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0.5, filterFUN = rf_filter,
                          filter_options = list(nfilter = 300),
                          family = "binomial", cores = 8, 
@@ -203,7 +249,7 @@ summary(res.rtx)
 Leave-one-out cross-validation (LOOCV) can be performed on the outer folds.
 
 ```{r eval = FALSE}
-# outer LOOCV
+# Outer LOOCV
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
                          filter_options = list(nfilter = 300, p_cutoff = NULL),
                          outer_method = "loocv",
@@ -212,7 +258,7 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_
 summary(res.rtx)
 ```
 
-# Nested CV with caret
+### Nested CV with caret
 
 Nested CV can also be performed using the caret package framework. This enables
 access to the large library of machine learning models available within caret.
