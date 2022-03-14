@@ -186,6 +186,14 @@ summary(res.rtx)
 Nested CV can also be performed using the caret package framework. This enables
 access to the large library of machine learning models available within caret.
 
+When fitting classification models, the usual default metric for tuning model
+hyperparameters in `caret` is Accuracy. However, with small datasets, accuracy
+is disproportionately affected by changes in a single individual's prediction
+outcome from incorrect to correctly classified or vice versa. For this reason,
+we suggest using logLoss with smaller datasets as it provides more stable
+measures of model tuning behaviour. In `nestedcv`, when fitting classification
+models with `caret`, the default metric is changed to use logLoss.
+
 Here we use caret for tuning the alpha and lambda parameters of glmnet.
 
 ```{r eval = FALSE}
