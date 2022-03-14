@@ -40,16 +40,21 @@ data.rtx <- data[metadata$Randomised.medication == "Rituximab", ]
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0.5,
                          family = "binomial", cores = 8,
                          alphaSet = seq(0.7, 1, 0.05))
-summary(res.rtx)
-coef(res.rtx)
+res.rtx
+```
 
+Use `summary()` to see full information from the nested model fitting. `coef()`
+can be used to show the coefficients of the final fitted model.
+Filters can be used by setting the `filterFUN` argument. Options for the filter 
+function are passed as a list through `filter_options`.
+
+```
 # t-test filter
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
                          filter_options = list(nfilter = 300, p_cutoff = NULL),
                          family = "binomial", cores = 8,
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
-coef(res.rtx)
 ```
 
 Output from the nested CV with glmnet can be plotted to show how deviance is 
@@ -101,7 +106,6 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0.5, filterFUN = rf_f
                          family = "binomial", cores = 8, 
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
-coef(res.rtx)
 
 # ReliefF algorithm filter
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = relieff_filter,
@@ -109,7 +113,6 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = relief
                          family = "binomial", cores = 8, 
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
-coef(res.rtx)
 ```
 
 Leave-one-out cross-validation (LOOCV) can be performed on the outer folds.
@@ -122,5 +125,4 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_
                          family = "binomial", cores = 8,
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
-coef(res.rtx)
 ```
