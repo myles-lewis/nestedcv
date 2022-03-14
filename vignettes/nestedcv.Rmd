@@ -33,7 +33,7 @@ splitting data into training and testing cohorts, typically 2/3 and 1/3
 respectively. Medical datasets may be too small for this, and so determination
 of accuracy in the left-out test set suffers because the test set is small.
 Nested cross-validation (CV) provides a way to get round this, by maximising use
-of the whole dataset for testing overall accuracy, but maintaining the split
+of the whole dataset for testing overall accuracy, while maintaining the split
 between training and testing.
 
 In addition typical biomedical datasets often have 10,000s of possible
@@ -48,6 +48,12 @@ the `caret` package, which is a general framework for fitting a large number of
 machine learning models. In addition, `nestedcv` adds functionality to enable
 cross-validation of the elastic net alpha parameter when fitting `glmnet`
 models.
+
+While some models such as `glmnet` allow for sparsity and have variable
+selection built-in, many models overfit or become unmanageable without variable
+selection. In addition, in medicine one of the goals of predictive modelling is
+commonly the development of diagnostic or biomarker tests, for which reducing
+the number of predictors is typically a practical necessity.
 
 Several filter functions (t-test, wilcoxon test, anova, Pearson/Spearman
 correlation, random forest, and ReliefF from the `CORElearn` package) for
