@@ -1,7 +1,11 @@
 # nestedcv
 
-Nested cross-validation (CV) for the 'glmnet' package, including cross-validation 
-of elastic net alpha parameter and filter functions for feature selection.
+Nested cross-validation (CV) for the glmnet and caret packages. With glmnet this 
+includes cross-validation of elastic net alpha parameter. A number of filter 
+functions (t-test, ANOVA, Pearson/Spearman correlation, random forest, ReliefF) 
+for feature selection are provided and can be embedded within the outer loop of 
+the nested CV. Nested CV can be also be performed with the caret package giving 
+access to the large number of prediction methods available in caret.
 
 # Installation
 
