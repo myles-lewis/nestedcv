@@ -126,3 +126,32 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
 ```
+
+Nested CV can also be performed using the caret package framework. Here we use
+caret for tuning glmnet.
+
+```
+# nested CV using caret
+tg <- expand.grid(lambda = exp(seq(log(2e-3), log(1e0), length.out = 100)),
+                  alpha = seq(0.8, 1, 0.1))
+ncv <- nestcv.train(y = yrtx, x = data.rtx,
+               method = "glmnet",
+               savePredictions = "final",
+               filterFUN = ttest_filter, filter_options = list(nfilter = 300),
+               tuneGrid = tg, cores = 8)
+ncv$summary
+
+# Plot ROC on outer folds
+plot(ncv$roc)
+
+# Plot ROC on inner LO folds
+inroc <- innercv_roc(ncv)
+plot(inroc)
+auc(inroc)
+
+# Show example tuning plot for outer fold 1
+plot(ncv$outer_result[[1]]$fit, xTrans = log)
+
+# Extract coefficients of final fitted model
+glmnet_coefs(ncv$final_fit$finalModel, s = ncv$finalTune$lambda)
+```
