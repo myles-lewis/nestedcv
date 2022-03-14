@@ -252,11 +252,11 @@ print.nestcv.glmnet <- function(x, digits = max(3L, getOption("digits") - 3L), .
   if (exists(x$call$filterFUN)) 
     cat("Filter: ", x$call$filterFUN, "\n") else cat("No filter\n")
   cat("\nFinal parameters:\n")
-  print(x$final_param, digits = digits)
+  print(x$final_param, digits = digits, print.gap = 2L)
   cat("\nFinal coefficients:\n")
   print(coef(x), digits = digits)
   cat("\nResult:\n")
-  print(x$summary, digits = digits)
+  print(x$summary, digits = digits, print.gap = 2L)
 }
 
 
@@ -276,11 +276,11 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
                         row.names = paste("Fold", 1:length(alpha)))
   print(foldres, digits = digits)
   cat("\nFinal parameters:\n")
-  print(object$final_param, digits = digits)
+  print(object$final_param, digits = digits, print.gap = 2L)
   cat("\nFinal coefficients:\n")
   print(coef(object), digits = digits)
   cat("\nResult:\n")
-  print(object$summary, digits = digits)
+  print(object$summary, digits = digits, print.gap = 2L)
   out <- list(folds = foldres, final_param = object$final_param,
               coef = coef(object), result = object$summary)
   invisible(out)
