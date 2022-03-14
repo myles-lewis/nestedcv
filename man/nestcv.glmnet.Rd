@@ -75,3 +75,6 @@ for classification. ROC AUC for binary classification. RMSE for regression.}
 Nested cross-validation (CV) with glmnet including tuning of elastic net
 alpha parameter and embedding of a filter function within the nested CV.
 }
+\author{
+Myles Lewis
+}

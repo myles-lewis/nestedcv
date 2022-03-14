@@ -33,3 +33,6 @@ Performs k-fold cross-validation for glmnet, including alpha mixing parameter.
 \seealso{
 \link{cv.glmnet}, \link{glmnet}
 }
+\author{
+Myles Lewis
+}

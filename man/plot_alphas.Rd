@@ -22,3 +22,6 @@ Plot of cross-validated glmnet alpha parameter against deviance.
 \seealso{
 \link{nestcv.glmnet}
 }
+\author{
+Myles Lewis
+}

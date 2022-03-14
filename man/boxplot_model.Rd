@@ -28,3 +28,6 @@ with excessively low or high values.
 \seealso{
 \link{nestcv.glmnet}
 }
+\author{
+Myles Lewis
+}

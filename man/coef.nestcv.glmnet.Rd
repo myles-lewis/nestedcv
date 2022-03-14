@@ -4,13 +4,13 @@
 \alias{coef.nestcv.glmnet}
 \title{Extract coefficients from nestcv.glmnet object}
 \usage{
-\method{coef}{nestcv.glmnet}(object, s = object$mean_lambda, ...)
+\method{coef}{nestcv.glmnet}(object, s = object$final_param["lambda"], ...)
 }
 \arguments{
 \item{object}{Object of class \code{"nestcv.glmnet"}}
 
-\item{s}{Value of penalty parameter lambda. Default is the mean of lambdas
-with lowest deviance across outer folds.}
+\item{s}{Value of penalty parameter lambda. Default is the mean of lambda
+values selected across each outer fold.}
 
 \item{...}{Other arguments passed to \link{coef.glmnet}}
 }

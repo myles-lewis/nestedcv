@@ -36,3 +36,6 @@ outer CV fold.
 \seealso{
 \link{nestcv.glmnet}
 }
+\author{
+Myles Lewis
+}

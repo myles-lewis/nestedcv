@@ -7,9 +7,10 @@
 \method{plot}{cva.glmnet}(
   x,
   xaxis = c("lambda", "nvar"),
+  pchMin = NULL,
   cols = NULL,
   palette = "zissou",
-  showLegend = "topright",
+  showLegend = "bottomright",
   ...
 )
 }
@@ -18,6 +19,9 @@
 
 \item{xaxis}{String specifying what is plotted on the x axis, either log
 lambda or the number of non-zero coefficients.}
+
+\item{pchMin}{plotting 'character' for the minimum point of each curve. Not
+shown if set to \code{NULL}. See \link{points}}
 
 \item{cols}{colour scheme}
 
@@ -41,4 +45,7 @@ values are shown by different colours.
 }
 \seealso{
 \link{nestcv.glmnet}
+}
+\author{
+Myles Lewis
 }

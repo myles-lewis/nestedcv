@@ -133,6 +133,7 @@ nestcv.glmnet <- function(y, x,
   # fit final glmnet
   lam <- mean(unlist(lapply(outer_res, '[[', 'lambda')))
   alph <- mean(unlist(lapply(outer_res, '[[', 'alpha')))
+  final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
   filtx <- if (is.null(filterFUN)) x else {
     args <- list(y = y, x = x)
     args <- append(args, filter_options)
@@ -144,9 +145,9 @@ nestcv.glmnet <- function(y, x,
               output = output,
               outer_result = outer_res,
               outer_method = outer_method,
+              n_inner_folds = n_inner_folds,
               outer_folds = outer_folds,
-              mean_lambda = lam,
-              mean_alpha = alph,
+              final_param = final_param,
               final_fit = fit,
               roc = glmnet.roc,
               summary = summary)
@@ -235,19 +236,54 @@ glmnet_coefs <- function(fit, s, ...) {
 #' Extracts coefficients from the final fit of a `"nestcv.glmnet"` object.
 #' 
 #' @param object Object of class `"nestcv.glmnet"`
-#' @param s Value of penalty parameter lambda. Default is the mean of lambdas 
-#' with lowest deviance across outer folds.
+#' @param s Value of penalty parameter lambda. Default is the mean of lambda 
+#' values selected across each outer fold.
 #' @param ... Other arguments passed to [coef.glmnet]
 #' @export
 #'
-coef.nestcv.glmnet <- function(object, s = object$mean_lambda, ...) {
+coef.nestcv.glmnet <- function(object, s = object$final_param["lambda"], ...) {
   glmnet_coefs(object$final_fit, s = s, ...)
 }
 
 
 #' @export
-summary.nestcv.glmnet <- function(object, ...) {
-  object$summary
+print.nestcv.glmnet <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
+  cat("Nested cross-validation with glmnet\n")
+  if (exists(x$call$filterFUN)) 
+    cat("Filter: ", x$call$filterFUN, "\n") else cat("No filter\n")
+  cat("\nFinal parameters:\n")
+  print(x$final_param, digits = digits)
+  cat("\nFinal coefficients:\n")
+  print(coef(x), digits = digits)
+  cat("\nResult:\n")
+  print(x$summary, digits = digits)
+}
+
+
+#' @export
+summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") - 3L), ...) {
+  cat("Nested cross-validation with glmnet\n")
+  if (exists(object$call$filterFUN)) 
+    cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
+  cat("Outer loop: ", switch(object$outer_method,
+                         cv = paste0(length(object$outer_folds), "-fold CV"),
+                         loocv = "leave-one-out CV"))
+  cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n\n"))
+  alpha <- unlist(lapply(object$outer_result, '[[', 'alpha'))
+  lambda <- unlist(lapply(object$outer_result, '[[', 'lambda'))
+  nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
+  foldres <- data.frame(alpha = alpha, lambda = lambda, n.filter = nfilter,
+                        row.names = paste("Fold", 1:length(alpha)))
+  print(foldres, digits = digits)
+  cat("\nFinal parameters:\n")
+  print(object$final_param, digits = digits)
+  cat("\nFinal coefficients:\n")
+  print(coef(object), digits = digits)
+  cat("\nResult:\n")
+  print(object$summary, digits = digits)
+  out <- list(folds = foldres, final_param = object$final_param,
+              coef = coef(object), result = object$summary)
+  invisible(out)
 }
 
 
