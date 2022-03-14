@@ -7,7 +7,9 @@
 \method{plot}{cva.glmnet}(
   x,
   xaxis = c("lambda", "nvar"),
-  pchMin = NULL,
+  errorBar = FALSE,
+  errorWidth = 0.01,
+  min.pch = NULL,
   cols = NULL,
   palette = "zissou",
   showLegend = "bottomright",
@@ -20,12 +22,16 @@
 \item{xaxis}{String specifying what is plotted on the x axis, either log
 lambda or the number of non-zero coefficients.}
 
-\item{pchMin}{plotting 'character' for the minimum point of each curve. Not
+\item{errorBar}{Logical whether to show error bars for the standard deviation.}
+
+\item{errorWidth}{Width of error bars.}
+
+\item{min.pch}{Plotting 'character' for the minimum point of each curve. Not
 shown if set to \code{NULL}. See \link{points}}
 
-\item{cols}{colour scheme}
+\item{cols}{Colour scheme}
 
-\item{palette}{palette name (one of \code{hcl.pals()}) which is passed to
+\item{palette}{Palette name (one of \code{hcl.pals()}) which is passed to
 \link{hcl.colors}}
 
 \item{showLegend}{Either a keyword to position the legend or \code{NULL} to hide

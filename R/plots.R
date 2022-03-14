@@ -113,10 +113,12 @@ plot_lambdas <- function(x,
 #' @param x Object of class 'cva.glmnet'
 #' @param xaxis String specifying what is plotted on the x axis, either log 
 #' lambda or the number of non-zero coefficients.
-#' @param pchMin plotting 'character' for the minimum point of each curve. Not 
+#' @param errorBar Logical whether to show error bars for the standard deviation.
+#' @param errorWidth Width of error bars.
+#' @param min.pch Plotting 'character' for the minimum point of each curve. Not 
 #' shown if set to `NULL`. See [points]
-#' @param cols colour scheme
-#' @param palette palette name (one of `hcl.pals()`) which is passed to 
+#' @param cols Colour scheme
+#' @param palette Palette name (one of `hcl.pals()`) which is passed to 
 #' [hcl.colors]
 #' @param showLegend Either a keyword to position the legend or `NULL` to hide 
 #' the legend.
@@ -131,7 +133,9 @@ plot_lambdas <- function(x,
 #' 
 plot.cva.glmnet <- function(x,
                             xaxis = c('lambda', 'nvar'),
-                            pchMin = NULL,
+                            errorBar = FALSE,
+                            errorWidth = 0.01,
+                            min.pch = NULL,
                             cols = NULL,
                             palette = "zissou",
                             showLegend = "bottomright",
@@ -144,32 +148,55 @@ plot.cva.glmnet <- function(x,
   px <- switch(xaxis,
                lambda = lapply(x$fits, function(i) log(i$lambda)),
                nvar = lapply(x$fits, function(i) i$nzero))
+  ylim <- range(unlist(cvms))
+  if (errorBar) {
+    cvlo <- lapply(x$fits, function(i) i$cvlo)
+    cvup <- lapply(x$fits, function(i) i$cvup)
+    ylim <- range(c(unlist(cvlo), unlist(cvup)))
+  }
+  type <- switch(xaxis,
+                lambda = 'l',
+                nvar = 'p')
+  cex <- switch(xaxis,
+               lambda = 0.5,
+               nvar = 0.8)
   plot.args <- list(y = cvms[[1]], x = px[[1]],
-                    type = switch(xaxis,
-                                  lambda = 'l',
-                                  nvar = 'p'),
-                    ylim = range(unlist(cvms)),
+                    type = type,
+                    ylim = ylim,
                     xlim = range(unlist(px)),
                     xlab = switch(xaxis,
                                   lambda = expression(Log(lambda)),
                                   nvar = "Number of non-zero coefficients"),
                     ylab = x$fits[[1]]$name,
+                    cex = cex,
                     col = cols[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
+  if (errorBar) {
+    ind <- seq(1, length(cvms[[1]]), 10)
+    for (i in 1:n) {
+      arrows(px[[i]][ind], cvlo[[i]][ind], px[[i]][ind], cvup[[i]][ind],
+             length = errorWidth, angle = 90, code = 3, col = cols[i])
+    }
+  }
   for (i in 2:n) {
     lines.args <- list(y = cvms[[i]], x = px[[i]], col = cols[i],
-                       type = switch(xaxis,
-                                     lambda = 'l',
-                                     nvar = 'p'))
+                       type = type,
+                       cex = cex)
     if (length(new.args)) lines.args[names(new.args)] <- new.args
     do.call("lines", lines.args)
   }
+  if (errorBar) {
+    for (i in 1:n) {
+      points(px[[i]][ind], cvms[[i]][ind], pch = 19, col = cols[i],
+             cex = lines.args$cex)
+    }
+  }
   # show minima
-  if (!is.null(pchMin)) {
+  if (!is.null(min.pch)) {
     wy <- unlist(lapply(cvms, which.min))
     for (i in 1:n) {
-      points(x = px[[i]][wy[i]], y = cvms[[i]][wy[i]], col = cols[i], pch = pchMin)
+      points(x = px[[i]][wy[i]], y = cvms[[i]][wy[i]], col = cols[i], pch = min.pch)
     }
   }
   if (!is.null(showLegend)) {
