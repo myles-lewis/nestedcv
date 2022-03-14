@@ -162,8 +162,10 @@ summary(res.rtx)
 
 # Nested CV with caret
 
-Nested CV can also be performed using the caret package framework. Here we use
-caret for tuning glmnet.
+Nested CV can also be performed using the caret package framework. This enables
+access to the large library of machine learning models available within caret.
+
+Here we use caret for tuning the alpha and lambda parameters of glmnet.
 
 ```{r eval = FALSE}
 # nested CV using caret
