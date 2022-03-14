@@ -86,7 +86,7 @@ plot_lambdas <- function(x,
     if (length(new.args)) lines.args[names(new.args)] <- new.args
     do.call("lines", lines.args)
   }
-  abline(v = log(x$mean_lambda), lty = 2, col = 'grey')
+  abline(v = log(x$final_param["lambda"]), lty = 2, col = 'grey')
   if (!is.null(showLegend)) {
     if (plot.args$type == 'p') {
       legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
@@ -209,7 +209,7 @@ plot.cva.glmnet <- function(x,
 #' 
 boxplot_model <- function(fit, x,
                           cols = NULL, palette = "Dark 3", ...) {
-  m <- glmnet_coefs(fit$final_fit, fit$mean_lambda)
+  m <- coef(fit)
   m <- names(m[-1])
   df <- data.frame(vars = rep(m, each = nrow(x)), 
                    y = unlist(lapply(m, function(i) x[, i])))
