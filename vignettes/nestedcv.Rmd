@@ -300,7 +300,7 @@ plot(ncv$outer_result[[1]]$fit, xTrans = log)
 glmnet_coefs(ncv$final_fit$finalModel, s = ncv$finalTune$lambda)
 ```
 
-### Making predictions on final fitted models
+### Making predictions
 
 For all of the nestedcv model training functions described above, predictions on
 new data can be made by referencing the final fitted object which is fitted to
