@@ -131,10 +131,18 @@ nestcv.train <- function(y, x,
   out <- list(output = output,
               outer_result = outer_res,
               final_fit = final_fit,
+              final_vars = colnames(filtx),
               roc = caret.roc,
               bestTunes = bestTunes,
               finalTune = finalTune,
               summary = summary)
   class(out) <- "nestcv.train"
   out
+}
+
+
+#' @method predict nestcv.train
+#' @export
+predict.nestcv.train <- function(object, newdata, ...) {
+  predict(object$final_fit, newdata = newdata[, object$final_vars], ...)
 }
