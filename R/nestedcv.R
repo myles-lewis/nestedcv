@@ -289,6 +289,18 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
 }
 
 
+#' @method predict nestcv.glmnet
+#' @export
+predict.nestcv.glmnet <- function(object, newdata,
+                                  s = object$final_param["lambda"],
+                                  ...) {
+  final_vars <- rownames(coef(object$final_fit))[-1]
+  newx <- newdata[, final_vars]
+  predict(object$final_fit, newx = newx, s = unname(s), ...)
+}
+
+
+
 #' Outer cross-validation with randomForest
 #' 
 #' Outer cross-validation (CV) with randomForest. Note, no tuning of 

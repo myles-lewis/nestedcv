@@ -300,12 +300,31 @@ plot(ncv$outer_result[[1]]$fit, xTrans = log)
 glmnet_coefs(ncv$final_fit$finalModel, s = ncv$finalTune$lambda)
 ```
 
+### Making predictions on final fitted models
+
+For all of the nestedcv model training functions described above, predictions on
+new data can be made by referencing the final fitted object which is fitted to
+the whole dataset.
+
+```{r eval = FALSE}
+# for nestcv.glmnet object
+preds <- predict(res.rtx, newdata = data.rtx, type = 'response')
+
+# for nestcv.train object
+preds <- predict(ncv, newdata = data.rtx)
+```
+
 # References
 
 Humby F, Durez P, Buch MH, et al. Rituximab versus tocilizumab in anti-TNF
 inadequate responder patients with rheumatoid arthritis (R4RA): 16-week outcomes
 of a stratified, biopsy-driven, multicentre, open-label, phase 4 randomised
 controlled trial. Lancet. 2021;397(10271):305-317.
+
+Rivellese F, Surace AEA, Goldmann K, et al, Lewis MJ, Pitzalis C and the R4RA
+collaborative group. Rituximab versus tocilizumab in rheumatoid arthritis:
+Synovial biopsy-based biomarker analysis of the phase 4 R4RA randomized trial.
+Nature medicine. 2022; accepted.
 
 Vabalas A, Gowen E, Poliakoff E, Casson AJ. Machine learning algorithm
 validation with a limited sample size. PloS one. 2019;14(11):e0224365.
