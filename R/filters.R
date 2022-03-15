@@ -274,6 +274,7 @@ rf_filter <- function(y, x, nfilter = NULL,
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
 #' `type` is `"full"` a named vector of variable importance is returned.
+#' @seealso [CORElearn::attrEval]
 #' @importFrom CORElearn attrEval
 #' @export
 #'
@@ -292,6 +293,7 @@ relieff_filter <- function(y, x, nfilter = NULL,
   if (type == "index") out <- as.integer(out)
   out
 }
+
 
 #' Combo filter
 #' 
@@ -325,4 +327,54 @@ combo_filter <- function(y, x,
   n <- round(nfilter / 2)
   unique(c(uni_set[1:min(n, length(uni_set))],
            relf_set[1:min(n, length(relf_set))]))
+}
+
+
+#' glmnet filter
+#'
+#' Filter using properties of elastic net regression using glmnet to calculate
+#' variable importance.
+#'
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param nfilter Number of predictors to return
+#' @param method String indicating method of determining variable importance.
+#'   "mean" (the default) uses the mean absolute coefficients across the range
+#'   of lambdas; "nonzero" counts the number of times variables are retained in
+#'   the model across all values of lambda.
+#' @param type Type of vector returned. Default "index" returns indices, "names"
+#'   returns predictor names, "full" returns full output.
+#' @param ... Other arguments passed to [glmnet]
+#' @details The glmnet elastic net mixing parameter alpha can be varied to
+#'   include a larger number of predictors. Default alpha = 1 is pure LASSO,
+#'   resulting in greatest sparsity, while alpha = 0 is pure ridge regression,
+#'   retaining all predictors in the regression model.
+#' @seealso [glmnet]
+#' @importFrom glmnet glmnet
+#' @export
+#' 
+glmnet_filter <- function(y,
+                          x,
+                          nfilter = NULL,
+                          method = c("mean", "nonzero"),
+                          type = c("index", "names", "full"),
+                          ...) {
+  type <- match.arg(type)
+  method <- match.arg(method)
+  fit <- glmnet(x, y, ...)
+  cf <- as.matrix(coef(fit))
+  if (method == 1) {
+    cf <- abs(cf)
+    out <- rowMeans(cf)  # mean abs coefs
+  } else {
+    cf <- cf != 0
+    out <- rowSums(cf)  # number of nonzero coefs
+  }
+  out <- out[-1]  # remove intercept
+  if (type == "full") return(out)
+  if (type == "index") names(out) <- 1:ncol(x)
+  out <- out[out != 0]
+  out <- sort(out, decreasing = TRUE)
+  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
+  return(names(out))
 }

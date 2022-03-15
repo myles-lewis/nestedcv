@@ -184,23 +184,24 @@ knitr::include_graphics("plot_alpha_lam.png")
 The tuning of alpha for each outer fold can be plotted.
 
 ```{r eval = FALSE}
-# Fold 1
+# Fold 1 line plot
 plot(res.rtx$outer_result[[1]]$cvafit)
 
 # Scatter plot
 plot(res.rtx$outer_result[[1]]$cvafit, type = 'p')
-```
 
-```{r, out.width='70%', fig.align="center", echo=FALSE}
-knitr::include_graphics("plot_cva.png")
-```
-
-```{r eval = FALSE}
 # Number of non-zero coefficients
 plot(res.rtx$outer_result[[1]]$cvafit, xaxis = 'nvar')
 ```
 
-ROC curves from left-out folds from both outer and inner CV can be plotted.
+```{r, out.width='100%', fig.align="center", echo=FALSE}
+knitr::include_graphics("plot_cva.png")
+```
+
+ROC curves from left-out folds from both outer and inner CV can be plotted. Note
+that the AUC based on the left-out outer folds is the unbiased estimate of
+accuracy, while the left-out inner folds demonstrate bias due to the
+optimisation of the model's hyperparameters on the inner fold data.
 
 ```{r eval = FALSE}
 # Outer CV ROC
