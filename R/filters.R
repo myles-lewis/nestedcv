@@ -376,5 +376,8 @@ glmnet_filter <- function(y,
   out <- out[out != 0]
   out <- sort(out, decreasing = TRUE)
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
-  return(names(out))
+  out <- names(out)
+  if (length(out) == 0) stop("No predictors selected")
+  if (type == "index") out <- as.integer(out)
+  out
 }
