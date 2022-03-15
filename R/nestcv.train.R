@@ -144,5 +144,7 @@ nestcv.train <- function(y, x,
 #' @method predict nestcv.train
 #' @export
 predict.nestcv.train <- function(object, newdata, ...) {
+  if (any(!object$final_vars %in% colnames(newdata))) 
+    stop("newdata is missing some predictors", call. = FALSE)
   predict(object$final_fit, newdata = newdata[, object$final_vars], ...)
 }
