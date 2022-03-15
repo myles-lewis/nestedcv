@@ -363,7 +363,7 @@ glmnet_filter <- function(y,
   method <- match.arg(method)
   fit <- glmnet(x, y, ...)
   cf <- as.matrix(coef(fit))
-  if (method == 1) {
+  if (method == "mean") {
     cf <- abs(cf)
     out <- rowMeans(cf)  # mean abs coefs
   } else {
