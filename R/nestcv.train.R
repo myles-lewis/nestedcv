@@ -55,12 +55,18 @@ nestcv.train <- function(y, x,
                          ...) {
   if (is.null(trControl)) {
     trControl <- if (is.factor(y)) {
-      trainControl(method = "repeatedcv", 
-                   number = 10, repeats = 1,
+      trainControl(method = "cv", 
+                   number = 10,
                    classProbs = TRUE,
                    savePredictions = savePredictions,
                    summaryFunction = mnLogLoss)
-    } else trainControl()
+    } else trainControl(method = "cv", 
+                        number = 10,
+                        savePredictions = savePredictions)
+  }
+  # switch off inner CV if tuneGrid is single row
+  if (!is.null(tuneGrid)) {
+    if (nrow(tuneGrid == 1)) trControl <- trainControl(method = "none", classProbs = TRUE)
   }
   outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
   outer_res <- mclapply(1:n_outer_folds, function(i) {

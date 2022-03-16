@@ -261,18 +261,11 @@ summary(res.rtx)
 
 ### Nested CV with caret
 
-Nested CV can also be performed using the caret package framework. This enables
-access to the large library of machine learning models available within caret.
+Nested CV can also be performed using the `caret` package framework written by
+Max Kuhn (https://topepo.github.io/caret/index.html). This enables access to the
+large library of machine learning models available within caret.
 
-When fitting classification models, the usual default metric for tuning model
-hyperparameters in `caret` is Accuracy. However, with small datasets, accuracy
-is disproportionately affected by changes in a single individual's prediction
-outcome from incorrect to correctly classified or vice versa. For this reason,
-we suggest using logLoss with smaller datasets as it provides more stable
-measures of model tuning behaviour. In `nestedcv`, when fitting classification
-models with `caret`, the default metric is changed to use logLoss.
-
-Here we use caret for tuning the alpha and lambda parameters of glmnet.
+Here we use `caret` for tuning the alpha and lambda parameters of `glmnet`.
 
 ```{r eval = FALSE}
 # nested CV using caret
@@ -291,13 +284,40 @@ plot(ncv$roc)
 # Plot ROC on inner LO folds
 inroc <- innercv_roc(ncv)
 plot(inroc)
-auc(inroc)
-
-# Show example tuning plot for outer fold 1
-plot(ncv$outer_result[[1]]$fit, xTrans = log)
+pROC::auc(inroc)
 
 # Extract coefficients of final fitted model
 glmnet_coefs(ncv$final_fit$finalModel, s = ncv$finalTune$lambda)
+```
+
+### Notes on caret
+
+It is important to realise that the `train()` function in `caret` sets a
+parameter known as `tuneLength` to 3 by default, so the default tuning grid is
+minimal. `tuneLength` can easily be increased to give a tuning grid of greater
+granularity. Tuneable parameters for individual models can be inspected using
+`modelLookup()`, while `getModelInfo()` gives further information.
+
+When fitting classification models, the usual default metric for tuning model
+hyperparameters in `caret` is Accuracy. However, with small datasets, accuracy
+is disproportionately affected by changes in a single individual's prediction
+outcome from incorrect to correctly classified or vice versa. For this reason,
+we suggest using logLoss with smaller datasets as it provides more stable
+measures of model tuning behaviour. In `nestedcv`, when fitting classification
+models with `caret`, the default metric is changed to use logLoss.
+
+We recommend that the results of tuning are plotted to understand whether
+parameters have a systematic effect on model accuracy. With small datasets
+tuning may pick parameters fairly randomly which may worsen noise surrounding
+performance than if they were fixed.
+
+```{r eval = FALSE}
+# Example tuning plot for outer fold 1
+plot(ncv$outer_result[[1]]$fit, xTrans = log)
+
+# ggplot2 version
+ggplot(ncv$outer_result[[1]]$fit) +
+  scale_x_log10() 
 ```
 
 ### Making predictions
