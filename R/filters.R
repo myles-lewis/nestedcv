@@ -349,7 +349,7 @@ combo_filter <- function(y, x,
 #'   include a larger number of predictors. Default alpha = 1 is pure LASSO,
 #'   resulting in greatest sparsity, while alpha = 0 is pure ridge regression,
 #'   retaining all predictors in the regression model. Note, the `family`
-#'   argument is generally required, see [glmnet].
+#'   argument is commonly needed, see [glmnet].
 #' @seealso [glmnet]
 #' @importFrom glmnet glmnet
 #' @export
@@ -362,6 +362,7 @@ glmnet_filter <- function(y,
                           ...) {
   type <- match.arg(type)
   method <- match.arg(method)
+  args <- list(...)
   fit <- glmnet(x, y, ...)
   cf <- as.matrix(coef(fit))
   if (method == "mean") {

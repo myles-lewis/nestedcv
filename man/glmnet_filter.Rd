@@ -39,7 +39,7 @@ The glmnet elastic net mixing parameter alpha can be varied to
 include a larger number of predictors. Default alpha = 1 is pure LASSO,
 resulting in greatest sparsity, while alpha = 0 is pure ridge regression,
 retaining all predictors in the regression model. Note, the \code{family}
-argument is generally required, see \link{glmnet}.
+argument is commonly needed, see \link{glmnet}.
 }
 \seealso{
 \link{glmnet}
