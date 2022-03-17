@@ -2,7 +2,7 @@
 % Please edit documentation in R/outercv.R
 \name{outercv}
 \alias{outercv}
-\title{Outer cross-validation of models}
+\title{Outer cross-validation of selected models}
 \usage{
 outercv(
   model,
@@ -38,11 +38,17 @@ uses \link[parallel:mclapply]{parallel::mclapply}.}
 \item{...}{Optional arguments passed to the function specified by \code{model}.}
 }
 \value{
-An object with S3 class "outercv.rf"
+An object with S3 class "outercv"
 }
 \description{
-Outer cross-validation (CV) of selected models. This is designed to quickly
-evaluate performance of specific models with fixed hyperparameters and no
-tuning. If tuning of parameters on data is required, full nested CV with
+This is a convenience function designed to quickly evaluate performance of
+specific models (random forest, naive Bayes) with fixed hyperparameters and
+no tuning. If tuning of parameters on data is required, full nested CV with
 inner CV is recommended to tune model hyperparameters (see \link{nestcv.train}).
+}
+\details{
+An alternative method of tuning a single model with fixed parameters
+is to use \link{nestcv.train} with \code{tuneGrid} set as a single row of a
+data.frame. The parameters which are needed for a specific model can be
+identified using \code{\link[caret:modelLookup]{caret::modelLookup()}}.
 }

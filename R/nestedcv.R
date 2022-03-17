@@ -4,47 +4,50 @@
 
 
 #' Nested cross-validation with glmnet
-#' 
-#' Nested cross-validation (CV) with glmnet including tuning of elastic net 
-#' alpha parameter and embedding of a filter function within the nested CV.
-#' 
+#'
+#' This function enables nested cross-validation (CV) with glmnet including
+#' tuning of elastic net alpha parameter. The function also allows the option of
+#' embedded filtering of predictors for feature selection nested within the
+#' outer loop of CV. Predictions on the outer test folds are brought back
+#' together and error estimation/ accuracy determined. The default is 10x10
+#' nested CV.
+#'
 #' @param y Response vector
 #' @param x Matrix of predictors
-#' @param family Either a character string representing one of the built-in 
-#' families, or else a `glm()` family object. Passed to [cv.glmnet] and [glmnet]
-#' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter]. 
-#' Any function can be provided and is passed `y` and `x`. Must return a 
-#' character vector with names of filtered predictors.
-#' @param filter_options List of additional arguments passed to the filter 
-#' function specified by `filterFUN`.
-#' @param outer_method String of either `"cv"` or `"loocv"` specifying whether to 
-#' do k-fold CV or leave one out CV (LOOCV) for the outer folds
+#' @param family Either a character string representing one of the built-in
+#'   families, or else a `glm()` family object. Passed to [cv.glmnet] and
+#'   [glmnet]
+#' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
+#'   Any function can be provided and is passed `y` and `x`. Must return a
+#'   character vector with names of filtered predictors.
+#' @param filter_options List of additional arguments passed to the filter
+#'   function specified by `filterFUN`.
+#' @param outer_method String of either `"cv"` or `"loocv"` specifying whether
+#'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
 #' @param n_inner_folds Number of inner CV folds
 #' @param alphaSet Vector of alphas to be tuned
-#' @param min_1se Value from 0 to 1 specifying choice of optimal lambda from 
-#' 0=lambda.min to 1=lambda.1se
-#' @param keep Logical indicating whether inner CV predictions are 
-#' retained for calculating left-out inner CV fold accuracy etc. See argument 
-#' `keep` in [cv.glmnet].
-#' @param cores Number of cores for parallel processing. Note this currently 
-#' uses [parallel::mclapply].
+#' @param min_1se Value from 0 to 1 specifying choice of optimal lambda from
+#'   0=lambda.min to 1=lambda.1se
+#' @param keep Logical indicating whether inner CV predictions are retained for
+#'   calculating left-out inner CV fold accuracy etc. See argument `keep` in
+#'   [cv.glmnet].
+#' @param cores Number of cores for parallel processing. Note this currently
+#'   uses [parallel::mclapply].
 #' @param ... Optional arguments passed to [cv.glmnet]
-#' @return An object with S3 class "nestcv.glmnet"
-#' \item{call}{the matched call}
-#' \item{output}{Predictions on the left-out outer folds}
-#' \item{outer_result}{List object of results from each outer fold containing 
-#' predictions on left-out outer folds, best lambda, best alpha, fitted glmnet 
-#' coefficients, list object of inner fitted cv.glmnet and number of filtered 
-#' predictors at each fold.}
-#' \item{outer_method}{the `outer_method` argument}
-#' \item{n_inner_folds}{number of inner folds}
-#' \item{outer_folds}{List of indices of outer training folds}
-#' \item{final_param}{Final mean best lambda and alpha from each fold}
-#' \item{final_fit}{Final fitted glmnet model}
-#' \item{roc}{ROC AUC for binary classification where available.}
-#' \item{summary}{Overall performance summary. Accuracy and balanced accuracy 
-#' for classification. ROC AUC for binary classification. RMSE for regression.}
+#' @return An object with S3 class "nestcv.glmnet" \item{call}{the matched call}
+#'   \item{output}{Predictions on the left-out outer folds}
+#'   \item{outer_result}{List object of results from each outer fold containing
+#'   predictions on left-out outer folds, best lambda, best alpha, fitted glmnet
+#'   coefficients, list object of inner fitted cv.glmnet and number of filtered
+#'   predictors at each fold.} \item{outer_method}{the `outer_method` argument}
+#'   \item{n_inner_folds}{number of inner folds} \item{outer_folds}{List of
+#'   indices of outer training folds} \item{final_param}{Final mean best lambda
+#'   and alpha from each fold} \item{final_fit}{Final fitted glmnet model}
+#'   \item{roc}{ROC AUC for binary classification where available.}
+#'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
+#'   for classification. ROC AUC for binary classification. RMSE for
+#'   regression.}
 #' @author Myles Lewis
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
