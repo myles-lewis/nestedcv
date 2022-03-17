@@ -4,14 +4,14 @@
 \alias{boxplot_model}
 \title{Boxplot model predictors}
 \usage{
-boxplot_model(fit, x, cols = NULL, palette = "Dark 3", ...)
+boxplot_model(fit, x, scheme = NULL, palette = "Dark 3", ...)
 }
 \arguments{
 \item{fit}{"nestedcv" object}
 
 \item{x}{matrix of predictors}
 
-\item{cols}{colour scheme}
+\item{scheme}{colour scheme}
 
 \item{palette}{palette name (one of \code{hcl.pals()}) which is passed to
 \link{hcl.colors}}

@@ -48,7 +48,7 @@ plot_alphas <- function(x,
 #' outer CV fold.
 #' 
 #' @param x Fitted "nestcv.glmnet" object
-#' @param cols colour scheme
+#' @param scheme colour scheme
 #' @param palette palette name (one of `hcl.pals()`) which is passed to 
 #' [hcl.colors]
 #' @param showLegend Either a keyword to position the legend or `NULL` to hide 
@@ -63,14 +63,14 @@ plot_alphas <- function(x,
 #' @export
 #' 
 plot_lambdas <- function(x,
-                         cols = NULL,
+                         scheme = NULL,
                          palette = "Dark 3",
                          showLegend = if(x$outer_method == "cv") "topright" else NULL,
                          ...) {
   cvms <- lapply(x$outer_result, function(fold) fold$cvafit$fits[[fold$cvafit$which_alpha]]$cvm)
   lambdas <- lapply(x$outer_result, function(fold) fold$cvafit$fits[[fold$cvafit$which_alpha]]$lambda)
   n <- length(cvms)
-  if (is.null(cols)) cols <- hcl.colors(n, palette)
+  if (is.null(scheme)) scheme <- hcl.colors(n, palette)
   new.args <- list(...)
   plot.args <- list(y = cvms[[1]], x = log(lambdas[[1]]),
                     type = 'l',
@@ -78,11 +78,11 @@ plot_lambdas <- function(x,
                     xlim = range(log(unlist(lambdas))),
                     xlab = expression(Log(lambda)),
                     ylab = x$outer_result[[1]]$cvafit$fits[[1]]$name,
-                    col = cols[1])
+                    col = scheme[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
   for (i in 2:n) {
-    lines.args <- list(y = cvms[[i]], x = log(lambdas[[i]]), col = cols[i])
+    lines.args <- list(y = cvms[[i]], x = log(lambdas[[i]]), col = scheme[i])
     if (length(new.args)) lines.args[names(new.args)] <- new.args
     do.call("lines", lines.args)
   }
@@ -92,38 +92,43 @@ plot_lambdas <- function(x,
       legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
       legend(showLegend, bty = 'n',
              legend = paste("Fold", 1:n),
-             col = cols, pch = legend.pch)
+             col = scheme, pch = legend.pch)
     } else {
       legend.lwd <- if (is.null(plot.args$lwd)) par("lwd") else plot.args$lwd
       legend(showLegend, bty = 'n',
              legend = paste("Fold", 1:n),
-             col = cols, lty = 1, lwd = legend.lwd)
+             col = scheme, lty = 1, lwd = legend.lwd)
     }
   }
 }
 
 
 #' Plot lambda across range of alphas
-#' 
-#' Plot showing cross-validated tuning of alpha and lambda from elastic net 
-#' regression via [glmnet]. Log lambda is on the x axis while the tuning metric 
-#' (log loss, deviance, accuracy, AUC etc) is on the y axis. Multiple alpha 
-#' values are shown by different colours.
-#' 
+#'
+#' Different types of plot showing cross-validated tuning of alpha and lambda
+#' from elastic net regression via [glmnet]. If `xaxis` is set to `"lambda"`,
+#' log lambda is on the x axis while the tuning metric (log loss, deviance,
+#' accuracy, AUC etc) is on the y axis. Multiple alpha values are shown by
+#' different colours. If `xaxis` is set to `"alpha"`, alpha is on the x axis
+#' with the tuning metric on y, with error bars showing metric SD. if `xaxis` is
+#' set to `"nvar"` the number of non-zero coefficients is shown on x and how
+#' this relates to model deviance/ accuracy on y.
+#'
 #' @param x Object of class 'cva.glmnet'
-#' @param xaxis String specifying what is plotted on the x axis, either log 
-#' lambda or the number of non-zero coefficients.
-#' @param errorBar Logical whether to show error bars for the standard deviation.
+#' @param xaxis String specifying what is plotted on the x axis, either log
+#'   lambda, alpha or the number of non-zero coefficients.
+#' @param errorBar Logical whether to show error bars for the standard deviation
+#'   of model deviance. Error bars are interleaved to avoid overlap.
 #' @param errorWidth Width of error bars.
-#' @param min.pch Plotting 'character' for the minimum point of each curve. Not 
-#' shown if set to `NULL`. See [points]
-#' @param cols Colour scheme
-#' @param palette Palette name (one of `hcl.pals()`) which is passed to 
-#' [hcl.colors]
-#' @param showLegend Either a keyword to position the legend or `NULL` to hide 
-#' the legend.
-#' @param ... Other arguments passed to [plot]. Use `type = 'p'` to plot a 
-#' scatter plot instead of a line plot.
+#' @param min.pch Plotting 'character' for the minimum point of each curve. Not
+#'   shown if set to `NULL`. See [points]
+#' @param scheme Colour scheme
+#' @param palette Palette name (one of `hcl.pals()`) which is passed to
+#'   [hcl.colors]
+#' @param showLegend Either a keyword to position the legend or `NULL` to hide
+#'   the legend.
+#' @param ... Other arguments passed to [plot]. Use `type = 'p'` to plot a
+#'   scatter plot instead of a line plot.
 #' @return No return value
 #' @seealso [nestcv.glmnet]
 #' @author Myles Lewis
@@ -132,19 +137,39 @@ plot_lambdas <- function(x,
 #' @export
 #' 
 plot.cva.glmnet <- function(x,
-                            xaxis = c('lambda', 'nvar'),
-                            errorBar = FALSE,
+                            xaxis = c('lambda', 'alpha', 'nvar'),
+                            errorBar = (xaxis == "alpha"),
                             errorWidth = 0.01,
                             min.pch = NULL,
-                            cols = NULL,
+                            scheme = NULL,
                             palette = "zissou",
                             showLegend = "bottomright",
                             ...) {
   xaxis <- match.arg(xaxis)
+  new.args <- list(...)
+  if (xaxis == "alpha") {
+    px <- x$alphaSet
+    y <- unlist(lapply(x$fits, function(i) min(i$cvm)))
+    ylo <- unlist(lapply(x$fits, function(i) {w <- which.min(i$cvm)
+      i$cvlo[w]}))
+    yup <- unlist(lapply(x$fits, function(i) {w <- which.min(i$cvm)
+      i$cvup[w]}))
+    ylim <- range(c(y, ylo, yup))
+    plot.args <- list(y = y, x = px,
+                      ylim = ylim,
+                      xlab = "Alpha",
+                      ylab = x$fits[[1]]$name,
+                      pch = 21,
+                      bg = "white")
+    if (length(new.args)) plot.args[names(new.args)] <- new.args
+    do.call("plot", plot.args)
+    if (errorBar) arrows(px, ylo, px, yup, length = errorWidth, angle = 90, code = 3)
+    do.call("points", plot.args)
+    return(invisible())
+  }
   cvms <- lapply(x$fits, function(i) i$cvm)
   n <- length(cvms)
-  if (is.null(cols)) cols <- hcl.colors(n, palette)
-  new.args <- list(...)
+  if (is.null(scheme)) scheme <- hcl.colors(n, palette)
   px <- switch(xaxis,
                lambda = lapply(x$fits, function(i) log(i$lambda)),
                nvar = lapply(x$fits, function(i) i$nzero))
@@ -169,18 +194,18 @@ plot.cva.glmnet <- function(x,
                                   nvar = "Number of non-zero coefficients"),
                     ylab = x$fits[[1]]$name,
                     cex = cex,
-                    col = cols[1])
+                    col = scheme[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
   if (errorBar) {
     ind <- seq(1, length(cvms[[1]]), 10)
     for (i in 1:n) {
       arrows(px[[i]][ind], cvlo[[i]][ind], px[[i]][ind], cvup[[i]][ind],
-             length = errorWidth, angle = 90, code = 3, col = cols[i])
+             length = errorWidth, angle = 90, code = 3, col = scheme[i])
     }
   }
   for (i in 2:n) {
-    lines.args <- list(y = cvms[[i]], x = px[[i]], col = cols[i],
+    lines.args <- list(y = cvms[[i]], x = px[[i]], col = scheme[i],
                        type = type,
                        cex = cex)
     if (length(new.args)) lines.args[names(new.args)] <- new.args
@@ -188,7 +213,7 @@ plot.cva.glmnet <- function(x,
   }
   if (errorBar) {
     for (i in 1:n) {
-      points(px[[i]][ind], cvms[[i]][ind], pch = 19, col = cols[i],
+      points(px[[i]][ind], cvms[[i]][ind], pch = 19, col = scheme[i],
              cex = lines.args$cex)
     }
   }
@@ -196,7 +221,7 @@ plot.cva.glmnet <- function(x,
   if (!is.null(min.pch)) {
     wy <- unlist(lapply(cvms, which.min))
     for (i in 1:n) {
-      points(x = px[[i]][wy[i]], y = cvms[[i]][wy[i]], col = cols[i], pch = min.pch)
+      points(x = px[[i]][wy[i]], y = cvms[[i]][wy[i]], col = scheme[i], pch = min.pch)
     }
   }
   if (!is.null(showLegend)) {
@@ -204,12 +229,12 @@ plot.cva.glmnet <- function(x,
       legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
       legend(showLegend, bty = 'n',
              legend = parse(text = paste("alpha ==", x$alphaSet)),
-             col = cols, pch = legend.pch)
+             col = scheme, pch = legend.pch)
     } else {
       legend.lwd <- if (is.null(plot.args$lwd)) par("lwd") else plot.args$lwd
       legend(showLegend, bty = 'n',
              legend = parse(text = paste("alpha ==", x$alphaSet)),
-             col = cols, lty = 1, lwd = legend.lwd)
+             col = scheme, lty = 1, lwd = legend.lwd)
     }
   }
 }
@@ -222,7 +247,7 @@ plot.cva.glmnet <- function(x,
 #' 
 #' @param fit "nestedcv" object
 #' @param x matrix of predictors
-#' @param cols colour scheme
+#' @param scheme colour scheme
 #' @param palette palette name (one of `hcl.pals()`) which is passed to 
 #' [hcl.colors]
 #' @param ... other arguments passed to [boxplot].
@@ -235,7 +260,7 @@ plot.cva.glmnet <- function(x,
 #' @export
 #' 
 boxplot_model <- function(fit, x,
-                          cols = NULL, palette = "Dark 3", ...) {
+                          scheme = NULL, palette = "Dark 3", ...) {
   m <- coef(fit)
   m <- names(m[-1])
   df <- data.frame(vars = rep(m, each = nrow(x)), 
@@ -244,12 +269,12 @@ boxplot_model <- function(fit, x,
   names(x_med) <- m
   x_med <- sort(x_med, decreasing = TRUE)
   df$vars <- factor(df$vars, levels = names(x_med))
-  if (is.null(cols)) cols <- hcl.colors(length(m), palette)
+  if (is.null(scheme)) scheme <- hcl.colors(length(m), palette)
   new.args <- list(...)
   plot.args <- list(formula = formula(df$y ~ df$vars),
                     xlab = "", ylab = "",
-                    boxcol = cols, medcol = cols,
-                    whiskcol = cols, staplecol = cols, outcol = cols,
+                    boxcol = scheme, medcol = scheme,
+                    whiskcol = scheme, staplecol = scheme, outcol = scheme,
                     col = NA,
                     las = 2, outpch = 20, outcex = 0.5,
                     whisklty = 1, 

@@ -6,7 +6,7 @@
 \usage{
 plot_lambdas(
   x,
-  cols = NULL,
+  scheme = NULL,
   palette = "Dark 3",
   showLegend = if (x$outer_method == "cv") "topright" else NULL,
   ...
@@ -15,7 +15,7 @@ plot_lambdas(
 \arguments{
 \item{x}{Fitted "nestcv.glmnet" object}
 
-\item{cols}{colour scheme}
+\item{scheme}{colour scheme}
 
 \item{palette}{palette name (one of \code{hcl.pals()}) which is passed to
 \link{hcl.colors}}

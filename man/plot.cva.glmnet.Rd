@@ -6,11 +6,11 @@
 \usage{
 \method{plot}{cva.glmnet}(
   x,
-  xaxis = c("lambda", "nvar"),
-  errorBar = FALSE,
+  xaxis = c("lambda", "alpha", "nvar"),
+  errorBar = (xaxis == "alpha"),
   errorWidth = 0.01,
   min.pch = NULL,
-  cols = NULL,
+  scheme = NULL,
   palette = "zissou",
   showLegend = "bottomright",
   ...
@@ -20,16 +20,17 @@
 \item{x}{Object of class 'cva.glmnet'}
 
 \item{xaxis}{String specifying what is plotted on the x axis, either log
-lambda or the number of non-zero coefficients.}
+lambda, alpha or the number of non-zero coefficients.}
 
-\item{errorBar}{Logical whether to show error bars for the standard deviation.}
+\item{errorBar}{Logical whether to show error bars for the standard deviation
+of model deviance. Error bars are interleaved to avoid overlap.}
 
 \item{errorWidth}{Width of error bars.}
 
 \item{min.pch}{Plotting 'character' for the minimum point of each curve. Not
 shown if set to \code{NULL}. See \link{points}}
 
-\item{cols}{Colour scheme}
+\item{scheme}{Colour scheme}
 
 \item{palette}{Palette name (one of \code{hcl.pals()}) which is passed to
 \link{hcl.colors}}
@@ -44,10 +45,14 @@ scatter plot instead of a line plot.}
 No return value
 }
 \description{
-Plot showing cross-validated tuning of alpha and lambda from elastic net
-regression via \link{glmnet}. Log lambda is on the x axis while the tuning metric
-(log loss, deviance, accuracy, AUC etc) is on the y axis. Multiple alpha
-values are shown by different colours.
+Different types of plot showing cross-validated tuning of alpha and lambda
+from elastic net regression via \link{glmnet}. If \code{xaxis} is set to \code{"lambda"},
+log lambda is on the x axis while the tuning metric (log loss, deviance,
+accuracy, AUC etc) is on the y axis. Multiple alpha values are shown by
+different colours. If \code{xaxis} is set to \code{"alpha"}, alpha is on the x axis
+with the tuning metric on y, with error bars showing metric SD. if \code{xaxis} is
+set to \code{"nvar"} the number of non-zero coefficients is shown on x and how
+this relates to model deviance/ accuracy on y.
 }
 \seealso{
 \link{nestcv.glmnet}
