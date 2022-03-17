@@ -308,8 +308,9 @@ models with `caret`, the default metric is changed to use logLoss.
 
 We recommend that the results of tuning are plotted to understand whether
 parameters have a systematic effect on model accuracy. With small datasets
-tuning may pick parameters fairly randomly which may worsen noise surrounding
-performance than if they were fixed.
+tuning may pick parameters partially at random because of random fluctuations in
+measured accuracy during tuning, which may worsen noise surrounding performance
+than if they were fixed.
 
 ```{r eval = FALSE}
 # Example tuning plot for outer fold 1
