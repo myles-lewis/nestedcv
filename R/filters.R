@@ -201,7 +201,7 @@ correl_filter <- function(y,
   type <- match.arg(type)
   res <- correls2(y, x, method = method, ...)
   if (type == "full") return(res)
-  out <- res[, "pvalue"]
+  out <- res[, "p-value"]
   names(out) <- if (type == "index") 1:ncol(x) else colnames(x)
   out <- sort(out)
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
