@@ -22,7 +22,7 @@
 #'   character vector with names of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter
 #'   function specified by `filterFUN`.
-#' @param outer_method String of either `"cv"` or `"loocv"` specifying whether
+#' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
 #' @param n_inner_folds Number of inner CV folds
@@ -61,7 +61,7 @@ nestcv.glmnet <- function(y, x,
                           family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
                           filterFUN = NULL,
                           filter_options = NULL,
-                          outer_method = c("cv", "loocv"),
+                          outer_method = c("cv", "LOOCV"),
                           n_outer_folds = 10,
                           n_inner_folds = 10,
                           alphaSet = seq(0, 1, 0.1),
@@ -74,7 +74,7 @@ nestcv.glmnet <- function(y, x,
   outer_method <- match.arg(outer_method)
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
-                        loocv = 1:length(y))
+                        LOOCV = 1:length(y))
   outer_res <- mclapply(1:length(outer_folds), function(i) {
     test <- outer_folds[[i]]
     # expand data with interactions

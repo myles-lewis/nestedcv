@@ -17,6 +17,8 @@
 #'   character vector with names of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter
 #'   function specified by `filterFUN`.
+#' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
+#'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
 #' @param cores Number of cores for parallel processing. Note this currently
 #'   uses [parallel::mclapply].
@@ -36,13 +38,16 @@
 outercv <- function(model, y, x,
                     filterFUN = NULL,
                     filter_options = NULL,
+                    outer_method = c("cv", "LOOCV"),
                     n_outer_folds = 10,
                     cores = 1,
                     ...) {
   reg <- !(is.factor(y) | is.character(y))  # y = regression
-  outer_folds <- createFolds(y, k = n_outer_folds)
-  dot.args <- list(...)
-  outer_res <- mclapply(1:n_outer_folds, function(i) {
+  outer_method <- match.arg(outer_method)
+  outer_folds <- switch(outer_method,
+                        cv = createFolds(y, k = n_outer_folds),
+                        LOOCV = 1:length(y))
+  outer_res <- mclapply(1:length(outer_folds), function(i) {
     test <- outer_folds[[i]]
     filtx <- if (is.null(filterFUN)) x else {
       args <- list(y = y[-test], x = x[-test, ])
@@ -50,8 +55,15 @@ outercv <- function(model, y, x,
       fset <- do.call(filterFUN, args)
       x[, fset]
     }
-    model.args <- list(x = filtx[-test, ], y = y[-test])
-    fit <- do.call(model, append(model.args, dot.args))
+    # check if model uses formula
+    if ("formula" %in% formalArgs(model)) {
+      dat <- if (is.data.frame(filtx)) {filtx[-test, ]
+      } else as.data.frame(filtx[-test, ], stringsAsFactors = TRUE)
+      dat$.outcome <- y[-test]
+      fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
+    } else {
+      fit <- model(y = y[-test], x = filtx[-test, ], ...)
+    }
     # test on outer CV
     predy <- predict(fit, newdata = filtx[test, ])
     preds <- data.frame(predy=predy, testy=y[test])
@@ -96,8 +108,16 @@ outercv <- function(model, y, x,
     fset <- do.call(filterFUN, args)
     x[, fset]
   }
-  model.args <- list(x = filtx, y = y)
-  fit <- do.call(model, append(model.args, dot.args))
+  # model.args <- list(x = filtx, y = y)
+  # fit <- do.call(model, append(model.args, dot.args))
+  if ("formula" %in% formalArgs(model)) {
+    dat <- if (is.data.frame(filtx)) {filtx
+    } else as.data.frame(filtx, stringsAsFactors = TRUE)
+    dat$.outcome <- y
+    fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
+  } else {
+    fit <- model(y = y, x = filtx, ...)
+  }
   out <- list(output = output,
               outer_result = outer_res,
               outer_folds = outer_folds,
