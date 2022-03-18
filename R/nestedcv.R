@@ -268,7 +268,7 @@ print.nestcv.glmnet <- function(x, digits = max(3L, getOption("digits") - 3L), .
 #' @export
 summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") - 3L), ...) {
   cat("Nested cross-validation with glmnet\n")
-  if (exists(object$call$filterFUN)) 
+  if (!is.null(object$call$filterFUN)) 
     cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
   cat("Outer loop: ", switch(object$outer_method,
                          cv = paste0(length(object$outer_folds), "-fold CV"),
