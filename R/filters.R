@@ -161,7 +161,7 @@ correls2 <- function(y, x,
     pval <- 2 * pt(abs(r) / sqrt((1 - r^2)/df), df, lower.tail=FALSE)
     rname <- 'rho'
   } else {
-    r <- as.vector(cor(y, x, use = use))
+    r <- suppressWarnings(as.vector(cor(y, x, use = use)))
     STATISTIC <- sqrt(df) * r / sqrt(1 - r^2)
     pval <- 2 * pt(abs(STATISTIC), df, lower.tail = FALSE)  # two-tailed
     rname <- 'r'
