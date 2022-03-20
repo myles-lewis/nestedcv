@@ -81,7 +81,7 @@ nestcv.train <- function(y, x,
   }
   # switch off inner CV if tuneGrid is single row
   if (!is.null(tuneGrid)) {
-    if (nrow(tuneGrid == 1)) trControl <- trainControl(method = "none", classProbs = TRUE)
+    if (nrow(tuneGrid) == 1) trControl <- trainControl(method = "none", classProbs = TRUE)
   }
   outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
   outer_res <- mclapply(1:n_outer_folds, function(i) {
