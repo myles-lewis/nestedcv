@@ -362,7 +362,6 @@ glmnet_filter <- function(y,
                           ...) {
   type <- match.arg(type)
   method <- match.arg(method)
-  args <- list(...)
   fit <- glmnet(x, y, ...)
   cf <- as.matrix(coef(fit))
   if (method == "mean") {

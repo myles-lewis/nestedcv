@@ -96,11 +96,13 @@ nestcv.train <- function(y, x,
                         metric = metric,
                         trControl = trControl,
                         tuneGrid = tuneGrid, ...)
-    predy <- predict(fit, newdata = filtx[-trainIndex, ], type = "raw")
-    predyp <- predict(fit, newdata = filtx[-trainIndex, ], type = "prob")
-    # note predyp has 2 columns
-    
-    preds <- data.frame(predy=predy, predyp=predyp[,2], testy=y[-trainIndex])
+    predy <- predict(fit, newdata = filtx[-trainIndex, ])
+    preds <- data.frame(predy=predy, testy=y[-trainIndex])
+    if (is.factor(y)) {
+      predyp <- predict(fit, newdata = filtx[-trainIndex, ], type = "prob")
+      # note predyp has 2 columns
+      preds$predyp <- predyp[,2]
+    }
     rownames(preds) <- rownames(x[-trainIndex, ])
     ret <- list(preds = preds,
                 fit = fit,
