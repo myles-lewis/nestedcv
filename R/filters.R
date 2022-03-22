@@ -397,7 +397,7 @@ glmnet_filter <- function(y,
 #' @return Vector of the indices of columns in `x` to remove due to collinearity
 #' @export
 #' 
-collinear_filter <- function(x, rsq_cutoff = 0.9) {
+collinear <- function(x, rsq_cutoff = 0.9) {
   rsq <- cor(x)^2
   rsq[lower.tri(rsq, diag = TRUE)] <- NA
   combsAboveCutoff <- which(rsq > rsq_cutoff)
