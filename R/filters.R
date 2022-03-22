@@ -383,6 +383,9 @@ glmnet_filter <- function(y,
   out
 }
 
+# Code modified from caret::findCorrelation
+# https://github.com/topepo/caret/blob/master/pkg/caret/R/findCorrelation.R
+
 #' Filter to reduce collinearity in predictors
 #'
 #' This function identifies predictors with r^2 above a given cut-off and
@@ -394,10 +397,11 @@ glmnet_filter <- function(y,
 #' @param x A matrix or data.frame of values. The order of columns is used to
 #'   determine which columns to retain, most important columns first.
 #' @param rsq_cutoff Value of cut-off for r-squared
+#' @param verbose Boolean whether to print details 
 #' @return Vector of the indices of columns in `x` to remove due to collinearity
 #' @export
 #' 
-collinear <- function(x, rsq_cutoff = 0.9) {
+collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
   rsq <- cor(x)^2
   rsq[lower.tri(rsq, diag = TRUE)] <- NA
   combsAboveCutoff <- which(rsq > rsq_cutoff)
@@ -405,7 +409,19 @@ collinear <- function(x, rsq_cutoff = 0.9) {
   rowsToCheck <- combsAboveCutoff %% nrow(rsq)
   colsToDiscard <- colsToCheck > rowsToCheck
   rowsToDiscard <- !colsToDiscard
-  deletecol <- c(colsToCheck[colsToDiscard], rowsToCheck[rowsToDiscard])
+  if (any(rowsToDiscard)) warning("Unexpected rows to discard")
+  if (verbose) {
+    df <- data.frame(keep = rowsToCheck, remove = colsToCheck)
+    df <- df[order(df$keep), ]
+    for (i in unique(df$keep)) {
+      if (!i %in% df$remove) cat("Keep ") else cat ("Removed ")
+      cat(paste0(colnames(x)[i], ", remove "))
+      rem <- df$remove[df$keep %in% i]
+      cat(paste(colnames(x)[rem], collapse = ", "))
+      cat("\n")
+    }
+  }
+  deletecol <- colsToCheck
   deletecol <- unique(deletecol)
   deletecol
 }

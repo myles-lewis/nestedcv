@@ -4,13 +4,15 @@
 \alias{collinear}
 \title{Filter to reduce collinearity in predictors}
 \usage{
-collinear(x, rsq_cutoff = 0.9)
+collinear(x, rsq_cutoff = 0.9, verbose = FALSE)
 }
 \arguments{
 \item{x}{A matrix or data.frame of values. The order of columns is used to
 determine which columns to retain, most important columns first.}
 
 \item{rsq_cutoff}{Value of cut-off for r-squared}
+
+\item{verbose}{Boolean whether to print details}
 }
 \value{
 Vector of the indices of columns in \code{x} to remove due to collinearity
