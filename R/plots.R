@@ -241,15 +241,16 @@ plot.cva.glmnet <- function(x,
 
 
 #' Boxplot model predictors
-#' 
+#'
 #' Boxplots to show range of model predictors to identify exceptional predictors
 #' with excessively low or high values.
-#' 
-#' @param fit "nestedcv" object
-#' @param x matrix of predictors
+#'
+#' @param x Either a "nestedcv" object or a character vector of predictors to
+#'   be plotted
+#' @param data matrix of predictors
 #' @param scheme colour scheme
-#' @param palette palette name (one of `hcl.pals()`) which is passed to 
-#' [hcl.colors]
+#' @param palette palette name (one of `hcl.pals()`) which is passed to
+#'   [hcl.colors]
 #' @param ... other arguments passed to [boxplot].
 #' @return No return value
 #' @seealso [nestcv.glmnet]
@@ -259,13 +260,12 @@ plot.cva.glmnet <- function(x,
 #' @importFrom stats formula
 #' @export
 #' 
-boxplot_model <- function(fit, x,
+boxplot_model <- function(x, data,
                           scheme = NULL, palette = "Dark 3", ...) {
-  m <- coef(fit)
-  m <- names(m[-1])
-  df <- data.frame(vars = rep(m, each = nrow(x)), 
-                   y = unlist(lapply(m, function(i) x[, i])))
-  x_med <- Rfast::colMedians(x[, m])
+  m <- if (is.character(x)) x else names(coef(x))[-1]
+  df <- data.frame(vars = rep(m, each = nrow(data)), 
+                   y = unlist(lapply(m, function(i) data[, i])))
+  x_med <- Rfast::colMedians(data[, m])
   names(x_med) <- m
   x_med <- sort(x_med, decreasing = TRUE)
   df$vars <- factor(df$vars, levels = names(x_med))
