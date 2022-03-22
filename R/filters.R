@@ -59,6 +59,11 @@ ttest_filter <- function(y,
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with 
 #' p values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
+#' @param rsq_cutoff r^2 cutoff for removing predictors due to collinearity.
+#'   Default `NULL` means no collinearity filtering. Predictors are ranked based
+#'   on anova test. If 2 or more predictors are collinear, the first ranked
+#'   predictor by anova is retained, while the other collinear predictors are
+#'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a matrix of p values.
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
@@ -71,6 +76,7 @@ anova_filter <- function(y,
                        x,
                        nfilter = NULL,
                        p_cutoff = 0.05,
+                       rsq_cutoff = NULL,
                        type = c("index", "names", "full")) {
   type <- match.arg(type)
   y <- factor(y)
@@ -79,8 +85,10 @@ anova_filter <- function(y,
   if (type == "full") return(res)
   out <- res[, "pval"]
   out <- sort(out)
-  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
+  if (!is.null(rsq_cutoff)) 
+    out <- out[-collinear(x[, names(out)], rsq_cutoff = rsq_cutoff)]
+  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   out <- names(out)
   if (length(out) == 0) stop("No predictors selected")
   if (type == "index") out <- as.integer(out)
@@ -98,6 +106,11 @@ anova_filter <- function(y,
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with 
 #' p values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
+#' @param rsq_cutoff r^2 cutoff for removing predictors due to collinearity.
+#'   Default `NULL` means no collinearity filtering. Predictors are ranked based
+#'   on Wilcoxon test. If 2 or more predictors are collinear, the first ranked
+#'   predictor by Wilcoxon test is retained, while the other collinear predictors are
+#'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a matrix of p-values.
 #' @param exact Logical whether exact or approximate p-value is calculated. 
@@ -114,6 +127,7 @@ wilcoxon_filter <- function(y,
                          x,
                          nfilter = NULL,
                          p_cutoff = 0.05,
+                         rsq_cutoff = NULL,
                          type = c("index", "names", "full"),
                          exact = FALSE,
                          ...) {
@@ -123,14 +137,16 @@ wilcoxon_filter <- function(y,
   indx2 <- as.numeric(y) == 2
   res <- suppressWarnings(
     matrixTests::row_wilcoxon_twosample(t(x[indx1, ]), t(x[indx2, ]),
-                                        exact = FALSE, ...)
+                                        exact = exact, ...)
   )
   if (type == "full") return(res)
   out <- res[, "pvalue"]
   names(out) <- if (type == "index") 1:ncol(x) else colnames(x)
   out <- sort(out)
-  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
+  if (!is.null(rsq_cutoff)) 
+    out <- out[-collinear(x[, names(out)], rsq_cutoff = rsq_cutoff)]
+  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   out <- names(out)
   if (length(out) == 0) stop("No predictors selected")
   if (type == "index") out <- as.integer(out)
