@@ -397,8 +397,9 @@ glmnet_filter <- function(y,
 #' @param x A matrix or data.frame of values. The order of columns is used to
 #'   determine which columns to retain, most important columns first.
 #' @param rsq_cutoff Value of cut-off for r-squared
-#' @param verbose Boolean whether to print details 
-#' @return Vector of the indices of columns in `x` to remove due to collinearity
+#' @param verbose Boolean whether to print details
+#' @return Integer vector of the indices of columns in `x` to remove due to
+#'   collinearity
 #' @export
 #' 
 collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
