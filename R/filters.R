@@ -34,18 +34,20 @@ ttest_filter <- function(y,
   indx1 <- as.numeric(y) == 1
   indx2 <- as.numeric(y) == 2
   res <- Rfast::ttests(x[indx1, ], x[indx2, ])
-  rownames(res) <- if (type == "index") 1:ncol(x) else colnames(x)
+  rownames(res) <- 1:ncol(x)
   if (type == "full") return(res)
-  out <- res[, "pvalue"]
-  out <- sort(out)
-  if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
-  if (!is.null(rsq_cutoff)) 
-    out <- out[-collinear(x[, names(out)], rsq_cutoff = rsq_cutoff)]
+  outp <- res[, "pvalue"]
+  out <- order(outp)
+  outp <- outp[out]
+  if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
+  if (!is.null(rsq_cutoff)) {
+    co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
+    out <- out[-co]
+  }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
-  out <- names(out)
   if (length(out) == 0) stop("No predictors selected")
-  if (type == "index") out <- as.integer(out)
-  out
+  switch(type,
+         index = out, names = colnames(x)[out])
 }
 
 
@@ -83,16 +85,18 @@ anova_filter <- function(y,
   res <- Rfast::ftests(x, y)
   rownames(res) <- if (type == "index") 1:ncol(x) else colnames(x)
   if (type == "full") return(res)
-  out <- res[, "pval"]
-  out <- sort(out)
-  if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
-  if (!is.null(rsq_cutoff)) 
-    out <- out[-collinear(x[, names(out)], rsq_cutoff = rsq_cutoff)]
+  outp <- res[, "pval"]
+  out <- order(outp)
+  outp <- outp[out]
+  if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
+  if (!is.null(rsq_cutoff)) {
+    co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
+    out <- out[-co]
+  }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
-  out <- names(out)
   if (length(out) == 0) stop("No predictors selected")
-  if (type == "index") out <- as.integer(out)
-  out
+  switch(type,
+         index = out, names = colnames(x)[out])
 }
 
 
@@ -140,17 +144,18 @@ wilcoxon_filter <- function(y,
                                         exact = exact, ...)
   )
   if (type == "full") return(res)
-  out <- res[, "pvalue"]
-  names(out) <- if (type == "index") 1:ncol(x) else colnames(x)
-  out <- sort(out)
-  if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
-  if (!is.null(rsq_cutoff)) 
-    out <- out[-collinear(x[, names(out)], rsq_cutoff = rsq_cutoff)]
+  outp <- res[, "pvalue"]
+  out <- order(outp)
+  outp <- outp[out]
+  if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
+  if (!is.null(rsq_cutoff)) {
+    co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
+    out <- out[-co]
+  }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
-  out <- names(out)
   if (length(out) == 0) stop("No predictors selected")
-  if (type == "index") out <- as.integer(out)
-  out
+  switch(type,
+         index = out, names = colnames(x)[out])
 }
 
 
