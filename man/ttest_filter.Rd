@@ -9,6 +9,7 @@ ttest_filter(
   x,
   nfilter = NULL,
   p_cutoff = 0.05,
+  rsq_cutoff = NULL,
   type = c("index", "names", "full")
 )
 }
@@ -18,17 +19,24 @@ ttest_filter(
 \item{x}{Matrix of predictors}
 
 \item{nfilter}{Number of predictors to return. If \code{NULL} all predictors with
-p values < \code{p_cutoff} are returned.}
+p-values < \code{p_cutoff} are returned.}
 
 \item{p_cutoff}{p value cut-off}
 
-\item{type}{Type of vector returned. Default "index" returns indices,
-"names" returns predictor names, "full" returns a matrix of p values.}
+\item{rsq_cutoff}{r^2 cutoff for removing predictors due to collinearity.
+Default \code{NULL} means no collinearity filtering. Predictors are ranked based
+on t-test. If 2 or more predictors are collinear, the first ranked
+predictor by t-test is retained, while the other collinear predictors are
+removed. See \code{\link[=collinear]{collinear()}}.}
+
+\item{type}{Type of vector returned. Default "index" returns indices, "names"
+returns predictor names, "full" returns a matrix of p values.}
 }
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
-character vector of names (type = "names") of filtered parameters. If
-\code{type} is \code{"full"} full output from \link[Rfast:ttests]{Rfast::ttests} is returned.
+character vector of names (type = "names") of filtered parameters in order
+of t-test p-value. If \code{type} is \code{"full"} full output from
+\link[Rfast:ttests]{Rfast::ttests} is returned.
 }
 \description{
 Simple univariate filter using t-test using the Rfast package for speed.

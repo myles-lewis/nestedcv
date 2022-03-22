@@ -1,19 +1,25 @@
 # Filters to reduce number of predictors in nested CV
 
 #' t-test filter
-#' 
+#'
 #' Simple univariate filter using t-test using the Rfast package for speed.
-#' 
+#'
 #' @param y Response vector
 #' @param x Matrix of predictors
-#' @param nfilter Number of predictors to return. If `NULL` all predictors with 
-#' p values < `p_cutoff` are returned.
+#' @param nfilter Number of predictors to return. If `NULL` all predictors with
+#'   p-values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
-#' @param type Type of vector returned. Default "index" returns indices,
-#' "names" returns predictor names, "full" returns a matrix of p values.
-#' @return Integer vector of indices of filtered parameters (type = "index") or 
-#' character vector of names (type = "names") of filtered parameters. If 
-#' `type` is `"full"` full output from [Rfast::ttests] is returned.
+#' @param rsq_cutoff r^2 cutoff for removing predictors due to collinearity.
+#'   Default `NULL` means no collinearity filtering. Predictors are ranked based
+#'   on t-test. If 2 or more predictors are collinear, the first ranked
+#'   predictor by t-test is retained, while the other collinear predictors are
+#'   removed. See [collinear()].
+#' @param type Type of vector returned. Default "index" returns indices, "names"
+#'   returns predictor names, "full" returns a matrix of p values.
+#' @return Integer vector of indices of filtered parameters (type = "index") or
+#'   character vector of names (type = "names") of filtered parameters in order
+#'   of t-test p-value. If `type` is `"full"` full output from
+#'   [Rfast::ttests] is returned.
 #' @importFrom Rfast ttests
 #' @export
 #' 
@@ -21,6 +27,7 @@ ttest_filter <- function(y,
                        x,
                        nfilter = NULL,
                        p_cutoff = 0.05,
+                       rsq_cutoff = NULL,
                        type = c("index", "names", "full")) {
   type <- match.arg(type)
   y <- factor(y)
@@ -31,8 +38,10 @@ ttest_filter <- function(y,
   if (type == "full") return(res)
   out <- res[, "pvalue"]
   out <- sort(out)
-  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
+  if (!is.null(rsq_cutoff)) 
+    out <- out[-collinear(x[, names(out)], rsq_cutoff = rsq_cutoff)]
+  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   out <- names(out)
   if (length(out) == 0) stop("No predictors selected")
   if (type == "index") out <- as.integer(out)
