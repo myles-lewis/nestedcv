@@ -9,6 +9,7 @@ anova_filter(
   x,
   nfilter = NULL,
   p_cutoff = 0.05,
+  rsq_cutoff = NULL,
   type = c("index", "names", "full")
 )
 }
@@ -21,6 +22,12 @@ anova_filter(
 p values < \code{p_cutoff} are returned.}
 
 \item{p_cutoff}{p value cut-off}
+
+\item{rsq_cutoff}{r^2 cutoff for removing predictors due to collinearity.
+Default \code{NULL} means no collinearity filtering. Predictors are ranked based
+on anova test. If 2 or more predictors are collinear, the first ranked
+predictor by anova is retained, while the other collinear predictors are
+removed. See \code{\link[=collinear]{collinear()}}.}
 
 \item{type}{Type of vector returned. Default "index" returns indices,
 "names" returns predictor names, "full" returns a matrix of p values.}
