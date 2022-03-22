@@ -415,12 +415,17 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
   if (verbose) {
     df <- data.frame(keep = rowsToCheck, remove = colsToCheck)
     df <- df[order(df$keep), ]
+    remd <- NULL
     for (i in unique(df$keep)) {
-      if (!i %in% df$remove) cat("Keep ") else cat ("Removed ")
-      cat(paste0(colnames(x)[i], ", remove "))
       rem <- df$remove[df$keep %in% i]
-      cat(paste(colnames(x)[rem], collapse = ", "))
-      cat("\n")
+      rem <- rem[!rem %in% remd]
+      if (length(rem) > 0) {
+        if (!i %in% df$remove) cat("Keep ") else cat ("Removed ")
+        cat(paste0(colnames(x)[i], ", remove "))
+        cat(paste(colnames(x)[rem], collapse = ", "))
+        remd <- c(remd, rem)
+        cat("\n")
+      }
     }
   }
   deletecol <- colsToCheck
