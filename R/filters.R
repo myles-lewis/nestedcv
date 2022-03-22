@@ -382,3 +382,30 @@ glmnet_filter <- function(y,
   if (type == "index") out <- as.integer(out)
   out
 }
+
+#' Filter to reduce collinearity in predictors
+#'
+#' This function identifies predictors with r^2 above a given cut-off and
+#' produces an index of predictors to be removed. The function takes a matrix or
+#' data.frame of predictors, and the columns need to be ordered in terms of
+#' importance - first column of any pair that are correlated is retained and
+#' subsequent columns which correlate above the cut-off are flagged for removal.
+#'
+#' @param x A matrix or data.frame of values. The order of columns is used to
+#'   determine which columns to retain, most important columns first.
+#' @param rsq_cutoff Value of cut-off for r-squared
+#' @return Vector of the indices of columns in `x` to remove due to collinearity
+#' @export
+#' 
+collinear_filter <- function(x, rsq_cutoff = 0.9) {
+  rsq <- cor(x)^2
+  rsq[lower.tri(rsq, diag = TRUE)] <- NA
+  combsAboveCutoff <- which(rsq > rsq_cutoff)
+  colsToCheck <- ceiling(combsAboveCutoff / nrow(rsq))
+  rowsToCheck <- combsAboveCutoff %% nrow(rsq)
+  colsToDiscard <- colsToCheck > rowsToCheck
+  rowsToDiscard <- !colsToDiscard
+  deletecol <- c(colsToCheck[colsToDiscard], rowsToCheck[rowsToDiscard])
+  deletecol <- unique(deletecol)
+  deletecol
+}

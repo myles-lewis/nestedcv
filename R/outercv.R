@@ -30,9 +30,10 @@
 #'   identified using [caret::modelLookup()].
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
+#' @importFrom methods formalArgs
 #' @importFrom parallel mclapply
 #' @importFrom pROC roc
-#' @importFrom stats predict setNames
+#' @importFrom stats as.formula predict setNames
 #' @export
 #' 
 outercv <- function(model, y, x,
