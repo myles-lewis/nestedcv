@@ -395,7 +395,8 @@ glmnet_filter <- function(y,
 #' subsequent columns which correlate above the cut-off are flagged for removal.
 #'
 #' @param x A matrix or data.frame of values. The order of columns is used to
-#'   determine which columns to retain, most important columns first.
+#'   determine which columns to retain, so the columns in `x` should be sorted
+#'   with the most important columns first.
 #' @param rsq_cutoff Value of cut-off for r-squared
 #' @param verbose Boolean whether to print details
 #' @return Integer vector of the indices of columns in `x` to remove due to

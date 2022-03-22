@@ -8,14 +8,16 @@ collinear(x, rsq_cutoff = 0.9, verbose = FALSE)
 }
 \arguments{
 \item{x}{A matrix or data.frame of values. The order of columns is used to
-determine which columns to retain, most important columns first.}
+determine which columns to retain, so the columns in \code{x} should be sorted
+with the most important columns first.}
 
 \item{rsq_cutoff}{Value of cut-off for r-squared}
 
 \item{verbose}{Boolean whether to print details}
 }
 \value{
-Vector of the indices of columns in \code{x} to remove due to collinearity
+Integer vector of the indices of columns in \code{x} to remove due to
+collinearity
 }
 \description{
 This function identifies predictors with r^2 above a given cut-off and
