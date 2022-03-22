@@ -82,6 +82,7 @@ outercv <- function(model, y, x,
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
+  rownames(output) <- unlist(lapply(predslist, rownames))
   fit.roc <- NULL
   if (reg) {
     df <- data.frame(obs = output$testy, pred = output$predy)

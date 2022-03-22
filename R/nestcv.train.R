@@ -112,6 +112,7 @@ nestcv.train <- function(y, x,
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
+  rownames(output) <- unlist(lapply(predslist, rownames))
   caret.roc <- NULL
   if (is.factor(y)) {
     if (nlevels(y) == 2) {
