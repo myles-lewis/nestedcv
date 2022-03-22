@@ -42,7 +42,7 @@ ttest_filter <- function(y,
   if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
   if (!is.null(rsq_cutoff)) {
     co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
-    out <- out[-co]
+    if (length(co) > 0) out <- out[-co]
   }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   if (length(out) == 0) stop("No predictors selected")
@@ -91,7 +91,7 @@ anova_filter <- function(y,
   if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
   if (!is.null(rsq_cutoff)) {
     co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
-    out <- out[-co]
+    if (length(co) > 0) out <- out[-co]
   }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   if (length(out) == 0) stop("No predictors selected")
@@ -150,7 +150,7 @@ wilcoxon_filter <- function(y,
   if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
   if (!is.null(rsq_cutoff)) {
     co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
-    out <- out[-co]
+    if (length(co) > 0) out <- out[-co]
   }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   if (length(out) == 0) stop("No predictors selected")
