@@ -8,10 +8,10 @@
 #' no tuning. If tuning of parameters on data is required, full nested CV with
 #' inner CV is recommended to tune model hyperparameters (see [nestcv.train]).
 #'
-#' @param model String specifying function to fit. Currently supports
-#'   randomForest and naive_bayes.
 #' @param y Response vector
 #' @param x Matrix of predictors
+#' @param model String specifying function to fit. Currently supports
+#'   randomForest and naive_bayes.
 #' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
 #'   Any function can be provided and is passed `y` and `x`. Must return a
 #'   character vector with names of filtered predictors.
@@ -36,7 +36,16 @@
 #' @importFrom stats as.formula predict setNames
 #' @export
 #' 
-outercv <- function(model, y, x,
+outercv <- function(y, ...) {
+  UseMethod("outercv")
+}
+
+
+#' @rdname outercv
+#' @export
+#' 
+outercv.default <- function(y, x,
+                            model,
                     filterFUN = NULL,
                     filter_options = NULL,
                     outer_method = c("cv", "LOOCV"),
@@ -132,3 +141,71 @@ outercv <- function(model, y, x,
 }
 
 
+#' @rdname outercv
+#' @export
+#' 
+outercv.formula <- function(formula, data,
+                            model,
+                            filterFUN = NULL,
+                            filter_options = NULL,
+                            outer_method = c("cv", "LOOCV"),
+                            n_outer_folds = 10,
+                            cores = 1,
+                            ...) {
+  reg <- !(is.factor(y) | is.character(y))  # y = regression
+  outer_method <- match.arg(outer_method)
+  outer_folds <- switch(outer_method,
+                        cv = createFolds(y, k = n_outer_folds),
+                        LOOCV = 1:length(y))
+  outer_res <- mclapply(1:length(outer_folds), function(i) {
+    test <- outer_folds[[i]]
+    y <- data[, all.vars(formula[[2]])]
+    fit <- model(formula = formula, data = data[test, ], ...)
+    # test on outer CV
+    predy <- predict(fit, newdata = data[test, ])
+    preds <- data.frame(predy=predy, testy=y[test])
+    # for AUC
+    if (!reg & nlevels(y) == 2) {
+      predyp <- predict(fit, newdata = data[test, ], type = "prob")
+      predyp <- predyp[,2]
+      preds$predyp <- predyp
+    }
+    rownames(preds) <- rownames(data[test, ])
+    list(preds = preds,
+         fit = fit)
+  }, mc.cores = cores)
+  predslist <- lapply(outer_res, '[[', 'preds')
+  output <- data.table::rbindlist(predslist)
+  output <- as.data.frame(output)
+  rownames(output) <- unlist(lapply(predslist, rownames))
+  fit.roc <- NULL
+  if (reg) {
+    df <- data.frame(obs = output$testy, pred = output$predy)
+    summary <- caret::defaultSummary(df)
+  } else if (nlevels(y) == 2) {
+    cm <- table(output$predy, output$testy)
+    acc <- sum(diag(cm))/ sum(cm)
+    ccm <- caret::confusionMatrix(cm)
+    b_acc <- ccm$byClass[11]
+    fit.roc <- pROC::roc(output$testy, output$predyp, direction = "<")
+    auc <- fit.roc$auc
+    summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
+  } else {
+    cm <- table(output$predy, output$testy)
+    acc <- sum(diag(cm))/ sum(cm)
+    ccm <- caret::confusionMatrix(cm)
+    b_acc <- ccm$byClass[11]
+    summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
+  }
+  
+  # fit final model
+  fit <- model(formula = formula, data = data, ...)
+  out <- list(output = output,
+              outer_result = outer_res,
+              outer_folds = outer_folds,
+              final_fit = fit,
+              roc = fit.roc,
+              summary = summary)
+  class(out) <- "outercv"
+  out
+}
