@@ -2,12 +2,16 @@
 % Please edit documentation in R/outercv.R
 \name{outercv}
 \alias{outercv}
+\alias{outercv.default}
+\alias{outercv.formula}
 \title{Outer cross-validation of selected models}
 \usage{
-outercv(
-  model,
+outercv(y, ...)
+
+\method{outercv}{default}(
   y,
   x,
+  model,
   filterFUN = NULL,
   filter_options = NULL,
   outer_method = c("cv", "LOOCV"),
@@ -15,18 +19,30 @@ outercv(
   cores = 1,
   ...
 )
+
+\method{outercv}{formula}(
+  formula,
+  data,
+  model,
+  outer_method = c("cv", "LOOCV"),
+  n_outer_folds = 10,
+  cores = 1,
+  ...
+)
 }
 \arguments{
-\item{model}{String specifying function to fit. Currently supports
-randomForest and naive_bayes.}
-
 \item{y}{Response vector}
+
+\item{...}{Optional arguments passed to the function specified by \code{model}.}
 
 \item{x}{Matrix of predictors}
 
+\item{model}{Model function to be fitted.}
+
 \item{filterFUN}{Filter function, e.g. \link{ttest_filter} or \link{relieff_filter}.
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
-character vector with names of filtered predictors.}
+character vector with names of filtered predictors. Not available if
+\code{outercv} is called with a formula.}
 
 \item{filter_options}{List of additional arguments passed to the filter
 function specified by \code{filterFUN}.}
@@ -39,20 +55,33 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 \item{cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}
 
-\item{...}{Optional arguments passed to the function specified by \code{model}.}
+\item{formula}{A formula describing the model to be fitted}
+
+\item{data}{A matrix or data frame containing variables in the model.}
 }
 \value{
 An object with S3 class "outercv"
 }
 \description{
-This is a convenience function designed to quickly evaluate performance of
-specific models (random forest, naive Bayes) with fixed hyperparameters and
-no tuning. If tuning of parameters on data is required, full nested CV with
-inner CV is recommended to tune model hyperparameters (see \link{nestcv.train}).
+This is a convenience function designed to use a single loop of
+cross-validation to quickly evaluate performance of specific models (random
+forest, naive Bayes, lm, glm) with fixed hyperparameters and no tuning. If
+tuning of parameters on data is required, full nested CV with inner CV is
+needed to tune model hyperparameters (see \link{nestcv.train}).
 }
 \details{
 An alternative method of tuning a single model with fixed parameters
 is to use \link{nestcv.train} with \code{tuneGrid} set as a single row of a
 data.frame. The parameters which are needed for a specific model can be
 identified using \code{\link[caret:modelLookup]{caret::modelLookup()}}.
+
+The formula method for \code{outercv} is not recommended with large data sets -
+it is designed primarily for more basic models e.g. \code{lm()} and \code{glm()}.
+Filtering is not available if \code{outercv} is called with a formula - use \code{x}
+and \code{y} interface instead.
+
+Note that in the case of \code{model = lm}, although additional arguments e.g.
+\code{subset}, \code{weights}, \code{offset} are passed into the model function via
+\code{"..."} the scoping is known to go wrong. Avoid using these arguments with
+\code{model = lm}.
 }
