@@ -462,3 +462,53 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
   deletecol <- unique(deletecol)
   deletecol
 }
+
+
+#' @importFrom RcppEigen fastLmPure
+#' @export
+#' 
+lm_filter <- function(y, x,
+                      force_vars = NULL,
+                      nfilter = NULL,
+                      p_cutoff = NULL,
+                      type = c("index", "names", "full"),
+                      ...) {
+  type <- match.arg(type)
+  if (is.data.frame(x)) {
+    is_factor <- vapply(x, is.factor, logical(1))
+    x[is_factor] <- lapply(x[is_factor], as.numeric)
+    x <- as.matrix(x)
+  }
+  check_vars <- colnames(x)[!colnames(x) %in% force_vars]
+  startx <- matrix(rep(1, nrow(x) *2), ncol = 2)
+  colnames(startx) <- c("(Intercept)", ".test")
+  if (length(force_vars) > 0) {
+    xset0 <- x[, force_vars, drop = FALSE]
+    xset <- cbind(startx, xset0)
+  } else xset <- startx
+  res <- sapply(check_vars, function(i) {
+    xset[, 2] <- x[, i]
+    fit <- fastLmPure(xset, y, method = 3L)
+    rss <- sum(fit$residuals^2)
+    tval <- fit$coefficients[2] / fit$se[2]
+    c(rss, tval)
+  })
+  rss <- res[1,]
+  tval <- res[2,]
+  n <- length(y)
+  P <- ncol(xset)
+  ## from stats::logLik.lm
+  loglik <- 0.5 * (-n * (log(2 * pi) + 1 - log(n) + log(rss)))
+  aic <- -2 * loglik + 2 * (P + 1)  ## from stats::AIC
+  rdf <- n - P
+  pval <- 2*pt(abs(tval), rdf, lower.tail = FALSE)  ## from stats::summary.lm
+  out <- cbind(aic, pval)
+  if (type == "full") return(out)
+  out <- out[order(out[,1]), ]
+  if (!is.null(p_cutoff)) out <- out[out[, 'pval'] < p_cutoff, ]
+  if (!is.null(nfilter)) out <- out[1:min(nfilter, nrow(out)), ]
+  if (nrow(out) == 0) stop("No predictors selected")
+  switch(type,
+         index = match(rownames(out), colnames(x)),
+         names = rownames(out))
+}
