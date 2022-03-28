@@ -494,8 +494,7 @@ lm_filter <- function(y, x,
                       force_vars = NULL,
                       nfilter = NULL,
                       p_cutoff = NULL,
-                      type = c("index", "names", "full"),
-                      ...) {
+                      type = c("index", "names", "full")) {
   type <- match.arg(type)
   if (is.data.frame(x)) {
     is_factor <- vapply(x, is.factor, logical(1))

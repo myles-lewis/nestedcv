@@ -10,8 +10,7 @@ lm_filter(
   force_vars = NULL,
   nfilter = NULL,
   p_cutoff = NULL,
-  type = c("index", "names", "full"),
-  ...
+  type = c("index", "names", "full")
 )
 }
 \arguments{
