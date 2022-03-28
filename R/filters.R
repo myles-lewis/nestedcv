@@ -463,7 +463,30 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
   deletecol
 }
 
-
+#' Linear model filter
+#'
+#' Linear models are fitted on each predictor, with inclusion of variable names
+#' listed in `force_vars` in the model. Predictors are ranked by Akaike
+#' information criteria (AIC) value, or can be filtered by the p-value on the
+#' estimate of the coefficient for that predictor in its model.
+#'
+#' @param y Numeric or integer response vector
+#' @param x Matrix of predictors. If `x` is a data.frame it will be turned into
+#'   a matrix. But note that factors will be reduced to numeric values, but a
+#'   full design matrix is not generated, so if factors have 3 or more levels,
+#'   it is recommended to convert `x` into a design (model) matrix first.
+#' @param force_vars Vector of column names `x` which are incorporated into the
+#'   linear model.
+#' @param nfilter Number of predictors to return. If `NULL` all predictors with
+#'   p-values < `p_cutoff` are returned.
+#' @param p_cutoff p-value cut-off. P-values are calculated by t-statistic on
+#'   the estimated coefficient for the predictor being tested.
+#' @param type Type of vector returned. Default "index" returns indices, "names"
+#'   returns predictor names, "full" returns a matrix of p values.
+#' @return Integer vector of indices of filtered parameters (`type = "index"`)
+#'   or character vector of names (`type = "names"`) of filtered parameters in
+#'   order of linear model AIC. If `type = "full"` a matrix of AIC values and
+#'   p-values for the tested predictor is returned.
 #' @importFrom RcppEigen fastLmPure
 #' @export
 #' 
