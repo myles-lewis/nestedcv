@@ -530,7 +530,8 @@ lm_filter <- function(y, x,
   if (!is.null(p_cutoff)) out <- out[out[, 'pval'] < p_cutoff, ]
   if (!is.null(nfilter)) out <- out[1:min(nfilter, nrow(out)), ]
   if (nrow(out) == 0) stop("No predictors selected")
+  out <- c(force_vars, rownames(out))
   switch(type,
-         index = match(rownames(out), colnames(x)),
-         names = rownames(out))
+         index = match(out, colnames(x)),
+         names = out)
 }
