@@ -32,6 +32,10 @@
 #' @param keep Logical indicating whether inner CV predictions are retained for
 #'   calculating left-out inner CV fold accuracy etc. See argument `keep` in
 #'   [cv.glmnet].
+#' @param penalty.factor Separate penalty factors can be applied to each
+#'   coefficient. Can be 0 for some variables, which implies no shrinkage, and
+#'   that variable is always included in the model. Default is 1 for all
+#'   variables. See [glmnet]
 #' @param cores Number of cores for parallel processing. Note this currently
 #'   uses [parallel::mclapply].
 #' @param ... Optional arguments passed to [cv.glmnet]
@@ -67,6 +71,7 @@ nestcv.glmnet <- function(y, x,
                           alphaSet = seq(0, 1, 0.1),
                           min_1se = 0,
                           keep = TRUE,
+                          penalty.factor = rep(1, ncol(x)),
                           cores = 1,
                           ...) {
   family <- match.arg(family)
@@ -78,15 +83,17 @@ nestcv.glmnet <- function(y, x,
   outer_res <- mclapply(1:length(outer_folds), function(i) {
     test <- outer_folds[[i]]
     # expand data with interactions
-    filtx <- if (is.null(filterFUN)) x else {
+    if (is.null(filterFUN)) filtx <- x else {
       args <- list(y = y[-test], x = x[-test, ])
       args <- append(args, filter_options)
       fset <- do.call(filterFUN, args)
-      x[, fset]
+      filtx <- x[, fset]
+      penalty.factor <- penalty.factor[fset]
     }
     cvafit <- cva.glmnet(x = filtx[-test, ], y = y[-test], 
                 alphaSet = alphaSet, nfolds = n_inner_folds,
-                keep = keep, family = family, ...)
+                keep = keep, family = family,
+                penalty.factor = penalty.factor, ...)
     alphafit <- cvafit$fits[[cvafit$which_alpha]]
     s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
     cf <- as.matrix(coef(alphafit, s = s))
@@ -140,13 +147,15 @@ nestcv.glmnet <- function(y, x,
   lam <- mean(unlist(lapply(outer_res, '[[', 'lambda')))
   alph <- mean(unlist(lapply(outer_res, '[[', 'alpha')))
   final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
-  filtx <- if (is.null(filterFUN)) x else {
+  if (is.null(filterFUN)) filtx <- x else {
     args <- list(y = y, x = x)
     args <- append(args, filter_options)
     fset <- do.call(filterFUN, args)
-    x[, fset]
+    filtx <- x[, fset]
+    penalty.factor <- penalty.factor[fset]
   }
-  fit <- glmnet(filtx, y, alpha = alph, family = family, ...)
+  fit <- glmnet(filtx, y, alpha = alph, family = family, 
+                penalty.factor = penalty.factor, ...)
   out <- list(call = nestcv.call,
               output = output,
               outer_result = outer_res,

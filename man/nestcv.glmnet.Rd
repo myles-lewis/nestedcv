@@ -16,6 +16,7 @@ nestcv.glmnet(
   alphaSet = seq(0, 1, 0.1),
   min_1se = 0,
   keep = TRUE,
+  penalty.factor = rep(1, ncol(x)),
   cores = 1,
   ...
 )
@@ -51,6 +52,11 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 \item{keep}{Logical indicating whether inner CV predictions are retained for
 calculating left-out inner CV fold accuracy etc. See argument \code{keep} in
 \link{cv.glmnet}.}
+
+\item{penalty.factor}{Separate penalty factors can be applied to each
+coefficient. Can be 0 for some variables, which implies no shrinkage, and
+that variable is always included in the model. Default is 1 for all
+variables. See \link{glmnet}}
 
 \item{cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}
