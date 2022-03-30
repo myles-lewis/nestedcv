@@ -485,8 +485,9 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
 #'   returns predictor names, "full" returns a matrix of p values.
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
 #'   or character vector of names (`type = "names"`) of filtered parameters in
-#'   order of linear model AIC. If `type = "full"` a matrix of AIC values and
-#'   p-values for the tested predictor is returned.
+#'   order of linear model AIC. Any variables in `force_vars` which are 
+#'   incorporated into all models are listed first. If `type = "full"` a matrix
+#'   of AIC values and p-values for the tested predictor is returned.
 #' @importFrom RcppEigen fastLmPure
 #' @export
 #' 
