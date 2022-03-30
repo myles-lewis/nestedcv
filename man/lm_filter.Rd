@@ -36,8 +36,10 @@ returns predictor names, "full" returns a matrix of p values.}
 \value{
 Integer vector of indices of filtered parameters (\code{type = "index"})
 or character vector of names (\code{type = "names"}) of filtered parameters in
-order of linear model AIC. If \code{type = "full"} a matrix of AIC values and
-p-values for the tested predictor is returned.
+order of linear model AIC. Any variables in \code{force_vars} which are
+incorporated into all models are listed first. If \code{type = "full"} a matrix
+of AIC values, sigma, the residual standard error (see \link{summary.lm}),
+t-statistic and p-values for the tested predictor is returned.
 }
 \description{
 Linear models are fitted on each predictor, with inclusion of variable names

@@ -485,9 +485,10 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
 #'   returns predictor names, "full" returns a matrix of p values.
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
 #'   or character vector of names (`type = "names"`) of filtered parameters in
-#'   order of linear model AIC. Any variables in `force_vars` which are 
+#'   order of linear model AIC. Any variables in `force_vars` which are
 #'   incorporated into all models are listed first. If `type = "full"` a matrix
-#'   of AIC values and p-values for the tested predictor is returned.
+#'   of AIC values, sigma, the residual standard error (see [summary.lm]),
+#'   t-statistic and p-values for the tested predictor is returned.
 #' @importFrom RcppEigen fastLmPure
 #' @export
 #' 
@@ -524,8 +525,10 @@ lm_filter <- function(y, x,
   loglik <- 0.5 * (-n * (log(2 * pi) + 1 - log(n) + log(rss)))
   aic <- -2 * loglik + 2 * (P + 1)  ## from stats::AIC
   rdf <- n - P
+  resvar <- rss/rdf
+  sigma <- sqrt(resvar)
   pval <- 2*pt(abs(tval), rdf, lower.tail = FALSE)  ## from stats::summary.lm
-  out <- cbind(aic, pval)
+  out <- cbind(aic, sigma, tval, pval)
   if (type == "full") return(out)
   out <- out[order(out[,1]), ]
   if (!is.null(p_cutoff)) out <- out[out[, 'pval'] < p_cutoff, ]
