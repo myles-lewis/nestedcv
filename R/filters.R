@@ -491,6 +491,11 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
 #'   p-values < `p_cutoff` are returned.
 #' @param p_cutoff p-value cut-off. P-values are calculated by t-statistic on
 #'   the estimated coefficient for the predictor being tested.
+#' @param rsq_cutoff r^2 cutoff for removing predictors due to collinearity.
+#'   Default `NULL` means no collinearity filtering. Predictors are ranked based
+#'   on AIC from a linear model. If 2 or more predictors are collinear, the
+#'   first ranked predictor by AIC is retained, while the other collinear
+#'   predictors are removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a matrix of p values.
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
@@ -501,11 +506,12 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
 #'   t-statistic and p-values for the tested predictor is returned.
 #' @importFrom RcppEigen fastLmPure
 #' @export
-#' 
+#'
 lm_filter <- function(y, x,
                       force_vars = NULL,
                       nfilter = NULL,
                       p_cutoff = NULL,
+                      rsq_cutoff = NULL,
                       type = c("index", "names", "full")) {
   type <- match.arg(type)
   if (is.data.frame(x)) {
@@ -542,6 +548,10 @@ lm_filter <- function(y, x,
   if (type == "full") return(out)
   out <- out[order(out[,1]), ]
   if (!is.null(p_cutoff)) out <- out[out[, 'pval'] < p_cutoff, ]
+  if (!is.null(rsq_cutoff)) {
+    co <- collinear(x[, rownames(out)], rsq_cutoff = rsq_cutoff)
+    if (length(co) > 0) out <- out[-co, ]
+  }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, nrow(out)), ]
   if (nrow(out) == 0) stop("No predictors selected")
   out <- c(force_vars, rownames(out))
