@@ -160,3 +160,106 @@ plot(ncv$outer_result[[1]]$fit, xTrans = log)
 # Extract coefficients of final fitted model
 glmnet_coefs(ncv$final_fit$finalModel, s = ncv$finalTune$lambda)
 ```
+
+
+## Linear regression with hsstan (continuous outcome)
+
+```
+# Cross-validation is used to apply univariate filtering of predictors.
+# only one CV split is needed (outercv) as the Bayesian model does not require
+# learning of meta-parameters.
+
+# load iris dataset and simulate a continuous outcome
+data(iris)
+dt <- iris[, 1:4]
+colnames(dt) <- c("marker1", "marker2", "marker3", "marker4")
+dt <- as.data.frame(apply(dt, 2, scale))
+dt$outcome.cont <- -3 + 0.5 * dt$marker1 + 2 * dt$marker2 + rnorm(nrow(dt), 0, 2)
+
+# unpenalised covariates: always retain in the prediction model
+uvars <- "marker1"
+# penalised covariates: coefficients are drawn from hierarchical shrinkage prior
+pvars <- c("marker2", "marker3", "marker4") # penalised covariates
+# run cross-validation with univariate filter and hsstan
+res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
+                         model = model.hsstan,
+                         filterFUN = lm_filter,
+                         filter_options = list(force_vars = uvars,
+                                               nfilter = 2,
+                                               p_cutoff = NULL,
+                                               rsq_cutoff = 0.9),
+                         n_outer_folds = 3, cores = 3,
+                         unpenalized = uvars, warmup = 1000, iter = 2000)
+# view prediction performance based on testing folds
+res.cv.hsstan$summary
+# view coefficients for the final model
+res.cv.hsstan$final_fit
+# view covariates selected by the univariate filter
+res.cv.hsstan$final_vars
+
+# load hsstan package to examine the Bayesian model
+library(hsstan)
+sampler.stats(res.cv.hsstan$final_fit)
+print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
+print(paste("Adding marker2 improves the model fit: substantial decrease of",
+            "KL-divergence from the full model to the submodel."))
+print(paste("Adding marker3 does not improve the model fit: no decrease of",
+            "KL-divergence from the full model to the submodel."))
+```
+
+## Logistic regression with hsstan (binary outcome)
+
+```
+# Cross-validation is used to apply univariate filtering of predictors.
+# only one CV split is needed (outercv) as the Bayesian model does not require
+# learning of meta-parameters.
+
+# sigmoid function
+sigmoid = function(x) {
+  1 / (1 + exp(-x))
+}
+
+# load iris dataset and create a binary outcome
+set.seed(267)
+data(iris)
+dt <- iris[, 1:4]
+colnames(dt) <- c("marker1", "marker2", "marker3", "marker4")
+dt <- as.data.frame(apply(dt, 2, scale))
+rownames(dt) <- paste0("sample", c(1:nrow(dt)))
+dt$outcome.bin <- sigmoid(0.5 * dt$marker1 + 2 * dt$marker2) > runif(nrow(dt))
+dt$outcome.bin <- factor(dt$outcome.bin)
+
+
+# unpenalised covariates: always retain in the prediction model
+uvars <- "marker1"
+# penalised covariates: coefficients are drawn from hierarchical shrinkage prior
+pvars <- c("marker2", "marker3", "marker4") # penalised covariates
+# run cross-validation with univariate filter and hsstan
+res.cv.hsstan <- outercv(y = dt$outcome.bin,
+                         x = as.matrix(dt[, c(uvars, pvars)]),
+                         model = model.hsstan,
+                         filterFUN = ttest_filter,
+                         filter_options = list(force_vars = uvars,
+                                               nfilter = 2,
+                                               p_cutoff = NULL,
+                                               rsq_cutoff = 0.9),
+                         n_outer_folds = 3, cores = 3,
+                         unpenalized = uvars, warmup = 1000, iter = 2000)
+
+
+# view prediction performance based on testing folds
+res.cv.hsstan$summary
+# view coefficients for the final model
+res.cv.hsstan$final_fit
+# view covariates selected by the univariate filter
+res.cv.hsstan$final_vars
+
+# load hsstan package to examine the Bayesian model
+library(hsstan)
+sampler.stats(res.cv.hsstan$final_fit)
+print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
+print(paste("Adding marker2 improves the model fit: substantial decrease of",
+            "KL-divergence from the full model to the submodel."))
+print(paste("Adding marker3 does not improve the model fit: no decrease of",
+            "KL-divergence from the full model to the submodel."))
+```
