@@ -209,6 +209,7 @@ plot(res.rtx$roc, main = "Outer fold ROC", font.main = 1, col = 'blue')
 legend("bottomright", legend = paste0("AUC = ", signif(pROC::auc(res.rtx$roc), 3)), bty = 'n')
 
 # Inner CV ROC
+rtx.inroc <- innercv_roc(res.rtx)
 plot(rtx.inroc, main = "Inner fold ROC", font.main = 1, col = 'red')
 legend("bottomright", legend = paste0("AUC = ", signif(pROC::auc(rtx.inroc), 3)), bty = 'n')
 ```
