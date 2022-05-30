@@ -3,9 +3,13 @@
 #' t-test filter
 #'
 #' Simple univariate filter using t-test using the Rfast package for speed.
+#' Can be applied to all or a subset of predictors.
 #'
 #' @param y Response vector
 #' @param x Matrix of predictors
+#' @param force_vars Vector of column names `x` which are always retained into
+#'   the model (i.e. not filtered). Default `NULL` means all predictors will be
+#'   passed to `filterFUN`.
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with
 #'   p-values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
@@ -16,15 +20,18 @@
 #'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a matrix of p values.
+#'
 #' @return Integer vector of indices of filtered parameters (type = "index") or
 #'   character vector of names (type = "names") of filtered parameters in order
 #'   of t-test p-value. If `type` is `"full"` full output from
 #'   [Rfast::ttests] is returned.
+#'
 #' @importFrom Rfast ttests
 #' @export
-#' 
+#'
 ttest_filter <- function(y,
                        x,
+                       force_vars,
                        nfilter = NULL,
                        p_cutoff = 0.05,
                        rsq_cutoff = NULL,
@@ -36,9 +43,11 @@ ttest_filter <- function(y,
   res <- Rfast::ttests(x[indx1, ], x[indx2, ])
   rownames(res) <- 1:ncol(x)
   if (type == "full") return(res)
-  outp <- res[, "pvalue"]
-  out <- order(outp)
-  outp <- outp[out]
+  check_vars <- which(!colnames(x) %in% force_vars)
+  outp <- res[check_vars, "pvalue"]
+  outorder <- order(outp)
+  out <- check_vars[outorder]
+  outp <- outp[outorder]
   if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
   if (!is.null(rsq_cutoff)) {
     co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
@@ -46,6 +55,7 @@ ttest_filter <- function(y,
   }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   if (length(out) == 0) stop("No predictors selected")
+  out <- c(which(colnames(x) %in% force_vars), out)
   switch(type,
          index = out, names = colnames(x)[out])
 }
@@ -481,6 +491,11 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
 #'   p-values < `p_cutoff` are returned.
 #' @param p_cutoff p-value cut-off. P-values are calculated by t-statistic on
 #'   the estimated coefficient for the predictor being tested.
+#' @param rsq_cutoff r^2 cutoff for removing predictors due to collinearity.
+#'   Default `NULL` means no collinearity filtering. Predictors are ranked based
+#'   on AIC from a linear model. If 2 or more predictors are collinear, the
+#'   first ranked predictor by AIC is retained, while the other collinear
+#'   predictors are removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a matrix of p values.
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
@@ -491,11 +506,12 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
 #'   t-statistic and p-values for the tested predictor is returned.
 #' @importFrom RcppEigen fastLmPure
 #' @export
-#' 
+#'
 lm_filter <- function(y, x,
                       force_vars = NULL,
                       nfilter = NULL,
                       p_cutoff = NULL,
+                      rsq_cutoff = NULL,
                       type = c("index", "names", "full")) {
   type <- match.arg(type)
   if (is.data.frame(x)) {
@@ -532,6 +548,10 @@ lm_filter <- function(y, x,
   if (type == "full") return(out)
   out <- out[order(out[,1]), ]
   if (!is.null(p_cutoff)) out <- out[out[, 'pval'] < p_cutoff, ]
+  if (!is.null(rsq_cutoff)) {
+    co <- collinear(x[, rownames(out)], rsq_cutoff = rsq_cutoff)
+    if (length(co) > 0) out <- out[-co, ]
+  }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, nrow(out)), ]
   if (nrow(out) == 0) stop("No predictors selected")
   out <- c(force_vars, rownames(out))
