@@ -5,7 +5,10 @@ Authors@R:
     c(person(given = "Myles",family = "Lewis",
     role = c("aut", "cre"),
     email = "myles.lewis@qmul.ac.uk",
-    comment = c(ORCID = "0000-0001-9365-5345")))
+    comment = c(ORCID = "0000-0001-9365-5345")),
+    person(given = "Athina",family = "Spiliopoulou",
+    role = c("aut"),
+    comment = c(ORCID = "0000-0002-5929-6585")))
 Maintainer: Myles Lewis <myles.lewis@qmul.ac.uk>
 Description: Nested cross-validation for the 'glmnet' and 'caret' packages, 
     including cross-validation of 'glmnet' alpha parameter and fast filter 
@@ -17,6 +20,7 @@ Imports:
     CORElearn,
     data.table,
     glmnet,
+    hsstan,
     matrixTests,
     methods,
     parallel,
@@ -25,7 +29,7 @@ Imports:
     RcppEigen,
     Rfast
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Suggests: 
     rmarkdown,
     knitr

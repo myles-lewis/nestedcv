@@ -25,6 +25,7 @@
 #'   function using the `filter_options$force_vars` argument. Filters currently
 #'   implementing this option are the `partial_ttest_filter` for binary outcomes
 #'   and the `lm_filter` for continuous outcomes.
+#' @param ... Optional arguments passed to `hsstan`
 #'
 #' @return An object of class `hsstan`
 #'
@@ -73,15 +74,16 @@ model.hsstan <- function(y, x, unpenalized = NULL, ...) {
 #'
 #' Draws from the posterior predictive distribution of the outcome.
 #'
-#' @param object: An object of class `hsstan`.
-#' @param newdata: Optional data frame containing the variables to use to
+#' @param object An object of class `hsstan`.
+#' @param newdata Optional data frame containing the variables to use to
 #'   predict. If `NULL` (default), the model matrix is used. If specified, its
 #'   continuous variables should be standardized, since the model coefficients
 #'   are learnt on standardized data.
-#' @param type: Option for binary outcomes only. Default `NULL` will return a
+#' @param type Option for binary outcomes only. Default `NULL` will return a
 #'   class with the highest probability for each sample. If set to `probs`, it
 #'   will return the probabilities for outcome = 0 and for outcome = 1 for each
 #'   sample.
+#' @param ... Optional arguments passed to `hsstan::posterior_predict`
 #'
 #' @return For a binary outcome and type = `NULL`, a character vector with the
 #'   name of the class that has the highest probability for each sample.

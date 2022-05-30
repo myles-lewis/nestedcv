@@ -7,6 +7,7 @@
 ttest_filter(
   y,
   x,
+  force_vars,
   nfilter = NULL,
   p_cutoff = 0.05,
   rsq_cutoff = NULL,
@@ -17,6 +18,10 @@ ttest_filter(
 \item{y}{Response vector}
 
 \item{x}{Matrix of predictors}
+
+\item{force_vars}{Vector of column names \code{x} which are always retained into
+the model (i.e. not filtered). Default \code{NULL} means all predictors will be
+passed to \code{filterFUN}.}
 
 \item{nfilter}{Number of predictors to return. If \code{NULL} all predictors with
 p-values < \code{p_cutoff} are returned.}
@@ -40,4 +45,5 @@ of t-test p-value. If \code{type} is \code{"full"} full output from
 }
 \description{
 Simple univariate filter using t-test using the Rfast package for speed.
+Can be applied to all or a subset of predictors.
 }

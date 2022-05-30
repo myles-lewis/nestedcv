@@ -10,6 +10,7 @@ lm_filter(
   force_vars = NULL,
   nfilter = NULL,
   p_cutoff = NULL,
+  rsq_cutoff = NULL,
   type = c("index", "names", "full")
 )
 }
@@ -29,6 +30,12 @@ p-values < \code{p_cutoff} are returned.}
 
 \item{p_cutoff}{p-value cut-off. P-values are calculated by t-statistic on
 the estimated coefficient for the predictor being tested.}
+
+\item{rsq_cutoff}{r^2 cutoff for removing predictors due to collinearity.
+Default \code{NULL} means no collinearity filtering. Predictors are ranked based
+on AIC from a linear model. If 2 or more predictors are collinear, the
+first ranked predictor by AIC is retained, while the other collinear
+predictors are removed. See \code{\link[=collinear]{collinear()}}.}
 
 \item{type}{Type of vector returned. Default "index" returns indices, "names"
 returns predictor names, "full" returns a matrix of p values.}
