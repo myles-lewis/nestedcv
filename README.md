@@ -203,9 +203,10 @@ sampler.stats(res.cv.hsstan$final_fit)
 print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
 ```
 
-Adding `marker2` improves the model fit: substantial decrease of KL-divergence
-from the full model to the submodel. Adding `marker3` does not improve the model
-fit: no decrease of KL-divergence from the full model to the submodel.
+Here adding `marker2` improves the model fit: substantial decrease of
+KL-divergence from the full model to the submodel. Adding `marker3` does not
+improve the model fit: no decrease of KL-divergence from the full model to the
+submodel.
 
 ## Logistic regression with hsstan (binary outcome)
 
@@ -260,6 +261,7 @@ sampler.stats(res.cv.hsstan$final_fit)
 print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
 ```
 
-Adding `marker2` improves the model fit: substantial decrease of KL-divergence
-from the full model to the submodel. Adding `marker3` does not improve the model
-fit: no decrease of KL-divergence from the full model to the submodel.
+Here adding `marker2` improves the model fit: substantial decrease of
+KL-divergence from the full model to the submodel. Adding `marker3` does not
+improve the model fit: no decrease of KL-divergence from the full model to the
+submodel.
