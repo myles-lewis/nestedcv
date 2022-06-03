@@ -96,7 +96,7 @@ outercv.default <- function(y, x,
       predyp <- predyp[,2]
       preds$predyp <- predyp
     }
-    rownames(preds) <- rownames(x[test, ])
+    rownames(preds) <- rownames(x[test, , drop = FALSE])
     list(preds = preds,
          fit = fit,
          nfilter = ncol(filtx))
@@ -203,7 +203,7 @@ outercv.formula <- function(formula, data,
       predyp <- predyp[,2]
       preds$predyp <- predyp
     }
-    rownames(preds) <- rownames(data[test, ])
+    rownames(preds) <- rownames(data[test, , drop = FALSE])
     list(preds = preds,
          fit = fit)
   }, mc.cores = cv.cores)
