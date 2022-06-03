@@ -16,7 +16,7 @@ outercv(y, ...)
   filter_options = NULL,
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
-  cores = 1,
+  cv.cores = 1,
   ...
 )
 
@@ -26,7 +26,7 @@ outercv(y, ...)
   model,
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
-  cores = 1,
+  cv.cores = 1,
   ...
 )
 }
@@ -52,7 +52,7 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
 \item{n_outer_folds}{Number of outer CV folds}
 
-\item{cores}{Number of cores for parallel processing. Note this currently
+\item{cv.cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}
 
 \item{formula}{A formula describing the model to be fitted}

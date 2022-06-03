@@ -17,7 +17,7 @@ nestcv.glmnet(
   min_1se = 0,
   keep = TRUE,
   penalty.factor = rep(1, ncol(x)),
-  cores = 1,
+  cv.cores = 1,
   ...
 )
 }
@@ -58,7 +58,7 @@ coefficient. Can be 0 for some variables, which implies no shrinkage, and
 that variable is always included in the model. Default is 1 for all
 variables. See \link{glmnet}}
 
-\item{cores}{Number of cores for parallel processing. Note this currently
+\item{cv.cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}
 
 \item{...}{Optional arguments passed to \link{cv.glmnet}}

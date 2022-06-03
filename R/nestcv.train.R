@@ -29,7 +29,7 @@
 #'   CV fold should be saved for ROC curves, accuracy etc see
 #'   [caret::trainControl].Set to `"final"` to capture predictions for inner CV
 #'   ROC.
-#' @param cores Number of cores for parallel processing. Note this currently
+#' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses `parallel::mclapply`.
 #' @param ... Arguments passed to [caret::train]
 #' @details Parallelisation is performed on the outer folds using `mclapply`.
@@ -62,7 +62,7 @@ nestcv.train <- function(y, x,
                          filterFUN = NULL,
                          filter_options = NULL, 
                          n_outer_folds = 10,
-                         cores = 1,
+                         cv.cores = 1,
                          metric = ifelse(is.factor(y), "logLoss", "RMSE"),
                          trControl = NULL,
                          tuneGrid = NULL,
@@ -108,7 +108,7 @@ nestcv.train <- function(y, x,
                 fit = fit,
                 nfilter = ncol(filtx))
     ret
-  }, mc.cores = cores)
+  }, mc.cores = cv.cores)
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)

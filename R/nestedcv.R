@@ -36,7 +36,7 @@
 #'   coefficient. Can be 0 for some variables, which implies no shrinkage, and
 #'   that variable is always included in the model. Default is 1 for all
 #'   variables. See [glmnet]
-#' @param cores Number of cores for parallel processing. Note this currently
+#' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses [parallel::mclapply].
 #' @param ... Optional arguments passed to [cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet" \item{call}{the matched call}
@@ -72,7 +72,7 @@ nestcv.glmnet <- function(y, x,
                           min_1se = 0,
                           keep = TRUE,
                           penalty.factor = rep(1, ncol(x)),
-                          cores = 1,
+                          cv.cores = 1,
                           ...) {
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)
@@ -120,7 +120,7 @@ nestcv.glmnet <- function(y, x,
       ret <- append(ret, list(ytrain = ytrain, innerCV_preds = innerCV_preds))
     }
     ret
-  }, mc.cores = cores)
+  }, mc.cores = cv.cores)
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)

@@ -23,7 +23,7 @@
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
-#' @param cores Number of cores for parallel processing. Note this currently
+#' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses [parallel::mclapply].
 #' @param ... Optional arguments passed to the function specified by `model`.
 #' @return An object with S3 class "outercv"
@@ -63,7 +63,7 @@ outercv.default <- function(y, x,
                             filter_options = NULL,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
-                            cores = 1,
+                            cv.cores = 1,
                             ...) {
   reg <- !(is.factor(y) | is.character(y))  # y = regression
   outer_method <- match.arg(outer_method)
@@ -100,7 +100,7 @@ outercv.default <- function(y, x,
     list(preds = preds,
          fit = fit,
          nfilter = ncol(filtx))
-  }, mc.cores = cores)
+  }, mc.cores = cv.cores)
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
@@ -162,7 +162,7 @@ outercv.formula <- function(formula, data,
                             model,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
-                            cores = 1, ...) {
+                            cv.cores = 1, ...) {
   # if model does not use formula, then revert to outercv.default(x, y, ...)
   if (!"formula" %in% formalArgs(model)) {
     # sample code from randomForest.formula/ svm.formula/ train.formula
@@ -181,7 +181,7 @@ outercv.formula <- function(formula, data,
     m <- model.frame(terms(reformulate(attributes(Terms)$term.labels)),
                      data.frame(m))
     out <- outercv.default(y, m, outer_method = outer_method, 
-                           n_outer_folds = n_outer_folds, cores = cores, ...)
+                           n_outer_folds = n_outer_folds, cv.cores = cv.cores, ...)
     return(out)
   }
   # for models designed for formula method
@@ -206,7 +206,7 @@ outercv.formula <- function(formula, data,
     rownames(preds) <- rownames(data[test, ])
     list(preds = preds,
          fit = fit)
-  }, mc.cores = cores)
+  }, mc.cores = cv.cores)
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)

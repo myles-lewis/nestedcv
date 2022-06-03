@@ -13,7 +13,7 @@ Maintainer: Myles Lewis <myles.lewis@qmul.ac.uk>
 Description: Nested cross-validation for the 'glmnet' and 'caret' packages, 
     including cross-validation of 'glmnet' alpha parameter and fast filter 
     functions for feature selection.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
     caret,

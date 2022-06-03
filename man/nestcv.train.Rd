@@ -10,7 +10,7 @@ nestcv.train(
   filterFUN = NULL,
   filter_options = NULL,
   n_outer_folds = 10,
-  cores = 1,
+  cv.cores = 1,
   metric = ifelse(is.factor(y), "logLoss", "RMSE"),
   trControl = NULL,
   tuneGrid = NULL,
@@ -32,7 +32,7 @@ function specified by \code{filterFUN}.}
 
 \item{n_outer_folds}{Number of outer CV folds}
 
-\item{cores}{Number of cores for parallel processing. Note this currently
+\item{cv.cores}{Number of cores for parallel processing. Note this currently
 uses \code{parallel::mclapply}.}
 
 \item{metric}{A string that specifies what summary metric will be used to
