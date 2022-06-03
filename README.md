@@ -216,9 +216,7 @@ learning of meta-parameters.
 
 ```
 # sigmoid function
-sigmoid = function(x) {
-  1 / (1 + exp(-x))
-}
+sigmoid <- function(x) {1 / (1 + exp(-x))}
 
 # load iris dataset and create a binary outcome
 set.seed(267)
