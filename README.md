@@ -201,19 +201,19 @@ res.cv.hsstan$final_vars
 library(hsstan)
 sampler.stats(res.cv.hsstan$final_fit)
 print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
-print(paste("Adding marker2 improves the model fit: substantial decrease of",
-            "KL-divergence from the full model to the submodel."))
-print(paste("Adding marker3 does not improve the model fit: no decrease of",
-            "KL-divergence from the full model to the submodel."))
 ```
+
+Adding `marker2` improves the model fit: substantial decrease of KL-divergence
+from the full model to the submodel. Adding `marker3` does not improve the model
+fit: no decrease of KL-divergence from the full model to the submodel.
 
 ## Logistic regression with hsstan (binary outcome)
 
-```
-# Cross-validation is used to apply univariate filtering of predictors.
-# only one CV split is needed (outercv) as the Bayesian model does not require
-# learning of meta-parameters.
+Cross-validation is used to apply univariate filtering of predictors.
+only one CV split is needed (outercv) as the Bayesian model does not require
+learning of meta-parameters.
 
+```
 # sigmoid function
 sigmoid = function(x) {
   1 / (1 + exp(-x))
@@ -258,8 +258,8 @@ res.cv.hsstan$final_vars
 library(hsstan)
 sampler.stats(res.cv.hsstan$final_fit)
 print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
-print(paste("Adding marker2 improves the model fit: substantial decrease of",
-            "KL-divergence from the full model to the submodel."))
-print(paste("Adding marker3 does not improve the model fit: no decrease of",
-            "KL-divergence from the full model to the submodel."))
 ```
+
+Adding `marker2` improves the model fit: substantial decrease of KL-divergence
+from the full model to the submodel. Adding `marker3` does not improve the model
+fit: no decrease of KL-divergence from the full model to the submodel.
