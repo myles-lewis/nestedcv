@@ -105,7 +105,7 @@ nestcv.glmnet <- function(y, x,
     predy <- as.vector(predict(alphafit, newx = filtx[test, ], s = s, type = "class"))
     predyp <- as.vector(predict(alphafit, newx = filtx[test, ], s = s))
     preds <- data.frame(predy=predy, predyp=predyp, testy=y[test])
-    rownames(preds) <- rownames(x[test, ])
+    rownames(preds) <- rownames(x[test, , drop = FALSE])
     ret <- list(preds = preds,
                 lambda = s,
                 alpha = cvafit$best_alpha,
