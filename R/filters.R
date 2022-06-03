@@ -7,9 +7,9 @@
 #'
 #' @param y Response vector
 #' @param x Matrix of predictors
-#' @param force_vars Vector of column names `x` which are always retained into
-#'   the model (i.e. not filtered). Default `NULL` means all predictors will be
-#'   passed to `filterFUN`.
+#' @param force_vars Vector of column names within `x` which are always retained
+#'   in the model (i.e. not filtered). Default `NULL` means all predictors will
+#'   be passed to `filterFUN`.
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with
 #'   p-values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
