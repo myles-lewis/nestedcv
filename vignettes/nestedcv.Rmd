@@ -104,8 +104,8 @@ leaves >16,000 genes), and we subset the dataset to the rituximab treated
 individuals (n=68).
 
 ```{r eval = FALSE}
-# Data for this example can be downloaded from:
-# DOI: 10.6084/m9.figshare.19336679
+# Raw RNA-Seq data for this example is located at:
+# https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-11611/
 
 # set up data
 load("/../R4RA_270821.RData")
@@ -357,7 +357,7 @@ uvars <- "marker1"
 # penalised covariates: coefficients are drawn from hierarchical shrinkage prior
 pvars <- c("marker2", "marker3", "marker4") # penalised covariates
 # run cross-validation with univariate filter and hsstan
-options(mc.cores=2)
+options(mc.cores=2)  # to pass CRAN package checks
 res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                          model = model.hsstan,
                          filterFUN = lm_filter,
@@ -451,7 +451,7 @@ controlled trial. Lancet. 2021;397(10271):305-317.
 Rivellese F, Surace AEA, Goldmann K, et al, Lewis MJ, Pitzalis C and the R4RA
 collaborative group. Rituximab versus tocilizumab in rheumatoid arthritis:
 Synovial biopsy-based biomarker analysis of the phase 4 R4RA randomized trial.
-Nature medicine. 2022; accepted.
+Nature medicine 2022. https://doi.org/10.1038/s41591-022-01789-0
 
 Vabalas A, Gowen E, Poliakoff E, Casson AJ. Machine learning algorithm
 validation with a limited sample size. PloS one. 2019;14(11):e0224365.
