@@ -31,7 +31,7 @@
 #'
 ttest_filter <- function(y,
                        x,
-                       force_vars,
+                       force_vars = NULL,
                        nfilter = NULL,
                        p_cutoff = 0.05,
                        rsq_cutoff = NULL,
