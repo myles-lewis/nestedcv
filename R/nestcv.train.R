@@ -189,6 +189,9 @@ summary.nestcv.train <- function(object,
   print(object$finalTune, digits = digits, print.gap = 2L, row.names = FALSE)
   cat("\nResult:\n")
   print(object$summary, digits = digits, print.gap = 2L)
+  out <- list(folds = foldres, final_param = object$finalTune,
+              result = object$summary)
+  invisible(out)
 }
 
 
