@@ -32,7 +32,8 @@
 #'   \item{outer_result}{List object of results from each outer fold containing
 #'   predictions on left-out outer folds, model result and number of filtered
 #'   predictors at each fold.}
-#'   \item{dimx}{dimensions of `x`}
+#'   \item{dimx}{dimensions of `x`; or number of rows of `data` for formula
+#'   method}
 #'   \item{outer_folds}{List of indices of outer training folds}
 #'   \item{final_fit}{Final fitted model on whole data}
 #'   \item{final_vars}{Column names of filtered predictors entering final model}
