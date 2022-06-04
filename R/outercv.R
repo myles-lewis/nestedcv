@@ -220,7 +220,8 @@ outercv.formula <- function(formula, data,
     acc <- sum(diag(cm))/ sum(cm)
     ccm <- caret::confusionMatrix(cm)
     b_acc <- ccm$byClass[11]
-    fit.roc <- pROC::roc(output$testy, output$predyp, direction = "<")
+    fit.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
+                         quiet = TRUE)
     auc <- fit.roc$auc
     summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
   } else {

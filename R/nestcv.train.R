@@ -120,7 +120,8 @@ nestcv.train <- function(y, x,
       acc <- sum(diag(cm))/ sum(cm)
       ccm <- caret::confusionMatrix(cm)
       b_acc <- ccm$byClass[11]
-      caret.roc <- pROC::roc(output$testy, output[, 2], direction = "<")
+      caret.roc <- pROC::roc(output$testy, output[, 2], direction = "<", 
+                             quiet = TRUE)
       auc <- caret.roc$auc
       summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Bal_accuracy"))
     } else {
