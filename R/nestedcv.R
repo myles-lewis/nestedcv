@@ -303,7 +303,7 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
   lambda <- unlist(lapply(object$outer_result, '[[', 'lambda'))
   nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
   foldres <- data.frame(alpha = alpha, lambda = lambda, n.filter = nfilter,
-                        row.names = paste("Fold", 1:length(alpha)))
+                        row.names = paste("Fold", seq_along(alpha)))
   print(foldres, digits = digits)
   cat("\nFinal parameters:\n")
   print(object$final_param, digits = digits, print.gap = 2L)

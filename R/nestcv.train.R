@@ -68,6 +68,7 @@ nestcv.train <- function(y, x,
                          tuneGrid = NULL,
                          savePredictions = FALSE,
                          ...) {
+  nestcv.call <- match.call(expand.dots = TRUE)
   if (is.null(trControl)) {
     trControl <- if (is.factor(y)) {
       trainControl(method = "cv", 
@@ -120,7 +121,7 @@ nestcv.train <- function(y, x,
       acc <- sum(diag(cm))/ sum(cm)
       ccm <- caret::confusionMatrix(cm)
       b_acc <- ccm$byClass[11]
-      caret.roc <- pROC::roc(output$testy, output[, 2], direction = "<", 
+      caret.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
                              quiet = TRUE)
       auc <- caret.roc$auc
       summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Bal_accuracy"))
@@ -139,7 +140,7 @@ nestcv.train <- function(y, x,
   }
   bestTunes <- lapply(outer_res, function(i) i$fit$bestTune)
   bestTunes <- as.data.frame(data.table::rbindlist(bestTunes))
-  rownames(bestTunes) <- paste0('Fold', 1:n_outer_folds)
+  rownames(bestTunes) <- paste('Fold', seq_along(n_outer_folds))
   finalTune <- colMeans(bestTunes)
   finalTune <- data.frame(as.list(finalTune))
   filtx <- if (is.null(filterFUN)) x else {
@@ -153,9 +154,11 @@ nestcv.train <- function(y, x,
                             trControl = fitControl,
                             tuneGrid = finalTune, ...)
   
-  out <- list(output = output,
+  out <- list(call = nestcv.call,
+              output = output,
               outer_result = outer_res,
               dimx = dim(x),
+              outer_folds = outer_folds,
               final_fit = final_fit,
               final_vars = colnames(filtx),
               roc = caret.roc,
@@ -164,6 +167,25 @@ nestcv.train <- function(y, x,
               summary = summary)
   class(out) <- "nestcv.train"
   out
+}
+
+#' @export
+summary.nestcv.train <- function(object, 
+                                 digits = max(3L, getOption("digits") - 3L), 
+                                 ...) {
+  cat("Nested cross-validation with caret\n")
+  if (!is.null(object$call$filterFUN)) 
+    cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
+  cat("Outer loop: ", paste0(length(object$outer_folds), "-fold CV\n"))
+  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
+  nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
+  foldres <- object$bestTunes
+  foldres$n.filter <- nfilter
+  print(foldres, digits = digits, print.gap = 2L)
+  cat("\nFinal parameters:\n")
+  print(object$finalTune, digits = digits, print.gap = 2L, row.names = FALSE)
+  cat("\nResult:\n")
+  print(object$summary, digits = digits, print.gap = 2L)
 }
 
 
