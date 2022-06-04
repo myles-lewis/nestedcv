@@ -32,6 +32,23 @@
 #' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses `parallel::mclapply`.
 #' @param ... Arguments passed to [caret::train]
+#' @return An object with S3 class "nestcv.train"
+#'   \item{call}{the matched call}
+#'   \item{output}{Predictions on the left-out outer folds}
+#'   \item{outer_result}{List object of results from each outer fold containing
+#'   predictions on left-out outer folds, caret result and number of filtered
+#'   predictors at each fold.}
+#'   \item{dimx}{dimensions of `x`}
+#'   \item{outer_folds}{List of indices of outer training folds}
+#'   \item{final_fit}{Final fitted caret model using best tune parameters}
+#'   \item{final_vars}{Column names of filtered predictors entering final model}
+#'   \item{roc}{ROC AUC for binary classification where available.}
+#'   \item{trControl}{`caret::trainControl` object used for inner CV}
+#'   \item{bestTunes}{best tuned parameters from each outer fold}
+#'   \item{finalTune}{final parameters used for final model}
+#'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
+#'   for classification. ROC AUC for binary classification. RMSE for
+#'   regression.}
 #' @details Parallelisation is performed on the outer folds using `mclapply`.
 #'   For classification `metric` defaults to using 'logLoss' with the
 #'   `trControl` arguments `classProbs = TRUE, summaryFunction = mnLogLoss`,
@@ -43,11 +60,6 @@
 #'   `trControl` defaults to `trainControl(method = "none")` which disables
 #'   inner CV as it is unnecessary. See
 #'   https://topepo.github.io/caret/model-training-and-tuning.html#fitting-models-without-parameter-tuning
-#'
-#'
-#'
-#'
-#'
 #'
 #' @author Myles Lewis
 #' @importFrom caret createFolds train trainControl mnLogLoss confusionMatrix
