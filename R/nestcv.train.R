@@ -155,6 +155,7 @@ nestcv.train <- function(y, x,
   
   out <- list(output = output,
               outer_result = outer_res,
+              dimx = dim(x),
               final_fit = final_fit,
               final_vars = colnames(filtx),
               roc = caret.roc,

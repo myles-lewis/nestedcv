@@ -50,7 +50,7 @@
 #'   \item{n_inner_folds}{number of inner folds}
 #'   \item{outer_folds}{List of
 #'   indices of outer training folds}
-#'   \item{ncolx}{number of predictors in `x`}
+#'   \item{dimx}{dimensions of `x`}
 #'   \item{final_param}{Final mean best lambda
 #'   and alpha from each fold}
 #'   \item{final_fit}{Final fitted glmnet model}
@@ -175,7 +175,7 @@ nestcv.glmnet <- function(y, x,
               outer_method = outer_method,
               n_inner_folds = n_inner_folds,
               outer_folds = outer_folds,
-              ncolx = ncol(x),
+              dimx = dim(x),
               final_param = final_param,
               final_fit = fit,
               roc = glmnet.roc,
@@ -298,7 +298,7 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
                          cv = paste0(length(object$outer_folds), "-fold CV"),
                          loocv = "leave-one-out CV"))
   cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n"))
-  cat(object$ncolx, "predictors\n\n")
+  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
   alpha <- unlist(lapply(object$outer_result, '[[', 'alpha'))
   lambda <- unlist(lapply(object$outer_result, '[[', 'lambda'))
   nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))

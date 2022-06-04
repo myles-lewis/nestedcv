@@ -75,7 +75,7 @@ predictors at each fold.}
 \item{n_inner_folds}{number of inner folds}
 \item{outer_folds}{List of
 indices of outer training folds}
-\item{ncolx}{number of predictors in \code{x}}
+\item{dimx}{dimensions of \code{x}}
 \item{final_param}{Final mean best lambda
 and alpha from each fold}
 \item{final_fit}{Final fitted glmnet model}

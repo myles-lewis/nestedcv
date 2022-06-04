@@ -237,6 +237,7 @@ outercv.formula <- function(formula, data,
   out <- list(output = output,
               outer_result = outer_res,
               outer_folds = outer_folds,
+              dimx = dim(x),
               final_fit = fit,
               roc = fit.roc,
               summary = summary)
