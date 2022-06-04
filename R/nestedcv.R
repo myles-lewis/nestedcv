@@ -39,15 +39,21 @@
 #' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses [parallel::mclapply].
 #' @param ... Optional arguments passed to [cv.glmnet]
-#' @return An object with S3 class "nestcv.glmnet" \item{call}{the matched call}
+#' @return An object with S3 class "nestcv.glmnet"
+#'   \item{call}{the matched call}
 #'   \item{output}{Predictions on the left-out outer folds}
 #'   \item{outer_result}{List object of results from each outer fold containing
 #'   predictions on left-out outer folds, best lambda, best alpha, fitted glmnet
 #'   coefficients, list object of inner fitted cv.glmnet and number of filtered
-#'   predictors at each fold.} \item{outer_method}{the `outer_method` argument}
-#'   \item{n_inner_folds}{number of inner folds} \item{outer_folds}{List of
-#'   indices of outer training folds} \item{final_param}{Final mean best lambda
-#'   and alpha from each fold} \item{final_fit}{Final fitted glmnet model}
+#'   predictors at each fold.}
+#'   \item{outer_method}{the `outer_method` argument}
+#'   \item{n_inner_folds}{number of inner folds}
+#'   \item{outer_folds}{List of
+#'   indices of outer training folds}
+#'   \item{ncolx}{number of predictors in `x`}
+#'   \item{final_param}{Final mean best lambda
+#'   and alpha from each fold}
+#'   \item{final_fit}{Final fitted glmnet model}
 #'   \item{roc}{ROC AUC for binary classification where available.}
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
@@ -168,6 +174,7 @@ nestcv.glmnet <- function(y, x,
               outer_method = outer_method,
               n_inner_folds = n_inner_folds,
               outer_folds = outer_folds,
+              ncolx = ncol(x),
               final_param = final_param,
               final_fit = fit,
               roc = glmnet.roc,
@@ -289,7 +296,8 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
   cat("Outer loop: ", switch(object$outer_method,
                          cv = paste0(length(object$outer_folds), "-fold CV"),
                          loocv = "leave-one-out CV"))
-  cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n\n"))
+  cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n"))
+  cat(object$ncolx, "predictors\n\n")
   alpha <- unlist(lapply(object$outer_result, '[[', 'alpha'))
   lambda <- unlist(lapply(object$outer_result, '[[', 'lambda'))
   nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
