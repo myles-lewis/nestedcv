@@ -124,14 +124,14 @@ nestcv.train <- function(y, x,
       caret.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
                              quiet = TRUE)
       auc <- caret.roc$auc
-      summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Bal_accuracy"))
+      summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
     } else {
       # multinomial class
       cm <- table(output$predy, output$testy)
       acc <- sum(diag(cm))/ sum(cm)
       ccm <- caret::confusionMatrix(cm)
       b_acc <- ccm$byClass[11]
-      summary <- setNames(c(acc, b_acc), c("Accuracy", "Bal_accuracy"))
+      summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
     }
   } else {
     # regression
@@ -140,7 +140,7 @@ nestcv.train <- function(y, x,
   }
   bestTunes <- lapply(outer_res, function(i) i$fit$bestTune)
   bestTunes <- as.data.frame(data.table::rbindlist(bestTunes))
-  rownames(bestTunes) <- paste('Fold', seq_along(n_outer_folds))
+  rownames(bestTunes) <- paste('Fold', seq_len(n_outer_folds))
   finalTune <- colMeans(bestTunes)
   finalTune <- data.frame(as.list(finalTune))
   filtx <- if (is.null(filterFUN)) x else {
@@ -162,6 +162,7 @@ nestcv.train <- function(y, x,
               final_fit = final_fit,
               final_vars = colnames(filtx),
               roc = caret.roc,
+              trControl = trControl,
               bestTunes = bestTunes,
               finalTune = finalTune,
               summary = summary)
@@ -176,7 +177,9 @@ summary.nestcv.train <- function(object,
   cat("Nested cross-validation with caret\n")
   if (!is.null(object$call$filterFUN)) 
     cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
-  cat("Outer loop: ", paste0(length(object$outer_folds), "-fold CV\n"))
+  cat("Outer loop: ", paste0(length(object$outer_folds), "-fold cv\n"))
+  cat("Inner loop: ", paste0(object$trControl$number, "-fold ",
+                             object$trControl$method, "\n"))
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
   nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
   foldres <- object$bestTunes
