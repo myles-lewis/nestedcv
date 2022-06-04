@@ -68,7 +68,8 @@
 #' @export
 #' 
 nestcv.glmnet <- function(y, x,
-                          family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
+                          family = c("gaussian", "binomial", "poisson", 
+                                     "multinomial", "cox", "mgaussian"),
                           filterFUN = NULL,
                           filter_options = NULL,
                           outer_method = c("cv", "LOOCV"),
