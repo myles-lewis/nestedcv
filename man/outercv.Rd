@@ -61,6 +61,19 @@ uses \link[parallel:mclapply]{parallel::mclapply}.}
 }
 \value{
 An object with S3 class "outercv"
+\item{call}{the matched call}
+\item{output}{Predictions on the left-out outer folds}
+\item{outer_result}{List object of results from each outer fold containing
+predictions on left-out outer folds, model result and number of filtered
+predictors at each fold.}
+\item{dimx}{dimensions of \code{x}}
+\item{outer_folds}{List of indices of outer training folds}
+\item{final_fit}{Final fitted model on whole data}
+\item{final_vars}{Column names of filtered predictors entering final model}
+\item{roc}{ROC AUC for binary classification where available.}
+\item{summary}{Overall performance summary. Accuracy and balanced accuracy
+for classification. ROC AUC for binary classification. RMSE for
+regression.}
 }
 \description{
 This is a convenience function designed to use a single loop of

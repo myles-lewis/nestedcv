@@ -27,6 +27,19 @@
 #'   uses [parallel::mclapply].
 #' @param ... Optional arguments passed to the function specified by `model`.
 #' @return An object with S3 class "outercv"
+#'   \item{call}{the matched call}
+#'   \item{output}{Predictions on the left-out outer folds}
+#'   \item{outer_result}{List object of results from each outer fold containing
+#'   predictions on left-out outer folds, model result and number of filtered
+#'   predictors at each fold.}
+#'   \item{dimx}{dimensions of `x`}
+#'   \item{outer_folds}{List of indices of outer training folds}
+#'   \item{final_fit}{Final fitted model on whole data}
+#'   \item{final_vars}{Column names of filtered predictors entering final model}
+#'   \item{roc}{ROC AUC for binary classification where available.}
+#'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
+#'   for classification. ROC AUC for binary classification. RMSE for
+#'   regression.}
 #' @details An alternative method of tuning a single model with fixed parameters
 #'   is to use [nestcv.train] with `tuneGrid` set as a single row of a
 #'   data.frame. The parameters which are needed for a specific model can be
@@ -65,6 +78,7 @@ outercv.default <- function(y, x,
                             n_outer_folds = 10,
                             cv.cores = 1,
                             ...) {
+  outercv.call <- match.call(expand.dots = TRUE)
   reg <- !(is.factor(y) | is.character(y))  # y = regression
   outer_method <- match.arg(outer_method)
   outer_folds <- switch(outer_method,
@@ -114,7 +128,8 @@ outercv.default <- function(y, x,
     acc <- sum(diag(cm))/ sum(cm)
     ccm <- caret::confusionMatrix(cm)
     b_acc <- ccm$byClass[11]
-    fit.roc <- pROC::roc(output$testy, output$predyp, direction = "<")
+    fit.roc <- pROC::roc(output$testy, output$predyp, direction = "<",
+                         quiet = TRUE)
     auc <- fit.roc$auc
     summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
   } else {
@@ -142,7 +157,8 @@ outercv.default <- function(y, x,
   } else {
     fit <- model(y = y, x = filtx, ...)
   }
-  out <- list(output = output,
+  out <- list(call = outercv.call,
+              output = output,
               outer_result = outer_res,
               outer_folds = outer_folds,
               dimx = dim(x),
@@ -164,6 +180,7 @@ outercv.formula <- function(formula, data,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
                             cv.cores = 1, ...) {
+  outercv.call <- match.call(expand.dots = TRUE)
   # if model does not use formula, then revert to outercv.default(x, y, ...)
   if (!"formula" %in% formalArgs(model)) {
     # sample code from randomForest.formula/ svm.formula/ train.formula
@@ -235,7 +252,8 @@ outercv.formula <- function(formula, data,
   
   # fit final model
   fit <- model(formula = formula, data = data, ...)
-  out <- list(output = output,
+  out <- list(call = outercv.call,
+              output = output,
               outer_result = outer_res,
               outer_folds = outer_folds,
               dimx = nrow(data),
