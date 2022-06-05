@@ -2,7 +2,7 @@
 % Please edit documentation in R/cv.hsstan.R
 \name{predict.hsstan}
 \alias{predict.hsstan}
-\title{predict from hsstan model fitted within cross-validation}
+\title{Predict from hsstan model fitted within cross-validation}
 \usage{
 \method{predict}{hsstan}(object, newdata = NULL, type = NULL, ...)
 }

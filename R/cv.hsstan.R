@@ -1,7 +1,7 @@
 # Train and predict wrapper functions for calling hsstan with filters from the
 # nestedcv package. Only outer.cv is needed
 
-#' hsstan model to be fitted with cross-validation
+#' hsstan model for cross-validation
 #'
 #' This function applies a cross-validation (CV) procedure for training Bayesian
 #' models with hierarchical shrinkage priors using the `hsstan` package.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cv.hsstan.R
 \name{model.hsstan}
 \alias{model.hsstan}
-\title{hsstan model to be fitted with cross-validation}
+\title{hsstan model for cross-validation}
 \usage{
 model.hsstan(y, x, unpenalized = NULL, ...)
 }
