@@ -41,7 +41,13 @@
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
 #'   regression.}
-#' @details An alternative method of tuning a single model with fixed parameters
+#' @details 
+#'   Some predictive model functions do not have an x & y interface. If the
+#'   function specified by `model` requires a formula, `x` & `y` will be merged
+#'   into a data.frame with `model()` called with a formula equivalent to 
+#'   `y ~ .`.
+#'   
+#'   An alternative method of tuning a single model with fixed parameters
 #'   is to use [nestcv.train] with `tuneGrid` set as a single row of a
 #'   data.frame. The parameters which are needed for a specific model can be
 #'   identified using [caret::modelLookup()].

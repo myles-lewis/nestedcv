@@ -441,6 +441,30 @@ KL-divergence from the full model to the submodel. Adding `marker3` does not
 improve the model fit: no decrease of KL-divergence from the full model to the
 submodel.
 
+# Parallelisation
+
+Currently `nestcv.glmnet`, `nestcv.train` and `outercv` all allow
+parallelisation using `mclapply` from the `parallel` package. This is enabled by
+specifying the number of cores using the argument `cv.cores`. Since in some
+cases the filtering process can be time consuming (e.g. `rf_filter`,
+`relieff_filter`), we tend to recommend parallelisation of the outer CV loop
+over parallelisation of the inner CV loop.
+
+The `caret` package is set up for parallelisation using `foreach`
+(https://topepo.github.io/caret/parallel-processing.html). We generally do not
+recommend nested parallelisation of both outer and inner loops, although this is
+theoretically feasible if you have enough cores. If *P* processors are
+registered with the parallel backend, some `caret` functionality leads to *P*^2^
+processes being generated. We generally find this does not lead to much speed up
+once the number of processes reaches the number of physical cores, as all
+processors are saturated and there is both time and memory overheads for
+duplicating data and packages for each process.
+
+Note at time of writing, there appears to be a bug in `rstan` (used by `hsstan`)
+leading to it ignoring the argument `cores` and instead spawning multiple
+processes as specified by the `chain` argument. This behaviour can be limited by
+setting `options(mc.cores = ..)`.
+
 # References
 
 Humby F, Durez P, Buch MH, et al. Rituximab versus tocilizumab in anti-TNF

@@ -66,7 +66,8 @@ An object with S3 class "outercv"
 \item{outer_result}{List object of results from each outer fold containing
 predictions on left-out outer folds, model result and number of filtered
 predictors at each fold.}
-\item{dimx}{dimensions of \code{x}}
+\item{dimx}{dimensions of \code{x}; or number of rows of \code{data} for formula
+method}
 \item{outer_folds}{List of indices of outer training folds}
 \item{final_fit}{Final fitted model on whole data}
 \item{final_vars}{Column names of filtered predictors entering final model}
@@ -83,6 +84,11 @@ tuning of parameters on data is required, full nested CV with inner CV is
 needed to tune model hyperparameters (see \link{nestcv.train}).
 }
 \details{
+Some predictive model functions do not have an x & y interface. If the
+function specified by \code{model} requires a formula, \code{x} & \code{y} will be merged
+into a data.frame with \code{model()} called with a formula equivalent to
+\code{y ~ .}.
+
 An alternative method of tuning a single model with fixed parameters
 is to use \link{nestcv.train} with \code{tuneGrid} set as a single row of a
 data.frame. The parameters which are needed for a specific model can be
