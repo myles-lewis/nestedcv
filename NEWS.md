@@ -6,9 +6,9 @@ News
 
 * Major update to include nestedcv.train function which adds nested CV to the 
 `train` function of `caret`
-* Note passing of extra arguments to filter functions specifed by `filterFUN` is 
-no longer done through `...` but with a list of arguments passed through a new 
-argument `filter_options`.
+* Note passing of extra arguments to filter functions specified by `filterFUN`
+is no longer done through `...` but with a list of arguments passed through a
+new argument `filter_options`.
 
 # nestedcv 0.0.9003
 ###### 02/03/2022

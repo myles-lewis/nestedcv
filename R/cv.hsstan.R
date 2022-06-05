@@ -32,6 +32,55 @@
 #' @author Athina Spiliopoulou
 #' @importFrom hsstan hsstan
 #' @importFrom data.table as.data.table
+#' @examples
+#' 
+#' # Cross-validation is used to apply univariate filtering of predictors.
+#' # only one CV split is needed (outercv) as the Bayesian model does not 
+#' # require learning of meta-parameters.
+#' 
+#' # load iris dataset and simulate a continuous outcome
+#' data(iris)
+#' dt <- iris[, 1:4]
+#' colnames(dt) <- c("marker1", "marker2", "marker3", "marker4")
+#' dt <- as.data.frame(apply(dt, 2, scale))
+#' dt$outcome.cont <- -3 + 0.5 * dt$marker1 + 2 * dt$marker2 + rnorm(nrow(dt), 0, 2)
+#' 
+#' # unpenalised covariates: always retain in the prediction model
+#' uvars <- "marker1"
+#' # penalised covariates: coefficients are drawn from hierarchical shrinkage
+#' # prior
+#' pvars <- c("marker2", "marker3", "marker4") # penalised covariates
+#' # run cross-validation with univariate filter and hsstan
+#' # dummy sampling for fast execution of example
+#' # recommend 4 chains, warmup 1000, iter 2000 in practice
+#' oldopt <- options(mc.cores = 2)
+#' res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
+#'                          model = model.hsstan,
+#'                          filterFUN = lm_filter,
+#'                          filter_options = list(force_vars = uvars,
+#'                                                nfilter = 2,
+#'                                                p_cutoff = NULL,
+#'                                                rsq_cutoff = 0.9),
+#'                          n_outer_folds = 3, chains = 2,
+#'                          unpenalized = uvars, warmup = 100, iter = 200)
+#' # view prediction performance based on testing folds
+#' res.cv.hsstan$summary
+#' # view coefficients for the final model
+#' res.cv.hsstan$final_fit
+#' # view covariates selected by the univariate filter
+#' res.cv.hsstan$final_vars
+#' 
+#' # load hsstan package to examine the Bayesian model
+#' library(hsstan)
+#' sampler.stats(res.cv.hsstan$final_fit)
+#' print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
+#' options(oldopt)
+#' 
+#' # Here adding `marker2` improves the model fit: substantial decrease of
+#' # KL-divergence from the full model to the submodel. Adding `marker3` does 
+#' # not improve the model fit: no decrease of KL-divergence from the full model 
+#' # to the submodel.
+#' 
 #' @export
 #'
 model.hsstan <- function(y, x, unpenalized = NULL, ...) {
@@ -70,7 +119,7 @@ model.hsstan <- function(y, x, unpenalized = NULL, ...) {
     return(fit)
 }
 
-#' predict from hsstan model fitted within cross-validation
+#' Predict from hsstan model fitted within cross-validation
 #'
 #' Draws from the posterior predictive distribution of the outcome.
 #'
