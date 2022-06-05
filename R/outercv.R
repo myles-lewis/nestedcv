@@ -32,8 +32,7 @@
 #'   \item{outer_result}{List object of results from each outer fold containing
 #'   predictions on left-out outer folds, model result and number of filtered
 #'   predictors at each fold.}
-#'   \item{dimx}{dimensions of `x`; or number of rows of `data` for formula
-#'   method}
+#'   \item{dimx}{vector of number of observations and number of predictors}
 #'   \item{outer_folds}{List of indices of outer training folds}
 #'   \item{final_fit}{Final fitted model on whole data}
 #'   \item{final_vars}{Column names of filtered predictors entering final model}
@@ -263,10 +262,35 @@ outercv.formula <- function(formula, data,
               output = output,
               outer_result = outer_res,
               outer_folds = outer_folds,
-              dimx = nrow(data),
+              dimx = c(nrow(data), length(labels(terms(fit)))),
               final_fit = fit,
               roc = fit.roc,
               summary = summary)
   class(out) <- "outercv"
   out
+}
+
+
+#' @export
+summary.outercv <- function(object, 
+                                 digits = max(3L, getOption("digits") - 3L), 
+                                 ...) {
+  cat("Single cross-validation to measure performance\n")
+  if (!is.null(object$call$filterFUN)) 
+    cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
+  cat("Outer loop: ", paste0(length(object$outer_folds), "-fold cv\n"))
+  cat("No inner loop\n")
+  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
+  if ("nfilter" %in% names(object$outer_result[[1]])) {
+    nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
+    nfilter <- data.frame(n.filter = nfilter,
+                          row.names = paste("Fold", seq_along(nfilter)))
+    print(nfilter, digits = digits, print.gap = 2L)
+    cat("\n")
+  } else nfilter <- NULL
+  cat("Result:\n")
+  print(object$summary, digits = digits, print.gap = 2L)
+  out <- list(dimx = object$dimx, nfilter = nfilter,
+              result = object$summary)
+  invisible(out)
 }
