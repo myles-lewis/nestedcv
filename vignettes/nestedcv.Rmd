@@ -21,6 +21,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 library(nestedcv)
+library(pROC)
 ```
 
 # Introduction
@@ -89,16 +90,69 @@ library(nestedcv)
 
 # Examples
 
+### Importance of nested CV
+
+The following simulated example demonstrates the bias intrinsic to datasets where *P* >>
+*n* when applying filtering of predictors to the whole dataset rather than to
+training folds.
+
+```{r}
+## Example binary classification problem with P >> n
+x <- matrix(rnorm(150 * 2e+04), 150, 2e+04)  # predictors
+y <- factor(rbinom(150, 1, 0.5))  # binary response
+
+## Partition data into 2/3 training set, 1/3 test set
+trainSet <- caret::createDataPartition(y, p = 0.66, list = FALSE)
+
+## t-test filter using whole test set
+filt <- ttest_filter(y, x, nfilter = 100)
+filx <- x[, filt]
+
+## Train glmnet on training set only using filtered predictor matrix
+library(glmnet)
+fit <- cv.glmnet(filx[trainSet, ], y[trainSet], family = "binomial")
+
+## Predict response on test set
+predy <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "class")
+predy <- as.vector(predy)
+predyp <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "response")
+predyp <- as.vector(predyp)
+output <- data.frame(testy = y[-trainSet], predy = predy, predyp = predyp)
+
+## Results on test set
+## shows bias since univariate filtering was applied to whole dataset
+predSummary(output)
+
+## Nested CV
+fit2 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 7:10 / 10,
+                      filterFUN = ttest_filter,
+                      filter_options = list(nfilter = 100))
+fit2
+
+testroc <- pROC::roc(output$testy, output$predyp, direction = "<", quiet = TRUE)
+inroc <- innercv_roc(fit2)
+plot(fit2$roc)
+lines(inroc, col = 'blue')
+lines(testroc, col = 'red')
+legend('bottomright', legend = c("Nested CV", "Left-out inner CV folds", 
+                                 "Test partition, non-nested filtering"), 
+       col = c("black", "blue", "red"), lty = 1, lwd = 2, bty = "n")
+```
+
+Here the dataset is pure noise. Filtering of predictors on the whole dataset is
+a source of leakage of information about the test set, leading to substantially
+overoptimistic performance on the test set as measured by ROC AUC.
+
 ### Nested CV with glmnet
 
-In the example below, RNA-Sequencing gene expression data from synovial biopsies
-from patients with rheumatoid arthritis in the R4RA randomised clinical trial
-(Humby et al, 2021) is used to predict clinical response to the biologic drug
-rituximab. Treatment response is determined by a clinical measure, namely
-Clinical Disease Activity Index (CDAI) 50% response, which has a binary outcome:
-treatment success or failure (response or non-response). This dataset contains
-gene expression on over 50,000 genes in arthritic synovial tissue from 133
-individuals, who were randomised to two drugs (rituximab and tocilizumab).
+In the real life example below, RNA-Sequencing gene expression data from
+synovial biopsies from patients with rheumatoid arthritis in the R4RA randomised
+clinical trial (Humby et al, 2021) is used to predict clinical response to the
+biologic drug rituximab. Treatment response is determined by a clinical measure,
+namely Clinical Disease Activity Index (CDAI) 50% response, which has a binary
+outcome: treatment success or failure (response or non-response). This dataset
+contains gene expression on over 50,000 genes in arthritic synovial tissue from
+133 individuals, who were randomised to two drugs (rituximab and tocilizumab).
 First, we remove genes of low expression using a median cut-off (this still
 leaves >16,000 genes), and we subset the dataset to the rituximab treated
 individuals (n=68).
