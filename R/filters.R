@@ -40,6 +40,7 @@ ttest_filter <- function(y,
   y <- factor(y)
   indx1 <- as.numeric(y) == 1
   indx2 <- as.numeric(y) == 2
+  x <- as.matrix(x)
   res <- Rfast::ttests(x[indx1, ], x[indx2, ])
   rownames(res) <- 1:ncol(x)
   if (type == "full") return(res)
@@ -92,6 +93,7 @@ anova_filter <- function(y,
                        type = c("index", "names", "full")) {
   type <- match.arg(type)
   y <- factor(y)
+  x <- as.matrix(x)
   res <- Rfast::ftests(x, y)
   rownames(res) <- if (type == "index") 1:ncol(x) else colnames(x)
   if (type == "full") return(res)
