@@ -41,6 +41,7 @@ ttest_filter <- function(y,
   indx1 <- as.numeric(y) == 1
   indx2 <- as.numeric(y) == 2
   x <- as.matrix(x)
+  if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
   res <- Rfast::ttests(x[indx1, ], x[indx2, ])
   rownames(res) <- 1:ncol(x)
   if (type == "full") return(res)
