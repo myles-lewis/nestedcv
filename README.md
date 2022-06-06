@@ -43,7 +43,7 @@ data.rtx <- data[metadata$Randomised.medication == "Rituximab", ]
 
 # no filter
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0.5,
-                         family = "binomial", cores = 8,
+                         family = "binomial", cv.cores = 4,
                          alphaSet = seq(0.7, 1, 0.05))
 res.rtx
 ```
@@ -57,7 +57,7 @@ function are passed as a list through `filter_options`.
 # t-test filter
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
                          filter_options = list(nfilter = 300, p_cutoff = NULL),
-                         family = "binomial", cores = 8,
+                         family = "binomial", cv.cores = 4,
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
 ```
@@ -108,14 +108,14 @@ correlation for regression modelling, random forest and ReliefF filters.
 # random forest filter
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0.5, filterFUN = rf_filter,
                          filter_options = list(nfilter = 300),
-                         family = "binomial", cores = 8, 
+                         family = "binomial", cv.cores = 4, 
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
 
 # ReliefF algorithm filter
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = relieff_filter,
                          filter_options = list(nfilter = 300),
-                         family = "binomial", cores = 8, 
+                         family = "binomial", cv.cores = 4, 
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
 ```
@@ -127,7 +127,7 @@ Leave-one-out cross-validation (LOOCV) can be performed on the outer folds.
 res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
                          filter_options = list(nfilter = 300, p_cutoff = NULL),
                          outer_method = "loocv",
-                         family = "binomial", cores = 8,
+                         family = "binomial", cv.cores = 4,
                          alphaSet = seq(0.7, 1, 0.05))
 summary(res.rtx)
 ```
@@ -143,7 +143,7 @@ ncv <- nestcv.train(y = yrtx, x = data.rtx,
                method = "glmnet",
                savePredictions = "final",
                filterFUN = ttest_filter, filter_options = list(nfilter = 300),
-               tuneGrid = tg, cores = 8)
+               tuneGrid = tg, cv.cores = 4)
 ncv$summary
 
 # Plot ROC on outer folds
