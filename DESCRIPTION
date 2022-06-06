@@ -35,6 +35,7 @@ Imports:
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.0
 Suggests: 
+    mda,
     rmarkdown,
     knitr
 VignetteBuilder: knitr

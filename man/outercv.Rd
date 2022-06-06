@@ -110,3 +110,51 @@ Note that in the case of \code{model = lm}, although additional arguments e.g.
 \code{"..."} the scoping is known to go wrong. Avoid using these arguments with
 \code{model = lm}.
 }
+\examples{
+
+## Classification example
+
+## sigmoid function
+sigmoid <- function(x) {1 / (1 + exp(-x))}
+
+# load iris dataset and simulate a binary outcome
+data(iris)
+dt <- iris[, 1:4]
+colnames(dt) <- c("marker1", "marker2", "marker3", "marker4")
+dt <- as.data.frame(apply(dt, 2, scale))
+x <- dt
+y2 <- sigmoid(0.5 * dt$marker1 + 2 * dt$marker2) > runif(nrow(dt))
+y2 <- factor(y2)
+
+## Random forest
+library(randomForest)
+cvfit <- outercv(y2, x, randomForest)
+summary(cvfit)
+plot(cvfit$roc)
+
+## Mixture discriminant analysis (MDA)
+if (requireNamespace("mda", quietly = TRUE)) {
+  library(mda)
+  cvfit <- outercv(y2, x, mda, predict_type = "posterior")
+  summary(cvfit)
+}
+
+
+## Example with continuous outcome
+y <- -3 + 0.5 * dt$marker1 + 2 * dt$marker2 + rnorm(nrow(dt), 0, 2)
+dt$outcome <- y
+
+## simple linear model - formula interface
+cvfit <- outercv(outcome ~ ., data = dt, model = lm)
+summary(cvfit)
+
+## random forest for regression
+cvfit <- outercv(y, x, randomForest)
+summary(cvfit)
+
+## example with lm_filter() to reduce input predictors
+cvfit <- outercv(y, x, randomForest, filterFUN = lm_filter,
+                 filter_options = list(nfilter = 2))
+summary(cvfit)
+
+}
