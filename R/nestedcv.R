@@ -99,6 +99,14 @@
 #'                       filterFUN = ttest_filter,
 #'                       filter_options = list(nfilter = 100))
 #' summary(fit2)
+#' plot_lambdas(fit2, showLegend = "bottomright")
+#' 
+#' library(pROC)
+#' plot(fit2$roc)
+#' inroc <- innercv_roc(fit2)
+#' lines(inroc, col = 'blue')
+#' legend('bottomright', legend = c("Nested CV", "Left-out inner CV folds"), 
+#'        col = c("black", "blue"), lty = 1, lwd = 2, bty = "n")
 #' 
 #' @export
 #' 

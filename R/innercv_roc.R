@@ -25,7 +25,7 @@ innercv_roc <- function(x, ...) {
 innercv_roc.nestcv.glmnet <- function(x, direction = "<", ...) {
   innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
   ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
-  pROC::roc(ytrain, innerpreds, direction = direction, ...)
+  pROC::roc(ytrain, innerpreds, direction = direction, quiet = TRUE, ...)
 }
 
 
@@ -36,5 +36,5 @@ innercv_roc.nestcv.glmnet <- function(x, direction = "<", ...) {
 innercv_roc.nestcv.train <- function(x, direction = "<", ...) {
   innerpreds <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
   ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
-  pROC::roc(ytrain, innerpreds, direction = direction, ...)
+  pROC::roc(ytrain, innerpreds, direction = direction, quiet = TRUE, ...)
 }
