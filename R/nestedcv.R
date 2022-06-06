@@ -101,12 +101,16 @@
 #' summary(fit2)
 #' plot_lambdas(fit2, showLegend = "bottomright")
 #' 
+#' ## ROC plots
 #' library(pROC)
-#' plot(fit2$roc)
+#' testroc <- roc(output$testy, output$predyp, direction = "<")
 #' inroc <- innercv_roc(fit2)
+#' plot(fit2$roc)
 #' lines(inroc, col = 'blue')
-#' legend('bottomright', legend = c("Nested CV", "Left-out inner CV folds"), 
-#'        col = c("black", "blue"), lty = 1, lwd = 2, bty = "n")
+#' lines(testroc, col = 'red')
+#' legend('bottomright', legend = c("Nested CV", "Left-out inner CV folds", 
+#'                                  "Test partition, non-nested filtering"), 
+#'        col = c("black", "blue", "red"), lty = 1, lwd = 2, bty = "n")
 #' 
 #' @export
 #' 
