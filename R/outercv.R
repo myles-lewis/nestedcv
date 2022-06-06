@@ -25,6 +25,11 @@
 #' @param n_outer_folds Number of outer CV folds
 #' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses [parallel::mclapply].
+#' @param predict_type Only used with binary classification. Calculation of ROC
+#'   AUC requires predicted class probabilities from fitted models. Most model
+#'   functions use syntax of the form `predict(..., type = "prob")`. However,
+#'   some models require a different `type` to be specified, which can be passed
+#'   to `predict()` via `predict_type`.
 #' @param ... Optional arguments passed to the function specified by `model`.
 #' @return An object with S3 class "outercv"
 #'   \item{call}{the matched call}
@@ -83,6 +88,7 @@ outercv.default <- function(y, x,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
                             cv.cores = 1,
+                            predict_type = "prob",
                             ...) {
   outercv.call <- match.call(expand.dots = TRUE)
   reg <- !(is.factor(y) | is.character(y))  # y = regression
@@ -112,7 +118,7 @@ outercv.default <- function(y, x,
     preds <- data.frame(predy=predy, testy=y[test])
     # for AUC
     if (!reg & nlevels(y) == 2) {
-      predyp <- predict(fit, newdata = filtx[test, ], type = "prob")
+      predyp <- predict(fit, newdata = filtx[test, ], type = predict_type)
       predyp <- predyp[,2]
       preds$predyp <- predyp
     }
@@ -124,7 +130,8 @@ outercv.default <- function(y, x,
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
-  rownames(output) <- unlist(lapply(predslist, rownames))
+  if (!is.null(rownames(x))) {
+    rownames(output) <- unlist(lapply(predslist, rownames))}
   fit.roc <- NULL
   if (reg) {
     df <- data.frame(obs = output$testy, pred = output$predy)
@@ -276,21 +283,35 @@ summary.outercv <- function(object,
                                  digits = max(3L, getOption("digits") - 3L), 
                                  ...) {
   cat("Single cross-validation to measure performance\n")
-  if (!is.null(object$call$filterFUN)) 
-    cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
   cat("Outer loop: ", paste0(length(object$outer_folds), "-fold cv\n"))
   cat("No inner loop\n")
-  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
-  if ("nfilter" %in% names(object$outer_result[[1]])) {
+  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
+  cat("Model: ", object$call$model, "\n")
+  if (!is.null(object$call$filterFUN)) {
+    cat("Filter: ", object$call$filterFUN, "\n")
     nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
     nfilter <- data.frame(n.filter = nfilter,
                           row.names = paste("Fold", seq_along(nfilter)))
     print(nfilter, digits = digits, print.gap = 2L)
-    cat("\n")
-  } else nfilter <- NULL
-  cat("Result:\n")
+  } else {
+    nfilter <- NULL
+    cat("No filter\n")
+  }
+  if (hasMethod2(object$final_fit, "print")) {
+    cat("\nFinal fit:")
+    print(object$final_fit)
+  }
+  cat("\nResult:\n")
   print(object$summary, digits = digits, print.gap = 2L)
   out <- list(dimx = object$dimx, nfilter = nfilter,
               result = object$summary)
   invisible(out)
+}
+
+
+#' @importFrom utils methods
+#' 
+hasMethod2 <- function(object, func) {
+  func %in% unlist(lapply(class(object), function(x) {
+        attr(methods(class = x), "info")$generic}))
 }

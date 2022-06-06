@@ -191,11 +191,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                          n_outer_folds = 3, cores = 3,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
 # view prediction performance based on testing folds
-res.cv.hsstan$summary
-# view coefficients for the final model
-res.cv.hsstan$final_fit
-# view covariates selected by the univariate filter
-res.cv.hsstan$final_vars
+summary(res.cv.hsstan)
 
 # load hsstan package to examine the Bayesian model
 library(hsstan)
@@ -247,11 +243,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.bin,
 
 
 # view prediction performance based on testing folds
-res.cv.hsstan$summary
-# view coefficients for the final model
-res.cv.hsstan$final_fit
-# view covariates selected by the univariate filter
-res.cv.hsstan$final_vars
+summary(res.cv.hsstan)
 
 # load hsstan package to examine the Bayesian model
 library(hsstan)

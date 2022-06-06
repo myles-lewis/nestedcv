@@ -17,6 +17,7 @@ outercv(y, ...)
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   cv.cores = 1,
+  predict_type = "prob",
   ...
 )
 
@@ -54,6 +55,12 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
 \item{cv.cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}
+
+\item{predict_type}{Only used with binary classification. Calculation of ROC
+AUC requires predicted class probabilities from fitted models. Most model
+functions use syntax of the form \code{predict(..., type = "prob")}. However,
+some models require a different \code{type} to be specified, which can be passed
+to \code{predict()} via \code{predict_type}.}
 
 \item{formula}{A formula describing the model to be fitted}
 

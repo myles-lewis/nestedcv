@@ -357,7 +357,7 @@ uvars <- "marker1"
 # penalised covariates: coefficients are drawn from hierarchical shrinkage prior
 pvars <- c("marker2", "marker3", "marker4") # penalised covariates
 # run cross-validation with univariate filter and hsstan
-options(mc.cores=2)  # to pass CRAN package checks
+oldopt <- options(mc.cores=2)  # to pass CRAN package checks
 res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                          model = model.hsstan,
                          filterFUN = lm_filter,
@@ -368,16 +368,12 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                          n_outer_folds = 3,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
 # view prediction performance based on testing folds
-res.cv.hsstan$summary
-# view coefficients for the final model
-res.cv.hsstan$final_fit
-# view covariates selected by the univariate filter
-res.cv.hsstan$final_vars
+summary(res.cv.hsstan)
 
 # load hsstan package to examine the Bayesian model
 library(hsstan)
 sampler.stats(res.cv.hsstan$final_fit)
-print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
+print(projsel(res.cv.hsstan$final_fit), digits = 4)  # adding marker2
 ```
 
 Here adding `marker2` improves the model fit: substantial decrease of
@@ -424,16 +420,12 @@ res.cv.hsstan <- outercv(y = dt$outcome.bin,
 
 
 # view prediction performance based on testing folds
-res.cv.hsstan$summary
-# view coefficients for the final model
-res.cv.hsstan$final_fit
-# view covariates selected by the univariate filter
-res.cv.hsstan$final_vars
+summary(res.cv.hsstan)
 
-# load hsstan package to examine the Bayesian model
-library(hsstan)
+# examine the Bayesian model
 sampler.stats(res.cv.hsstan$final_fit)
-print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
+print(projsel(res.cv.hsstan$final_fit), digits = 4)  # adding marker2
+options(oldopt)  # reset options
 ```
 
 Here adding `marker2` improves the model fit: substantial decrease of
