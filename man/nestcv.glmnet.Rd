@@ -110,14 +110,14 @@ library(glmnet)
 fit <- cv.glmnet(filx[trainSet, ], y[trainSet], family = "binomial")
 plot(fit)
 
-## Predict response on test set
+## Predict response on test partition
 predy <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "class")
 predy <- as.vector(predy)
 predyp <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "response")
 predyp <- as.vector(predyp)
 output <- data.frame(testy = y[-trainSet], predy = predy, predyp = predyp)
 
-## Results on test set
+## Results on test partition
 ## shows bias since univariate filtering was applied to whole dataset
 predSummary(output)
 
@@ -126,6 +126,14 @@ fit2 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
                       filterFUN = ttest_filter,
                       filter_options = list(nfilter = 100))
 summary(fit2)
+plot_lambdas(fit2, showLegend = "bottomright")
+
+library(pROC)
+plot(fit2$roc)
+inroc <- innercv_roc(fit2)
+lines(inroc, col = 'blue')
+legend('bottomright', legend = c("Nested CV", "Left-out inner CV folds"), 
+       col = c("black", "blue"), lty = 1, lwd = 2, bty = "n")
 
 }
 \author{
