@@ -65,6 +65,41 @@
 #' @importFrom parallel mclapply
 #' @importFrom pROC roc
 #' @importFrom stats predict setNames
+#' @examples
+#' 
+#' ## Example binary classification problem with P >> n
+#' x <- matrix(rnorm(150 * 2e+04), 150, 2e+04)  # predictors
+#' y <- factor(rbinom(150, 1, 0.5))  # binary response
+#' 
+#' ## Partition data into 2/3 training set, 1/3 test set
+#' trainSet <- caret::createDataPartition(y, p = 0.66, list = FALSE)
+#' 
+#' ## t-test filter using whole dataset
+#' filt <- ttest_filter(y, x, nfilter = 100)
+#' filx <- x[, filt]
+#' 
+#' ## Train glmnet on training set only using filtered predictor matrix
+#' library(glmnet)
+#' fit <- cv.glmnet(filx[trainSet, ], y[trainSet], family = "binomial")
+#' plot(fit)
+#' 
+#' ## Predict response on test set
+#' predy <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "class")
+#' predy <- as.vector(predy)
+#' predyp <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "response")
+#' predyp <- as.vector(predyp)
+#' output <- data.frame(testy = y[-trainSet], predy = predy, predyp = predyp)
+#' 
+#' ## Results on test set
+#' ## shows bias since univariate filtering was applied to whole dataset
+#' predSummary(output)
+#' 
+#' ## Nested CV
+#' fit2 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+#'                       filterFUN = ttest_filter,
+#'                       filter_options = list(nfilter = 100))
+#' summary(fit2)
+#' 
 #' @export
 #' 
 nestcv.glmnet <- function(y, x,
@@ -134,27 +169,12 @@ nestcv.glmnet <- function(y, x,
   if (!is.null(rownames(x))) {
     rownames(output) <- unlist(lapply(predslist, rownames))}
   
+  summary <- predSummary(output)
   glmnet.roc <- NULL
   if (family == "binomial") {
-    cm <- table(output$predy, output$testy)
-    acc <- sum(diag(cm))/ sum(cm)
-    ccm <- caret::confusionMatrix(cm)
-    b_acc <- ccm$byClass[11]
-    glmnet.roc <- pROC::roc(output$testy, output[, 2], direction = "<", 
-                            quiet = TRUE)
-    auc <- glmnet.roc$auc
-    summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
-  } else if (family == "multinomial") {
-    cm <- table(output$predy, output$testy)
-    acc <- sum(diag(cm))/ sum(cm)
-    ccm <- caret::confusionMatrix(cm)
-    b_acc <- ccm$byClass[11]
-    summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
-  } else {
-    df <- data.frame(obs = output$testy, pred = output$predy)
-    summary <- caret::defaultSummary(df)
+    glmnet.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
+                           quiet = TRUE)
   }
-  
   # fit final glmnet
   lam <- mean(unlist(lapply(outer_res, '[[', 'lambda')))
   alph <- mean(unlist(lapply(outer_res, '[[', 'alpha')))
@@ -337,3 +357,36 @@ predict.nestcv.glmnet <- function(object, newdata,
   predict(object$final_fit, newx = newx, s = unname(s), ...)
 }
 
+#' Summarise prediction performance metrics
+#' 
+#' Quick function to calculate performance metrics: accuracy and balanced
+#' accuracy for classification; ROC AUC for binary classification; RMSE for
+#' regression.
+#' 
+#' @param output data.frame with columns `testy` containing observed response
+#'   from test folds; `predy` predicted response; `predyp` (optional) predicted
+#'   probabilities for classification to calculate ROC AUC
+#' @return Vector containing accuracy and balanced accuracy for classification,
+#'   ROC AUC for binary classification, RMSE for regression.
+#' 
+#' @export
+predSummary <- function(output) {
+  if (is.factor(output$testy)) {
+    cm <- table(output$predy, output$testy)
+    acc <- sum(diag(cm))/ sum(cm)
+    ccm <- caret::confusionMatrix(cm)
+    b_acc <- ccm$byClass[11]
+    if (nlevels(output$testy) == 2) {
+      outputroc <- pROC::roc(output$testy, output$predyp, direction = "<", 
+                              quiet = TRUE)
+      auc <- outputroc$auc
+      summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
+    } else {
+      summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
+    }
+  } else {
+    df <- data.frame(obs = output$testy, pred = output$predy)
+    summary <- caret::defaultSummary(df)
+  }
+  summary
+}

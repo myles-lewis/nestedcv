@@ -92,6 +92,42 @@ outer loop of CV. Predictions on the outer test folds are brought back
 together and error estimation/ accuracy determined. The default is 10x10
 nested CV.
 }
+\examples{
+
+## Example binary classification problem with P >> n
+x <- matrix(rnorm(150 * 2e+04), 150, 2e+04)  # predictors
+y <- factor(rbinom(150, 1, 0.5))  # binary response
+
+## Partition data into 2/3 training set, 1/3 test set
+trainSet <- caret::createDataPartition(y, p = 0.66, list = FALSE)
+
+## t-test filter using whole dataset
+filt <- ttest_filter(y, x, nfilter = 100)
+filx <- x[, filt]
+
+## Train glmnet on training set only using filtered predictor matrix
+library(glmnet)
+fit <- cv.glmnet(filx[trainSet, ], y[trainSet], family = "binomial")
+plot(fit)
+
+## Predict response on test set
+predy <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "class")
+predy <- as.vector(predy)
+predyp <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "response")
+predyp <- as.vector(predyp)
+output <- data.frame(testy = y[-trainSet], predy = predy, predyp = predyp)
+
+## Results on test set
+## shows bias since univariate filtering was applied to whole dataset
+predSummary(output)
+
+## Nested CV
+fit2 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                      filterFUN = ttest_filter,
+                      filter_options = list(nfilter = 100))
+summary(fit2)
+
+}
 \author{
 Myles Lewis
 }

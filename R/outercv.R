@@ -179,25 +179,11 @@ outercv.default <- function(y, x,
   output <- as.data.frame(output)
   if (!is.null(rownames(x))) {
     rownames(output) <- unlist(lapply(predslist, rownames))}
+  summary <- predSummary(output)
   fit.roc <- NULL
-  if (reg) {
-    df <- data.frame(obs = output$testy, pred = output$predy)
-    summary <- caret::defaultSummary(df)
-  } else if (nlevels(y) == 2) {
-    cm <- table(output$predy, output$testy)
-    acc <- sum(diag(cm))/ sum(cm)
-    ccm <- caret::confusionMatrix(cm)
-    b_acc <- ccm$byClass[11]
+  if (!reg & nlevels(y) == 2) {
     fit.roc <- pROC::roc(output$testy, output$predyp, direction = "<",
                          quiet = TRUE)
-    auc <- fit.roc$auc
-    summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
-  } else {
-    cm <- table(output$predy, output$testy)
-    acc <- sum(diag(cm))/ sum(cm)
-    ccm <- caret::confusionMatrix(cm)
-    b_acc <- ccm$byClass[11]
-    summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
   }
   
   # fit final model
@@ -289,25 +275,11 @@ outercv.formula <- function(formula, data,
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
   rownames(output) <- unlist(lapply(predslist, rownames))
+  summary <- predSummary(output)
   fit.roc <- NULL
-  if (reg) {
-    df <- data.frame(obs = output$testy, pred = output$predy)
-    summary <- caret::defaultSummary(df)
-  } else if (nlevels(y) == 2) {
-    cm <- table(output$predy, output$testy)
-    acc <- sum(diag(cm))/ sum(cm)
-    ccm <- caret::confusionMatrix(cm)
-    b_acc <- ccm$byClass[11]
-    fit.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
+  if (!reg & nlevels(y) == 2) {
+    fit.roc <- pROC::roc(output$testy, output$predyp, direction = "<",
                          quiet = TRUE)
-    auc <- fit.roc$auc
-    summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
-  } else {
-    cm <- table(output$predy, output$testy)
-    acc <- sum(diag(cm))/ sum(cm)
-    ccm <- caret::confusionMatrix(cm)
-    b_acc <- ccm$byClass[11]
-    summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
   }
   
   # fit final model

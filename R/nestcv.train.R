@@ -127,29 +127,11 @@ nestcv.train <- function(y, x,
   output <- as.data.frame(output)
   if (!is.null(rownames(x))) {
     rownames(output) <- unlist(lapply(predslist, rownames))}
+  summary <- predSummary(output)
   caret.roc <- NULL
-  if (is.factor(y)) {
-    if (nlevels(y) == 2) {
-      cm <- table(output$predy, output$testy)
-      acc <- sum(diag(cm))/ sum(cm)
-      ccm <- caret::confusionMatrix(cm)
-      b_acc <- ccm$byClass[11]
-      caret.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
-                             quiet = TRUE)
-      auc <- caret.roc$auc
-      summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
-    } else {
-      # multinomial class
-      cm <- table(output$predy, output$testy)
-      acc <- sum(diag(cm))/ sum(cm)
-      ccm <- caret::confusionMatrix(cm)
-      b_acc <- ccm$byClass[11]
-      summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
-    }
-  } else {
-    # regression
-    df <- data.frame(obs = output$testy, pred = output$predy)
-    summary <- caret::defaultSummary(df)
+  if (is.factor(y) & nlevels(y) == 2) {
+    caret.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
+                           quiet = TRUE)
   }
   bestTunes <- lapply(outer_res, function(i) i$fit$bestTune)
   bestTunes <- as.data.frame(data.table::rbindlist(bestTunes))
