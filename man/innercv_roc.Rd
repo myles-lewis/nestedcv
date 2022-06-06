@@ -27,3 +27,50 @@ Build ROC (receiver operating characteristic) curve from left-out folds
 from inner CV. Object can be plotted using \code{plot()} or passed to functions
 \code{\link[=auc]{auc()}} etc.
 }
+\examples{
+
+## Example binary classification problem with P >> n
+x <- matrix(rnorm(150 * 2e+04), 150, 2e+04)  # predictors
+y <- factor(rbinom(150, 1, 0.5))  # binary response
+
+## Partition data into 2/3 training set, 1/3 test set
+trainSet <- caret::createDataPartition(y, p = 0.66, list = FALSE)
+
+## t-test filter using whole dataset
+filt <- ttest_filter(y, x, nfilter = 100)
+filx <- x[, filt]
+
+## Train glmnet on training set only using filtered predictor matrix
+library(glmnet)
+fit <- cv.glmnet(filx[trainSet, ], y[trainSet], family = "binomial")
+plot(fit)
+
+## Predict response on test partition
+predy <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "class")
+predy <- as.vector(predy)
+predyp <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "response")
+predyp <- as.vector(predyp)
+output <- data.frame(testy = y[-trainSet], predy = predy, predyp = predyp)
+
+## Results on test partition
+## shows bias since univariate filtering was applied to whole dataset
+predSummary(output)
+
+## Nested CV
+fit2 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                      filterFUN = ttest_filter,
+                      filter_options = list(nfilter = 100))
+summary(fit2)
+
+## ROC plots
+library(pROC)
+testroc <- roc(output$testy, output$predyp, direction = "<")
+inroc <- innercv_roc(fit2)
+plot(fit2$roc)
+lines(inroc, col = 'blue')
+lines(testroc, col = 'red')
+legend('bottomright', legend = c("Nested CV", "Left-out inner CV folds", 
+                                 "Test partition, non-nested filtering"), 
+       col = c("black", "blue", "red"), lty = 1, lwd = 2, bty = "n")
+
+}
