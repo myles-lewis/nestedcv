@@ -83,14 +83,14 @@
 #' fit <- cv.glmnet(filx[trainSet, ], y[trainSet], family = "binomial")
 #' plot(fit)
 #' 
-#' ## Predict response on test set
+#' ## Predict response on test partition
 #' predy <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "class")
 #' predy <- as.vector(predy)
 #' predyp <- predict(fit, newx = filx[-trainSet, ], s = "lambda.min", type = "response")
 #' predyp <- as.vector(predyp)
 #' output <- data.frame(testy = y[-trainSet], predy = predy, predyp = predyp)
 #' 
-#' ## Results on test set
+#' ## Results on test partition
 #' ## shows bias since univariate filtering was applied to whole dataset
 #' predSummary(output)
 #' 
