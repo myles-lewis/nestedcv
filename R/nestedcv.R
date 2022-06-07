@@ -58,6 +58,9 @@
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
 #'   regression.}
+#' @details
+#' glmnet cannot tolerate missing values in 'y', so these individuals are
+#' removed from 'y' & 'x'. A warning is given for missing values in 'x'.
 #' @author Myles Lewis
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
@@ -132,6 +135,8 @@ nestcv.glmnet <- function(y, x,
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
   ok <- checkxy(y, x)
+  y <- y[ok]
+  x <- x[ok,]
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
@@ -406,11 +411,11 @@ predSummary <- function(output) {
 
 
 checkxy <- function(y, x) {
-  if (length(y) != nrow(x)) stop("y and x mismatch", call. = FALSE)
+  if (length(y) != nrow(x)) 
+    stop("Mismatch in length of 'y' and number of rows in 'x'", call. = FALSE)
   nax <- sum(!complete.cases(t(x)))
-  if (nax != 0) message(nax, " columns in x have NA")
+  if (nax != 0) message(nax, " columns in 'x' contain NA")
   nay <- is.na(y)
-  if (any(nay)) message(sum(nay), " NA in y")
+  if (any(nay)) message("'y' contains ", sum(nay), " NA")
   !nay
 }
-

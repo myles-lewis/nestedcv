@@ -92,6 +92,10 @@ outer loop of CV. Predictions on the outer test folds are brought back
 together and error estimation/ accuracy determined. The default is 10x10
 nested CV.
 }
+\details{
+glmnet cannot tolerate missing values in 'y', so these individuals are
+removed from both 'y' and 'x'. A warning is given for missing values in 'x'.
+}
 \examples{
 
 ## Example binary classification problem with P >> n
