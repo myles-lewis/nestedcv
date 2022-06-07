@@ -131,6 +131,9 @@ nestcv.glmnet <- function(y, x,
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
+  ok <- checkxy(y, x)
+  y <- y[ok]
+  x <- x[ok,]
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
@@ -402,3 +405,14 @@ predSummary <- function(output) {
   }
   summary
 }
+
+
+checkxy <- function(y, x) {
+  if (length(y) != nrow(x)) stop("y and x mismatch", call. = FALSE)
+  nax <- sum(!complete.cases(t(x)))
+  if (nax != 0) message(nax, " columns in x have NA")
+  nay <- is.na(y)
+  if (any(nay)) message(sum(nay), " NA in y")
+  !nay
+}
+
