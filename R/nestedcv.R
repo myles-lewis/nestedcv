@@ -414,7 +414,8 @@ checkxy <- function(y, x) {
   if (length(y) != nrow(x)) 
     stop("Mismatch in length of 'y' and number of rows in 'x'", call. = FALSE)
   nax <- sum(!complete.cases(t(x)))
-  if (nax != 0) message(nax, " columns in 'x' contain NA")
+  if (nax == 1) {message("1 column in 'x' contains NA")
+  } else if (nax > 1) message(nax, " columns in 'x' contain NA")
   nay <- is.na(y)
   if (any(nay)) message("'y' contains ", sum(nay), " NA")
   !nay

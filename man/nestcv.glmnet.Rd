@@ -94,7 +94,7 @@ nested CV.
 }
 \details{
 glmnet cannot tolerate missing values in 'y', so these individuals are
-removed from both 'y' and 'x'. A warning is given for missing values in 'x'.
+removed from 'y' & 'x'. A warning is given for missing values in 'x'.
 }
 \examples{
 
