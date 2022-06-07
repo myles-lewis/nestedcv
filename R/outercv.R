@@ -138,6 +138,7 @@ outercv.default <- function(y, x,
                             predict_type = "prob",
                             ...) {
   outercv.call <- match.call(expand.dots = TRUE)
+  ok <- checkxy(y, x)
   reg <- !(is.factor(y) | is.character(y))  # y = regression
   outer_method <- match.arg(outer_method)
   outer_folds <- switch(outer_method,

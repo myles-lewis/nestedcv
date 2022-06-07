@@ -81,6 +81,7 @@ nestcv.train <- function(y, x,
                          savePredictions = FALSE,
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)
+  ok <- checkxy(y, x)
   if (is.null(trControl)) {
     trControl <- if (is.factor(y)) {
       trainControl(method = "cv", 
