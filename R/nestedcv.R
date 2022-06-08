@@ -38,6 +38,10 @@
 #'   variables. See [glmnet]
 #' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses [parallel::mclapply].
+#' @param na.option Character value specifying how `NA`s are dealt with. "omit"
+#'   is equivalent to `na.action = na.omit`. "omitcol" (the default) removes
+#'   cases if there are NA in 'y', but columns (predictors) containing `NA` are
+#'   removed from 'x'. Any other value means that `NA` are ignored.
 #' @param ... Optional arguments passed to [cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet"
 #'   \item{call}{the matched call}
@@ -58,9 +62,6 @@
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
 #'   regression.}
-#' @details
-#' glmnet cannot tolerate missing values in 'y', so these individuals are
-#' removed from 'y' & 'x'. A warning is given for missing values in 'x'.
 #' @author Myles Lewis
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
@@ -130,13 +131,14 @@ nestcv.glmnet <- function(y, x,
                           keep = TRUE,
                           penalty.factor = rep(1, ncol(x)),
                           cv.cores = 1,
+                          na.option = "omitcol",
                           ...) {
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
-  ok <- checkxy(y, x)
-  y <- y[ok]
-  x <- x[ok,]
+  ok <- checkxy(y, x, na.option)
+  y <- y[ok$r]
+  x <- x[ok$r, ok$c]
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
@@ -410,13 +412,26 @@ predSummary <- function(output) {
 }
 
 
-checkxy <- function(y, x) {
-  if (length(y) != nrow(x)) 
+checkxy <- function(y, x, na.option) {
+  if (length(y) != nrow(x))
     stop("Mismatch in length of 'y' and number of rows in 'x'", call. = FALSE)
-  nax <- sum(!complete.cases(t(x)))
-  if (nax == 1) {message("1 column in 'x' contains NA")
-  } else if (nax > 1) message(nax, " columns in 'x' contain NA")
   nay <- is.na(y)
   if (any(nay)) message("'y' contains ", sum(nay), " NA")
-  !nay
+  naxr <- !complete.cases(x)
+  naxc <- !complete.cases(t(x))
+  okr <- rep.int(TRUE, length(y))
+  okc <- rep.int(TRUE, ncol(x))
+  if (na.option == "omit") {
+    if (sum(naxr) == 1) {message("1 row in 'x' contains NA")
+    } else if (sum(naxr) > 1) message(sum(naxr), " rows in 'x' contain NA")
+    okr <- !nay & !naxr
+  } else {
+    if (sum(naxc) == 1) {message("1 column in 'x' contains NA")
+    } else if (sum(naxc) > 1) message(sum(naxc), " columns in 'x' contain NA")
+  }
+  if (na.option == "omitcol") {
+    okr <- !nay
+    okc <- !naxc
+  }
+  list(r = okr, c = okc)
 }
