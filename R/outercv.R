@@ -75,6 +75,11 @@
 #'   `subset`, `weights`, `offset` are passed into the model function via
 #'   `"..."` the scoping is known to go wrong. Avoid using these arguments with
 #'   `model = lm`.
+#'   
+#'   `NA` handling differs between the default S3 method and the formula S3
+#'   method. The `na.option` argument takes a character string, while the more
+#'   typical `na.action` argument takes a function.
+#'   
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
 #' @importFrom methods formalArgs
