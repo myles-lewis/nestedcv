@@ -237,7 +237,7 @@ outercv.default <- function(y, x,
 
 
 #' @rdname outercv
-#' @importFrom stats model.frame model.response reformulate terms
+#' @importFrom stats na.fail model.frame model.response reformulate terms
 #' @export
 #' 
 outercv.formula <- function(formula, data,
