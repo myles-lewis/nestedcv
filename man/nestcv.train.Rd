@@ -15,6 +15,7 @@ nestcv.train(
   trControl = NULL,
   tuneGrid = NULL,
   savePredictions = FALSE,
+  na.option = "pass",
   ...
 )
 }
@@ -51,6 +52,12 @@ http://topepo.github.io/caret/using-your-own-model-in-train.html.}
 CV fold should be saved for ROC curves, accuracy etc see
 \link[caret:trainControl]{caret::trainControl}.Set to \code{"final"} to capture predictions for inner CV
 ROC.}
+
+\item{na.option}{Character value specifying how \code{NA}s are dealt with.
+\code{"omit"} is equivalent to \code{na.action = na.omit}. \code{"omitcol"} removes cases
+if there are \code{NA} in 'y', but columns (predictors) containing \code{NA} are
+removed from 'x' to preserve cases. Any other value means that \code{NA} are
+ignored (a message is given).}
 
 \item{...}{Arguments passed to \link[caret:train]{caret::train}}
 }

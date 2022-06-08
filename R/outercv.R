@@ -30,6 +30,11 @@
 #'   functions use syntax of the form `predict(..., type = "prob")`. However,
 #'   some models require a different `type` to be specified, which can be passed
 #'   to `predict()` via `predict_type`.
+#' @param na.option Character value specifying how `NA`s are dealt with.
+#'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
+#'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
+#'   removed from 'x' to preserve cases. Any other value means that `NA` are
+#'   ignored (a message is given).
 #' @param ... Optional arguments passed to the function specified by `model`.
 #' @return An object with S3 class "outercv"
 #'   \item{call}{the matched call}
@@ -136,9 +141,12 @@ outercv.default <- function(y, x,
                             n_outer_folds = 10,
                             cv.cores = 1,
                             predict_type = "prob",
+                            na.option = "pass",
                             ...) {
   outercv.call <- match.call(expand.dots = TRUE)
-  ok <- checkxy(y, x)
+  ok <- checkxy(y, x, na.option)
+  y <- y[ok$r]
+  x <- x[ok$r, ok$c]
   reg <- !(is.factor(y) | is.character(y))  # y = regression
   outer_method <- match.arg(outer_method)
   outer_folds <- switch(outer_method,

@@ -18,6 +18,7 @@ outercv(y, ...)
   n_outer_folds = 10,
   cv.cores = 1,
   predict_type = "prob",
+  na.option = "pass",
   ...
 )
 
@@ -61,6 +62,12 @@ AUC requires predicted class probabilities from fitted models. Most model
 functions use syntax of the form \code{predict(..., type = "prob")}. However,
 some models require a different \code{type} to be specified, which can be passed
 to \code{predict()} via \code{predict_type}.}
+
+\item{na.option}{Character value specifying how \code{NA}s are dealt with.
+\code{"omit"} is equivalent to \code{na.action = na.omit}. \code{"omitcol"} removes cases
+if there are \code{NA} in 'y', but columns (predictors) containing \code{NA} are
+removed from 'x' to preserve cases. Any other value means that \code{NA} are
+ignored (a message is given).}
 
 \item{formula}{A formula describing the model to be fitted}
 

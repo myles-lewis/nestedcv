@@ -18,6 +18,7 @@ nestcv.glmnet(
   keep = TRUE,
   penalty.factor = rep(1, ncol(x)),
   cv.cores = 1,
+  na.option = "omit",
   ...
 )
 }
@@ -61,6 +62,12 @@ variables. See \link{glmnet}}
 \item{cv.cores}{Number of cores for parallel processing. Note this currently
 uses \link[parallel:mclapply]{parallel::mclapply}.}
 
+\item{na.option}{Character value specifying how \code{NA}s are dealt with.
+\code{"omit"} (the default) is equivalent to \code{na.action = na.omit}. \code{"omitcol"}
+removes cases if there are \code{NA} in 'y', but columns (predictors) containing
+\code{NA} are removed from 'x' to preserve cases. Any other value means that
+\code{NA} are ignored (a message is given).}
+
 \item{...}{Optional arguments passed to \link{cv.glmnet}}
 }
 \value{
@@ -93,8 +100,8 @@ together and error estimation/ accuracy determined. The default is 10x10
 nested CV.
 }
 \details{
-glmnet cannot tolerate missing values in 'y', so these individuals are
-removed from 'y' & 'x'. A warning is given for missing values in 'x'.
+glmnet does not tolerate missing values, so \code{na.option = "omit"} is the
+default.
 }
 \examples{
 

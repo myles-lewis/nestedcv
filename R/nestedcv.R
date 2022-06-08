@@ -38,10 +38,11 @@
 #'   variables. See [glmnet]
 #' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses [parallel::mclapply].
-#' @param na.option Character value specifying how `NA`s are dealt with. "omit"
-#'   is equivalent to `na.action = na.omit`. "omitcol" (the default) removes
-#'   cases if there are NA in 'y', but columns (predictors) containing `NA` are
-#'   removed from 'x'. Any other value means that `NA` are ignored.
+#' @param na.option Character value specifying how `NA`s are dealt with.
+#'   `"omit"` (the default) is equivalent to `na.action = na.omit`. `"omitcol"`
+#'   removes cases if there are `NA` in 'y', but columns (predictors) containing
+#'   `NA` are removed from 'x' to preserve cases. Any other value means that
+#'   `NA` are ignored (a message is given).
 #' @param ... Optional arguments passed to [cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet"
 #'   \item{call}{the matched call}
@@ -62,6 +63,9 @@
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
 #'   regression.}
+#' @details
+#' glmnet does not tolerate missing values, so `na.option = "omit"` is the
+#' default.
 #' @author Myles Lewis
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
@@ -131,7 +135,7 @@ nestcv.glmnet <- function(y, x,
                           keep = TRUE,
                           penalty.factor = rep(1, ncol(x)),
                           cv.cores = 1,
-                          na.option = "omitcol",
+                          na.option = "omit",
                           ...) {
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)

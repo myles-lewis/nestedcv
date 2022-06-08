@@ -31,6 +31,11 @@
 #'   ROC.
 #' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses `parallel::mclapply`.
+#' @param na.option Character value specifying how `NA`s are dealt with.
+#'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
+#'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
+#'   removed from 'x' to preserve cases. Any other value means that `NA` are
+#'   ignored (a message is given).
 #' @param ... Arguments passed to [caret::train]
 #' @return An object with S3 class "nestcv.train"
 #'   \item{call}{the matched call}
@@ -79,9 +84,12 @@ nestcv.train <- function(y, x,
                          trControl = NULL,
                          tuneGrid = NULL,
                          savePredictions = FALSE,
+                         na.option = "pass",
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)
-  ok <- checkxy(y, x)
+  ok <- checkxy(y, x, na.option)
+  y <- y[ok$r]
+  x <- x[ok$r, ok$c]
   if (is.null(trControl)) {
     trControl <- if (is.factor(y)) {
       trainControl(method = "cv", 
