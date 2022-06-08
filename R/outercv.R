@@ -35,6 +35,11 @@
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
 #'   removed from 'x' to preserve cases. Any other value means that `NA` are
 #'   ignored (a message is given).
+#' @param na.action Formula S3 method only: a function to specify the action to
+#'   be taken if NAs are found. The default action is for the procedure to fail.
+#'   An alternative is `na.omit`, which leads to rejection of cases with missing
+#'   values on any required variable. (NOTE: If given, this argument must be
+#'   named.)
 #' @param ... Optional arguments passed to the function specified by `model`.
 #' @return An object with S3 class "outercv"
 #'   \item{call}{the matched call}
@@ -234,7 +239,8 @@ outercv.formula <- function(formula, data,
                             model,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
-                            cv.cores = 1, ...) {
+                            cv.cores = 1, ...,
+                            na.action = na.fail) {
   outercv.call <- match.call(expand.dots = TRUE)
   # if model does not use formula, then revert to outercv.default(x, y, ...)
   if (!"formula" %in% formalArgs(model)) {
@@ -243,14 +249,14 @@ outercv.formula <- function(formula, data,
     names(m)[2] <- "formula"
     if (is.matrix(eval(m$data, parent.frame())))
       m$data <- as.data.frame(data)
-    # m$... <- NULL
-    # m$na.action <- na.action
+    m$... <- NULL
+    m$na.action <- na.action
     m[[1]] <- as.name("model.frame")
     m <- eval(m, parent.frame())
     y <- model.response(m)
     Terms <- attr(m, "terms")
     attr(Terms, "intercept") <- 0
-    # attr(y, "na.action") <- attr(m, "na.action")
+    attr(y, "na.action") <- attr(m, "na.action")
     m <- model.frame(terms(reformulate(attributes(Terms)$term.labels)),
                      data.frame(m))
     out <- outercv.default(y, m, outer_method = outer_method, 

@@ -29,7 +29,8 @@ outercv(y, ...)
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   cv.cores = 1,
-  ...
+  ...,
+  na.action = na.fail
 )
 }
 \arguments{
@@ -72,6 +73,12 @@ ignored (a message is given).}
 \item{formula}{A formula describing the model to be fitted}
 
 \item{data}{A matrix or data frame containing variables in the model.}
+
+\item{na.action}{Formula S3 method only: a function to specify the action to
+be taken if NAs are found. The default action is for the procedure to fail.
+An alternative is \code{na.omit}, which leads to rejection of cases with missing
+values on any required variable. (NOTE: If given, this argument must be
+named.)}
 }
 \value{
 An object with S3 class "outercv"
