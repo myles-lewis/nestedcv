@@ -109,7 +109,6 @@ nestcv.train <- function(y, x,
   if (!is.null(tuneGrid)) {
     if (nrow(tuneGrid) == 1) trControl <- trainControl(method = "none", classProbs = TRUE)
   }
-  outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
   outer_folds <- if (outer_method == "cv") {
     createFolds(y, k = n_outer_folds, returnTrain = TRUE)
   } else if (outer_method == "LOOCV") {
