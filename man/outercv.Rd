@@ -114,10 +114,11 @@ is to use \link{nestcv.train} with \code{tuneGrid} set as a single row of a
 data.frame. The parameters which are needed for a specific model can be
 identified using \code{\link[caret:modelLookup]{caret::modelLookup()}}.
 
-The formula method for \code{outercv} is not recommended with large data sets -
-it is designed primarily for more basic models e.g. \code{lm()} and \code{glm()}.
-Filtering is not available if \code{outercv} is called with a formula - use \code{x}
-and \code{y} interface instead.
+The S3 formula method for \code{outercv} is not really recommended with large
+data sets - it is envisaged to be primarily used when measuring performance
+of more basic models e.g. \code{lm()} which lack an \code{x} & \code{y} style interface.
+Notably filtering is not available if \code{outercv} is called with a formula -
+use the \code{x} & \code{y} interface instead.
 
 Note that in the case of \code{model = lm}, although additional arguments e.g.
 \code{subset}, \code{weights}, \code{offset} are passed into the model function via

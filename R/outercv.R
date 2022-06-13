@@ -66,10 +66,11 @@
 #'   data.frame. The parameters which are needed for a specific model can be
 #'   identified using [caret::modelLookup()].
 #'
-#'   The formula method for `outercv` is not recommended with large data sets -
-#'   it is designed primarily for more basic models e.g. `lm()` and `glm()`.
-#'   Filtering is not available if `outercv` is called with a formula - use `x`
-#'   and `y` interface instead.
+#'   The S3 formula method for `outercv` is not really recommended with large
+#'   data sets - it is envisaged to be primarily used when measuring performance
+#'   of more basic models e.g. `lm()` which lack an `x` & `y` style interface.
+#'   Notably filtering is not available if `outercv` is called with a formula -
+#'   use the `x` & `y` interface instead.
 #'
 #'   Note that in the case of `model = lm`, although additional arguments e.g.
 #'   `subset`, `weights`, `offset` are passed into the model function via
