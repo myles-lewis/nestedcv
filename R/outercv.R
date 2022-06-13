@@ -322,8 +322,10 @@ summary.outercv <- function(object,
                                  digits = max(3L, getOption("digits") - 3L), 
                                  ...) {
   cat("Single cross-validation to measure performance\n")
-  cat("Outer loop: ", paste0(length(object$outer_folds), "-fold cv\n"))
-  cat("No inner loop\n")
+  cat("Outer loop: ", switch(object$outer_method,
+                             cv = paste0(length(object$outer_folds), "-fold CV"),
+                             loocv = "leave-one-out CV"))
+  cat("\nNo inner loop\n")
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
   cat("Model: ", object$call$model, "\n")
   if (!is.null(object$call$filterFUN)) {
