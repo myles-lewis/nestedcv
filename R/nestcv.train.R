@@ -46,7 +46,7 @@
 #'   predictions on left-out outer folds, caret result and number of filtered
 #'   predictors at each fold.}
 #'   \item{dimx}{dimensions of `x`}
-#'   \item{outer_folds}{List of indices of outer training folds}
+#'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{final_fit}{Final fitted caret model using best tune parameters}
 #'   \item{final_vars}{Column names of filtered predictors entering final model}
 #'   \item{roc}{ROC AUC for binary classification where available.}
@@ -109,32 +109,29 @@ nestcv.train <- function(y, x,
   if (!is.null(tuneGrid)) {
     if (nrow(tuneGrid) == 1) trControl <- trainControl(method = "none", classProbs = TRUE)
   }
-  outer_folds <- if (outer_method == "cv") {
-    createFolds(y, k = n_outer_folds, returnTrain = TRUE)
-  } else if (outer_method == "LOOCV") {
-    loocv <- rep(list(seq_along(y)), length(y))
-    lapply(seq_along(y), function(i) loocv[[i]][-i])
-  }
+  outer_folds <- switch(outer_method,
+                        cv = createFolds(y, k = n_outer_folds),
+                        LOOCV = 1:length(y))
   outer_res <- mclapply(1:n_outer_folds, function(i) {
-    trainIndex <- outer_folds[[i]]
+    test <- outer_folds[[i]]
     filtx <- if (is.null(filterFUN)) x else {
-      args <- list(y = y[trainIndex], x = x[trainIndex, ])
+      args <- list(y = y[-test], x = x[-test, ])
       args <- append(args, filter_options)
       fset <- do.call(filterFUN, args)
       x[, fset]
     }
-    fit <- caret::train(x = filtx[trainIndex, ], y = y[trainIndex],
+    fit <- caret::train(x = filtx[-test, ], y = y[-test],
                         metric = metric,
                         trControl = trControl,
                         tuneGrid = tuneGrid, ...)
-    predy <- predict(fit, newdata = filtx[-trainIndex, ])
-    preds <- data.frame(predy=predy, testy=y[-trainIndex])
+    predy <- predict(fit, newdata = filtx[test, ])
+    preds <- data.frame(predy=predy, testy=y[test])
     if (is.factor(y)) {
-      predyp <- predict(fit, newdata = filtx[-trainIndex, ], type = "prob")
+      predyp <- predict(fit, newdata = filtx[test, ], type = "prob")
       # note predyp has 2 columns
       preds$predyp <- predyp[,2]
     }
-    rownames(preds) <- rownames(x[-trainIndex, , drop = FALSE])
+    rownames(preds) <- rownames(x[test, , drop = FALSE])
     ret <- list(preds = preds,
                 fit = fit,
                 nfilter = ncol(filtx))
