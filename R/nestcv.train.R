@@ -15,6 +15,8 @@
 #'   character vector with names of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter
 #'   function specified by `filterFUN`.
+#' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
+#'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
 #' @param metric A string that specifies what summary metric will be used to
 #'   select the optimal model. By default, "logLoss" is used for classification
@@ -77,7 +79,8 @@
 #' 
 nestcv.train <- function(y, x,
                          filterFUN = NULL,
-                         filter_options = NULL, 
+                         filter_options = NULL,
+                         outer_method = c("cv", "LOOCV"),
                          n_outer_folds = 10,
                          cv.cores = 1,
                          metric = ifelse(is.factor(y), "logLoss", "RMSE"),
@@ -87,6 +90,7 @@ nestcv.train <- function(y, x,
                          na.option = "pass",
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)
+  outer_method <- match.arg(outer_method)
   ok <- checkxy(y, x, na.option)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
@@ -106,6 +110,12 @@ nestcv.train <- function(y, x,
     if (nrow(tuneGrid) == 1) trControl <- trainControl(method = "none", classProbs = TRUE)
   }
   outer_folds <- createFolds(y, k = n_outer_folds, returnTrain = TRUE)
+  outer_folds <- if (outer_method == "cv") {
+    createFolds(y, k = n_outer_folds, returnTrain = TRUE)
+  } else if (outer_method == "LOOCV") {
+    loocv <- rep(list(seq_along(y)), length(y))
+    lapply(seq_along(y), function(i) loocv[[i]][-i])
+  }
   outer_res <- mclapply(1:n_outer_folds, function(i) {
     trainIndex <- outer_folds[[i]]
     filtx <- if (is.null(filterFUN)) x else {
@@ -161,8 +171,9 @@ nestcv.train <- function(y, x,
   out <- list(call = nestcv.call,
               output = output,
               outer_result = outer_res,
-              dimx = dim(x),
+              outer_method = outer_method,
               outer_folds = outer_folds,
+              dimx = dim(x),
               final_fit = final_fit,
               final_vars = colnames(filtx),
               roc = caret.roc,
@@ -181,7 +192,9 @@ summary.nestcv.train <- function(object,
   cat("Nested cross-validation with caret\n")
   if (!is.null(object$call$filterFUN)) 
     cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
-  cat("Outer loop: ", paste0(length(object$outer_folds), "-fold cv\n"))
+  cat("Outer loop: ", switch(object$outer_method,
+                             cv = paste0(length(object$outer_folds), "-fold CV"),
+                             LOOCV = "leave-one-out CV"))
   cat("Inner loop: ", paste0(object$trControl$number, "-fold ",
                              object$trControl$method, "\n"))
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
