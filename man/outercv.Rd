@@ -88,7 +88,7 @@ An object with S3 class "outercv"
 predictions on left-out outer folds, model result and number of filtered
 predictors at each fold.}
 \item{dimx}{vector of number of observations and number of predictors}
-\item{outer_folds}{List of indices of outer training folds}
+\item{outer_folds}{List of indices of outer test folds}
 \item{final_fit}{Final fitted model on whole data}
 \item{final_vars}{Column names of filtered predictors entering final model}
 \item{roc}{ROC AUC for binary classification where available.}

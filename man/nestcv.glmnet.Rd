@@ -80,8 +80,7 @@ coefficients, list object of inner fitted cv.glmnet and number of filtered
 predictors at each fold.}
 \item{outer_method}{the \code{outer_method} argument}
 \item{n_inner_folds}{number of inner folds}
-\item{outer_folds}{List of
-indices of outer training folds}
+\item{outer_folds}{List of indices of outer test folds}
 \item{dimx}{dimensions of \code{x}}
 \item{final_param}{Final mean best lambda
 and alpha from each fold}

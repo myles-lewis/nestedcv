@@ -53,8 +53,7 @@
 #'   predictors at each fold.}
 #'   \item{outer_method}{the `outer_method` argument}
 #'   \item{n_inner_folds}{number of inner folds}
-#'   \item{outer_folds}{List of
-#'   indices of outer training folds}
+#'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{dimx}{dimensions of `x`}
 #'   \item{final_param}{Final mean best lambda
 #'   and alpha from each fold}
