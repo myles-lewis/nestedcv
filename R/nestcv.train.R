@@ -29,8 +29,8 @@
 #' @param tuneGrid Data frame of tuning values, see [caret::train].
 #' @param savePredictions Indicates whether hold-out predictions for each inner
 #'   CV fold should be saved for ROC curves, accuracy etc see
-#'   [caret::trainControl].Set to `"final"` to capture predictions for inner CV
-#'   ROC.
+#'   [caret::trainControl]. Default is `"final"` to capture predictions for
+#'   inner CV ROC.
 #' @param cv.cores Number of cores for parallel processing. Note this currently
 #'   uses `parallel::mclapply`.
 #' @param na.option Character value specifying how `NA`s are dealt with.
@@ -69,6 +69,43 @@
 #'   https://topepo.github.io/caret/model-training-and-tuning.html#fitting-models-without-parameter-tuning
 #'
 #' @author Myles Lewis
+#' @examples
+#' 
+#' ## sigmoid function
+#' sigmoid <- function(x) {1 / (1 + exp(-x))}
+#' 
+#' ## load iris dataset and simulate a binary outcome
+#' data(iris)
+#' x <- iris[, 1:4]
+#' colnames(x) <- c("marker1", "marker2", "marker3", "marker4")
+#' x <- as.data.frame(apply(x, 2, scale))
+#' y2 <- sigmoid(0.5 * x$marker1 + 2 * x$marker2) > runif(nrow(x))
+#' y2 <- factor(y2, labels = c("class1", "class2"))
+#' 
+#' ## Example using random forest with caret
+#' cvrf <- nestcv.train(y2, x, method = "rf")
+#' summary(cvrf)
+#' 
+#' ## Example of glmnet tuned using caret
+#' ## set up tuning grid
+#' tg <- expand.grid(lambda = exp(seq(log(2e-3), log(1e0), length.out = 20)),
+#'                   alpha = seq(0.8, 1, 0.1))
+#' 
+#' ncv <- nestcv.train(y = y2, x = x,
+#'                     method = "glmnet",
+#'                     tuneGrid = tg, cv.cores = 2)
+#' summary(ncv)
+#' 
+#' ## plot tuning for outer fold #1
+#' plot(ncv$outer_result[[1]]$fit, xTrans = log)
+#' 
+#' ## plot final ROC curve
+#' plot(ncv$roc)
+#' 
+#' ## plot ROC for left-out inner folds
+#' inroc <- innercv_roc(ncv)
+#' plot(inroc)
+#' 
 #' @importFrom caret createFolds train trainControl mnLogLoss confusionMatrix
 #'   defaultSummary
 #' @importFrom data.table rbindlist
@@ -86,7 +123,7 @@ nestcv.train <- function(y, x,
                          metric = ifelse(is.factor(y), "logLoss", "RMSE"),
                          trControl = NULL,
                          tuneGrid = NULL,
-                         savePredictions = FALSE,
+                         savePredictions = "final",
                          na.option = "pass",
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)
@@ -189,8 +226,8 @@ summary.nestcv.train <- function(object,
   if (!is.null(object$call$filterFUN)) 
     cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
   cat("Outer loop: ", switch(object$outer_method,
-                             cv = paste0(length(object$outer_folds), "-fold CV"),
-                             LOOCV = "leave-one-out CV"))
+                             cv = paste0(length(object$outer_folds), "-fold cv\n"),
+                             LOOCV = "leave-one-out CV\n"))
   cat("Inner loop: ", paste0(object$trControl$number, "-fold ",
                              object$trControl$method, "\n"))
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
