@@ -83,13 +83,16 @@
 #' y2 <- factor(y2, labels = c("class1", "class2"))
 #' 
 #' ## Example using random forest with caret
-#' cvrf <- nestcv.train(y2, x, method = "rf")
+#' cvrf <- nestcv.train(y2, x, method = "rf",
+#'                      cv.cores = 2)
 #' summary(cvrf)
 #' 
 #' ## Example of glmnet tuned using caret
-#' ## set up tuning grid
-#' tg <- expand.grid(lambda = exp(seq(log(2e-3), log(1e0), length.out = 20)),
-#'                   alpha = seq(0.8, 1, 0.1))
+#' ## set up small tuning grid for quick execution
+#' ## length.out of 20-100 is usually recommended for lambda
+#' ## and more alpha values ranging from 0-1
+#' tg <- expand.grid(lambda = exp(seq(log(2e-3), log(1e0), length.out = 5)),
+#'                   alpha = 1)
 #' 
 #' ncv <- nestcv.train(y = y2, x = x,
 #'                     method = "glmnet",
