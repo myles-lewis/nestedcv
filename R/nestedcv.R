@@ -342,7 +342,7 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
     cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
   cat("Outer loop: ", switch(object$outer_method,
                          cv = paste0(length(object$outer_folds), "-fold CV"),
-                         loocv = "leave-one-out CV"))
+                         LOOCV = "leave-one-out CV"))
   cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n"))
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
   alpha <- unlist(lapply(object$outer_result, '[[', 'alpha'))

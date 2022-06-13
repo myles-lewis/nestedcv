@@ -225,6 +225,7 @@ outercv.default <- function(y, x,
   out <- list(call = outercv.call,
               output = output,
               outer_result = outer_res,
+              outer_method = outer_method,
               outer_folds = outer_folds,
               dimx = dim(x),
               final_fit = fit,
@@ -307,6 +308,7 @@ outercv.formula <- function(formula, data,
   out <- list(call = outercv.call,
               output = output,
               outer_result = outer_res,
+              outer_method = outer_method,
               outer_folds = outer_folds,
               dimx = c(nrow(data), length(labels(terms(fit)))),
               final_fit = fit,
@@ -324,7 +326,7 @@ summary.outercv <- function(object,
   cat("Single cross-validation to measure performance\n")
   cat("Outer loop: ", switch(object$outer_method,
                              cv = paste0(length(object$outer_folds), "-fold CV"),
-                             loocv = "leave-one-out CV"))
+                             LOOCV = "leave-one-out CV"))
   cat("\nNo inner loop\n")
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
   cat("Model: ", object$call$model, "\n")
