@@ -73,7 +73,7 @@ An object with S3 class "nestcv.train"
 predictions on left-out outer folds, caret result and number of filtered
 predictors at each fold.}
 \item{dimx}{dimensions of \code{x}}
-\item{outer_folds}{List of indices of outer training folds}
+\item{outer_folds}{List of indices of outer test folds}
 \item{final_fit}{Final fitted caret model using best tune parameters}
 \item{final_vars}{Column names of filtered predictors entering final model}
 \item{roc}{ROC AUC for binary classification where available.}
