@@ -73,7 +73,7 @@
 #'
 #'   Note that in the case of `model = lm`, although additional arguments e.g.
 #'   `subset`, `weights`, `offset` are passed into the model function via
-#'   `"..."` the scoping is known to go wrong. Avoid using these arguments with
+#'   `"..."` the scoping is known to go awry. Avoid using these arguments with
 #'   `model = lm`.
 #'   
 #'   `NA` handling differs between the default S3 method and the formula S3

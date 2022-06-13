@@ -121,7 +121,7 @@ and \code{y} interface instead.
 
 Note that in the case of \code{model = lm}, although additional arguments e.g.
 \code{subset}, \code{weights}, \code{offset} are passed into the model function via
-\code{"..."} the scoping is known to go wrong. Avoid using these arguments with
+\code{"..."} the scoping is known to go awry. Avoid using these arguments with
 \code{model = lm}.
 
 \code{NA} handling differs between the default S3 method and the formula S3
