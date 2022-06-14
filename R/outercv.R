@@ -163,36 +163,12 @@ outercv.default <- function(y, x,
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
+  
   outer_res <- mclapply(outer_folds, function(test) {
-    filtx <- if (is.null(filterFUN)) x else {
-      args <- list(y = y[-test], x = x[-test, ])
-      args <- append(args, filter_options)
-      fset <- do.call(filterFUN, args)
-      x[, fset]
-    }
-    # check if model uses formula
-    if ("formula" %in% formalArgs(model)) {
-      dat <- if (is.data.frame(filtx)) {filtx[-test, ]
-      } else as.data.frame(filtx[-test, ], stringsAsFactors = TRUE)
-      dat$.outcome <- y[-test]
-      fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
-    } else {
-      fit <- model(y = y[-test], x = filtx[-test, ], ...)
-    }
-    # test on outer CV
-    predy <- predict(fit, newdata = filtx[test, ])
-    preds <- data.frame(predy=predy, testy=y[test])
-    # for AUC
-    if (!reg & nlevels(y) == 2) {
-      predyp <- predict(fit, newdata = filtx[test, ], type = predict_type)
-      predyp <- predyp[,2]
-      preds$predyp <- predyp
-    }
-    rownames(preds) <- rownames(x)[test]
-    list(preds = preds,
-         fit = fit,
-         nfilter = ncol(filtx))
+    outercvCore(test, y, x, model,
+                filterFUN, filter_options, predict_type, ...)
   }, mc.cores = cv.cores)
+  
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
@@ -234,6 +210,39 @@ outercv.default <- function(y, x,
               summary = summary)
   class(out) <- "outercv"
   out
+}
+
+
+outercvCore <- function(test, y, x, model,
+                        filterFUN, filter_options, predict_type, ...) {
+  filtx <- if (is.null(filterFUN)) x else {
+    args <- list(y = y[-test], x = x[-test, ])
+    args <- append(args, filter_options)
+    fset <- do.call(filterFUN, args)
+    x[, fset]
+  }
+  # check if model uses formula
+  if ("formula" %in% formalArgs(model)) {
+    dat <- if (is.data.frame(filtx)) {filtx[-test, ]
+    } else as.data.frame(filtx[-test, ], stringsAsFactors = TRUE)
+    dat$.outcome <- y[-test]
+    fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
+  } else {
+    fit <- model(y = y[-test], x = filtx[-test, ], ...)
+  }
+  # test on outer CV
+  predy <- predict(fit, newdata = filtx[test, ])
+  preds <- data.frame(predy=predy, testy=y[test])
+  # for AUC
+  if (!reg & nlevels(y) == 2) {
+    predyp <- predict(fit, newdata = filtx[test, ], type = predict_type)
+    predyp <- predyp[,2]
+    preds$predyp <- predyp
+  }
+  rownames(preds) <- rownames(x)[test]
+  list(preds = preds,
+       fit = fit,
+       nfilter = ncol(filtx))
 }
 
 
