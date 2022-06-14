@@ -69,7 +69,7 @@
 #' @importFrom caret createFolds confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
 #' @importFrom glmnet cv.glmnet glmnet
-#' @importFrom parallel mclapply
+#' @importFrom parallel mclapply makeCluster clusterExport stopCluster parLapply
 #' @importFrom pROC roc
 #' @importFrom stats predict setNames
 #' @examples
@@ -146,11 +146,27 @@ nestcv.glmnet <- function(y, x,
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
-  outer_res <- mclapply(outer_folds, function(test) {
-    nestcv.glmnetCore(test, y, x, filterFUN, filter_options, 
-                      alphaSet, min_1se, n_inner_folds, keep, family,
-                      penalty.factor, ...)
-  }, mc.cores = cv.cores)
+  
+  if (Sys.info()["sysname"] == "Windows") {
+    cl <- makeCluster(cv.cores)
+    clusterExport(cl, varlist = c("outer_folds", "y", "x", "filterFUN",
+                                  "filter_options", "alphaSet", "min_1se", 
+                                  "n_inner_folds", "keep", "family", 
+                                  "penalty.factor", "nestcv.glmnetCore", ...),
+                  envir = environment())
+    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
+      nestcv.glmnetCore(test, y, x, filterFUN, filter_options, 
+                        alphaSet, min_1se, n_inner_folds, keep, family,
+                        penalty.factor, ...)
+    })
+    stopCluster(cl)
+  } else {
+    outer_res <- mclapply(outer_folds, function(test) {
+      nestcv.glmnetCore(test, y, x, filterFUN, filter_options, 
+                        alphaSet, min_1se, n_inner_folds, keep, family,
+                        penalty.factor, ...)
+    }, mc.cores = cv.cores)
+  }
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
