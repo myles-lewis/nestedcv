@@ -23,8 +23,9 @@
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
-#' @param cv.cores Number of cores for parallel processing. Note this currently
-#'   uses [parallel::mclapply].
+#' @param cv.cores Number of cores for parallel processing of the outer loops.
+#'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
+#'   on windows.
 #' @param predict_type Only used with binary classification. Calculation of ROC
 #'   AUC requires predicted class probabilities from fitted models. Most model
 #'   functions use syntax of the form `predict(..., type = "prob")`. However,
@@ -58,19 +59,19 @@
 #' @details 
 #'   Some predictive model functions do not have an x & y interface. If the
 #'   function specified by `model` requires a formula, `x` & `y` will be merged
-#'   into a data.frame with `model()` called with a formula equivalent to 
+#'   into a dataframe with `model()` called with a formula equivalent to 
 #'   `y ~ .`.
+#'   
+#'   The S3 formula method for `outercv` is not really recommended with large
+#'   data sets - it is envisaged to be primarily used to compare
+#'   performance of more basic models e.g. `lm()` specified by formulae for
+#'   example incorporating interactions. NOTE: filtering is not available if
+#'   `outercv` is called with a formula - use the `x-y` interface instead.
 #'   
 #'   An alternative method of tuning a single model with fixed parameters
 #'   is to use [nestcv.train] with `tuneGrid` set as a single row of a
 #'   data.frame. The parameters which are needed for a specific model can be
 #'   identified using [caret::modelLookup()].
-#'
-#'   The S3 formula method for `outercv` is not really recommended with large
-#'   data sets - it is envisaged to be primarily used when measuring performance
-#'   of more basic models e.g. `lm()` which lack an `x` & `y` style interface.
-#'   Notably filtering is not available if `outercv` is called with a formula -
-#'   use the `x` & `y` interface instead.
 #'
 #'   Note that in the case of `model = lm`, although additional arguments e.g.
 #'   `subset`, `weights`, `offset` are passed into the model function via
@@ -163,36 +164,25 @@ outercv.default <- function(y, x,
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
-  outer_res <- mclapply(outer_folds, function(test) {
-    filtx <- if (is.null(filterFUN)) x else {
-      args <- list(y = y[-test], x = x[-test, ])
-      args <- append(args, filter_options)
-      fset <- do.call(filterFUN, args)
-      x[, fset]
-    }
-    # check if model uses formula
-    if ("formula" %in% formalArgs(model)) {
-      dat <- if (is.data.frame(filtx)) {filtx[-test, ]
-      } else as.data.frame(filtx[-test, ], stringsAsFactors = TRUE)
-      dat$.outcome <- y[-test]
-      fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
-    } else {
-      fit <- model(y = y[-test], x = filtx[-test, ], ...)
-    }
-    # test on outer CV
-    predy <- predict(fit, newdata = filtx[test, ])
-    preds <- data.frame(predy=predy, testy=y[test])
-    # for AUC
-    if (!reg & nlevels(y) == 2) {
-      predyp <- predict(fit, newdata = filtx[test, ], type = predict_type)
-      predyp <- predyp[,2]
-      preds$predyp <- predyp
-    }
-    rownames(preds) <- rownames(x)[test]
-    list(preds = preds,
-         fit = fit,
-         nfilter = ncol(filtx))
-  }, mc.cores = cv.cores)
+  
+  if (Sys.info()["sysname"] == "Windows") {
+    cl <- makeCluster(cv.cores)
+    clusterExport(cl, varlist = c("outer_folds", "y", "x", "model", "reg",
+                                  "filterFUN", "filter_options",
+                                  "predict_type", "outercvCore", ...),
+                  envir = environment())
+    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
+      outercvCore(test, y, x, model, reg,
+                  filterFUN, filter_options, predict_type, ...)
+    })
+    stopCluster(cl)
+  } else {
+    outer_res <- mclapply(outer_folds, function(test) {
+      outercvCore(test, y, x, model, reg,
+                  filterFUN, filter_options, predict_type, ...)
+    }, mc.cores = cv.cores)
+  }
+  
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
@@ -212,8 +202,7 @@ outercv.default <- function(y, x,
     fset <- do.call(filterFUN, args)
     x[, fset]
   }
-  # model.args <- list(x = filtx, y = y)
-  # fit <- do.call(model, append(model.args, dot.args))
+  
   if ("formula" %in% formalArgs(model)) {
     dat <- if (is.data.frame(filtx)) {filtx
     } else as.data.frame(filtx, stringsAsFactors = TRUE)
@@ -237,6 +226,39 @@ outercv.default <- function(y, x,
 }
 
 
+outercvCore <- function(test, y, x, model, reg,
+                        filterFUN, filter_options, predict_type, ...) {
+  filtx <- if (is.null(filterFUN)) x else {
+    args <- list(y = y[-test], x = x[-test, ])
+    args <- append(args, filter_options)
+    fset <- do.call(filterFUN, args)
+    x[, fset]
+  }
+  # check if model uses formula
+  if ("formula" %in% formalArgs(model)) {
+    dat <- if (is.data.frame(filtx)) {filtx[-test, ]
+    } else as.data.frame(filtx[-test, ], stringsAsFactors = TRUE)
+    dat$.outcome <- y[-test]
+    fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
+  } else {
+    fit <- model(y = y[-test], x = filtx[-test, ], ...)
+  }
+  # test on outer CV
+  predy <- predict(fit, newdata = filtx[test, ])
+  preds <- data.frame(predy=predy, testy=y[test])
+  # for AUC
+  if (!reg & nlevels(y) == 2) {
+    predyp <- predict(fit, newdata = filtx[test, ], type = predict_type)
+    predyp <- predyp[,2]
+    preds$predyp <- predyp
+  }
+  rownames(preds) <- rownames(x)[test]
+  list(preds = preds,
+       fit = fit,
+       nfilter = ncol(filtx))
+}
+
+
 #' @rdname outercv
 #' @importFrom stats na.fail model.frame model.response reformulate terms
 #' @export
@@ -245,7 +267,8 @@ outercv.formula <- function(formula, data,
                             model,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
-                            cv.cores = 1, ...,
+                            cv.cores = 1,
+                            predict_type = "prob", ...,
                             na.action = na.fail) {
   outercv.call <- match.call(expand.dots = TRUE)
   # if model does not use formula, then revert to outercv.default(x, y, ...)
@@ -276,22 +299,23 @@ outercv.formula <- function(formula, data,
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
-  outer_res <- mclapply(1:length(outer_folds), function(i) {
-    test <- outer_folds[[i]]
+  
+  outer_res <- mclapply(outer_folds, function(test) {
     fit <- model(formula = formula, data = data, ...)
     # test on outer CV
     predy <- predict(fit, newdata = data[test, ])
     preds <- data.frame(predy=predy, testy=y[test])
     # for AUC
     if (!reg & nlevels(y) == 2) {
-      predyp <- predict(fit, newdata = data[test, ], type = "prob")
+      predyp <- predict(fit, newdata = data[test, ], type = predict_type)
       predyp <- predyp[,2]
       preds$predyp <- predyp
     }
-    rownames(preds) <- rownames(data[test, , drop = FALSE])
+    rownames(preds) <- rownames(data)[test]
     list(preds = preds,
          fit = fit)
   }, mc.cores = cv.cores)
+  
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)

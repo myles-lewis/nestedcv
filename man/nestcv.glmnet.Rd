@@ -59,8 +59,9 @@ coefficient. Can be 0 for some variables, which implies no shrinkage, and
 that variable is always included in the model. Default is 1 for all
 variables. See \link{glmnet}}
 
-\item{cv.cores}{Number of cores for parallel processing. Note this currently
-uses \link[parallel:mclapply]{parallel::mclapply}.}
+\item{cv.cores}{Number of cores for parallel processing of the outer loops.
+NOTE: this uses \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply}
+on windows.}
 
 \item{na.option}{Character value specifying how \code{NA}s are dealt with.
 \code{"omit"} (the default) is equivalent to \code{na.action = na.omit}. \code{"omitcol"}

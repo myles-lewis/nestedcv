@@ -31,8 +31,9 @@
 #'   CV fold should be saved for ROC curves, accuracy etc see
 #'   [caret::trainControl]. Default is `"final"` to capture predictions for
 #'   inner CV ROC.
-#' @param cv.cores Number of cores for parallel processing. Note this currently
-#'   uses `parallel::mclapply`.
+#' @param cv.cores Number of cores for parallel processing of the outer loops.
+#'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
+#'   on windows.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
@@ -154,30 +155,28 @@ nestcv.train <- function(y, x,
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
-  outer_res <- mclapply(outer_folds, function(test) {
-    filtx <- if (is.null(filterFUN)) x else {
-      args <- list(y = y[-test], x = x[-test, ])
-      args <- append(args, filter_options)
-      fset <- do.call(filterFUN, args)
-      x[, fset]
-    }
-    fit <- caret::train(x = filtx[-test, ], y = y[-test],
-                        metric = metric,
-                        trControl = trControl,
-                        tuneGrid = tuneGrid, ...)
-    predy <- predict(fit, newdata = filtx[test, ])
-    preds <- data.frame(predy=predy, testy=y[test])
-    if (is.factor(y)) {
-      predyp <- predict(fit, newdata = filtx[test, ], type = "prob")
-      # note predyp has 2 columns
-      preds$predyp <- predyp[,2]
-    }
-    rownames(preds) <- rownames(x)[test]
-    ret <- list(preds = preds,
-                fit = fit,
-                nfilter = ncol(filtx))
-    ret
-  }, mc.cores = cv.cores)
+  
+  if (Sys.info()["sysname"] == "Windows") {
+    cl <- makeCluster(cv.cores)
+    clusterExport(cl, varlist = c("outer_folds", "y", "x", 
+                                  "filterFUN", "filter_options",
+                                  "metric", "trControl", "tuneGrid",
+                                  "nestcv.trainCore", ...),
+                  envir = environment())
+    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
+      nestcv.trainCore(test, y, x,
+                       filterFUN, filter_options,
+                       metric, trControl, tuneGrid, ...)
+    })
+    stopCluster(cl)
+  } else {
+    outer_res <- mclapply(outer_folds, function(test) {
+      nestcv.trainCore(test, y, x,
+                       filterFUN, filter_options,
+                       metric, trControl, tuneGrid, ...)
+    }, mc.cores = cv.cores)
+  }
+  
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
@@ -221,6 +220,35 @@ nestcv.train <- function(y, x,
   class(out) <- "nestcv.train"
   out
 }
+
+
+nestcv.trainCore <- function(test, y, x,
+                             filterFUN, filter_options,
+                             metric, trControl, tuneGrid, ...) {
+  filtx <- if (is.null(filterFUN)) x else {
+    args <- list(y = y[-test], x = x[-test, ])
+    args <- append(args, filter_options)
+    fset <- do.call(filterFUN, args)
+    x[, fset]
+  }
+  fit <- caret::train(x = filtx[-test, ], y = y[-test],
+                      metric = metric,
+                      trControl = trControl,
+                      tuneGrid = tuneGrid, ...)
+  predy <- predict(fit, newdata = filtx[test, ])
+  preds <- data.frame(predy=predy, testy=y[test])
+  if (is.factor(y)) {
+    predyp <- predict(fit, newdata = filtx[test, ], type = "prob")
+    # note predyp has 2 columns
+    preds$predyp <- predyp[,2]
+  }
+  rownames(preds) <- rownames(x)[test]
+  ret <- list(preds = preds,
+              fit = fit,
+              nfilter = ncol(filtx))
+  ret
+}
+
 
 #' @export
 summary.nestcv.train <- function(object, 
