@@ -84,6 +84,7 @@
 #' 
 #' ## Example using random forest with caret
 #' cvrf <- nestcv.train(y2, x, method = "rf",
+#'                      n_outer_folds = 3,
 #'                      cv.cores = 2)
 #' summary(cvrf)
 #' 
@@ -96,6 +97,7 @@
 #' 
 #' ncv <- nestcv.train(y = y2, x = x,
 #'                     method = "glmnet",
+#'                     n_outer_folds = 3,
 #'                     tuneGrid = tg, cv.cores = 2)
 #' summary(ncv)
 #' 
