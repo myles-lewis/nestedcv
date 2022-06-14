@@ -164,10 +164,23 @@ outercv.default <- function(y, x,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
   
-  outer_res <- mclapply(outer_folds, function(test) {
-    outercvCore(test, y, x, model,
-                filterFUN, filter_options, predict_type, ...)
-  }, mc.cores = cv.cores)
+  if (Sys.info()["sysname"] == "Windows") {
+    cl <- makeCluster(cv.cores)
+    clusterExport(cl, varlist = c("outer_folds", "y", "x", "model", "reg",
+                                  "filterFUN", "filter_options",
+                                  "predict_type", "outercvCore", ...),
+                  envir = environment())
+    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
+      outercvCore(test, y, x, model, reg,
+                  filterFUN, filter_options, predict_type, ...)
+    })
+    stopCluster(cl)
+  } else {
+    outer_res <- mclapply(outer_folds, function(test) {
+      outercvCore(test, y, x, model, reg,
+                  filterFUN, filter_options, predict_type, ...)
+    }, mc.cores = cv.cores)
+  }
   
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
@@ -213,7 +226,7 @@ outercv.default <- function(y, x,
 }
 
 
-outercvCore <- function(test, y, x, model,
+outercvCore <- function(test, y, x, model, reg,
                         filterFUN, filter_options, predict_type, ...) {
   filtx <- if (is.null(filterFUN)) x else {
     args <- list(y = y[-test], x = x[-test, ])
