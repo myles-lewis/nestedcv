@@ -37,8 +37,9 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
 \item{n_outer_folds}{Number of outer CV folds}
 
-\item{cv.cores}{Number of cores for parallel processing. Note this currently
-uses \code{parallel::mclapply}.}
+\item{cv.cores}{Number of cores for parallel processing of the outer loops.
+NOTE: this uses \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply}
+on windows.}
 
 \item{metric}{A string that specifies what summary metric will be used to
 select the optimal model. By default, "logLoss" is used for classification

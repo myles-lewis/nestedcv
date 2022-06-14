@@ -23,8 +23,9 @@
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
-#' @param cv.cores Number of cores for parallel processing. Note this currently
-#'   uses [parallel::mclapply].
+#' @param cv.cores Number of cores for parallel processing of the outer loops.
+#'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
+#'   on windows.
 #' @param predict_type Only used with binary classification. Calculation of ROC
 #'   AUC requires predicted class probabilities from fitted models. Most model
 #'   functions use syntax of the form `predict(..., type = "prob")`. However,

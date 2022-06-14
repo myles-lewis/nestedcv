@@ -31,8 +31,9 @@
 #'   CV fold should be saved for ROC curves, accuracy etc see
 #'   [caret::trainControl]. Default is `"final"` to capture predictions for
 #'   inner CV ROC.
-#' @param cv.cores Number of cores for parallel processing. Note this currently
-#'   uses `parallel::mclapply`.
+#' @param cv.cores Number of cores for parallel processing of the outer loops.
+#'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
+#'   on windows.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are

@@ -36,8 +36,9 @@
 #'   coefficient. Can be 0 for some variables, which implies no shrinkage, and
 #'   that variable is always included in the model. Default is 1 for all
 #'   variables. See [glmnet]
-#' @param cv.cores Number of cores for parallel processing. Note this currently
-#'   uses [parallel::mclapply].
+#' @param cv.cores Number of cores for parallel processing of the outer loops.
+#'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
+#'   on windows.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` (the default) is equivalent to `na.action = na.omit`. `"omitcol"`
 #'   removes cases if there are `NA` in 'y', but columns (predictors) containing

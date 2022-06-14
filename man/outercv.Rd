@@ -56,8 +56,9 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
 \item{n_outer_folds}{Number of outer CV folds}
 
-\item{cv.cores}{Number of cores for parallel processing. Note this currently
-uses \link[parallel:mclapply]{parallel::mclapply}.}
+\item{cv.cores}{Number of cores for parallel processing of the outer loops.
+NOTE: this uses \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply}
+on windows.}
 
 \item{predict_type}{Only used with binary classification. Calculation of ROC
 AUC requires predicted class probabilities from fitted models. Most model
