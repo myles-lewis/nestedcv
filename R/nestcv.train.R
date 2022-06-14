@@ -155,11 +155,26 @@ nestcv.train <- function(y, x,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
   
-  outer_res <- mclapply(outer_folds, function(test) {
-    nestcv.trainCore(test, y, x,
-                     filterFUN, filter_options,
-                     metric, trControl, tuneGrid, ...)
-  }, mc.cores = cv.cores)
+  if (Sys.info()["sysname"] == "Windows") {
+    cl <- makeCluster(cv.cores)
+    clusterExport(cl, varlist = c("outer_folds", "y", "x", 
+                                  "filterFUN", "filter_options",
+                                  "metric", "trControl", "tuneGrid",
+                                  "nestcv.trainCore", ...),
+                  envir = environment())
+    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
+      nestcv.trainCore(test, y, x,
+                       filterFUN, filter_options,
+                       metric, trControl, tuneGrid, ...)
+    })
+    stopCluster(cl)
+  } else {
+    outer_res <- mclapply(outer_folds, function(test) {
+      nestcv.trainCore(test, y, x,
+                       filterFUN, filter_options,
+                       metric, trControl, tuneGrid, ...)
+    }, mc.cores = cv.cores)
+  }
   
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
