@@ -201,8 +201,7 @@ outercv.default <- function(y, x,
     fset <- do.call(filterFUN, args)
     x[, fset]
   }
-  # model.args <- list(x = filtx, y = y)
-  # fit <- do.call(model, append(model.args, dot.args))
+  
   if ("formula" %in% formalArgs(model)) {
     dat <- if (is.data.frame(filtx)) {filtx
     } else as.data.frame(filtx, stringsAsFactors = TRUE)
@@ -267,7 +266,8 @@ outercv.formula <- function(formula, data,
                             model,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
-                            cv.cores = 1, ...,
+                            cv.cores = 1,
+                            predict_type = "prob", ...,
                             na.action = na.fail) {
   outercv.call <- match.call(expand.dots = TRUE)
   # if model does not use formula, then revert to outercv.default(x, y, ...)
@@ -298,22 +298,23 @@ outercv.formula <- function(formula, data,
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
-  outer_res <- mclapply(1:length(outer_folds), function(i) {
-    test <- outer_folds[[i]]
+  
+  outer_res <- mclapply(outer_folds, function(test) {
     fit <- model(formula = formula, data = data, ...)
     # test on outer CV
     predy <- predict(fit, newdata = data[test, ])
     preds <- data.frame(predy=predy, testy=y[test])
     # for AUC
     if (!reg & nlevels(y) == 2) {
-      predyp <- predict(fit, newdata = data[test, ], type = "prob")
+      predyp <- predict(fit, newdata = data[test, ], type = predict_type)
       predyp <- predyp[,2]
       preds$predyp <- predyp
     }
-    rownames(preds) <- rownames(data[test, , drop = FALSE])
+    rownames(preds) <- rownames(data)[test]
     list(preds = preds,
          fit = fit)
   }, mc.cores = cv.cores)
+  
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
