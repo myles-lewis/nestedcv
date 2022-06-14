@@ -29,6 +29,7 @@ outercv(y, ...)
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   cv.cores = 1,
+  predict_type = "prob",
   ...,
   na.action = na.fail
 )
