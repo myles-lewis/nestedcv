@@ -13,7 +13,7 @@
 #' nested CV.
 #'
 #' @param y Response vector
-#' @param x Matrix of predictors
+#' @param x Matrix of predictors. Dataframes will be coerced to a matrix.
 #' @param family Either a character string representing one of the built-in
 #'   families, or else a `glm()` family object. Passed to [cv.glmnet] and
 #'   [glmnet]

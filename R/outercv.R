@@ -10,7 +10,7 @@
 #' needed to tune model hyperparameters (see [nestcv.train]).
 #'
 #' @param y Response vector
-#' @param x Matrix or data frame of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param formula A formula describing the model to be fitted
 #' @param data A matrix or data frame containing variables in the model.
 #' @param model Model function to be fitted.

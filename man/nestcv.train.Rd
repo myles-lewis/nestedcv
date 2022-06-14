@@ -23,7 +23,7 @@ nestcv.train(
 \arguments{
 \item{y}{Response vector. For classification this should be a factor.}
 
-\item{x}{Matrix of predictors}
+\item{x}{Matrix or dataframe of predictors}
 
 \item{filterFUN}{Filter function, e.g. \link{ttest_filter} or \link{relieff_filter}.
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
@@ -119,6 +119,7 @@ y2 <- factor(y2, labels = c("class1", "class2"))
 
 ## Example using random forest with caret
 cvrf <- nestcv.train(y2, x, method = "rf",
+                     n_outer_folds = 3,
                      cv.cores = 2)
 summary(cvrf)
 
@@ -131,6 +132,7 @@ tg <- expand.grid(lambda = exp(seq(log(2e-3), log(1e0), length.out = 5)),
 
 ncv <- nestcv.train(y = y2, x = x,
                     method = "glmnet",
+                    n_outer_folds = 3,
                     tuneGrid = tg, cv.cores = 2)
 summary(ncv)
 

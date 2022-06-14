@@ -9,7 +9,7 @@
 #' estimation/ accuracy determined. The default is 10x10 nested CV.
 #'
 #' @param y Response vector. For classification this should be a factor.
-#' @param x Matrix of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
 #'   Any function can be provided and is passed `y` and `x`. Must return a
 #'   character vector with names of filtered predictors.

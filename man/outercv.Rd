@@ -38,7 +38,7 @@ outercv(y, ...)
 
 \item{...}{Optional arguments passed to the function specified by \code{model}.}
 
-\item{x}{Matrix or data frame of predictors}
+\item{x}{Matrix or dataframe of predictors}
 
 \item{model}{Model function to be fitted.}
 

@@ -25,7 +25,7 @@ nestcv.glmnet(
 \arguments{
 \item{y}{Response vector}
 
-\item{x}{Matrix of predictors}
+\item{x}{Matrix of predictors. Dataframes will be coerced to a matrix.}
 
 \item{family}{Either a character string representing one of the built-in
 families, or else a \code{glm()} family object. Passed to \link{cv.glmnet} and
