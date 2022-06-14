@@ -171,7 +171,7 @@ nestcv.train <- function(y, x,
       # note predyp has 2 columns
       preds$predyp <- predyp[,2]
     }
-    rownames(preds) <- rownames(x[test, , drop = FALSE])
+    rownames(preds) <- rownames(x)[test]
     ret <- list(preds = preds,
                 fit = fit,
                 nfilter = ncol(filtx))

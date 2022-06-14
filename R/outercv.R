@@ -189,7 +189,7 @@ outercv.default <- function(y, x,
       predyp <- predyp[,2]
       preds$predyp <- predyp
     }
-    rownames(preds) <- rownames(x[test, , drop = FALSE])
+    rownames(preds) <- rownames(x)[test]
     list(preds = preds,
          fit = fit,
          nfilter = ncol(filtx))
