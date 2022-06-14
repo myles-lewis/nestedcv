@@ -154,8 +154,7 @@ nestcv.train <- function(y, x,
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
-  outer_res <- mclapply(1:n_outer_folds, function(i) {
-    test <- outer_folds[[i]]
+  outer_res <- mclapply(outer_folds, function(test) {
     filtx <- if (is.null(filterFUN)) x else {
       args <- list(y = y[-test], x = x[-test, ])
       args <- append(args, filter_options)

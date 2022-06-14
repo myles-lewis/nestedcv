@@ -139,14 +139,14 @@ nestcv.glmnet <- function(y, x,
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
+  x <- as.matrix(x)
   ok <- checkxy(y, x, na.option)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
-  outer_res <- mclapply(1:length(outer_folds), function(i) {
-    test <- outer_folds[[i]]
+  outer_res <- mclapply(outer_folds, function(test) {
     # expand data with interactions
     if (is.null(filterFUN)) {
       filtx <- x
