@@ -154,30 +154,13 @@ nestcv.train <- function(y, x,
   outer_folds <- switch(outer_method,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
+  
   outer_res <- mclapply(outer_folds, function(test) {
-    filtx <- if (is.null(filterFUN)) x else {
-      args <- list(y = y[-test], x = x[-test, ])
-      args <- append(args, filter_options)
-      fset <- do.call(filterFUN, args)
-      x[, fset]
-    }
-    fit <- caret::train(x = filtx[-test, ], y = y[-test],
-                        metric = metric,
-                        trControl = trControl,
-                        tuneGrid = tuneGrid, ...)
-    predy <- predict(fit, newdata = filtx[test, ])
-    preds <- data.frame(predy=predy, testy=y[test])
-    if (is.factor(y)) {
-      predyp <- predict(fit, newdata = filtx[test, ], type = "prob")
-      # note predyp has 2 columns
-      preds$predyp <- predyp[,2]
-    }
-    rownames(preds) <- rownames(x)[test]
-    ret <- list(preds = preds,
-                fit = fit,
-                nfilter = ncol(filtx))
-    ret
+    nestcv.trainCore(test, y, x,
+                     filterFUN, filter_options,
+                     metric, trControl, tuneGrid, ...)
   }, mc.cores = cv.cores)
+  
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
@@ -221,6 +204,35 @@ nestcv.train <- function(y, x,
   class(out) <- "nestcv.train"
   out
 }
+
+
+nestcv.trainCore <- function(test, y, x,
+                             filterFUN, filter_options,
+                             metric, trControl, tuneGrid, ...) {
+  filtx <- if (is.null(filterFUN)) x else {
+    args <- list(y = y[-test], x = x[-test, ])
+    args <- append(args, filter_options)
+    fset <- do.call(filterFUN, args)
+    x[, fset]
+  }
+  fit <- caret::train(x = filtx[-test, ], y = y[-test],
+                      metric = metric,
+                      trControl = trControl,
+                      tuneGrid = tuneGrid, ...)
+  predy <- predict(fit, newdata = filtx[test, ])
+  preds <- data.frame(predy=predy, testy=y[test])
+  if (is.factor(y)) {
+    predyp <- predict(fit, newdata = filtx[test, ], type = "prob")
+    # note predyp has 2 columns
+    preds$predyp <- predyp[,2]
+  }
+  rownames(preds) <- rownames(x)[test]
+  ret <- list(preds = preds,
+              fit = fit,
+              nfilter = ncol(filtx))
+  ret
+}
+
 
 #' @export
 summary.nestcv.train <- function(object, 
