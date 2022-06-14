@@ -147,43 +147,9 @@ nestcv.glmnet <- function(y, x,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
   outer_res <- mclapply(outer_folds, function(test) {
-    if (is.null(filterFUN)) {
-      filtx <- x
-      filtpen.factor <- penalty.factor
-    } else {
-      args <- list(y = y[-test], x = x[-test, ])
-      args <- append(args, filter_options)
-      fset <- do.call(filterFUN, args)
-      filtx <- x[, fset]
-      filtpen.factor <- penalty.factor[fset]
-    }
-    cvafit <- cva.glmnet(x = filtx[-test, ], y = y[-test], 
-                alphaSet = alphaSet, nfolds = n_inner_folds,
-                keep = keep, family = family,
-                penalty.factor = filtpen.factor, ...)
-    alphafit <- cvafit$fits[[cvafit$which_alpha]]
-    s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
-    cf <- as.matrix(coef(alphafit, s = s))
-    cf <- cf[cf != 0, ]
-    # test on outer CV
-    predy <- as.vector(predict(alphafit, newx = filtx[test, ], s = s, type = "class"))
-    predyp <- as.vector(predict(alphafit, newx = filtx[test, ], s = s))
-    preds <- data.frame(predy=predy, predyp=predyp, testy=y[test])
-    rownames(preds) <- rownames(x)[test]
-    ret <- list(preds = preds,
-                lambda = s,
-                alpha = cvafit$best_alpha,
-                coef = cf,
-                cvafit = cvafit,
-                nfilter = ncol(filtx))
-    # inner CV predictions
-    if (keep) {
-      ind <- alphafit$index["min", ]
-      innerCV_preds <- alphafit$fit.preval[, ind]
-      ytrain <- y[-test]
-      ret <- append(ret, list(ytrain = ytrain, innerCV_preds = innerCV_preds))
-    }
-    ret
+    nestcv.glmnetCore(test, y, x, filterFUN, filter_options, 
+                      alphaSet, min_1se, n_inner_folds, keep, family,
+                      penalty.factor, ...)
   }, mc.cores = cv.cores)
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
@@ -226,6 +192,49 @@ nestcv.glmnet <- function(y, x,
               summary = summary)
   class(out) <- "nestcv.glmnet"
   out
+}
+
+
+nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options, 
+                              alphaSet, min_1se, n_inner_folds, keep, family,
+                              penalty.factor, ...) {
+  if (is.null(filterFUN)) {
+    filtx <- x
+    filtpen.factor <- penalty.factor
+  } else {
+    args <- list(y = y[-test], x = x[-test, ])
+    args <- append(args, filter_options)
+    fset <- do.call(filterFUN, args)
+    filtx <- x[, fset]
+    filtpen.factor <- penalty.factor[fset]
+  }
+  cvafit <- cva.glmnet(x = filtx[-test, ], y = y[-test], 
+                       alphaSet = alphaSet, nfolds = n_inner_folds,
+                       keep = keep, family = family,
+                       penalty.factor = filtpen.factor, ...)
+  alphafit <- cvafit$fits[[cvafit$which_alpha]]
+  s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
+  cf <- as.matrix(coef(alphafit, s = s))
+  cf <- cf[cf != 0, ]
+  # test on outer CV
+  predy <- as.vector(predict(alphafit, newx = filtx[test, ], s = s, type = "class"))
+  predyp <- as.vector(predict(alphafit, newx = filtx[test, ], s = s))
+  preds <- data.frame(predy=predy, predyp=predyp, testy=y[test])
+  rownames(preds) <- rownames(x)[test]
+  ret <- list(preds = preds,
+              lambda = s,
+              alpha = cvafit$best_alpha,
+              coef = cf,
+              cvafit = cvafit,
+              nfilter = ncol(filtx))
+  # inner CV predictions
+  if (keep) {
+    ind <- alphafit$index["min", ]
+    innerCV_preds <- alphafit$fit.preval[, ind]
+    ytrain <- y[-test]
+    ret <- append(ret, list(ytrain = ytrain, innerCV_preds = innerCV_preds))
+  }
+  ret
 }
 
 
