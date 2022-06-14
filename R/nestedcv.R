@@ -147,7 +147,6 @@ nestcv.glmnet <- function(y, x,
                         cv = createFolds(y, k = n_outer_folds),
                         LOOCV = 1:length(y))
   outer_res <- mclapply(outer_folds, function(test) {
-    # expand data with interactions
     if (is.null(filterFUN)) {
       filtx <- x
       filtpen.factor <- penalty.factor
