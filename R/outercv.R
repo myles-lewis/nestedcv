@@ -59,19 +59,19 @@
 #' @details 
 #'   Some predictive model functions do not have an x & y interface. If the
 #'   function specified by `model` requires a formula, `x` & `y` will be merged
-#'   into a data.frame with `model()` called with a formula equivalent to 
+#'   into a dataframe with `model()` called with a formula equivalent to 
 #'   `y ~ .`.
+#'   
+#'   The S3 formula method for `outercv` is not really recommended with large
+#'   data sets - it is envisaged to be primarily used to compare
+#'   performance of more basic models e.g. `lm()` specified by formulae for
+#'   example incorporating interactions. NOTE: filtering is not available if
+#'   `outercv` is called with a formula - use the `x-y` interface instead.
 #'   
 #'   An alternative method of tuning a single model with fixed parameters
 #'   is to use [nestcv.train] with `tuneGrid` set as a single row of a
 #'   data.frame. The parameters which are needed for a specific model can be
 #'   identified using [caret::modelLookup()].
-#'
-#'   The S3 formula method for `outercv` is not really recommended with large
-#'   data sets - it is envisaged to be primarily used when measuring performance
-#'   of more basic models e.g. `lm()` which lack an `x` & `y` style interface.
-#'   Notably filtering is not available if `outercv` is called with a formula -
-#'   use the `x` & `y` interface instead.
 #'
 #'   Note that in the case of `model = lm`, although additional arguments e.g.
 #'   `subset`, `weights`, `offset` are passed into the model function via

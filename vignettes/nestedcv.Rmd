@@ -490,11 +490,12 @@ submodel.
 # Parallelisation
 
 Currently `nestcv.glmnet`, `nestcv.train` and `outercv` all allow
-parallelisation using `mclapply` from the `parallel` package. This is enabled by
-specifying the number of cores using the argument `cv.cores`. Since in some
-cases the filtering process can be time consuming (e.g. `rf_filter`,
-`relieff_filter`), we tend to recommend parallelisation of the outer CV loop
-over parallelisation of the inner CV loop.
+parallelisation of the outer CV loop using `mclapply` from the `parallel`
+package on unix/mac and `parLapply` on windows. This is enabled by specifying
+the number of cores using the argument `cv.cores`. Since in some cases the
+filtering process can be time consuming (e.g. `rf_filter`, `relieff_filter`), we
+tend to recommend parallelisation of the outer CV loop over parallelisation of
+the inner CV loop.
 
 The `caret` package is set up for parallelisation using `foreach`
 (https://topepo.github.io/caret/parallel-processing.html). We generally do not
