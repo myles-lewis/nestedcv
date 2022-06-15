@@ -1,6 +1,19 @@
 News
 =====
 
+# nestedcv 0.2.1
+###### 15/06/2022
+
+* Parallelisation on windows added
+* hsstan model has been added (Athina Spiliopoulou)
+* outer_folds can be specified for consistent model comparisons
+* Checks on x, y added
+* NA handling
+* summary and print methods
+* Implemented LOOCV
+* Collinearity filter
+* Runnable examples have been added throughout
+
 # nestedcv 0.0.9100
 ###### 02/03/2022
 
