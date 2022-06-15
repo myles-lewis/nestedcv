@@ -1,6 +1,6 @@
 ---
 title: "nestedcv"
-author: "Myles Lewis"
+author: "Myles Lewis, Athina Spiliopoulou, Katriona Goldmann"
 output:
   html_document:
     toc: true
