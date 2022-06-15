@@ -12,6 +12,7 @@ News
 * summary and print methods
 * Implemented LOOCV
 * Collinearity filter
+* Implement lm and glm as models in outercv()
 * Runnable examples have been added throughout
 
 # nestedcv 0.0.9100
