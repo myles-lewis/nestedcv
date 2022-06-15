@@ -188,7 +188,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = 3, cores = 3,
+                         n_outer_folds = 3, cv.cores = 3,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
 # view prediction performance based on testing folds
 summary(res.cv.hsstan)
@@ -238,7 +238,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.bin,
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = 3, cores = 3,
+                         n_outer_folds = 3, cv.cores = 3,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
 
 
