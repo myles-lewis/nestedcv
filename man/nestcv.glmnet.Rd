@@ -13,6 +13,7 @@ nestcv.glmnet(
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   n_inner_folds = 10,
+  outer_folds = NULL,
   alphaSet = seq(0, 1, 0.1),
   min_1se = 0,
   keep = TRUE,
@@ -44,6 +45,9 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 \item{n_outer_folds}{Number of outer CV folds}
 
 \item{n_inner_folds}{Number of inner CV folds}
+
+\item{outer_folds}{Optional list containing indices of test folds for outer
+CV. If supplied, \code{n_outer_folds} is ignored.}
 
 \item{alphaSet}{Vector of alphas to be tuned}
 

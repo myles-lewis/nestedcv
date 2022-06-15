@@ -26,6 +26,8 @@
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
 #' @param n_inner_folds Number of inner CV folds
+#' @param outer_folds Optional list containing indices of test folds for outer
+#'   CV. If supplied, `n_outer_folds` is ignored.
 #' @param alphaSet Vector of alphas to be tuned
 #' @param min_1se Value from 0 to 1 specifying choice of optimal lambda from
 #'   0=lambda.min to 1=lambda.1se
@@ -130,6 +132,7 @@ nestcv.glmnet <- function(y, x,
                           outer_method = c("cv", "LOOCV"),
                           n_outer_folds = 10,
                           n_inner_folds = 10,
+                          outer_folds = NULL,
                           alphaSet = seq(0, 1, 0.1),
                           min_1se = 0,
                           keep = TRUE,
@@ -144,9 +147,11 @@ nestcv.glmnet <- function(y, x,
   ok <- checkxy(y, x, na.option)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
-  outer_folds <- switch(outer_method,
-                        cv = createFolds(y, k = n_outer_folds),
-                        LOOCV = 1:length(y))
+  if (is.null(outer_folds)) {
+    outer_folds <- switch(outer_method,
+                          cv = createFolds(y, k = n_outer_folds),
+                          LOOCV = 1:length(y))
+  }
   
   if (Sys.info()["sysname"] == "Windows") {
     cl <- makeCluster(cv.cores)

@@ -18,6 +18,8 @@
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
+#' @param outer_folds Optional list containing indices of test folds for outer
+#'   CV. If supplied, `n_outer_folds` is ignored.
 #' @param metric A string that specifies what summary metric will be used to
 #'   select the optimal model. By default, "logLoss" is used for classification
 #'   and "RMSE" is used for regression. Note this differs from the default
@@ -125,6 +127,7 @@ nestcv.train <- function(y, x,
                          filter_options = NULL,
                          outer_method = c("cv", "LOOCV"),
                          n_outer_folds = 10,
+                         outer_folds = NULL,
                          cv.cores = 1,
                          metric = ifelse(is.factor(y), "logLoss", "RMSE"),
                          trControl = NULL,
@@ -152,9 +155,11 @@ nestcv.train <- function(y, x,
   if (!is.null(tuneGrid)) {
     if (nrow(tuneGrid) == 1) trControl <- trainControl(method = "none", classProbs = TRUE)
   }
-  outer_folds <- switch(outer_method,
-                        cv = createFolds(y, k = n_outer_folds),
-                        LOOCV = 1:length(y))
+  if (is.null(outer_folds)) {
+    outer_folds <- switch(outer_method,
+                          cv = createFolds(y, k = n_outer_folds),
+                          LOOCV = 1:length(y))
+  }
   
   if (Sys.info()["sysname"] == "Windows") {
     cl <- makeCluster(cv.cores)

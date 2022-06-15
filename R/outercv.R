@@ -23,6 +23,8 @@
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
+#' @param outer_folds Optional list containing indices of test folds for outer
+#'   CV. If supplied, `n_outer_folds` is ignored.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
 #'   on windows.
@@ -151,6 +153,7 @@ outercv.default <- function(y, x,
                             filter_options = NULL,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
+                            outer_folds = NULL,
                             cv.cores = 1,
                             predict_type = "prob",
                             na.option = "pass",
@@ -161,9 +164,11 @@ outercv.default <- function(y, x,
   x <- x[ok$r, ok$c]
   reg <- !(is.factor(y) | is.character(y))  # y = regression
   outer_method <- match.arg(outer_method)
-  outer_folds <- switch(outer_method,
-                        cv = createFolds(y, k = n_outer_folds),
-                        LOOCV = 1:length(y))
+  if (is.null(outer_folds)) {
+    outer_folds <- switch(outer_method,
+                          cv = createFolds(y, k = n_outer_folds),
+                          LOOCV = 1:length(y))
+  }
   
   if (Sys.info()["sysname"] == "Windows") {
     cl <- makeCluster(cv.cores)
@@ -267,6 +272,7 @@ outercv.formula <- function(formula, data,
                             model,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
+                            outer_folds = NULL,
                             cv.cores = 1,
                             predict_type = "prob", ...,
                             na.action = na.fail) {
@@ -296,9 +302,11 @@ outercv.formula <- function(formula, data,
   outer_method <- match.arg(outer_method)
   y <- data[, all.vars(formula[[2]])]
   reg <- !(is.factor(y) | is.character(y))  # y = regression
-  outer_folds <- switch(outer_method,
-                        cv = createFolds(y, k = n_outer_folds),
-                        LOOCV = 1:length(y))
+  if (is.null(outer_folds)) {
+    outer_folds <- switch(outer_method,
+                          cv = createFolds(y, k = n_outer_folds),
+                          LOOCV = 1:length(y))
+  }
   
   outer_res <- mclapply(outer_folds, function(test) {
     fit <- model(formula = formula, data = data, ...)
