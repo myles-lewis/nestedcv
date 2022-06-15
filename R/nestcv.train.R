@@ -161,7 +161,7 @@ nestcv.train <- function(y, x,
                           LOOCV = 1:length(y))
   }
   
-  if (Sys.info()["sysname"] == "Windows") {
+  if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     clusterExport(cl, varlist = c("outer_folds", "y", "x", 
                                   "filterFUN", "filter_options",

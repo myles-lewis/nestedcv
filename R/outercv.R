@@ -170,7 +170,7 @@ outercv.default <- function(y, x,
                           LOOCV = 1:length(y))
   }
   
-  if (Sys.info()["sysname"] == "Windows") {
+  if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     clusterExport(cl, varlist = c("outer_folds", "y", "x", "model", "reg",
                                   "filterFUN", "filter_options",
@@ -308,21 +308,23 @@ outercv.formula <- function(formula, data,
                           LOOCV = 1:length(y))
   }
   
-  outer_res <- mclapply(outer_folds, function(test) {
-    fit <- model(formula = formula, data = data, ...)
-    # test on outer CV
-    predy <- predict(fit, newdata = data[test, ])
-    preds <- data.frame(predy=predy, testy=y[test])
-    # for AUC
-    if (!reg & nlevels(y) == 2) {
-      predyp <- predict(fit, newdata = data[test, ], type = predict_type)
-      predyp <- predyp[,2]
-      preds$predyp <- predyp
-    }
-    rownames(preds) <- rownames(data)[test]
-    list(preds = preds,
-         fit = fit)
-  }, mc.cores = cv.cores)
+  if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+    cl <- makeCluster(cv.cores)
+    clusterExport(cl, varlist = c("outer_folds", "formula", "data", "y", 
+                                  "model", "reg", "predict_type",
+                                  "outercvFormulaCore", ...),
+                  envir = environment())
+    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
+      outercvFormulaCore(test, formula, data, y, model,
+                         reg, predict_type, ...)
+    })
+    stopCluster(cl)
+  } else {
+    outer_res <- mclapply(outer_folds, function(test) {
+      outercvFormulaCore(test, formula, data, y, model,
+                         reg, predict_type, ...)
+    }, mc.cores = cv.cores)
+  }
   
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
@@ -350,6 +352,24 @@ outercv.formula <- function(formula, data,
   out
 }
 
+  
+outercvFormulaCore <- function(test, formula, data, y, model,
+                               reg, predict_type, ...) {
+  fit <- model(formula = formula, data = data, ...)
+  # test on outer CV
+  predy <- predict(fit, newdata = data[test, ])
+  preds <- data.frame(predy=predy, testy=y[test])
+  # for AUC
+  if (!reg & nlevels(y) == 2) {
+    predyp <- predict(fit, newdata = data[test, ], type = predict_type)
+    predyp <- predyp[,2]
+    preds$predyp <- predyp
+  }
+  rownames(preds) <- rownames(data)[test]
+  list(preds = preds,
+       fit = fit)
+}
+  
 
 #' @export
 summary.outercv <- function(object, 
