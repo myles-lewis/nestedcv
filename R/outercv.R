@@ -169,6 +169,7 @@ outercv.default <- function(y, x,
                           cv = createFolds(y, k = n_outer_folds),
                           LOOCV = 1:length(y))
   }
+  if (outercv.call$model == "glm") predict_type <- "response"
   
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
@@ -193,6 +194,9 @@ outercv.default <- function(y, x,
   output <- as.data.frame(output)
   if (!is.null(rownames(x))) {
     rownames(output) <- unlist(lapply(predslist, rownames))}
+  if (outercv.call$model == "glm") {
+    output$predy <- levels(output$testy)[as.numeric(output$predyp > 0.5) +1]
+  }
   summary <- predSummary(output)
   fit.roc <- NULL
   if (!reg & nlevels(y) == 2) {
@@ -254,7 +258,7 @@ outercvCore <- function(test, y, x, model, reg,
   # for AUC
   if (!reg & nlevels(y) == 2) {
     predyp <- predict(fit, newdata = filtx[test, ], type = predict_type)
-    predyp <- predyp[,2]
+    if (!is.vector(predyp)) predyp <- predyp[,2]
     preds$predyp <- predyp
   }
   rownames(preds) <- rownames(x)[test]
