@@ -26,6 +26,22 @@
 #'   of t-test p-value. If `type` is `"full"` full output from
 #'   [Rfast::ttests] is returned.
 #'
+#' @examples
+#' ## sigmoid function
+#' sigmoid <- function(x) {1 / (1 + exp(-x))}
+#' 
+#' ## load iris dataset and simulate a binary outcome
+#' data(iris)
+#' dt <- iris[, 1:4]
+#' colnames(dt) <- c("marker1", "marker2", "marker3", "marker4")
+#' dt <- as.data.frame(apply(dt, 2, scale))
+#' y2 <- sigmoid(0.5 * dt$marker1 + 2 * dt$marker2) > runif(nrow(dt))
+#' y2 <- factor(y2, labels = c("C1", "C2"))
+#' 
+#' ttest_filter(y2, dt)  # returns index of filtered predictors
+#' ttest_filter(y2, dt, type = "name")  # shows names of predictors
+#' ttest_filter(y2, dt, type = "full")  # full results table
+#'
 #' @importFrom Rfast ttests
 #' @export
 #'
@@ -43,10 +59,23 @@ ttest_filter <- function(y,
   x <- as.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
   res <- Rfast::ttests(x[indx1, ], x[indx2, ])
-  rownames(res) <- 1:ncol(x)
+  rownames(res) <- colnames(x)
   if (type == "full") return(res)
+  filter_finish(res[, "pvalue"],
+                x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
+}
+
+# (p cut-off) - optional
+# sort table
+# remove collinear
+# filter by n
+# add back force_var
+# return index or colnames
+
+filter_finish <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
+                          type) {
   check_vars <- which(!colnames(x) %in% force_vars)
-  outp <- res[check_vars, "pvalue"]
+  outp <- pval[check_vars]
   outorder <- order(outp)
   out <- check_vars[outorder]
   outp <- outp[outorder]
@@ -70,6 +99,9 @@ ttest_filter <- function(y,
 #' 
 #' @param y Response vector
 #' @param x Matrix of predictors
+#' @param force_vars Vector of column names within `x` which are always retained
+#'   in the model (i.e. not filtered). Default `NULL` means all predictors will
+#'   be passed to `filterFUN`.
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with 
 #' p values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
@@ -83,33 +115,33 @@ ttest_filter <- function(y,
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
 #' `type` is `"full"` full output from [Rfast::ftests] is returned.
+#' 
+#' @examples
+#' data(iris)
+#' dt <- iris[, 1:4]
+#' y3 <- iris[, 5]
+#' anova_filter(y3, dt)  # returns index of filtered predictors
+#' anova_filter(y3, dt, type = "full")  # shows names of predictors
+#' anova_filter(y3, dt, type = "name")  # full results table
+#' 
 #' @importFrom Rfast ftests
 #' @export
 #' 
 anova_filter <- function(y,
-                       x,
-                       nfilter = NULL,
-                       p_cutoff = 0.05,
-                       rsq_cutoff = NULL,
-                       type = c("index", "names", "full")) {
+                         x,
+                         force_vars = NULL,
+                         nfilter = NULL,
+                         p_cutoff = 0.05,
+                         rsq_cutoff = NULL,
+                         type = c("index", "names", "full")) {
   type <- match.arg(type)
   y <- factor(y)
   x <- as.matrix(x)
   res <- Rfast::ftests(x, y)
-  rownames(res) <- if (type == "index") 1:ncol(x) else colnames(x)
+  rownames(res) <- colnames(x)
   if (type == "full") return(res)
-  outp <- res[, "pval"]
-  out <- order(outp)
-  outp <- outp[out]
-  if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
-  if (!is.null(rsq_cutoff)) {
-    co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
-    if (length(co) > 0) out <- out[-co]
-  }
-  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
-  if (length(out) == 0) stop("No predictors selected")
-  switch(type,
-         index = out, names = colnames(x)[out])
+  filter_finish(res[, "pval"],
+                x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
 }
 
 
@@ -120,6 +152,9 @@ anova_filter <- function(y,
 #' 
 #' @param y Response vector
 #' @param x Matrix of predictors
+#' @param force_vars Vector of column names within `x` which are always retained
+#'   in the model (i.e. not filtered). Default `NULL` means all predictors will
+#'   be passed to `filterFUN`.
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with 
 #' p values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
@@ -141,13 +176,14 @@ anova_filter <- function(y,
 #' @export
 #' 
 wilcoxon_filter <- function(y,
-                         x,
-                         nfilter = NULL,
-                         p_cutoff = 0.05,
-                         rsq_cutoff = NULL,
-                         type = c("index", "names", "full"),
-                         exact = FALSE,
-                         ...) {
+                            x,
+                            force_vars = NULL,
+                            nfilter = NULL,
+                            p_cutoff = 0.05,
+                            rsq_cutoff = NULL,
+                            type = c("index", "names", "full"),
+                            exact = FALSE,
+                            ...) {
   type <- match.arg(type)
   y <- factor(y)
   indx1 <- as.numeric(y) == 1
@@ -157,18 +193,8 @@ wilcoxon_filter <- function(y,
                                         exact = exact, ...)
   )
   if (type == "full") return(res)
-  outp <- res[, "pvalue"]
-  out <- order(outp)
-  outp <- outp[out]
-  if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
-  if (!is.null(rsq_cutoff)) {
-    co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
-    if (length(co) > 0) out <- out[-co]
-  }
-  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
-  if (length(out) == 0) stop("No predictors selected")
-  switch(type,
-         index = out, names = colnames(x)[out])
+  filter_finish(res[, "pvalue"],
+                x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
 }
 
 
@@ -222,6 +248,9 @@ correls2 <- function(y, x,
 #' 
 #' @param y Response vector
 #' @param x Matrix of predictors
+#' @param force_vars Vector of column names within `x` which are always retained
+#'   in the model (i.e. not filtered). Default `NULL` means all predictors will
+#'   be passed to `filterFUN`.
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with 
 #' p values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
@@ -235,24 +264,18 @@ correls2 <- function(y, x,
 #' @export
 #' 
 correl_filter <- function(y,
-                      x,
-                      nfilter = NULL,
-                      p_cutoff = 0.05,
-                      method = "pearson",
-                      type = c("index", "names", "full"),
-                      ...) {
+                          x,
+                          force_vars = NULL,
+                          nfilter = NULL,
+                          p_cutoff = 0.05,
+                          method = "pearson",
+                          type = c("index", "names", "full"),
+                          ...) {
   type <- match.arg(type)
   res <- correls2(y, x, method = method, ...)
   if (type == "full") return(res)
-  out <- res[, "p-value"]
-  names(out) <- if (type == "index") 1:ncol(x) else colnames(x)
-  out <- sort(out)
-  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
-  if (!is.null(p_cutoff)) out <- out[out < p_cutoff]
-  out <- names(out)
-  if (length(out) == 0) stop("No predictors selected")
-  if (type == "index") out <- as.integer(out)
-  out
+  filter_finish(res[, "p-value"],
+                x, force_vars, nfilter, p_cutoff, rsq_cutoff=NULL, type)
 }
 
 
