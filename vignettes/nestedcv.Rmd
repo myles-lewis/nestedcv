@@ -283,8 +283,37 @@ boxplot_model(res.rtx, data.rtx, ylab = "VST")
 knitr::include_graphics("boxplot.png")
 ```
 
-Other filters include Wilcoxon (Mann-Whitney) test, Pearson or Spearman 
-correlation for regression modelling, random forest and ReliefF filters.
+Leave-one-out cross-validation (LOOCV) can be performed on the outer folds.
+
+```{r eval = FALSE}
+# Outer LOOCV
+res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
+                         filter_options = list(nfilter = 300, p_cutoff = NULL),
+                         outer_method = "LOOCV",
+                         family = "binomial", cv.cores = 8,
+                         alphaSet = seq(0.7, 1, 0.05))
+summary(res.rtx)
+```
+
+### Filters
+
+Multiple filters are available including:
+
+----------------- ---------------------------------------------------------
+`ttest_filter`    t-test
+
+`wilcoxon_filter` Wilcoxon (Mann-Whitney) test
+
+`anova_filter`    one-way ANOVA
+
+`correl_filter`   Pearson or Spearman correlation for regression modelling
+
+`lm_filter`       linear model with covariates
+
+`rf_filter`       random forest variable importance
+
+`relieff_filter`  ReliefF and other methods available via CORElearn
+----------------- ---------------------------------------------------------
 
 ```{r eval = FALSE}
 # Random forest filter
@@ -302,17 +331,25 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = relief
 summary(res.rtx)
 ```
 
-Leave-one-out cross-validation (LOOCV) can be performed on the outer folds.
+### Custom filter
+
+It is fairly straightforward to create your own custom filter, which can be
+embedded within the outer CV loops via `nestcv.glmnet`, `nestcv.train` or
+`outercv`. The function simply must be of the form
 
 ```{r eval = FALSE}
-# Outer LOOCV
-res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_filter,
-                         filter_options = list(nfilter = 300, p_cutoff = NULL),
-                         outer_method = "LOOCV",
-                         family = "binomial", cv.cores = 8,
-                         alphaSet = seq(0.7, 1, 0.05))
-summary(res.rtx)
+filter <- function(y, x, ...) {}
 ```
+
+Other arguments can be passed in to the filter function as a named list via the
+`filter_options` argument. The function must return a vector of indices of those
+predictors in `x` which are to be retained for downstream model fitting as well
+as prediction on left-out outer folds. Importantly the filter function is
+applied independently to each outer CV fold and not run on the whole data.
+
+Finally once the model performance has been calculated by nested CV. The filter
+is applied to the whole dataset when refitting the final model to the full
+dataset.
 
 ### Nested CV with caret
 
@@ -486,6 +523,7 @@ Here adding `marker2` improves the model fit: substantial decrease of
 KL-divergence from the full model to the submodel. Adding `marker3` does not
 improve the model fit: no decrease of KL-divergence from the full model to the
 submodel.
+
 
 # Parallelisation
 
