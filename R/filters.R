@@ -65,12 +65,6 @@ ttest_filter <- function(y,
                 x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
 }
 
-# (p cut-off) - optional
-# sort table
-# remove collinear
-# filter by n
-# add back force_var
-# return index or colnames
 
 filter_finish <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
                           type) {
