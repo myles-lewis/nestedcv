@@ -61,12 +61,12 @@ ttest_filter <- function(y,
   res <- Rfast::ttests(x[indx1, ], x[indx2, ])
   rownames(res) <- colnames(x)
   if (type == "full") return(res)
-  filter_finish(res[, "pvalue"],
+  filter_end(res[, "pvalue"],
                 x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
 }
 
 
-filter_finish <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
+filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
                           type) {
   check_vars <- which(!colnames(x) %in% force_vars)
   outp <- pval[check_vars]
@@ -134,7 +134,7 @@ anova_filter <- function(y,
   res <- Rfast::ftests(x, y)
   rownames(res) <- colnames(x)
   if (type == "full") return(res)
-  filter_finish(res[, "pval"],
+  filter_end(res[, "pval"],
                 x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
 }
 
@@ -187,7 +187,7 @@ wilcoxon_filter <- function(y,
                                         exact = exact, ...)
   )
   if (type == "full") return(res)
-  filter_finish(res[, "pvalue"],
+  filter_end(res[, "pvalue"],
                 x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
 }
 
@@ -268,7 +268,7 @@ correl_filter <- function(y,
   type <- match.arg(type)
   res <- correls2(y, x, method = method, ...)
   if (type == "full") return(res)
-  filter_finish(res[, "p-value"],
+  filter_end(res[, "p-value"],
                 x, force_vars, nfilter, p_cutoff, rsq_cutoff=NULL, type)
 }
 
