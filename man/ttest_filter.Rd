@@ -47,3 +47,20 @@ of t-test p-value. If \code{type} is \code{"full"} full output from
 Simple univariate filter using t-test using the Rfast package for speed.
 Can be applied to all or a subset of predictors.
 }
+\examples{
+## sigmoid function
+sigmoid <- function(x) {1 / (1 + exp(-x))}
+
+## load iris dataset and simulate a binary outcome
+data(iris)
+dt <- iris[, 1:4]
+colnames(dt) <- c("marker1", "marker2", "marker3", "marker4")
+dt <- as.data.frame(apply(dt, 2, scale))
+y2 <- sigmoid(0.5 * dt$marker1 + 2 * dt$marker2) > runif(nrow(dt))
+y2 <- factor(y2, labels = c("C1", "C2"))
+
+ttest_filter(y2, dt)  # returns index of filtered predictors
+ttest_filter(y2, dt, type = "name")  # shows names of predictors
+ttest_filter(y2, dt, type = "full")  # full results table
+
+}

@@ -7,6 +7,7 @@
 anova_filter(
   y,
   x,
+  force_vars = NULL,
   nfilter = NULL,
   p_cutoff = 0.05,
   rsq_cutoff = NULL,
@@ -17,6 +18,10 @@ anova_filter(
 \item{y}{Response vector}
 
 \item{x}{Matrix of predictors}
+
+\item{force_vars}{Vector of column names within \code{x} which are always retained
+in the model (i.e. not filtered). Default \code{NULL} means all predictors will
+be passed to \code{filterFUN}.}
 
 \item{nfilter}{Number of predictors to return. If \code{NULL} all predictors with
 p values < \code{p_cutoff} are returned.}
@@ -40,4 +45,13 @@ character vector of names (type = "names") of filtered parameters. If
 \description{
 Simple univariate filter using anova (Welch's F-test) using the
 Rfast package for speed.
+}
+\examples{
+data(iris)
+dt <- iris[, 1:4]
+y3 <- iris[, 5]
+anova_filter(y3, dt)  # returns index of filtered predictors
+anova_filter(y3, dt, type = "full")  # shows names of predictors
+anova_filter(y3, dt, type = "name")  # full results table
+
 }

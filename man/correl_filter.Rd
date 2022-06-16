@@ -7,6 +7,7 @@
 correl_filter(
   y,
   x,
+  force_vars = NULL,
   nfilter = NULL,
   p_cutoff = 0.05,
   method = "pearson",
@@ -18,6 +19,10 @@ correl_filter(
 \item{y}{Response vector}
 
 \item{x}{Matrix of predictors}
+
+\item{force_vars}{Vector of column names within \code{x} which are always retained
+in the model (i.e. not filtered). Default \code{NULL} means all predictors will
+be passed to \code{filterFUN}.}
 
 \item{nfilter}{Number of predictors to return. If \code{NULL} all predictors with
 p values < \code{p_cutoff} are returned.}
