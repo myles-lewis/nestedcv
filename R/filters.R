@@ -79,7 +79,7 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
     if (length(co) > 0) out <- out[-co]
   }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
-  if (length(out) == 0) stop("No predictors selected")
+  if (length(out) == 0) stop("No predictors left after filtering")
   out <- c(which(colnames(x) %in% force_vars), out)
   switch(type,
          index = out, names = colnames(x)[out])
