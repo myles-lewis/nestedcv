@@ -194,7 +194,7 @@ wilcoxon_filter <- function(y,
 
 #' Correlation between a vector and a matrix
 #'
-#' Fast pearson/spearman correlation where y is vector, x is matrix, adapted 
+#' Fast Pearson/Spearman correlation where `y` is vector, `x` is matrix, adapted 
 #' from [stats::cor.test].
 #' 
 #' @param y Numerical vector

@@ -17,7 +17,7 @@ correls2(y, x, method = "pearson", use = "complete.obs")
 covariances in the presence of missing values. See \link{cor}}
 }
 \description{
-Fast pearson/spearman correlation where y is vector, x is matrix, adapted
+Fast Pearson/Spearman correlation where \code{y} is vector, \code{x} is matrix, adapted
 from \link[stats:cor.test]{stats::cor.test}.
 }
 \details{
