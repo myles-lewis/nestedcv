@@ -427,14 +427,59 @@ preds <- predict(res.rtx, newdata = data.rtx, type = 'response')
 preds <- predict(ncv, newdata = data.rtx)
 ```
 
-# CV with hsstan
+### Bayesian shrinkage models with cross-validated univariate filters
+The two examples below implement Bayesian linear and logistic regression models
+using the horseshoe prior over parameters to encourage a sparse model. Models
+are fitted using the `hsstan` R package, which performs full Bayesian inference
+through a `Stan` implementation. In Bayesian inference model meta-parameters
+such as the amount of shrinkage are also given prior distributions and are
+thus directly learned from the data through sampling. This bypasses the need to
+cross-validate results over a grid of values for the meta-parameters, as would
+be required to find the optimal lambda in a lasso or elastic net model.
 
-### Linear regression with hsstan (continuous outcome)
+However, Bayesian inference is computationally intensive. In high-dimensional
+settings, with e.g. more than 10,000 biomarkers, pre-filtering of inputs based
+on univariate measures of association with the outcome may be beneficial. If
+pre-filtering of inputs is used then a cross-validation procedure is needed to
+ensure that the data points used for pre-filtering and model fitting differ
+from the data points used to quantify model performance. The `outercv()`
+function is used to perform univariate pre-filtering and cross-validate model
+performance in this setting.
+
+The univariate filters currently implemented to work with the `hsstan` code are
+the `lm_filter` for the case of linear regression and the `ttest_filter` for the
+case of logistic regression.
+
+CAUTION should be used when setting the number of cores available for
+parallelisation. The code will use the product of `cv.cores` and `mc.cores`.
+The former controls parallelisation over folds, while the latter controls
+parallelisation in the Bayesian inference procedure. The default setting for
+`hsstan` is to use 4 Markov chains for sampling. We recommend setting
+`options(mc.cores = 4)` which will parallelise computation over the chains.
+If we are also using a 10-fold cross-validation procedure, and set
+`cv.cores = 10` to parallelise computation over folds, then 40 cores will be
+used in total.
+
+#### Linear regression with a Bayesian shrinkage model (continuous outcomes)
+
+We use cross-validation and apply univariate filtering of predictors and
+model fitting in one part of the data (training fold), followed by evaluation
+of model performance on the left-out data (testing fold), repeated in each fold.
+
+Only one cross-validation split is needed (function `outercv`) as the Bayesian
+model does not require cross-validation for meta-parameters.
 
 ```{r}
-# Cross-validation is used to apply univariate filtering of predictors.
-# only one CV split is needed (outercv) as the Bayesian model does not require
-# learning of meta-parameters.
+
+# specify options for running the code
+nfolds <- 3
+
+# specify number of cores for parallelising computation
+# the product of cv.cores and mc.cores will be used in total
+# number of cores for parallelising over CV folds
+cv.cores <- 1
+# number of cores for parallelising hsstan sampling
+options(mc.cores = 2)
 
 # load iris dataset and simulate a continuous outcome
 data(iris)
@@ -456,7 +501,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = 3,
+                         n_outer_folds = nfolds, cv.cores = cv.cores,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
 # view prediction performance based on testing folds
 summary(res.cv.hsstan)
@@ -472,15 +517,28 @@ KL-divergence from the full model to the submodel. Adding `marker3` does not
 improve the model fit: no decrease of KL-divergence from the full model to the
 submodel.
 
-### Logistic regression with hsstan (binary outcome)
+#### Logistic regression with a Bayesian shrinkage model (continuous outcomes)
 
-Cross-validation is used to apply univariate filtering of predictors.
-only one CV split is needed (outercv) as the Bayesian model does not require
-learning of meta-parameters.
+We use cross-validation and apply univariate filtering of predictors and
+model fitting in one part of the data (training fold), followed by evaluation
+of model performance on the left-out data (testing fold), repeated in each fold.
+
+Only one cross-validation split is needed (function `outercv`) as the Bayesian
+model does not require cross-validation for meta-parameters.
 
 ```{r}
 # sigmoid function
 sigmoid <- function(x) {1 / (1 + exp(-x))}
+
+# specify options for running the code
+nfolds <- 3
+
+# specify number of cores for parallelising computation
+# the product of cv.cores and mc.cores will be used in total
+# number of cores for parallelising over CV folds
+cv.cores <- 1
+# number of cores for parallelising hsstan sampling
+options(mc.cores = 2)
 
 # load iris dataset and create a binary outcome
 set.seed(267)
@@ -506,7 +564,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.bin,
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = 3,
+                         n_outer_folds = nfolds, cv.cores = cv.cores,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
 
 
