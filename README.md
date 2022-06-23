@@ -165,10 +165,22 @@ glmnet_coefs(ncv$final_fit$finalModel, s = ncv$finalTune$lambda)
 ## Linear regression with hsstan (continuous outcome)
 
 Cross-validation is used to apply univariate filtering of predictors.
-only one CV split is needed (outercv) as the Bayesian model does not require
+Only one CV split is needed (outercv) as the Bayesian model does not require
 learning of meta-parameters.
 
 ```
+# specify options for running the code
+nfolds <- 3
+
+# specify number of cores for parallelising computation
+# the product of cv.cores and mc.cores (12 cores) will be used in total
+# number of cores for parallelising over CV folds
+cv.cores <- 3
+# number of cores for parallelising stan sampling (default over 4 chains)
+# in hsstan the number of cores is specified by setting options(mc.cores)
+options(mc.cores = 4)
+
+
 # load iris dataset and simulate a continuous outcome
 data(iris)
 dt <- iris[, 1:4]
@@ -188,7 +200,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = 3, cv.cores = 3,
+                         n_outer_folds = nfolds, cv.cores = cv.cores,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
 # view prediction performance based on testing folds
 summary(res.cv.hsstan)
@@ -207,12 +219,23 @@ submodel.
 ## Logistic regression with hsstan (binary outcome)
 
 Cross-validation is used to apply univariate filtering of predictors.
-only one CV split is needed (outercv) as the Bayesian model does not require
+Only one CV split is needed (outercv) as the Bayesian model does not require
 learning of meta-parameters.
 
 ```
 # sigmoid function
 sigmoid <- function(x) {1 / (1 + exp(-x))}
+
+# specify options for running the code
+nfolds <- 3
+
+# specify number of cores for parallelising computation
+# the product of cv.cores and mc.cores will be used in total
+# number of cores for parallelising over CV folds
+cv.cores <- 3
+# number of cores for parallelising stan sampling (default over 4 chains)
+# in hsstan the number of cores is specified by setting options(mc.cores)
+options(mc.cores = 4)
 
 # load iris dataset and create a binary outcome
 set.seed(267)
@@ -238,7 +261,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.bin,
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = 3, cv.cores = 3,
+                         n_outer_folds = nfolds, cv.cores = cv.cores,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
 
 
