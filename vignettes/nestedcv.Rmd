@@ -427,7 +427,7 @@ preds <- predict(res.rtx, newdata = data.rtx, type = 'response')
 preds <- predict(ncv, newdata = data.rtx)
 ```
 
-### Bayesian shrinkage models with cross-validated univariate filters
+### Bayesian shrinkage models
 The two examples below implement Bayesian linear and logistic regression models
 using the horseshoe prior over parameters to encourage a sparse model. Models
 are fitted using the `hsstan` R package, which performs full Bayesian inference
@@ -445,10 +445,6 @@ ensure that the data points used for pre-filtering and model fitting differ
 from the data points used to quantify model performance. The `outercv()`
 function is used to perform univariate pre-filtering and cross-validate model
 performance in this setting.
-
-The univariate filters currently implemented to work with the `hsstan` code are
-the `lm_filter` for the case of linear regression and the `ttest_filter` for the
-case of logistic regression.
 
 CAUTION should be used when setting the number of cores available for
 parallelisation. The code will use the product of `cv.cores` and `mc.cores`.
