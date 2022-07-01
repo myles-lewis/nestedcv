@@ -21,6 +21,7 @@ Language: en-gb
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
+    Boruta,
     caret,
     CORElearn,
     data.table,
