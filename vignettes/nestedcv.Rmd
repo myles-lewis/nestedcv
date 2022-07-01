@@ -297,7 +297,7 @@ summary(res.rtx)
 
 ### Filters
 
-Multiple filters are available including:
+Multiple filters for variable reduction are available including:
 
 ----------------- ---------------------------------------------------------
 `ttest_filter`    t-test
@@ -313,6 +313,8 @@ Multiple filters are available including:
 `rf_filter`       random forest variable importance
 
 `relieff_filter`  ReliefF and other methods available via CORElearn
+
+`boruta_filter`   Boruta
 ----------------- ---------------------------------------------------------
 
 ```{r eval = FALSE}
