@@ -237,12 +237,15 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
                        penalty.factor = filtpen.factor, ...)
   alphafit <- cvafit$fits[[cvafit$which_alpha]]
   s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
-  cf <- as.matrix(coef(alphafit, s = s))
-  cf <- cf[cf != 0, ]
+  cf <- glmnet_coefs(alphafit, s = s)
   # test on outer CV
   predy <- as.vector(predict(alphafit, newx = filtx[test, ], s = s, type = "class"))
-  predyp <- as.vector(predict(alphafit, newx = filtx[test, ], s = s))
-  preds <- data.frame(predy=predy, predyp=predyp, testy=y[test])
+  if (family == "binomial") {
+    predyp <- as.vector(predict(alphafit, newx = filtx[test, ], s = s))
+    preds <- data.frame(predy=predy, predyp=predyp, testy=y[test])
+  } else {
+    preds <- data.frame(predy=predy, testy=y[test])
+  }
   rownames(preds) <- rownames(x)[test]
   ret <- list(preds = preds,
               lambda = s,
@@ -251,7 +254,7 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
               cvafit = cvafit,
               nfilter = ncol(filtx))
   # inner CV predictions
-  if (keep) {
+  if (keep & family == "binomial") {
     ind <- alphafit$index["min", ]
     innerCV_preds <- alphafit$fit.preval[, ind]
     ytrain <- y[-test]
