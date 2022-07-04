@@ -33,7 +33,7 @@
 #' @importFrom hsstan hsstan
 #' @importFrom data.table as.data.table
 #' @examples
-#' 
+#' \dontrun{
 #' # Cross-validation is used to apply univariate filtering of predictors.
 #' # only one CV split is needed (outercv) as the Bayesian model does not 
 #' # require learning of meta-parameters.
@@ -80,7 +80,7 @@
 #' # KL-divergence from the full model to the submodel. Adding `marker3` does 
 #' # not improve the model fit: no decrease of KL-divergence from the full model 
 #' # to the submodel.
-#' 
+#' }
 #' @export
 #'
 model.hsstan <- function(y, x, unpenalized = NULL, ...) {
