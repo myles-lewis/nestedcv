@@ -240,11 +240,14 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
   cf <- glmnet_coefs(alphafit, s = s)
   # test on outer CV
   predy <- as.vector(predict(alphafit, newx = filtx[test, ], s = s, type = "class"))
+  preds <- data.frame(testy=y[test], predy=predy)
   if (family == "binomial") {
     predyp <- as.vector(predict(alphafit, newx = filtx[test, ], s = s))
-    preds <- data.frame(predy=predy, predyp=predyp, testy=y[test])
-  } else {
-    preds <- data.frame(predy=predy, testy=y[test])
+    preds <- cbind(preds, predyp)
+  } else if (family == "multinomial") {
+    # glmnet generates 3d array
+    predyp <- predict(alphafit, newx = filtx[test, ], s = s)[,, 1]
+    preds <- cbind(preds, predyp)
   }
   rownames(preds) <- rownames(x)[test]
   ret <- list(preds = preds,
@@ -254,10 +257,12 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
               cvafit = cvafit,
               nfilter = ncol(filtx))
   # inner CV predictions
-  if (keep & family == "binomial") {
+  if (keep) {
     ind <- alphafit$index["min", ]
-    innerCV_preds <- alphafit$fit.preval[, ind]
     ytrain <- y[-test]
+    innerCV_preds <- if (family == "multinomial") {
+      alphafit$fit.preval[, , ind]
+    } else alphafit$fit.preval[, ind]
     ret <- append(ret, list(ytrain = ytrain, innerCV_preds = innerCV_preds))
   }
   ret
