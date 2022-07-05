@@ -73,7 +73,7 @@
 #'
 #' @author Myles Lewis
 #' @examples
-#' 
+#' \dontrun{
 #' ## sigmoid function
 #' sigmoid <- function(x) {1 / (1 + exp(-x))}
 #' 
@@ -113,7 +113,7 @@
 #' ## plot ROC for left-out inner folds
 #' inroc <- innercv_roc(ncv)
 #' plot(inroc)
-#' 
+#' }
 #' @importFrom caret createFolds train trainControl mnLogLoss confusionMatrix
 #'   defaultSummary
 #' @importFrom data.table rbindlist

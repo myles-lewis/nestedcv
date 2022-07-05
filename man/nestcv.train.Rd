@@ -110,7 +110,7 @@ inner CV as it is unnecessary. See
 https://topepo.github.io/caret/model-training-and-tuning.html#fitting-models-without-parameter-tuning
 }
 \examples{
-
+\dontrun{
 ## sigmoid function
 sigmoid <- function(x) {1 / (1 + exp(-x))}
 
@@ -150,7 +150,7 @@ plot(ncv$roc)
 ## plot ROC for left-out inner folds
 inroc <- innercv_roc(ncv)
 plot(inroc)
-
+}
 }
 \author{
 Myles Lewis

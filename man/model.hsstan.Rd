@@ -39,7 +39,7 @@ CV procedure is needed to evaluate performance. This is implemented using the
 \code{outer} CV procedure in the \code{nestedcv} package.
 }
 \examples{
-
+\dontrun{
 # Cross-validation is used to apply univariate filtering of predictors.
 # only one CV split is needed (outercv) as the Bayesian model does not 
 # require learning of meta-parameters.
@@ -86,7 +86,7 @@ options(oldopt)
 # KL-divergence from the full model to the submodel. Adding `marker3` does 
 # not improve the model fit: no decrease of KL-divergence from the full model 
 # to the submodel.
-
+}
 }
 \author{
 Athina Spiliopoulou
