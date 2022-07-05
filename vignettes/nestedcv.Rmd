@@ -40,9 +40,12 @@ between training and testing.
 In addition typical biomedical datasets often have many 10,000s of possible
 predictors, so filtering of predictors is commonly needed. However, it has been
 demonstrated that filtering on the whole dataset creates a bias when determining
-accuracy of model (Vabalas et al, 2019). Thus, it is recommended that any
-filtering of predictors is performed within the CV loops, to prevent data
-leakage.
+accuracy of models (Vabalas et al, 2019). Feature selection of predictors should
+be considered an integral part of a model, with feature selection performed only
+on training data. Then the selected features and accompanying model can be
+tested on hold-out test data without bias. Thus, it is recommended that any
+filtering of predictors is performed within the CV loops, to prevent test data
+information leakage.
 
 This package enables nested cross-validation (CV) to be performed using the
 commonly used `glmnet` package, which fits elastic net regression models, and
