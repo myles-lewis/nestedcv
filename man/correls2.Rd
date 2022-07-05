@@ -16,6 +16,11 @@ correls2(y, x, method = "pearson", use = "complete.obs")
 \item{use}{Optional character string giving a method for computing
 covariances in the presence of missing values. See \link{cor}}
 }
+\value{
+Matrix with columns containing the correlation statistic, either
+Pearson r or Spearman rho, and p-values for each column of \code{x} correlated
+against vector \code{y}
+}
 \description{
 Fast Pearson/Spearman correlation where \code{y} is vector, \code{x} is matrix, adapted
 from \link[stats:cor.test]{stats::cor.test}.

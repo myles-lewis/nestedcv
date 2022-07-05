@@ -1,5 +1,5 @@
 Package: nestedcv
-Title: Nested Cross-Validation with 'Glmnet' and 'caret'
+Title: Nested Cross-Validation with 'glmnet' and 'caret'
 Version: 0.2.3
 Authors@R: 
     c(person(given = "Myles",family = "Lewis",
@@ -14,9 +14,12 @@ Authors@R:
     email = "k.goldmann@qmul.ac.uk",
     comment = c(ORCID = "0000-0002-9073-6323")))
 Maintainer: Myles Lewis <myles.lewis@qmul.ac.uk>
-Description: Nested cross-validation for the 'glmnet' and 'caret' packages, 
-    including cross-validation of 'glmnet' alpha parameter and fast filter 
-    functions for feature selection.
+Description: Performs nested k*l-fold cross-validation for the 'glmnet' and 
+    'caret' packages, including cross-validation of 'glmnet' alpha parameter and 
+    fast filter functions for feature selection. 
+    Stone M (1977). "An Asymptotic Equivalence of Choice of Model by 
+    Cross-Validation and Akaike's Criterion". Journal of the Royal Statistical 
+    Society, Series B (Methodological). 39 (1): 44–47. <doi:10.1111/j.2517-6161.1977.tb01603.x>
 Language: en-gb
 License: MIT + file LICENSE
 Encoding: UTF-8

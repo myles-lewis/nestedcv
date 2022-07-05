@@ -15,7 +15,14 @@
 
 \item{...}{Other arguments passed to \code{predict.glmnet}.}
 }
+\value{
+Object returned depends on the \code{...} argument passed to predict
+method for \code{glmnet} objects.
+}
 \description{
 Obtains predictions from the final fitted model from a \link{nestcv.glmnet}
 object.
+}
+\seealso{
+\link[glmnet:glmnet]{glmnet::glmnet}
 }

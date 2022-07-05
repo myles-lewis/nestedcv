@@ -26,6 +26,11 @@ importance.}
 
 \item{...}{Other arguments passed to \link[Boruta:Boruta]{Boruta::Boruta}}
 }
+\value{
+Integer vector of indices of filtered parameters (type = "index") or
+character vector of names (type = "names") of filtered parameters. If
+\code{type} is \code{"full"} full output from \code{Boruta} is returned.
+}
 \description{
 Filter using Boruta algorithm.
 }

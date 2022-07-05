@@ -110,7 +110,7 @@ inner CV as it is unnecessary. See
 https://topepo.github.io/caret/model-training-and-tuning.html#fitting-models-without-parameter-tuning
 }
 \examples{
-\dontrun{
+\donttest{
 ## sigmoid function
 sigmoid <- function(x) {1 / (1 + exp(-x))}
 

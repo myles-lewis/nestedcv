@@ -73,7 +73,7 @@
 #'
 #' @author Myles Lewis
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' ## sigmoid function
 #' sigmoid <- function(x) {1 / (1 + exp(-x))}
 #' 

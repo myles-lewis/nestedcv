@@ -15,6 +15,10 @@
 #' Boruta works differently from other filters in that it does not rank
 #' variables by variable importance, but tries to determine relevant features
 #' and divides features into Rejected, Tentative or Confirmed.
+#' @return Integer vector of indices of filtered parameters (type = "index") or
+#'   character vector of names (type = "names") of filtered parameters. If
+#'   `type` is `"full"` full output from `Boruta` is returned.
+#' 
 #' @importFrom Boruta Boruta
 #' @export
 

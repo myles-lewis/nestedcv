@@ -204,6 +204,9 @@ wilcoxon_filter <- function(y,
 #' covariances in the presence of missing values. See [cor]
 #' @details For speed, p-values for Spearman's test are computed by 
 #' asymptotic t approximation, equivalent to [cor.test] with `exact = FALSE`.
+#' @return Matrix with columns containing the correlation statistic, either
+#'   Pearson r or Spearman rho, and p-values for each column of `x` correlated
+#'   against vector `y`
 #' @importFrom Rfast Rank colRanks
 #' @importFrom stats complete.cases cor pt
 #' @export
@@ -410,6 +413,9 @@ combo_filter <- function(y, x,
 #'   resulting in greatest sparsity, while alpha = 0 is pure ridge regression,
 #'   retaining all predictors in the regression model. Note, the `family`
 #'   argument is commonly needed, see [glmnet].
+#' @return Integer vector of indices of filtered parameters (type = "index") or
+#'   character vector of names (type = "names") of filtered parameters. If
+#'   `type` is `"full"` a named vector of variable importance is returned.
 #' @seealso [glmnet]
 #' @importFrom glmnet glmnet
 #' @export

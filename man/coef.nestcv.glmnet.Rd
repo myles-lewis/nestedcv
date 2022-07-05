@@ -14,6 +14,10 @@ values selected across each outer fold.}
 
 \item{...}{Other arguments passed to \link{coef.glmnet}}
 }
+\value{
+Vector or list of coefficients ordered with the intercept first,
+followed by highest absolute value to lowest.
+}
 \description{
 Extracts coefficients from the final fit of a \code{"nestcv.glmnet"} object.
 }

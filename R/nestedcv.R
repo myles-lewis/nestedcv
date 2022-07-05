@@ -352,6 +352,8 @@ glmnet_coefs <- function(fit, s, ...) {
 #' @param s Value of penalty parameter lambda. Default is the mean of lambda 
 #' values selected across each outer fold.
 #' @param ... Other arguments passed to [coef.glmnet]
+#' @return Vector or list of coefficients ordered with the intercept first, 
+#' followed by highest absolute value to lowest.
 #' @export
 #'
 coef.nestcv.glmnet <- function(object, s = object$final_param["lambda"], ...) {
@@ -409,6 +411,9 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
 #' @param newdata New data to predict outcome on
 #' @param s Value of lambda for glmnet prediction
 #' @param ... Other arguments passed to `predict.glmnet`.
+#' @return Object returned depends on the `...` argument passed to predict
+#'   method for `glmnet` objects.
+#' @seealso [glmnet::glmnet]
 #' @method predict nestcv.glmnet
 #' @export
 predict.nestcv.glmnet <- function(object, newdata,

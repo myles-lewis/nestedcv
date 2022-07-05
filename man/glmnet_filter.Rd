@@ -30,6 +30,11 @@ returns predictor names, "full" returns full output.}
 
 \item{...}{Other arguments passed to \link{glmnet}}
 }
+\value{
+Integer vector of indices of filtered parameters (type = "index") or
+character vector of names (type = "names") of filtered parameters. If
+\code{type} is \code{"full"} a named vector of variable importance is returned.
+}
 \description{
 Filter using properties of elastic net regression using glmnet to calculate
 variable importance.
