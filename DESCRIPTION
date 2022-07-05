@@ -14,12 +14,7 @@ Authors@R:
     email = "k.goldmann@qmul.ac.uk",
     comment = c(ORCID = "0000-0002-9073-6323")))
 Maintainer: Myles Lewis <myles.lewis@qmul.ac.uk>
-Description: Performs nested k*l-fold cross-validation for the 'glmnet' and 
-    'caret' packages, including cross-validation of 'glmnet' alpha parameter and 
-    fast filter functions for feature selection. 
-    Stone M (1977). "An Asymptotic Equivalence of Choice of Model by 
-    Cross-Validation and Akaike's Criterion". Journal of the Royal Statistical 
-    Society, Series B (Methodological). 39 (1): 44–47. <doi:10.1111/j.2517-6161.1977.tb01603.x>
+Description: Implements nested k*l-fold cross-validation for lasso and elastic-net regularised linear models via the 'glmnet' package and other machine learning models via the 'caret' package. Cross-validation of 'glmnet' alpha mixing parameter and embedded fast filter functions for feature selection are provided. Described as double cross-validation by Stone (1977) <doi:10.1111/j.2517-6161.1977.tb01603.x>.
 Language: en-gb
 License: MIT + file LICENSE
 Encoding: UTF-8
