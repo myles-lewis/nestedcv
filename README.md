@@ -10,10 +10,8 @@ in caret.
 
 # Installation
 
-Install from Github (requires API token).
-
 ```
-devtools::install_github("myles-lewis/nestedcv", auth_token = "API token...")
+install.packages("nestedcv")
 library(nestedcv)
 ```
 
