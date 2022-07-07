@@ -31,7 +31,7 @@ development and tuning of machine learning models in biomedical data where the
 sample size is frequently limited, but the number of predictors may be
 significantly larger (P >> n). While most machine learning pipelines involve
 splitting data into training and testing cohorts, typically 2/3 and 1/3
-respectively. Medical datasets may be too small for this, and so determination
+respectively, medical datasets may be too small for this, and so determination
 of accuracy in the left-out test set suffers because the test set is small.
 Nested cross-validation (CV) provides a way to get round this, by maximising use
 of the whole dataset for testing overall accuracy, while maintaining the split
@@ -57,11 +57,11 @@ models.
 `nestedcv` partitions the dataset into outer and inner folds (default 10x10
 folds). The inner fold CV, (default is 10-fold), is used to tune optimal
 hyperparameters for models. Then the model is fitted on the whole inner fold and
-tested on the left-out data from the outer fold. This repeated across all outer
-folds (default 10 outer folds), and the unseen test predictions from the outer
-folds are compared against the true results for the outer test folds and the
-results concatenated, to give measures of accuracy (e.g. AUC and accuracy for
-classification, or RMSE for regression) across the whole dataset.
+tested on the left-out data from the outer fold. This is repeated across all
+outer folds (default 10 outer folds), and the unseen test predictions from the
+outer folds are compared against the true results for the outer test folds and
+the results concatenated, to give measures of accuracy (e.g. AUC and accuracy
+for classification, or RMSE for regression) across the whole dataset.
 
 Finally, the tuning parameters for each model in the outer folds are averaged to
 give the mean best parameters across all outer folds. A final model is fitted
@@ -84,10 +84,8 @@ outer loop of the nested CV.
 
 # Installation
 
-Install from Github (requires API token).
-
 ```{r eval = FALSE}
-devtools::install_github("myles-lewis/nestedcv", auth_token = "API token...")
+install.packages("nestedcv")
 library(nestedcv)
 ```
 
