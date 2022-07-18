@@ -169,7 +169,9 @@ plot.cva.glmnet <- function(x,
   }
   cvms <- lapply(x$fits, function(i) i$cvm)
   n <- length(cvms)
-  if (is.null(scheme)) scheme <- hcl.colors(n, palette)
+  if (is.null(scheme)) {
+    scheme <- if (n > 1) hcl.colors(n, palette) else "royalblue"
+  }
   px <- switch(xaxis,
                lambda = lapply(x$fits, function(i) log(i$lambda)),
                nvar = lapply(x$fits, function(i) i$nzero))
@@ -204,12 +206,14 @@ plot.cva.glmnet <- function(x,
              length = errorWidth, angle = 90, code = 3, col = scheme[i])
     }
   }
-  for (i in 2:n) {
-    lines.args <- list(y = cvms[[i]], x = px[[i]], col = scheme[i],
-                       type = type,
-                       cex = cex)
-    if (length(new.args)) lines.args[names(new.args)] <- new.args
-    do.call("lines", lines.args)
+  if (n >= 2) {
+    for (i in 2:n) {
+      lines.args <- list(y = cvms[[i]], x = px[[i]], col = scheme[i],
+                         type = type,
+                         cex = cex)
+      if (length(new.args)) lines.args[names(new.args)] <- new.args
+      do.call("lines", lines.args)
+    }
   }
   if (errorBar) {
     for (i in 1:n) {
