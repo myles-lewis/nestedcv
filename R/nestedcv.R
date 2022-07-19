@@ -293,10 +293,15 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
 #' 
 cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...) {
   foldid <- sample(rep(seq_len(nfolds), length = length(y)))
-  fits <- lapply(alphaSet, function(alpha) {
-    cv.glmnet(x = x, y = y, 
-              alpha = alpha, foldid = foldid, ...)
-  })
+  fit1 <- cv.glmnet(x = x, y = y, 
+                    alpha = tail(alphaSet, 1), foldid = foldid, ...)
+  if (length(alphaSet) > 1) {
+    fits <- lapply(alphaSet[1:(length(alphaSet)-1)], function(alpha) {
+      cv.glmnet(x = x, y = y, 
+                alpha = alpha, foldid = foldid, lambda = fit1$lambda, ...)
+    })
+    fits <- append(fits, list(fit1))
+  } else fits <- list(fit1)
   alpha_cvm <- unlist(lapply(fits, function(i) min(i$cvm)))
   which_alpha <- which.min(alpha_cvm)
   best_alpha <- alphaSet[which_alpha]

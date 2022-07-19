@@ -117,12 +117,14 @@ plot_lambdas <- function(x,
 #' @param x Object of class 'cva.glmnet'
 #' @param xaxis String specifying what is plotted on the x axis, either log
 #'   lambda, alpha or the number of non-zero coefficients.
-#' @param errorBar Logical whether to show error bars for the standard deviation
-#'   of model deviance. Error bars are interleaved to avoid overlap.
+#' @param errorBar Logical whether to control error bars for the standard
+#'   deviation of model deviance when `xaxis = 'lambda'`. Because of overlapping
+#'   lines, only the deviance of the top and bottom points at a given lambda are
+#'   shown.
 #' @param errorWidth Width of error bars.
 #' @param min.pch Plotting 'character' for the minimum point of each curve. Not
 #'   shown if set to `NULL`. See [points]
-#' @param scheme Colour scheme
+#' @param scheme Colour scheme. Overrides the `palette` argument.
 #' @param palette Palette name (one of `hcl.pals()`) which is passed to
 #'   [hcl.colors]
 #' @param showLegend Either a keyword to position the legend or `NULL` to hide
@@ -139,7 +141,7 @@ plot_lambdas <- function(x,
 plot.cva.glmnet <- function(x,
                             xaxis = c('lambda', 'alpha', 'nvar'),
                             errorBar = (xaxis == "alpha"),
-                            errorWidth = 0.01,
+                            errorWidth = 0.015,
                             min.pch = NULL,
                             scheme = NULL,
                             palette = "zissou",
@@ -171,21 +173,35 @@ plot.cva.glmnet <- function(x,
   n <- length(cvms)
   if (is.null(scheme)) {
     scheme <- if (n > 1) hcl.colors(n, palette) else "royalblue"
-  }
+  } else scheme <- rep_len(scheme, length(x$fits))
   px <- switch(xaxis,
                lambda = lapply(x$fits, function(i) log(i$lambda)),
                nvar = lapply(x$fits, function(i) i$nzero))
   ylim <- range(unlist(cvms))
   if (errorBar) {
-    cvlo <- lapply(x$fits, function(i) i$cvlo)
-    cvup <- lapply(x$fits, function(i) i$cvup)
-    ylim <- range(c(unlist(cvlo), unlist(cvup)))
+    ms <- do.call(cbind, cvms)
+    xs <- do.call(cbind, px)
+    whichup <- Rfast::rowMaxs(ms)
+    whichlo <- Rfast::rowMins(ms)
+    ups <- lapply(x$fits, function(i) i$cvup)
+    ups <- do.call(cbind, ups)
+    los <- lapply(x$fits, function(i) i$cvlo)
+    los <- do.call(cbind, los)
+    cvlo1 <- selectCol(ms, whichlo)
+    cvlo2 <- selectCol(los, whichlo)
+    cvlox <- selectCol(xs, whichlo)
+    cvup1 <- selectCol(ms, whichup)
+    cvup2 <- selectCol(ups, whichup)
+    cvupx <- selectCol(xs, whichup)
+    ylim <- range(c(unlist(cvlo2), unlist(cvup2)))
   }
   type <- switch(xaxis,
                 lambda = 'l',
                 nvar = 'p')
+  if (xaxis == 'nvar') errorBar <- FALSE
+  if (errorBar) type <- 'p'
   cex <- switch(xaxis,
-               lambda = 0.5,
+               lambda = 0.6,
                nvar = 0.8)
   plot.args <- list(y = cvms[[1]], x = px[[1]],
                     type = type,
@@ -198,27 +214,23 @@ plot.cva.glmnet <- function(x,
                     cex = cex,
                     col = scheme[1])
   if (length(new.args)) plot.args[names(new.args)] <- new.args
+  if (plot.args$type == 'l') errorBar <- FALSE
   do.call("plot", plot.args)
   if (errorBar) {
-    ind <- seq(1, length(cvms[[1]]), 10)
-    for (i in 1:n) {
-      arrows(px[[i]][ind], cvlo[[i]][ind], px[[i]][ind], cvup[[i]][ind],
-             length = errorWidth, angle = 90, code = 3, col = scheme[i])
-    }
+    arrows(cvlox, cvlo1, cvlox, cvlo2,
+           length = errorWidth, angle = 90, col = scheme[whichlo])
+    arrows(cvupx, cvup1, cvupx, cvup2,
+           length = errorWidth, angle = 90, col = scheme[whichup])
+    points(y = cvms[[1]], x = px[[1]],
+           cex = cex, pch = 21, col = scheme[1], bg = 'white')
   }
   if (n >= 2) {
     for (i in 2:n) {
       lines.args <- list(y = cvms[[i]], x = px[[i]], col = scheme[i],
                          type = type,
-                         cex = cex)
+                         cex = cex, pch = 21, bg = 'white')
       if (length(new.args)) lines.args[names(new.args)] <- new.args
       do.call("lines", lines.args)
-    }
-  }
-  if (errorBar) {
-    for (i in 1:n) {
-      points(px[[i]][ind], cvms[[i]][ind], pch = 19, col = scheme[i],
-             cex = lines.args$cex)
     }
   }
   # show minima
@@ -233,14 +245,20 @@ plot.cva.glmnet <- function(x,
       legend.pch <- if (is.null(plot.args$pch)) par("pch") else plot.args$pch
       legend(showLegend, bty = 'n',
              legend = parse(text = paste("alpha ==", x$alphaSet)),
-             col = scheme, pch = legend.pch)
+             col = scheme, pch = legend.pch, cex = 0.9)
     } else {
       legend.lwd <- if (is.null(plot.args$lwd)) par("lwd") else plot.args$lwd
       legend(showLegend, bty = 'n',
              legend = parse(text = paste("alpha ==", x$alphaSet)),
-             col = scheme, lty = 1, lwd = legend.lwd)
+             col = scheme, lty = 1, lwd = legend.lwd, cex = 0.9)
     }
   }
+}
+
+
+selectCol <- function(x, colIndex) {
+  out <- lapply(seq_along(colIndex), function(i) x[i, colIndex[i]])
+  unlist(out)
 }
 
 
