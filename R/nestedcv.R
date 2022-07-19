@@ -289,6 +289,7 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
 #' @seealso [cv.glmnet], [glmnet]
 #' @author Myles Lewis
 #' @importFrom glmnet cv.glmnet
+#' @importFrom utils tail
 #' @export
 #' 
 cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...) {

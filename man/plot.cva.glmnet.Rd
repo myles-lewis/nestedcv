@@ -8,7 +8,7 @@
   x,
   xaxis = c("lambda", "alpha", "nvar"),
   errorBar = (xaxis == "alpha"),
-  errorWidth = 0.01,
+  errorWidth = 0.015,
   min.pch = NULL,
   scheme = NULL,
   palette = "zissou",
@@ -22,15 +22,17 @@
 \item{xaxis}{String specifying what is plotted on the x axis, either log
 lambda, alpha or the number of non-zero coefficients.}
 
-\item{errorBar}{Logical whether to show error bars for the standard deviation
-of model deviance. Error bars are interleaved to avoid overlap.}
+\item{errorBar}{Logical whether to control error bars for the standard
+deviation of model deviance when \code{xaxis = 'lambda'}. Because of overlapping
+lines, only the deviance of the top and bottom points at a given lambda are
+shown.}
 
 \item{errorWidth}{Width of error bars.}
 
 \item{min.pch}{Plotting 'character' for the minimum point of each curve. Not
 shown if set to \code{NULL}. See \link{points}}
 
-\item{scheme}{Colour scheme}
+\item{scheme}{Colour scheme. Overrides the \code{palette} argument.}
 
 \item{palette}{Palette name (one of \code{hcl.pals()}) which is passed to
 \link{hcl.colors}}

@@ -1,6 +1,14 @@
 News
 =====
 
+# nestedcv 0.2.4
+###### 19/7/2022
+* Corrected handling of multinomial models in `nestcv.glmnet()`
+* Align lambda in `cva.glmnet()`
+* Improve plotting of error bars in `plot.cva.glmnet`
+* Bugfix: plot of single `alphaSet` in `plot.cva.glmnet`
+* Updated documentation and vignette
+
 # nestedcv 0.2.1
 ###### 15/06/2022
 
