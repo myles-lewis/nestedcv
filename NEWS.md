@@ -1,8 +1,12 @@
 News
 =====
 
+# nestedcv 0.2.5
+###### 18/08/2022
+* Final lambda in `nestcv.glmnet()` is mean of best lambdas on log scale
+
 # nestedcv 0.2.4
-###### 19/7/2022
+###### 19/07/2022
 * Corrected handling of multinomial models in `nestcv.glmnet()`
 * Align lambda in `cva.glmnet()`
 * Improve plotting of error bars in `plot.cva.glmnet`
