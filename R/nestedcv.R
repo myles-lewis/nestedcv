@@ -187,7 +187,7 @@ nestcv.glmnet <- function(y, x,
                            quiet = TRUE)
   }
   # fit final glmnet
-  lam <- mean(unlist(lapply(outer_res, '[[', 'lambda')))
+  lam <- exp(mean(log(unlist(lapply(outer_res, '[[', 'lambda')))))
   alph <- mean(unlist(lapply(outer_res, '[[', 'alpha')))
   final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
   if (is.null(filterFUN)) {
