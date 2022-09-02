@@ -310,26 +310,33 @@ boxplot_model <- function(x, data,
 #' Variable importance plot
 #' 
 #' Plot of variable importance of coefficients of a final fitted
-#' 'nestedcv.glmnet' model using ggplot2.
+#' 'nestedcv.glmnet' model using ggplot2. Mean expression can be overlaid as the
+#' size of points as this can be informative in models of biological attributes.
 #' 
 #' @param x a 'nestcv.glmnet' class object
 #' @param abs Logical whether to show absolute value of glmnet coefficients
+#' @param size Logical whether to show mean expression by size of points
 #' @return Returns a ggplot2 plot
 #' @importFrom ggplot2 ggplot geom_point scale_fill_viridis_c scale_y_discrete
-#'   xlab ylab theme_minimal aes theme element_text
+#'   xlab ylab theme_minimal aes theme element_text geom_col
 #' @importFrom rlang .data
 #' @export
 #' 
-plot_varImp <- function(x, abs = TRUE) {
+plot_varImp <- function(x, abs = TRUE, size = TRUE) {
   if (!inherits(x, "nestcv.glmnet")) stop("Not a 'nestcv.glmnet' class object")
   df <- x$final_coef[-1,]
   if (abs) df[, 'coef'] <- abs(df[, 'coef'])
   df$name <- factor(rownames(df), levels = rownames(df))
-  ggplot(df, aes(x = .data$coef, y = .data$name, size = .data$meanExp,
-                 fill = .data$meanExp)) +
-    geom_point(shape = 21, alpha = 0.7) +
-    scale_fill_viridis_c(guide = "legend") +
-    scale_y_discrete(limits=rev) + ylab("") +
+  p <- if (size) {
+    ggplot(df, aes(x = .data$coef, y = .data$name, size = .data$meanExp,
+                   fill = .data$meanExp)) +
+      geom_point(shape = 21, alpha = 0.7) +
+      scale_fill_viridis_c(guide = "legend")
+  } else {
+    ggplot(df, aes(x = .data$coef, y = .data$name)) +
+      geom_col()
+  }
+  p + scale_y_discrete(limits=rev) + ylab("") +
     xlab("Variable importance") +
     theme_minimal() +
     theme(axis.text = element_text(colour = "black"))

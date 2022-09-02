@@ -4,17 +4,20 @@
 \alias{plot_varImp}
 \title{Variable importance plot}
 \usage{
-plot_varImp(x, abs = TRUE)
+plot_varImp(x, abs = TRUE, size = TRUE)
 }
 \arguments{
 \item{x}{a 'nestcv.glmnet' class object}
 
 \item{abs}{Logical whether to show absolute value of glmnet coefficients}
+
+\item{size}{Logical whether to show mean expression by size of points}
 }
 \value{
 Returns a ggplot2 plot
 }
 \description{
 Plot of variable importance of coefficients of a final fitted
-'nestedcv.glmnet' model using ggplot2.
+'nestedcv.glmnet' model using ggplot2. Mean expression can be overlaid as the
+size of points as this can be informative in models of biological attributes.
 }
