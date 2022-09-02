@@ -74,6 +74,7 @@
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom parallel mclapply makeCluster clusterExport stopCluster parLapply
 #' @importFrom pROC roc
+#' @importFrom Rfast colmeans
 #' @importFrom stats predict setNames
 #' @examples
 #' 
@@ -144,6 +145,7 @@ nestcv.glmnet <- function(y, x,
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
   x <- as.matrix(x)
+  if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
   ok <- checkxy(y, x, na.option)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
@@ -202,6 +204,9 @@ nestcv.glmnet <- function(y, x,
   }
   fit <- glmnet(filtx, y, alpha = alph, family = family, 
                 penalty.factor = filtpen.factor, ...)
+  fin_coef <- glmnet_coefs(fit, s = final_param["lambda"])
+  cfmean <- colmeans(x[, names(fin_coef)[-1]])
+  final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
   out <- list(call = nestcv.call,
               output = output,
               outer_result = outer_res,
@@ -211,6 +216,7 @@ nestcv.glmnet <- function(y, x,
               dimx = dim(x),
               final_param = final_param,
               final_fit = fit,
+              final_coef = final_coef,
               roc = glmnet.roc,
               summary = summary)
   class(out) <- "nestcv.glmnet"

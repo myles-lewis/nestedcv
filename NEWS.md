@@ -1,9 +1,11 @@
 News
 =====
 
-# nestedcv 0.2.5
-###### 18/08/2022
+# nestedcv 0.2.6
+###### 02/09/2022
 * Final lambda in `nestcv.glmnet()` is mean of best lambdas on log scale
+* Added `plot_varImp` for plotting variable importance for `nestcv.glmnet` final
+models
 
 # nestedcv 0.2.4
 ###### 19/07/2022

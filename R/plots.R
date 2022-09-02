@@ -306,6 +306,36 @@ boxplot_model <- function(x, data,
   do.call("boxplot", plot.args)
 }
 
+
+#' Variable importance plot
+#' 
+#' Plot of variable importance of coefficients of a final fitted
+#' 'nestedcv.glmnet' model using ggplot2.
+#' 
+#' @param x a 'nestcv.glmnet' class object
+#' @param abs Logical whether to show absolute value of glmnet coefficients
+#' @return Returns a ggplot2 plot
+#' @importFrom ggplot2 ggplot geom_point scale_fill_viridis_c scale_y_discrete
+#'   xlab ylab theme_minimal aes theme element_text
+#' @importFrom rlang .data
+#' @export
+#' 
+plot_varImp <- function(x, abs = TRUE) {
+  if (!inherits(x, "nestcv.glmnet")) stop("Not a 'nestcv.glmnet' class object")
+  df <- x$final_coef[-1,]
+  if (abs) df[, 'coef'] <- abs(df[, 'coef'])
+  df$name <- factor(rownames(df), levels = rownames(df))
+  ggplot(df, aes(x = .data$coef, y = .data$name, size = .data$meanExp,
+                 fill = .data$meanExp)) +
+    geom_point(shape = 21, alpha = 0.7) +
+    scale_fill_viridis_c(guide = "legend") +
+    scale_y_discrete(limits=rev) + ylab("") +
+    xlab("Variable importance") +
+    theme_minimal() +
+    theme(axis.text = element_text(colour = "black"))
+}
+
+
 #' Plot caret tuning
 #' 
 #' Plots the main tuning parameter in models built using [caret::train]
