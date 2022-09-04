@@ -54,6 +54,7 @@
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{final_fit}{Final fitted model on whole data}
 #'   \item{final_vars}{Column names of filtered predictors entering final model}
+#'   \item{summary_vars}{Summary statistics of filtered predictors}
 #'   \item{roc}{ROC AUC for binary classification where available.}
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
@@ -228,6 +229,7 @@ outercv.default <- function(y, x,
               dimx = dim(x),
               final_fit = fit,
               final_vars = colnames(filtx),
+              summary_vars = summary_vars(filtx),
               roc = fit.roc,
               summary = summary)
   class(out) <- "outercv"
@@ -354,6 +356,7 @@ outercv.formula <- function(formula, data,
               outer_folds = outer_folds,
               dimx = c(nrow(data), length(labels(terms(fit)))),
               final_fit = fit,
+              summary_vars = summary_vars(data),
               roc = fit.roc,
               summary = summary)
   class(out) <- "outercv"

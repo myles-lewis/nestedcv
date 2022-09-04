@@ -41,7 +41,7 @@
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
 #'   removed from 'x' to preserve cases. Any other value means that `NA` are
 #'   ignored (a message is given).
-#' @param ... Arguments passed to [caret::train]
+#' @param ... Arguments passed to [caret::train] including `method`
 #' @return An object with S3 class "nestcv.train"
 #'   \item{call}{the matched call}
 #'   \item{output}{Predictions on the left-out outer folds}
@@ -52,6 +52,7 @@
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{final_fit}{Final fitted caret model using best tune parameters}
 #'   \item{final_vars}{Column names of filtered predictors entering final model}
+#'   \item{summary_vars}{Summary statistics of filtered predictors}
 #'   \item{roc}{ROC AUC for binary classification where available.}
 #'   \item{trControl}{`caret::trainControl` object used for inner CV}
 #'   \item{bestTunes}{best tuned parameters from each outer fold}
@@ -289,3 +290,39 @@ predict.nestcv.train <- function(object, newdata, ...) {
     stop("newdata is missing some predictors", call. = FALSE)
   predict(object$final_fit, newdata = newdata[, object$final_vars], ...)
 }
+
+
+#' Summarise variables
+#' 
+#' @param x Matrix or dataframe with variables in columns
+#' @return A matrix with variables in rows and mean, median and SD for each
+#'   variable or number of levels if the variable is a factor. If `NA` are
+#'   detected, an extra column `n.NA` is added with the numbers of `NA` for each
+#'   variable.
+#' @importFrom Rfast colMedians colVars
+#' @export
+#' 
+summary_vars <- function(x) {
+  if (is.matrix(x)) {
+    if (!is.numeric(x)) return("Not numeric")
+    mat <- x
+    selCols <- TRUE
+  } else {
+    selCols <- unlist(lapply(x, is.numeric))
+    mat <- as.matrix(x[, selCols])
+  }
+  summary_mat <- cbind(colMeans(mat, na.rm = TRUE), colMedians(mat, na.rm = TRUE),
+                       colVars(mat, std = TRUE, na.rm = TRUE))
+  colnames(summary_mat) <- c("mean", "median", "sd")
+  if (any(!selCols)) {
+    nlevels_mat <- unlist(lapply(x[, !selCols], function(i) nlevels(as.factor(i))))
+    out <- matrix(NA, nrow = ncol(x), ncol = 4,
+                  dimnames = list(colnames(x), c("mean", "median", "sd", "nlevels")))
+    out[selCols, 1:3] <- summary_mat
+    out[!selCols, 4] <- nlevels_mat
+  } else out <- summary_mat
+  n.NA <- apply(x, 2, function(i) sum(is.na(i)))
+  if (any(n.NA > 0)) out <- cbind(out, n.NA)
+  out
+}
+

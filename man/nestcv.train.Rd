@@ -68,7 +68,7 @@ if there are \code{NA} in 'y', but columns (predictors) containing \code{NA} are
 removed from 'x' to preserve cases. Any other value means that \code{NA} are
 ignored (a message is given).}
 
-\item{...}{Arguments passed to \link[caret:train]{caret::train}}
+\item{...}{Arguments passed to \link[caret:train]{caret::train} including \code{method}}
 }
 \value{
 An object with S3 class "nestcv.train"
@@ -81,6 +81,7 @@ predictors at each fold.}
 \item{outer_folds}{List of indices of outer test folds}
 \item{final_fit}{Final fitted caret model using best tune parameters}
 \item{final_vars}{Column names of filtered predictors entering final model}
+\item{summary_vars}{Summary statistics of filtered predictors}
 \item{roc}{ROC AUC for binary classification where available.}
 \item{trControl}{\code{caret::trainControl} object used for inner CV}
 \item{bestTunes}{best tuned parameters from each outer fold}
