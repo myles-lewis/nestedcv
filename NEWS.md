@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.3.0
+###### 05/09/2022
+* Add `oversample()` to handle class imbalance using random over/undersampling
+* Add bootstrap wrapper to filters, e.g. `boot_ttest()`
+
 # nestedcv 0.2.6
 ###### 02/09/2022
 * Final lambda in `nestcv.glmnet()` is mean of best lambdas on log scale
