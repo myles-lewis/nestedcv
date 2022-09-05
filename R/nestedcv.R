@@ -138,8 +138,11 @@ nestcv.glmnet <- function(y, x,
                           min_1se = 0,
                           keep = TRUE,
                           penalty.factor = rep(1, ncol(x)),
+                          balance = "none",
+                          balance_options = NULL,
                           cv.cores = 1,
                           na.option = "omit",
+                          verbose = TRUE,
                           ...) {
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)
@@ -149,6 +152,18 @@ nestcv.glmnet <- function(y, x,
   ok <- checkxy(y, x, na.option)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
+  if (balance == "oversample") {
+    args <- list(y = y)
+    args <- append(args, balance_options)
+    samples <- do.call(oversample, args)
+    y <- y[samples]
+    x <- x[samples,]
+    rownames(x) <- make.names(rownames(x), unique = TRUE)
+    if (verbose) {
+      message("Oversampling")
+      print(c(table(y)))
+    }
+  }
   if (is.null(outer_folds)) {
     outer_folds <- switch(outer_method,
                           cv = createFolds(y, k = n_outer_folds),
@@ -219,6 +234,9 @@ nestcv.glmnet <- function(y, x,
               final_coef = final_coef,
               roc = glmnet.roc,
               summary = summary)
+  if (balance == "oversample") {
+    out$samples <- samples
+  }
   class(out) <- "nestcv.glmnet"
   out
 }
