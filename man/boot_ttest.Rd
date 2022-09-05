@@ -2,9 +2,21 @@
 % Please edit documentation in R/boot_filter.R
 \name{boot_ttest}
 \alias{boot_ttest}
-\title{Bootstrap t-test filter}
+\alias{boot_wilcoxon}
+\alias{boot_anova}
+\alias{boot_correl}
+\alias{boot_lm}
+\title{Bootstrap univariate filters}
 \usage{
 boot_ttest(y, x, B = 50, ...)
+
+boot_wilcoxon(y, x, B = 50, ...)
+
+boot_anova(y, x, B = 50, ...)
+
+boot_correl(y, x, B = 50, ...)
+
+boot_lm(y, x, B = 50, ...)
 }
 \arguments{
 \item{y}{Response vector}
@@ -13,16 +25,20 @@ boot_ttest(y, x, B = 50, ...)
 
 \item{B}{Number of times to bootstrap}
 
-\item{...}{Optional arguments passed to \code{\link[=ttest_filter]{ttest_filter()}}}
+\item{...}{Optional arguments passed to the filter function}
 }
 \value{
-Integer vector of indices of filtered parameters (\code{type = "index"})
-or if \code{type = "full"} a matrix of rankings from each bootstrap is returned.
+Integer vector of indices of filtered parameters (\code{type = "index"}),
+or if \code{type = "full"}, a matrix of rankings from each bootstrap is
+returned.
 }
 \description{
-Randomly samples predictors and averages the ranking from \code{\link[=ttest_filter]{ttest_filter()}} to
-give an ensemble measure of best predictors by bootstrapped t-test.
+Randomly samples predictors and averages the ranking from filtering functions
+including \code{\link[=ttest_filter]{ttest_filter()}}, \code{\link[=wilcoxon_filter]{wilcoxon_filter()}}, \code{\link[=anova_filter]{anova_filter()}},
+\code{\link[=correl_filter]{correl_filter()}} and \code{\link[=lm_filter]{lm_filter()}} to give an ensemble measure of best
+predictors by repeated random sampling subjected to a statistical test.
 }
 \seealso{
-\code{\link[=boot_filter]{boot_filter()}}
+\code{\link[=ttest_filter]{ttest_filter()}}, \code{\link[=wilcoxon_filter]{wilcoxon_filter()}}, \code{\link[=anova_filter]{anova_filter()}},
+\code{\link[=correl_filter]{correl_filter()}}, \code{\link[=lm_filter]{lm_filter()}} and \code{\link[=boot_filter]{boot_filter()}}
 }

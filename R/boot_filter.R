@@ -29,21 +29,56 @@ boot_filter <- function(y, x, filterFUN, B = 50, type = "index", ...) {
 }
 
 
-#' Bootstrap t-test filter
+#' Bootstrap univariate filters
 #'
-#' Randomly samples predictors and averages the ranking from [ttest_filter()] to
-#' give an ensemble measure of best predictors by bootstrapped t-test.
+#' Randomly samples predictors and averages the ranking from filtering functions
+#' including [ttest_filter()], [wilcoxon_filter()], [anova_filter()],
+#' [correl_filter()] and [lm_filter()] to give an ensemble measure of best
+#' predictors by repeated random sampling subjected to a statistical test.
 #'
 #' @param y Response vector
 #' @param x Matrix of predictors
 #' @param B Number of times to bootstrap
-#' @param ... Optional arguments passed to [ttest_filter()]
-#' @return Integer vector of indices of filtered parameters (`type = "index"`)
-#'   or if `type = "full"` a matrix of rankings from each bootstrap is returned.
-#' @seealso [boot_filter()]
+#' @param ... Optional arguments passed to the filter function
+#' @return Integer vector of indices of filtered parameters (`type = "index"`),
+#'   or if `type = "full"`, a matrix of rankings from each bootstrap is
+#'   returned.
+#' @seealso [ttest_filter()], [wilcoxon_filter()], [anova_filter()],
+#'   [correl_filter()], [lm_filter()] and [boot_filter()]
 #' @export
 #' 
 boot_ttest <- function(y, x, B = 50, ...) {
   boot_filter(y, x, ttest_filter, B=B, ...)
 }
 
+
+#' @rdname boot_ttest
+#' @export
+#' 
+boot_wilcoxon <- function(y, x, B = 50, ...) {
+  boot_filter(y, x, wilcoxon_filter, B=B, ...)
+}
+
+
+#' @rdname boot_ttest
+#' @export
+#' 
+boot_anova <- function(y, x, B = 50, ...) {
+  boot_filter(y, x, anova_filter, B=B, ...)
+}
+
+
+#' @rdname boot_ttest
+#' @export
+#' 
+boot_correl <- function(y, x, B = 50, ...) {
+  boot_filter(y, x, correl_filter, B=B, ...)
+}
+
+
+#' @rdname boot_ttest
+#' @export
+#' 
+boot_lm <- function(y, x, B = 50, ...) {
+  boot_filter(y, x, lm_filter, B=B, ...)
+}
