@@ -11,7 +11,7 @@ oversample(y, over = NULL, under = 1, yminor = NULL)
 
 \item{over}{Amount of oversampling of the minority class. If set to \code{NULL}
 then all classes will be oversampled up to the number of samples in the
-majority class.}
+majority class. To turn off oversampling set \code{over = 1}.}
 
 \item{under}{Amount of undersampling of the majority class}
 
