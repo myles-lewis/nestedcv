@@ -47,8 +47,3 @@ oversample <- function(y, over = NULL, under = 1, yminor = NULL) {
   out
 }
 
-
-# replicate_data <- function(y, x, inc = 2, ymin = NULL) {
-#   
-# }
-
