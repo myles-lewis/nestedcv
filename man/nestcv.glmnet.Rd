@@ -18,8 +18,11 @@ nestcv.glmnet(
   min_1se = 0,
   keep = TRUE,
   penalty.factor = rep(1, ncol(x)),
+  balance = "none",
+  balance_options = NULL,
   cv.cores = 1,
   na.option = "omit",
+  verbose = TRUE,
   ...
 )
 }
@@ -63,6 +66,12 @@ coefficient. Can be 0 for some variables, which implies no shrinkage, and
 that variable is always included in the model. Default is 1 for all
 variables. See \link{glmnet}}
 
+\item{balance}{Specifies method for dealing with imbalanced data. Current
+options are \code{"none"} or \code{"oversample"}. See \code{\link[=oversample]{oversample()}}}
+
+\item{balance_options}{List of additional arguments passed to the balancing
+function}
+
 \item{cv.cores}{Number of cores for parallel processing of the outer loops.
 NOTE: this uses \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply}
 on windows.}
@@ -72,6 +81,8 @@ on windows.}
 removes cases if there are \code{NA} in 'y', but columns (predictors) containing
 \code{NA} are removed from 'x' to preserve cases. Any other value means that
 \code{NA} are ignored (a message is given).}
+
+\item{verbose}{Logical whether to display messages}
 
 \item{...}{Optional arguments passed to \link{cv.glmnet}}
 }

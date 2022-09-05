@@ -38,6 +38,10 @@
 #'   coefficient. Can be 0 for some variables, which implies no shrinkage, and
 #'   that variable is always included in the model. Default is 1 for all
 #'   variables. See [glmnet]
+#' @param balance Specifies method for dealing with imbalanced data. Current
+#'   options are `"none"` or `"oversample"`. See [oversample()]
+#' @param balance_options List of additional arguments passed to the balancing
+#'   function
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
 #'   on windows.
@@ -46,6 +50,7 @@
 #'   removes cases if there are `NA` in 'y', but columns (predictors) containing
 #'   `NA` are removed from 'x' to preserve cases. Any other value means that
 #'   `NA` are ignored (a message is given).
+#' @param verbose Logical whether to display messages
 #' @param ... Optional arguments passed to [cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet"
 #'   \item{call}{the matched call}
@@ -152,7 +157,7 @@ nestcv.glmnet <- function(y, x,
   ok <- checkxy(y, x, na.option)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
-  if (balance == "oversample") {
+  if (!is.numeric(y) & balance == "oversample") {
     args <- list(y = y)
     args <- append(args, balance_options)
     samples <- do.call(oversample, args)
@@ -160,7 +165,7 @@ nestcv.glmnet <- function(y, x,
     x <- x[samples,]
     rownames(x) <- make.names(rownames(x), unique = TRUE)
     if (verbose) {
-      message("Oversampling")
+      message("Over/undersampling")
       print(c(table(y)))
     }
   }
@@ -229,6 +234,8 @@ nestcv.glmnet <- function(y, x,
               n_inner_folds = n_inner_folds,
               outer_folds = outer_folds,
               dimx = dim(x),
+              y = y,
+              balance = balance,
               final_param = final_param,
               final_fit = fit,
               final_coef = final_coef,
@@ -414,12 +421,15 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
                          cv = paste0(length(object$outer_folds), "-fold CV"),
                          LOOCV = "leave-one-out CV"))
   cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n"))
-  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
+  cat("Balancing method:", object$balance, "\n")
+  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
+  if (!is.numeric(object$y)) print(c(table(object$y)))
   alpha <- unlist(lapply(object$outer_result, '[[', 'alpha'))
   lambda <- unlist(lapply(object$outer_result, '[[', 'lambda'))
   nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
   foldres <- data.frame(alpha = alpha, lambda = lambda, n.filter = nfilter,
                         row.names = paste("Fold", seq_along(alpha)))
+  cat("\n")
   print(foldres, digits = digits)
   cat("\nFinal parameters:\n")
   print(object$final_param, digits = digits, print.gap = 2L)
