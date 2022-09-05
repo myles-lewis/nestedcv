@@ -1,22 +1,28 @@
 
-
-
-replicateData <- function(y, x, inc = 2, ymin = NULL) {
-  
-}
-
-
-
+#' Oversampling and undersampling
+#' 
+#' Random oversampling to compensate for data imbalance
+#' 
+#' @param y Vector of response outcome as a factor
+#' @param over Amount of oversampling of the minority class. If set to `NULL`
+#'   then all classes will be oversampled up to the number of samples in the
+#'   majority class. To turn off oversampling set `over = 1`.
+#' @param under Amount of undersampling of the majority class
+#' @param yminor Optional character value specifying the level in `y` which is
+#'   to be oversampled. If `NULL`, this is set automatically to the class with
+#'   the smallest sample size.
+#' @return A vector of sample indices
 #' @export
 #' 
-oversample <- function(y, over = NULL, yminor = NULL, under = 1) {
+oversample <- function(y, over = NULL, under = 1, yminor = NULL) {
   ytab <- table(y)
   ymajor <- names(ytab)[which.max(ytab)]
+  nymajor <- round(max(ytab) * under)
   if (is.null(over)) {
     # equalise
     yset <- names(ytab)[!names(ytab) %in% ymajor]
     add_samples <- unlist(lapply(yset, function(i) {
-      size <- max(ytab) - ytab[i]
+      size <- nymajor - ytab[i]
       ind <- which(y == i)
       sample(ind, size, replace = size > length(ind))
     }))
@@ -26,7 +32,7 @@ oversample <- function(y, over = NULL, yminor = NULL, under = 1) {
     size <- round(ytab[yminor] * (over - 1))
     ind <- which(y == yminor)
     add_samples <- sample(ind, size, replace = (over >= 2))
-  }
+  } else add_samples <- NULL
   
   if (under != 1) {
     ind <- which(y == ymajor)
@@ -40,4 +46,9 @@ oversample <- function(y, over = NULL, yminor = NULL, under = 1) {
   
   out
 }
+
+
+# replicate_data <- function(y, x, inc = 2, ymin = NULL) {
+#   
+# }
 
