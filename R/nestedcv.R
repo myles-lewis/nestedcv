@@ -39,7 +39,7 @@
 #'   that variable is always included in the model. Default is 1 for all
 #'   variables. See [glmnet]
 #' @param balance Specifies method for dealing with imbalanced data. Current
-#'   options are `"none"` or `"oversample"`. See [oversample()]
+#'   options are `"none"` or `"randomsample"`. See [randomsample()]
 #' @param balance_options List of additional arguments passed to the balancing
 #'   function
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
@@ -50,7 +50,6 @@
 #'   removes cases if there are `NA` in 'y', but columns (predictors) containing
 #'   `NA` are removed from 'x' to preserve cases. Any other value means that
 #'   `NA` are ignored (a message is given).
-#' @param verbose Logical whether to display messages
 #' @param ... Optional arguments passed to [cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet"
 #'   \item{call}{the matched call}
@@ -144,10 +143,9 @@ nestcv.glmnet <- function(y, x,
                           keep = TRUE,
                           penalty.factor = rep(1, ncol(x)),
                           balance = "none",
-                          balance_options = NULL,
+                          balance_options = list(minor = NULL, major = 1),
                           cv.cores = 1,
                           na.option = "omit",
-                          verbose = TRUE,
                           ...) {
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)
@@ -157,17 +155,13 @@ nestcv.glmnet <- function(y, x,
   ok <- checkxy(y, x, na.option)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
-  if (!is.numeric(y) & balance == "oversample") {
+  if (!is.numeric(y) & balance == "randomsample") {
     args <- list(y = y)
     args <- append(args, balance_options)
-    samples <- do.call(oversample, args)
+    samples <- do.call(randomsample, args)
     y <- y[samples]
     x <- x[samples,]
     rownames(x) <- make.names(rownames(x), unique = TRUE)
-    if (verbose) {
-      message("Over/undersampling")
-      print(c(table(y)))
-    }
   }
   if (is.null(outer_folds)) {
     outer_folds <- switch(outer_method,
@@ -236,12 +230,13 @@ nestcv.glmnet <- function(y, x,
               dimx = dim(x),
               y = y,
               balance = balance,
+              balance_options = balance_options,
               final_param = final_param,
               final_fit = fit,
               final_coef = final_coef,
               roc = glmnet.roc,
               summary = summary)
-  if (balance == "oversample") {
+  if (balance == "randomsample") {
     out$samples <- samples
   }
   class(out) <- "nestcv.glmnet"
@@ -421,9 +416,13 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
                          cv = paste0(length(object$outer_folds), "-fold CV"),
                          LOOCV = "leave-one-out CV"))
   cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n"))
-  cat("Balancing method:", object$balance, "\n")
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
+  if (object$balance == "randomsample") {
+    cat("\nBalancing:\n")
+    sample_message(object$balance_options$minor, object$balance_options$major)
+  }
   if (!is.numeric(object$y)) print(c(table(object$y)))
+  
   alpha <- unlist(lapply(object$outer_result, '[[', 'alpha'))
   lambda <- unlist(lapply(object$outer_result, '[[', 'lambda'))
   nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
@@ -433,7 +432,7 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
   print(foldres, digits = digits)
   cat("\nFinal parameters:\n")
   print(object$final_param, digits = digits, print.gap = 2L)
-  cat("\nFinal coefficients:\n")
+  cat("\nFinal coefficients:", paste0("(", length(coef(object)) -1, ")"), "\n")
   print(coef(object), digits = digits)
   cat("\nResult:\n")
   print(object$summary, digits = digits, print.gap = 2L)

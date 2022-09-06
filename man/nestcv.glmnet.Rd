@@ -19,10 +19,9 @@ nestcv.glmnet(
   keep = TRUE,
   penalty.factor = rep(1, ncol(x)),
   balance = "none",
-  balance_options = NULL,
+  balance_options = list(minor = NULL, major = 1),
   cv.cores = 1,
   na.option = "omit",
-  verbose = TRUE,
   ...
 )
 }
@@ -67,7 +66,7 @@ that variable is always included in the model. Default is 1 for all
 variables. See \link{glmnet}}
 
 \item{balance}{Specifies method for dealing with imbalanced data. Current
-options are \code{"none"} or \code{"oversample"}. See \code{\link[=oversample]{oversample()}}}
+options are \code{"none"} or \code{"randomsample"}. See \code{\link[=randomsample]{randomsample()}}}
 
 \item{balance_options}{List of additional arguments passed to the balancing
 function}
@@ -81,8 +80,6 @@ on windows.}
 removes cases if there are \code{NA} in 'y', but columns (predictors) containing
 \code{NA} are removed from 'x' to preserve cases. Any other value means that
 \code{NA} are ignored (a message is given).}
-
-\item{verbose}{Logical whether to display messages}
 
 \item{...}{Optional arguments passed to \link{cv.glmnet}}
 }
