@@ -137,6 +137,7 @@ nestcv.glmnet <- function(y, x,
                           alphaSet = seq(0, 1, 0.1),
                           min_1se = 0,
                           keep = TRUE,
+                          weights = NULL,
                           penalty.factor = rep(1, ncol(x)),
                           cv.cores = 1,
                           na.option = "omit",
@@ -159,20 +160,21 @@ nestcv.glmnet <- function(y, x,
     cl <- makeCluster(cv.cores)
     clusterExport(cl, varlist = c("outer_folds", "y", "x", "filterFUN",
                                   "filter_options", "alphaSet", "min_1se", 
-                                  "n_inner_folds", "keep", "family", 
+                                  "n_inner_folds", "keep", "family",
+                                  "weights",
                                   "penalty.factor", "nestcv.glmnetCore", ...),
                   envir = environment())
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {
       nestcv.glmnetCore(test, y, x, filterFUN, filter_options, 
                         alphaSet, min_1se, n_inner_folds, keep, family,
-                        penalty.factor, ...)
+                        weights, penalty.factor, ...)
     })
     stopCluster(cl)
   } else {
     outer_res <- mclapply(outer_folds, function(test) {
       nestcv.glmnetCore(test, y, x, filterFUN, filter_options, 
                         alphaSet, min_1se, n_inner_folds, keep, family,
-                        penalty.factor, ...)
+                        weights, penalty.factor, ...)
     }, mc.cores = cv.cores)
   }
   
@@ -214,6 +216,7 @@ nestcv.glmnet <- function(y, x,
               n_inner_folds = n_inner_folds,
               outer_folds = outer_folds,
               dimx = dim(x),
+              y = y,
               final_param = final_param,
               final_fit = fit,
               final_coef = final_coef,
@@ -226,7 +229,7 @@ nestcv.glmnet <- function(y, x,
 
 nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options, 
                               alphaSet, min_1se, n_inner_folds, keep, family,
-                              penalty.factor, ...) {
+                              weights, penalty.factor, ...) {
   if (is.null(filterFUN)) {
     filtx <- x
     filtpen.factor <- penalty.factor
@@ -239,7 +242,7 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
   }
   cvafit <- cva.glmnet(x = filtx[-test, ], y = y[-test], 
                        alphaSet = alphaSet, nfolds = n_inner_folds,
-                       keep = keep, family = family,
+                       keep = keep, family = family, weights = weights[-test],
                        penalty.factor = filtpen.factor, ...)
   alphafit <- cvafit$fits[[cvafit$which_alpha]]
   s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))

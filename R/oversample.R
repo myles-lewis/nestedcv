@@ -49,12 +49,10 @@ randomsample <- function(y, minor = NULL, major = 1, yminor = NULL,
     out <- c(seq_along(y), add_samples)
   }
   
-  if (verbose) {
-    sample_message(minor, major)
-    print(c(table(y[out])))
-  }
-  
-  out
+  y <- y[out]
+  x <- x[out, ]
+  rownames(x) <- make.names(rownames(x), unique = TRUE)
+  list(y = y, x=x)
 }
 
 
