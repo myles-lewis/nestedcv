@@ -279,7 +279,8 @@ outercvCore <- function(test, y, x, model, reg,
   rownames(preds) <- rownames(filt_xtest)
   list(preds = preds,
        fit = fit,
-       nfilter = ncol(filt_xtest))
+       nfilter = ncol(filt_xtest),
+       ytrain = ytrain)
 }
 
 
