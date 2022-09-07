@@ -277,14 +277,15 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
               alpha = cvafit$best_alpha,
               coef = cf,
               cvafit = cvafit,
-              nfilter = ncol(filt_xtrain))
+              nfilter = ncol(filt_xtrain),
+              ytrain = ytrain)
   # inner CV predictions
   if (keep) {
     ind <- alphafit$index["min", ]
     innerCV_preds <- if (family == "multinomial") {
       alphafit$fit.preval[, , ind]
     } else alphafit$fit.preval[, ind]
-    ret <- append(ret, list(ytrain = ytrain, innerCV_preds = innerCV_preds))
+    ret <- append(ret, list(innerCV_preds = innerCV_preds))
   }
   ret
 }
