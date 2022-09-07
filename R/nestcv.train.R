@@ -134,13 +134,17 @@ nestcv.train <- function(y, x,
                          trControl = NULL,
                          tuneGrid = NULL,
                          savePredictions = "final",
+                         balance = "none",
+                         balance_options = list(minor = NULL, major = 1),
                          na.option = "pass",
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
-  ok <- checkxy(y, x, na.option)
-  y <- y[ok$r]
-  x <- x[ok$r, ok$c]
+  dat <- preprocess(y, x, balance, balance_options, na.option)
+  y <- dat$y
+  x <- dat$x
+  pre <- dat$pre
+  
   if (is.null(trControl)) {
     trControl <- if (is.factor(y)) {
       trainControl(method = "cv", 
@@ -215,7 +219,9 @@ nestcv.train <- function(y, x,
               outer_result = outer_res,
               outer_method = outer_method,
               outer_folds = outer_folds,
+              preprocess = pre,
               dimx = dim(x),
+              y = y,
               final_fit = final_fit,
               final_vars = colnames(filtx),
               roc = caret.roc,

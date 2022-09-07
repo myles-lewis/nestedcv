@@ -151,18 +151,12 @@ nestcv.glmnet <- function(y, x,
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
   x <- as.matrix(x)
-  if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
-  ok <- checkxy(y, x, na.option)
-  y <- y[ok$r]
-  x <- x[ok$r, ok$c]
-  if (!is.numeric(y) & balance == "randomsample") {
-    args <- list(y = y)
-    args <- append(args, balance_options)
-    samples <- do.call(randomsample, args)
-    y <- y[samples]
-    x <- x[samples,]
-    rownames(x) <- make.names(rownames(x), unique = TRUE)
-  }
+  
+  dat <- preprocess(y, x, balance, balance_options, na.option)
+  y <- dat$y
+  x <- dat$x
+  pre <- dat$pre
+  
   if (is.null(outer_folds)) {
     outer_folds <- switch(outer_method,
                           cv = createFolds(y, k = n_outer_folds),
@@ -227,18 +221,14 @@ nestcv.glmnet <- function(y, x,
               outer_method = outer_method,
               n_inner_folds = n_inner_folds,
               outer_folds = outer_folds,
+              preprocess = pre,
               dimx = dim(x),
               y = y,
-              balance = balance,
-              balance_options = balance_options,
               final_param = final_param,
               final_fit = fit,
               final_coef = final_coef,
               roc = glmnet.roc,
               summary = summary)
-  if (balance == "randomsample") {
-    out$samples <- samples
-  }
   class(out) <- "nestcv.glmnet"
   out
 }
@@ -408,7 +398,9 @@ print.nestcv.glmnet <- function(x, digits = max(3L, getOption("digits") - 3L), .
 
 
 #' @export
-summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") - 3L), ...) {
+summary.nestcv.glmnet <- function(object,
+                                  digits = max(3L, getOption("digits") - 3L),
+                                  ...) {
   cat("Nested cross-validation with glmnet\n")
   if (!is.null(object$call$filterFUN)) 
     cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
@@ -417,9 +409,10 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
                          LOOCV = "leave-one-out CV"))
   cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n"))
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
-  if (object$balance == "randomsample") {
+  if (object$preprocess$balance == "randomsample") {
     cat("\nBalancing:\n")
-    sample_message(object$balance_options$minor, object$balance_options$major)
+    sample_message(object$preprocess$balance_options$minor,
+                   object$preprocess$balance_options$major)
   }
   if (!is.numeric(object$y)) print(c(table(object$y)))
   
@@ -497,27 +490,3 @@ predSummary <- function(output) {
   summary
 }
 
-
-checkxy <- function(y, x, na.option) {
-  if (length(y) != nrow(x))
-    stop("Mismatch in length of 'y' and number of rows in 'x'", call. = FALSE)
-  nay <- is.na(y)
-  if (any(nay)) message("'y' contains ", sum(nay), " NA")
-  naxr <- !complete.cases(x)
-  naxc <- !complete.cases(t(x))
-  okr <- rep.int(TRUE, length(y))
-  okc <- rep.int(TRUE, ncol(x))
-  if (na.option == "omit") {
-    if (sum(naxr) == 1) {message("1 row in 'x' contains NA")
-    } else if (sum(naxr) > 1) message(sum(naxr), " rows in 'x' contain NA")
-    okr <- !nay & !naxr
-  } else {
-    if (sum(naxc) == 1) {message("1 column in 'x' contains NA")
-    } else if (sum(naxc) > 1) message(sum(naxc), " columns in 'x' contain NA")
-  }
-  if (na.option == "omitcol") {
-    okr <- !nay
-    okc <- !naxc
-  }
-  list(r = okr, c = okc)
-}

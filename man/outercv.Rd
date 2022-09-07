@@ -19,6 +19,8 @@ outercv(y, ...)
   outer_folds = NULL,
   cv.cores = 1,
   predict_type = "prob",
+  balance = "none",
+  balance_options = list(minor = NULL, major = 1),
   na.option = "pass",
   ...
 )

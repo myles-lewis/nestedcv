@@ -157,12 +157,16 @@ outercv.default <- function(y, x,
                             outer_folds = NULL,
                             cv.cores = 1,
                             predict_type = "prob",
+                            balance = "none",
+                            balance_options = list(minor = NULL, major = 1),
                             na.option = "pass",
                             ...) {
   outercv.call <- match.call(expand.dots = TRUE)
-  ok <- checkxy(y, x, na.option)
-  y <- y[ok$r]
-  x <- x[ok$r, ok$c]
+  dat <- preprocess(y, x, balance, balance_options, na.option)
+  y <- dat$y
+  x <- dat$x
+  pre <- dat$pre
+  
   reg <- !(is.factor(y) | is.character(y))  # y = regression
   outer_method <- match.arg(outer_method)
   if (is.null(outer_folds)) {
@@ -226,7 +230,9 @@ outercv.default <- function(y, x,
               outer_result = outer_res,
               outer_method = outer_method,
               outer_folds = outer_folds,
+              preprocess = pre,
               dimx = dim(x),
+              y = y,
               final_fit = fit,
               final_vars = colnames(filtx),
               summary_vars = summary_vars(filtx),
@@ -354,7 +360,9 @@ outercv.formula <- function(formula, data,
               outer_result = outer_res,
               outer_method = outer_method,
               outer_folds = outer_folds,
+              preprocess = NULL,
               dimx = c(nrow(data), length(labels(terms(fit)))),
+              y = y,
               final_fit = fit,
               summary_vars = summary_vars(data),
               roc = fit.roc,
