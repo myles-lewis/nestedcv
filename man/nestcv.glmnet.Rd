@@ -10,6 +10,8 @@ nestcv.glmnet(
   family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
   filterFUN = NULL,
   filter_options = NULL,
+  balance = NULL,
+  balance_options = NULL,
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   n_inner_folds = 10,
@@ -17,6 +19,7 @@ nestcv.glmnet(
   alphaSet = seq(0, 1, 0.1),
   min_1se = 0,
   keep = TRUE,
+  weights = NULL,
   penalty.factor = rep(1, ncol(x)),
   cv.cores = 1,
   na.option = "omit",
@@ -39,6 +42,13 @@ character vector with names of filtered predictors.}
 \item{filter_options}{List of additional arguments passed to the filter
 function specified by \code{filterFUN}.}
 
+\item{balance}{Specifies method for dealing with imbalanced class data.
+Current options are \code{"randomsample"} or \code{"smote"}. See \code{\link[=randomsample]{randomsample()}} and
+\code{\link[=smote]{smote()}}}
+
+\item{balance_options}{List of additional arguments passed to the balancing
+function}
+
 \item{outer_method}{String of either \code{"cv"} or \code{"LOOCV"} specifying whether
 to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
@@ -57,6 +67,9 @@ CV. If supplied, \code{n_outer_folds} is ignored.}
 \item{keep}{Logical indicating whether inner CV predictions are retained for
 calculating left-out inner CV fold accuracy etc. See argument \code{keep} in
 \link{cv.glmnet}.}
+
+\item{weights}{Weights applied to each sample. Note \code{weights} and \code{balance}
+cannot be used at the same time.}
 
 \item{penalty.factor}{Separate penalty factors can be applied to each
 coefficient. Can be 0 for some variables, which implies no shrinkage, and

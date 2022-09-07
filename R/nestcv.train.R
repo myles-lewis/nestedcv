@@ -15,6 +15,11 @@
 #'   character vector with names of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter
 #'   function specified by `filterFUN`.
+#' @param balance Specifies method for dealing with imbalanced class data.
+#'   Current options are `"randomsample"` or `"smote"`. See [randomsample()] and
+#'   [smote()]
+#' @param balance_options List of additional arguments passed to the balancing
+#'   function
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
@@ -126,6 +131,8 @@
 nestcv.train <- function(y, x,
                          filterFUN = NULL,
                          filter_options = NULL,
+                         balance = NULL,
+                         balance_options = NULL,
                          outer_method = c("cv", "LOOCV"),
                          n_outer_folds = 10,
                          outer_folds = NULL,
@@ -166,12 +173,14 @@ nestcv.train <- function(y, x,
     cl <- makeCluster(cv.cores)
     clusterExport(cl, varlist = c("outer_folds", "y", "x", 
                                   "filterFUN", "filter_options",
+                                  "balance", "balance_options",
                                   "metric", "trControl", "tuneGrid",
                                   "nestcv.trainCore", ...),
                   envir = environment())
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {
       nestcv.trainCore(test, y, x,
                        filterFUN, filter_options,
+                       balance, balance_options,
                        metric, trControl, tuneGrid, ...)
     })
     stopCluster(cl)
@@ -179,6 +188,7 @@ nestcv.train <- function(y, x,
     outer_res <- mclapply(outer_folds, function(test) {
       nestcv.trainCore(test, y, x,
                        filterFUN, filter_options,
+                       balance, balance_options,
                        metric, trControl, tuneGrid, ...)
     }, mc.cores = cv.cores)
   }
@@ -230,28 +240,30 @@ nestcv.train <- function(y, x,
 
 nestcv.trainCore <- function(test, y, x,
                              filterFUN, filter_options,
+                             balance, balance_options,
                              metric, trControl, tuneGrid, ...) {
-  filtx <- if (is.null(filterFUN)) x else {
-    args <- list(y = y[-test], x = x[-test, ])
-    args <- append(args, filter_options)
-    fset <- do.call(filterFUN, args)
-    x[, fset]
-  }
-  fit <- caret::train(x = filtx[-test, ], y = y[-test],
+  dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
+                       balance, balance_options)
+  ytrain <- dat$ytrain
+  ytest <- dat$ytest
+  filt_xtrain <- dat$filt_xtrain
+  filt_xtest <- dat$filt_xtest
+  
+  fit <- caret::train(x = filt_xtrain, y = ytrain,
                       metric = metric,
                       trControl = trControl,
                       tuneGrid = tuneGrid, ...)
-  predy <- predict(fit, newdata = filtx[test, ])
-  preds <- data.frame(predy=predy, testy=y[test])
+  predy <- predict(fit, newdata = filt_xtest)
+  preds <- data.frame(predy=predy, testy=ytest)
   if (is.factor(y)) {
-    predyp <- predict(fit, newdata = filtx[test, ], type = "prob")
+    predyp <- predict(fit, newdata = filt_xtest, type = "prob")
     # note predyp has 2 columns
     preds$predyp <- predyp[,2]
   }
-  rownames(preds) <- rownames(x)[test]
+  rownames(preds) <- rownames(filt_xtest)
   ret <- list(preds = preds,
               fit = fit,
-              nfilter = ncol(filtx))
+              nfilter = ncol(filt_xtrain))
   ret
 }
 

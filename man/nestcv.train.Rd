@@ -9,6 +9,8 @@ nestcv.train(
   x,
   filterFUN = NULL,
   filter_options = NULL,
+  balance = NULL,
+  balance_options = NULL,
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   outer_folds = NULL,
@@ -32,6 +34,13 @@ character vector with names of filtered predictors.}
 
 \item{filter_options}{List of additional arguments passed to the filter
 function specified by \code{filterFUN}.}
+
+\item{balance}{Specifies method for dealing with imbalanced class data.
+Current options are \code{"randomsample"} or \code{"smote"}. See \code{\link[=randomsample]{randomsample()}} and
+\code{\link[=smote]{smote()}}}
+
+\item{balance_options}{List of additional arguments passed to the balancing
+function}
 
 \item{outer_method}{String of either \code{"cv"} or \code{"LOOCV"} specifying whether
 to do k-fold CV or leave one out CV (LOOCV) for the outer folds}

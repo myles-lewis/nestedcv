@@ -13,7 +13,8 @@
 #' @param yminor Optional character value specifying the level in `y` which is
 #'   to be oversampled. If `NULL`, this is set automatically to the class with
 #'   the smallest sample size.
-#' @return Matrix of synthesised data
+#' @return List containing extended matrix `x` of synthesised data and extended
+#'   response vector `y`
 #' @importFrom stats dist runif
 #' @export
 

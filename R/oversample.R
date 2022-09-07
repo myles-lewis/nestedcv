@@ -5,6 +5,7 @@
 #' group to compensate for class imbalance in datasets.
 #' 
 #' @param y Vector of response outcome as a factor
+#' @param x Matrix of predictors
 #' @param minor Amount of oversampling of the minority class. If set to `NULL`
 #'   then all classes will be oversampled up to the number of samples in the
 #'   majority class. To turn off oversampling set `minor = 1`.
@@ -15,10 +16,11 @@
 #' @param verbose Logical whether to display messages
 #' @details
 #' `minor` < 1 and `major` > 1 are ignored.
-#' @return A vector of sample indices
+#' @return List containing extended matrix `x` of synthesised data and extended
+#'   response vector `y`
 #' @export
 #' 
-randomsample <- function(y, minor = NULL, major = 1, yminor = NULL,
+randomsample <- function(y, x, minor = NULL, major = 1, yminor = NULL,
                          verbose = TRUE) {
   ytab <- table(y)
   ymajor <- names(ytab)[which.max(ytab)]
@@ -52,7 +54,7 @@ randomsample <- function(y, minor = NULL, major = 1, yminor = NULL,
   y <- y[out]
   x <- x[out, ]
   rownames(x) <- make.names(rownames(x), unique = TRUE)
-  list(y = y, x=x)
+  list(y = y, x = x)
 }
 
 
