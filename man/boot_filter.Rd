@@ -15,6 +15,8 @@ boot_filter(y, x, filterFUN, B = 50, nfilter = NULL, type = "index", ...)
 
 \item{B}{Number of times to bootstrap}
 
+\item{nfilter}{Number of predictors to return}
+
 \item{type}{Type of vector returned. Default "index" returns indices, "full"
 returns full output.}
 

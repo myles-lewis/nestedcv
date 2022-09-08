@@ -8,6 +8,7 @@
 #' @param x Matrix of predictors
 #' @param filterFUN Filter function, e.g. [ttest_filter()].
 #' @param B Number of times to bootstrap
+#' @param nfilter Number of predictors to return
 #' @param type Type of vector returned. Default "index" returns indices, "full"
 #'   returns full output.
 #' @param ... Optional arguments passed to the function specified by `filterFUN`
