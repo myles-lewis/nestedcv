@@ -16,7 +16,8 @@
 #' @seealso [boot_ttest()]
 #' @export
 #' 
-boot_filter <- function(y, x, filterFUN, B = 50, type = "index", ...) {
+boot_filter <- function(y, x, filterFUN, B = 50,
+                        nfilter = NULL, type = "index", ...) {
   ranks <- sapply(1:B, function(i) {
     ind <- sample.int(length(y), replace = TRUE)
     out <- filterFUN(y[ind], x[ind, ], type = "full", ...)
@@ -25,7 +26,9 @@ boot_filter <- function(y, x, filterFUN, B = 50, type = "index", ...) {
   meanRank <- rowMeans(ranks)
   names(meanRank) <- colnames(x)
   if (type == "full") return(sort(meanRank))
-  order(meanRank)
+  out <- order(meanRank)
+  if (!is.null(nfilter)) out <- out[1:nfilter]
+  out
 }
 
 

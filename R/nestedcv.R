@@ -262,7 +262,7 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
   cf <- glmnet_coefs(alphafit, s = s)
   # test on outer CV
   predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
-  preds <- data.frame(testy=y[test], predy=predy)
+  preds <- data.frame(testy=ytest, predy=predy)
   if (family == "binomial") {
     predyp <- as.vector(predict(alphafit, newx = filt_xtest, s = s))
     preds <- cbind(preds, predyp)
