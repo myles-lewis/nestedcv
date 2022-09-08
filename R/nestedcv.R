@@ -40,7 +40,8 @@
 #'   calculating left-out inner CV fold accuracy etc. See argument `keep` in
 #'   [cv.glmnet].
 #' @param weights Weights applied to each sample. Note `weights` and `balance`
-#'   cannot be used at the same time.
+#'   cannot be used at the same time. Weights are only applied in glmnet and not
+#'   in filters.
 #' @param penalty.factor Separate penalty factors can be applied to each
 #'   coefficient. Can be 0 for some variables, which implies no shrinkage, and
 #'   that variable is always included in the model. Default is 1 for all
