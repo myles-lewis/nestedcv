@@ -221,9 +221,14 @@ nestcv.glmnet <- function(y, x,
   }
   fit <- glmnet(filtx, y, alpha = alph, family = family, 
                 penalty.factor = filtpen.factor, ...)
+  
   fin_coef <- glmnet_coefs(fit, s = final_param["lambda"])
-  cfmean <- colmeans(x[, names(fin_coef)[-1]])
-  final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
+  if (is.list(fin_coef)) {
+    final_coef <- fin_coef  # multinomial
+  } else {
+    cfmean <- colmeans(x[, names(fin_coef)[-1]])
+    final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
+  }
   out <- list(call = nestcv.call,
               output = output,
               outer_result = outer_res,
