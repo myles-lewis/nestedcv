@@ -161,7 +161,9 @@ nestcv.glmnet <- function(y, x,
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
   if (!is.null(balance) & !is.null(weights)) {
-    stop("Balancing methods and weights cannot be used at the same time")}
+    stop("`balance` and `weights` cannot be used at the same time")}
+  if (!is.null(balance) & is.numeric(y)) {
+    stop("`balance` can only be used for classification")}
   
   if (is.null(outer_folds)) {
     outer_folds <- switch(outer_method,

@@ -145,6 +145,8 @@ nestcv.train <- function(y, x,
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
+  if (!is.null(balance) & is.numeric(y)) {
+    stop("`balance` can only be used for classification")}
   ok <- checkxy(y, x, na.option)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]

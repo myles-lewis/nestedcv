@@ -171,6 +171,8 @@ outercv.default <- function(y, x,
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
   reg <- !(is.factor(y) | is.character(y))  # y = regression
+  if (!is.null(balance) & reg) {
+    stop("`balance` can only be used for classification")}
   outer_method <- match.arg(outer_method)
   if (is.null(outer_folds)) {
     outer_folds <- switch(outer_method,
