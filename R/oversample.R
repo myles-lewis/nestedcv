@@ -66,3 +66,4 @@ sample_message <- function(minor = 1, major = 1) {
     if (major < 1) cat("Random undersampling majority x", major, "\n")
   }
 }
+

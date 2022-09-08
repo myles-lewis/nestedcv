@@ -406,7 +406,14 @@ summary.outercv <- function(object,
                              cv = paste0(length(object$outer_folds), "-fold CV"),
                              LOOCV = "leave-one-out CV"))
   cat("\nNo inner loop\n")
+  balance <- object$call$balance
+  if (!is.null(balance)) {
+    cat("Balancing: ", balance, "\n")
+  }
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
+  if (!is.numeric(object$y)) print(c(table(object$y)))
+  cat("\n")
+  
   cat("Model: ", object$call$model, "\n")
   if (!is.null(object$call$filterFUN)) {
     cat("Filter: ", object$call$filterFUN, "\n")

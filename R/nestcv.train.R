@@ -281,7 +281,13 @@ summary.nestcv.train <- function(object,
                              LOOCV = "leave-one-out CV\n"))
   cat("Inner loop: ", paste0(object$trControl$number, "-fold ",
                              object$trControl$method, "\n"))
-  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
+  balance <- object$call$balance
+  if (!is.null(balance)) {
+    cat("Balancing: ", balance, "\n")
+  }
+  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
+  if (!is.numeric(object$y)) print(c(table(object$y)))
+  cat("\n")
   nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
   foldres <- object$bestTunes
   foldres$n.filter <- nfilter

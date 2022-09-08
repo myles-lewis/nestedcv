@@ -412,12 +412,20 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
                          cv = paste0(length(object$outer_folds), "-fold CV"),
                          LOOCV = "leave-one-out CV"))
   cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n"))
-  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n\n")
+  balance <- object$call$balance
+  if (!is.null(balance)) {
+    cat("Balancing: ", balance, "\n")
+  }
+  cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
+  if (!is.numeric(object$y)) print(c(table(object$y)))
+  cat("\n")
+  
   alpha <- unlist(lapply(object$outer_result, '[[', 'alpha'))
   lambda <- unlist(lapply(object$outer_result, '[[', 'lambda'))
   nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
   foldres <- data.frame(alpha = alpha, lambda = lambda, n.filter = nfilter,
                         row.names = paste("Fold", seq_along(alpha)))
+  
   print(foldres, digits = digits)
   cat("\nFinal parameters:\n")
   print(object$final_param, digits = digits, print.gap = 2L)
