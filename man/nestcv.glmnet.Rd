@@ -69,7 +69,8 @@ calculating left-out inner CV fold accuracy etc. See argument \code{keep} in
 \link{cv.glmnet}.}
 
 \item{weights}{Weights applied to each sample. Note \code{weights} and \code{balance}
-cannot be used at the same time.}
+cannot be used at the same time. Weights are only applied in glmnet and not
+in filters.}
 
 \item{penalty.factor}{Separate penalty factors can be applied to each
 coefficient. Can be 0 for some variables, which implies no shrinkage, and

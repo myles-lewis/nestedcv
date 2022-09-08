@@ -29,3 +29,8 @@ response vector \code{y}
 Synthetic Minority Oversampling Technique (SMOTE) algorithm for imbalanced
 classification data.
 }
+\references{
+Chawla, N. V., Bowyer, K. W., Hall, L. O., and Kegelmeyer, W. P. (2002).
+\emph{Smote: Synthetic minority over-sampling technique}. Journal of
+Artificial Intelligence Research, 16:321-357.
+}

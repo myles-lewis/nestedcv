@@ -4,7 +4,7 @@
 \alias{boot_filter}
 \title{Bootstrap for filter functions}
 \usage{
-boot_filter(y, x, filterFUN, B = 50, type = "index", ...)
+boot_filter(y, x, filterFUN, B = 50, nfilter = NULL, type = "index", ...)
 }
 \arguments{
 \item{y}{Response vector}
