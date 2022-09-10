@@ -368,6 +368,10 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = relief
 summary(res.rtx)
 ```
 
+Bootstrapped versions of the univariate filters are available [see
+`boot_ttest()`]. These use repeated random sampling to try to improve stability
+of ranking of predictors based on univariate statistics.
+
 ### Custom filter
 
 It is fairly straightforward to create your own custom filter, which can be
