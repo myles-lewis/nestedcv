@@ -430,15 +430,16 @@ The number of samples in each class in the outer CV folds can be checked on
 A custom balancing function can be provided. The function must be of the form:
 
 ```{r eval = FALSE}
-balance <- function(y, x, ...) {}
+balance <- function(y, x, ...) {
+  
+  return(list(y = y, x = x))
+}
 ```
 
 Other arguments can be passed in to the balance function as a named list via the
 `balance_options` argument. The function must return a list containing `y` an
 expanded/altered response vector and `x` the matrix or dataframe of predictors
-with increased/decreased samples in rows and predictors in columns. In theory
-manipulation of predictors to generate additional, composite predictors would be
-supported here.
+with increased/decreased samples in rows and predictors in columns.
 
 ### Nested CV with caret
 
