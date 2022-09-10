@@ -388,6 +388,54 @@ Finally once the model performance has been calculated by nested CV. The filter
 is applied to the whole dataset when refitting the final model to the full
 dataset.
 
+### Class imbalance
+
+Class imbalance is known to impact on model fitting for certain model types,
+e.g. random forest. Models may tend to aim to predict the majority class and
+ignore the minority class as selecting the majority class can give high accuracy
+purely by chance. While performance measures such as balanced accuracy can give
+improved estimates of model performance, techniques for rebalancing data have
+been developed. These include:
+
+* Random oversampling of the minority class
+* Random undersampling of the majority class
+* Combination of oversampling and undersampling
+* Synthesising new data in the minority class, e.g. SMOTE (Chawla et al, 2002)
+
+These are available within `nestedcv` using the `balance` argument to specify a
+balancing function. Other arguments to control the balancing process are passed
+to the function as a list via `balance_options`.
+
+-------------- --------------------------------------------------------------
+`randomsample` Random oversampling of the minority class and/or undersampling 
+               of the majority class
+
+`smote`        Synthetic minority oversampling technique (SMOTE)
+-------------- --------------------------------------------------------------
+
+Note that in `nestedcv` balancing is performed only on the outer training folds,
+immediately prior to filtering of features. This is important as balancing the
+whole dataset prior to the outer CV leads to data leakage of outer CV hold-out
+samples into the outer training folds.
+
+The number of samples in each class in the outer CV folds can be checked on
+`nestedcv` objects using the function `class_balance()`.
+
+### Custom balancing function
+
+A custom balancing function can be provided. The function must be of the form:
+
+```{r eval = FALSE}
+balance <- function(y, x, ...) {}
+```
+
+Other arguments can be passed in to the balance function as a named list via the
+`balance_options` argument. The function must return a list containing `y` an
+expanded/altered response vector and `x` the matrix or dataframe of predictors
+with increased/decreased samples in rows and predictors in columns. In theory
+manipulation of predictors to generate additional, composite predictors would be
+supported here.
+
 ### Nested CV with caret
 
 Nested CV can also be performed using the `caret` package framework written by
@@ -647,16 +695,29 @@ setting `options(mc.cores = ..)`.
 
 # References
 
-Humby F, Durez P, Buch MH, et al. Rituximab versus tocilizumab in anti-TNF
-inadequate responder patients with rheumatoid arthritis (R4RA): 16-week outcomes
-of a stratified, biopsy-driven, multicentre, open-label, phase 4 randomised
-controlled trial. Lancet. 2021;397(10271):305-317.
+Chawla, NV, Bowyer KW, Hall LO, Kegelmeyer WP. Smote: Synthetic minority
+over-sampling technique. \emph{Journal of Artificial Intelligence Research}
+2002; 16:321-357
+
+Humby F, Durez P, Buch MH, Lewis MJ et al. Rituximab versus tocilizumab in
+anti-TNF inadequate responder patients with rheumatoid arthritis (R4RA): 16-week
+outcomes of a stratified, biopsy-driven, multicentre, open-label, phase 4
+randomised controlled trial. \emph{Lancet} 2021; 397(10271):305-317.
+https://doi.org/10.1016/s0140-6736(20)32341-2
+
+Kuhn, M. Building Predictive Models in R Using the caret Package. \emph{Journal
+of Statistical Software} 2008; 28(5):1-26.
 
 Rivellese F, Surace AEA, Goldmann K, et al, Lewis MJ, Pitzalis C and the R4RA
 collaborative group. Rituximab versus tocilizumab in rheumatoid arthritis:
 Synovial biopsy-based biomarker analysis of the phase 4 R4RA randomized trial.
-Nature medicine 2022. https://doi.org/10.1038/s41591-022-01789-0
+\emph{Nature medicine} 2022; 28(6):1256-1268.
+https://doi.org/10.1038/s41591-022-01789-0
 
 Vabalas A, Gowen E, Poliakoff E, Casson AJ. Machine learning algorithm
 validation with a limited sample size. PloS one. 2019;14(11):e0224365.
+
+Zou, H, Hastie, T. Regularization and variable selection via the elastic net.
+\emph{Journal of the Royal Statistical Society: Series B (Statistical
+Methodology)} 2005; 67(2): 301-320.
 

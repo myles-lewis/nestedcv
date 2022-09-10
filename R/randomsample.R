@@ -13,15 +13,13 @@
 #' @param yminor Optional character value specifying the level in `y` which is
 #'   to be oversampled. If `NULL`, this is set automatically to the class with
 #'   the smallest sample size.
-#' @param verbose Logical whether to display messages
 #' @details
 #' `minor` < 1 and `major` > 1 are ignored.
 #' @return List containing extended matrix `x` of synthesised data and extended
 #'   response vector `y`
 #' @export
 #' 
-randomsample <- function(y, x, minor = NULL, major = 1, yminor = NULL,
-                         verbose = TRUE) {
+randomsample <- function(y, x, minor = NULL, major = 1, yminor = NULL) {
   ytab <- table(y)
   ymajor <- names(ytab)[which.max(ytab)]
   nymajor <- round(max(ytab) * major)
