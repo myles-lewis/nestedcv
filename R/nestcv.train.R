@@ -217,7 +217,7 @@ nestcv.train <- function(y, x,
     fset <- do.call(filterFUN, args)
     x[, fset]
   }
-  fitControl <- trainControl(method = "none", classProbs = TRUE)
+  fitControl <- trainControl(method = "none", classProbs = is.factor(y))
   final_fit <- caret::train(x = filtx, y = y, 
                             trControl = fitControl,
                             tuneGrid = finalTune, ...)
