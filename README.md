@@ -10,9 +10,15 @@ in caret.
 
 # Installation
 
+Install from CRAN
 ```
 install.packages("nestedcv")
 library(nestedcv)
+```
+
+Install from Github
+```
+devtools::install_github("myles-lewis/nestedcv")
 ```
 
 # Example
