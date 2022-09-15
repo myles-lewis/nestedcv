@@ -41,6 +41,10 @@
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
 #'   on windows.
+#' @param finalCV Logical whether to use hyperparameters from outer CV folds for
+#'   the final model or to perform one last round of CV on the whole dataset to
+#'   determine the final model parameters. Performance metrics are independent
+#'   of this last step.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
@@ -65,8 +69,10 @@
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
 #'   regression.}
-#' @details Parallelisation is performed on the outer folds using `mclapply`.
-#'   For classification `metric` defaults to using 'logLoss' with the
+#' @details Parallelisation is performed on the outer folds using
+#'   `parallel::mclapply` on unix/mac and `parallel::parLapply` on windows.
+#'   
+#'   For classification, `metric` defaults to using 'logLoss' with the
 #'   `trControl` arguments `classProbs = TRUE, summaryFunction = mnLogLoss`,
 #'   rather than 'Accuracy' which is the default classification metric in
 #'   `caret`. See [trainControl]. LogLoss is arguably more consistent than
@@ -141,6 +147,7 @@ nestcv.train <- function(y, x,
                          trControl = NULL,
                          tuneGrid = NULL,
                          savePredictions = "final",
+                         finalCV = FALSE,
                          na.option = "pass",
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)
@@ -209,7 +216,7 @@ nestcv.train <- function(y, x,
   bestTunes <- lapply(outer_res, function(i) i$fit$bestTune)
   bestTunes <- as.data.frame(data.table::rbindlist(bestTunes))
   rownames(bestTunes) <- paste('Fold', seq_len(n_outer_folds))
-  finalTune <- finaliseTune(bestTunes)
+  
   
   filtx <- if (is.null(filterFUN)) x else {
     args <- list(y = y, x = x)
@@ -217,10 +224,22 @@ nestcv.train <- function(y, x,
     fset <- do.call(filterFUN, args)
     x[, fset]
   }
-  fitControl <- trainControl(method = "none", classProbs = is.factor(y))
-  final_fit <- caret::train(x = filtx, y = y, 
-                            trControl = fitControl,
-                            tuneGrid = finalTune, ...)
+  
+  if (finalCV) {
+    # use CV on whole data to finalise parameters
+    final_fit <- caret::train(x = filtx, y = y, 
+                              metric = metric,
+                              trControl = trControl,
+                              tuneGrid = tuneGrid, ...)
+    finalTune <- final_fit$bestTune
+  } else {
+    # use outer folds for final parameters, fit single final model
+    finalTune <- finaliseTune(bestTunes)
+    fitControl <- trainControl(method = "none", classProbs = is.factor(y))
+    final_fit <- caret::train(x = filtx, y = y, 
+                              trControl = fitControl,
+                              tuneGrid = finalTune, ...)
+  }
   
   out <- list(call = nestcv.call,
               output = output,

@@ -1,11 +1,13 @@
 News
 =====
 
-# nestedcv 0.3.1
+# nestedcv 0.3.2
 ###### 15/09/2022
 * Fix bug in `nestcv.train` for caret models with tuning parameters which are
 factors
 * Fix bug in `nestcv.train` for caret models using regression
+* Add option in `nestcv.train` to tune final model parameters using a final
+round of CV on the whole dataset
 
 # nestedcv 0.3.0
 ###### 07/09/2022
