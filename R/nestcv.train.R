@@ -209,8 +209,8 @@ nestcv.train <- function(y, x,
   bestTunes <- lapply(outer_res, function(i) i$fit$bestTune)
   bestTunes <- as.data.frame(data.table::rbindlist(bestTunes))
   rownames(bestTunes) <- paste('Fold', seq_len(n_outer_folds))
-  finalTune <- colMeans(bestTunes)
-  finalTune <- data.frame(as.list(finalTune))
+  finalTune <- finaliseTune(bestTunes)
+  
   filtx <- if (is.null(filterFUN)) x else {
     args <- list(y = y, x = x)
     args <- append(args, filter_options)
@@ -268,6 +268,18 @@ nestcv.trainCore <- function(test, y, x,
               fit = fit,
               nfilter = ncol(filt_xtrain))
   ret
+}
+
+
+# finalise the caret model tuning from bestTune dataframe
+finaliseTune <- function(x) {
+  fintune <- lapply(colnames(x), function(i) {
+    if (is.numeric(x[, i])) return(median(x[, i]))
+    tab <- table(x[, i])
+    names(tab)[which.max(tab)]  # majority vote for factors
+  })
+  names(fintune) <- colnames(x)
+  data.frame(fintune, check.names = FALSE)
 }
 
 
