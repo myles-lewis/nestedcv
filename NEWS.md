@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.3.1
+###### 15/09/2022
+* Fix bug in `nestcv.train` for caret models with tuning parameters which are
+factors
+
 # nestedcv 0.3.0
 ###### 07/09/2022
 * Add `randomsample()` to handle class imbalance using random over/undersampling

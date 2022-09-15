@@ -272,6 +272,7 @@ nestcv.trainCore <- function(test, y, x,
 
 
 # finalise the caret model tuning from bestTune dataframe
+#' @importFrom stats median
 finaliseTune <- function(x) {
   fintune <- lapply(colnames(x), function(i) {
     if (is.numeric(x[, i])) return(median(x[, i]))
