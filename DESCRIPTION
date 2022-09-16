@@ -25,6 +25,7 @@ Imports:
     caret,
     CORElearn,
     data.table,
+    doParallel,
     ggplot2,
     glmnet,
     hsstan,
