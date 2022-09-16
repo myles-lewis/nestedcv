@@ -142,6 +142,10 @@ is to use \link{nestcv.train} with \code{tuneGrid} set as a single row of a
 data.frame. The parameters which are needed for a specific model can be
 identified using \code{\link[caret:modelLookup]{caret::modelLookup()}}.
 
+Case weights can be passed to model function which accept these, however
+\code{outercv} assumes that these are passed to the model via an argument named
+\code{weights}.
+
 Note that in the case of \code{model = lm}, although additional arguments e.g.
 \code{subset}, \code{weights}, \code{offset} are passed into the model function via
 \code{"..."} the scoping is known to go awry. Avoid using these arguments with

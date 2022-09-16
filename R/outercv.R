@@ -83,6 +83,10 @@
 #'   is to use [nestcv.train] with `tuneGrid` set as a single row of a
 #'   data.frame. The parameters which are needed for a specific model can be
 #'   identified using [caret::modelLookup()].
+#'   
+#'   Case weights can be passed to model function which accept these, however
+#'   `outercv` assumes that these are passed to the model via an argument named
+#'   `weights`.
 #'
 #'   Note that in the case of `model = lm`, although additional arguments e.g.
 #'   `subset`, `weights`, `offset` are passed into the model function via
