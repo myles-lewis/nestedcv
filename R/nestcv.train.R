@@ -17,7 +17,7 @@
 #'   function specified by `filterFUN`.
 #' @param weights Weights applied to each sample for models which can use
 #'   weights. Note `weights` and `balance` cannot be used at the same time.
-#'   Weights are only applied in glmnet and not in filters.
+#'   Weights are not applied in filters.
 #' @param balance Specifies method for dealing with imbalanced class data.
 #'   Current options are `"randomsample"` or `"smote"`. See [randomsample()] and
 #'   [smote()]

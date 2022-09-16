@@ -39,7 +39,7 @@ function specified by \code{filterFUN}.}
 
 \item{weights}{Weights applied to each sample for models which can use
 weights. Note \code{weights} and \code{balance} cannot be used at the same time.
-Weights are only applied in glmnet and not in filters.}
+Weights are not applied in filters.}
 
 \item{balance}{Specifies method for dealing with imbalanced class data.
 Current options are \code{"randomsample"} or \code{"smote"}. See \code{\link[=randomsample]{randomsample()}} and
