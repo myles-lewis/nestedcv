@@ -14,7 +14,7 @@ nest_filt_bal <- function(test, y, x,
     ytrain <- y[-test]
     xtrain <- x[-test, ]
     ytest <- y[test]
-    xtest <- x[test, ]
+    xtest <- x[test, , drop = FALSE]
   }
   
   if (!is.null(balance)) {
@@ -34,7 +34,7 @@ nest_filt_bal <- function(test, y, x,
     args <- append(args, filter_options)
     fset <- do.call(filterFUN, args)
     filt_xtrain <- xtrain[, fset]
-    filt_xtest <- xtest[, fset]
+    filt_xtest <- xtest[, fset, drop = FALSE]
     filt_pen.factor <- penalty.factor[fset]
   }
   
