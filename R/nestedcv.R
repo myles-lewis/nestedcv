@@ -221,7 +221,7 @@ nestcv.glmnet <- function(y, x,
   
   if (finalCV) {
     # use CV on whole data to finalise parameters
-    cvafit <- cva.glmnet(filtx, yfinal, alpha = alphaSet, family = family, 
+    cvafit <- cva.glmnet(filtx, yfinal, alphaSet = alphaSet, family = family, 
                   penalty.factor = filtpen.factor, ...)
     alphafit <- cvafit$fits[[cvafit$which_alpha]]
     s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
