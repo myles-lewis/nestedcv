@@ -218,20 +218,18 @@ outercv.default <- function(y, x,
   }
   
   # fit final model
-  filtx <- if (is.null(filterFUN)) x else {
-    args <- list(y = y, x = x)
-    args <- append(args, filter_options)
-    fset <- do.call(filterFUN, args)
-    x[, fset]
-  }
+  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
+                       balance, balance_options)
+  yfinal <- dat$ytrain
+  filtx <- dat$filt_xtrain
   
   if ("formula" %in% formalArgs(model)) {
     dat <- if (is.data.frame(filtx)) {filtx
     } else as.data.frame(filtx, stringsAsFactors = TRUE)
-    dat$.outcome <- y
+    dat$.outcome <- yfinal
     fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
   } else {
-    fit <- model(y = y, x = filtx, ...)
+    fit <- model(y = yfinal, x = filtx, ...)
   }
   out <- list(call = outercv.call,
               output = output,
@@ -240,6 +238,7 @@ outercv.default <- function(y, x,
               outer_folds = outer_folds,
               dimx = dim(x),
               y = y,
+              yfinal = yfinal,
               final_fit = fit,
               final_vars = colnames(filtx),
               summary_vars = summary_vars(filtx),
