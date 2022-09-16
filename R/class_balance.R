@@ -19,6 +19,11 @@ class_balance.nestcv.glmnet <- function(object) {
   tab <- table(ytrain)
   cat("Training folds:\n")
   print(c(tab))
+  yfinal <- object$yfinal
+  if (!is.null(yfinal)) {
+    cat("Final fit:\n")
+    print(c(table(yfinal)))
+  }
   invisible(tab)
 }
 
@@ -32,6 +37,11 @@ class_balance.nestcv.train <- function(object) {
   tab <- table(ytrain)
   cat("Training folds:\n")
   print(c(tab))
+  yfinal <- object$yfinal
+  if (!is.null(yfinal)) {
+    cat("Final fit:\n")
+    print(c(table(yfinal)))
+  }
   invisible(tab)
 }
 
