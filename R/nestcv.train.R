@@ -216,7 +216,7 @@ nestcv.train <- function(y, x,
   }
   bestTunes <- lapply(outer_res, function(i) i$fit$bestTune)
   bestTunes <- as.data.frame(data.table::rbindlist(bestTunes))
-  rownames(bestTunes) <- paste('Fold', seq_len(n_outer_folds))
+  rownames(bestTunes) <- paste('Fold', seq_len(nrow(bestTunes)))
   
   dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                        balance, balance_options)
