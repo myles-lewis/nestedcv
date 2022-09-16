@@ -15,6 +15,9 @@
 #'   character vector with names of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter
 #'   function specified by `filterFUN`.
+#' @param weights Weights applied to each sample for models which can use
+#'   weights. Note `weights` and `balance` cannot be used at the same time.
+#'   Weights are only applied in glmnet and not in filters.
 #' @param balance Specifies method for dealing with imbalanced class data.
 #'   Current options are `"randomsample"` or `"smote"`. See [randomsample()] and
 #'   [smote()]
@@ -138,6 +141,7 @@
 nestcv.train <- function(y, x,
                          filterFUN = NULL,
                          filter_options = NULL,
+                         weights = NULL,
                          balance = NULL,
                          balance_options = NULL,
                          outer_method = c("cv", "LOOCV"),
@@ -155,9 +159,12 @@ nestcv.train <- function(y, x,
   outer_method <- match.arg(outer_method)
   if (!is.null(balance) & is.numeric(y)) {
     stop("`balance` can only be used for classification")}
-  ok <- checkxy(y, x, na.option)
+  ok <- checkxy(y, x, na.option, weights)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
+  weights <- weights[ok$r]
+  if (!is.null(balance) & !is.null(weights)) {
+    stop("`balance` and `weights` cannot be used at the same time")}
   if (is.null(trControl)) {
     trControl <- if (is.factor(y)) {
       trainControl(method = "cv", 
@@ -181,7 +188,7 @@ nestcv.train <- function(y, x,
   
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
-    clusterExport(cl, varlist = c("outer_folds", "y", "x", 
+    clusterExport(cl, varlist = c("outer_folds", "y", "x", "weights",
                                   "filterFUN", "filter_options",
                                   "balance", "balance_options",
                                   "metric", "trControl", "tuneGrid",
@@ -190,7 +197,7 @@ nestcv.train <- function(y, x,
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {
       nestcv.trainCore(test, y, x,
                        filterFUN, filter_options,
-                       balance, balance_options,
+                       weights, balance, balance_options,
                        metric, trControl, tuneGrid, ...)
     })
     stopCluster(cl)
@@ -198,7 +205,7 @@ nestcv.train <- function(y, x,
     outer_res <- mclapply(outer_folds, function(test) {
       nestcv.trainCore(test, y, x,
                        filterFUN, filter_options,
-                       balance, balance_options,
+                       weights, balance, balance_options,
                        metric, trControl, tuneGrid, ...)
     }, mc.cores = cv.cores)
   }
@@ -234,7 +241,8 @@ nestcv.train <- function(y, x,
       on.exit(stopCluster(cl))
     }
     if (cv.cores >= 2) registerDoParallel(cv.cores)
-    final_fit <- caret::train(x = filtx, y = yfinal, 
+    final_fit <- caret::train(x = filtx, y = yfinal,
+                              weights = weights,
                               metric = metric,
                               trControl = trControl,
                               tuneGrid = tuneGrid, ...)
@@ -243,7 +251,8 @@ nestcv.train <- function(y, x,
     # use outer folds for final parameters, fit single final model
     finalTune <- finaliseTune(bestTunes)
     fitControl <- trainControl(method = "none", classProbs = is.factor(y))
-    final_fit <- caret::train(x = filtx, y = y, 
+    final_fit <- caret::train(x = filtx, y = y,
+                              weights = weights,
                               trControl = fitControl,
                               tuneGrid = finalTune, ...)
   }
@@ -270,7 +279,7 @@ nestcv.train <- function(y, x,
 
 nestcv.trainCore <- function(test, y, x,
                              filterFUN, filter_options,
-                             balance, balance_options,
+                             weights, balance, balance_options,
                              metric, trControl, tuneGrid, ...) {
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options)
@@ -280,6 +289,7 @@ nestcv.trainCore <- function(test, y, x,
   filt_xtest <- dat$filt_xtest
   
   fit <- caret::train(x = filt_xtrain, y = ytrain,
+                      weights = weights[-test],
                       metric = metric,
                       trControl = trControl,
                       tuneGrid = tuneGrid, ...)

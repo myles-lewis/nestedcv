@@ -42,3 +42,22 @@ nest_filt_bal <- function(test, y, x,
        filt_xtrain = filt_xtrain, filt_xtest = filt_xtest,
        filt_pen.factor = filt_pen.factor)
 }
+
+
+#' Calculate weights for class imbalance
+#' 
+#' @param y Response vector
+#' @return Vector of weights
+#' @export
+#' 
+weight <- function(y) {
+  if (is.numeric(y)) {
+    message("y is numeric: this function is designed for classification")
+  }
+  tab <- c(table(y))
+  props <- 1/tab
+  weights <- props[as.numeric(y)]
+  weights <- weights / sum(weights)
+  weights
+}
+

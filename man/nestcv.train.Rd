@@ -9,6 +9,7 @@ nestcv.train(
   x,
   filterFUN = NULL,
   filter_options = NULL,
+  weights = NULL,
   balance = NULL,
   balance_options = NULL,
   outer_method = c("cv", "LOOCV"),
@@ -35,6 +36,10 @@ character vector with names of filtered predictors.}
 
 \item{filter_options}{List of additional arguments passed to the filter
 function specified by \code{filterFUN}.}
+
+\item{weights}{Weights applied to each sample for models which can use
+weights. Note \code{weights} and \code{balance} cannot be used at the same time.
+Weights are only applied in glmnet and not in filters.}
 
 \item{balance}{Specifies method for dealing with imbalanced class data.
 Current options are \code{"randomsample"} or \code{"smote"}. See \code{\link[=randomsample]{randomsample()}} and

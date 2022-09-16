@@ -1,7 +1,7 @@
 News
 =====
 
-# nestedcv 0.3.4
+# nestedcv 0.3.5
 ###### 16/09/2022
 * Fix bug in `nestcv.train` for caret models with tuning parameters which are
 factors
@@ -10,6 +10,7 @@ factors
 parameters using a final round of CV on the whole dataset
 * Fix bugs in LOOCV
 * Add balancing to final model fitting
+* Add case weights to `nestcv.train`
 
 # nestedcv 0.3.0
 ###### 07/09/2022

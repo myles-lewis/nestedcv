@@ -162,9 +162,10 @@ nestcv.glmnet <- function(y, x,
   outer_method <- match.arg(outer_method)
   x <- as.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
-  ok <- checkxy(y, x, na.option)
+  ok <- checkxy(y, x, na.option, weights)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
+  weights <- weights[ok$r]
   if (!is.null(balance) & !is.null(weights)) {
     stop("`balance` and `weights` cannot be used at the same time")}
   if (!is.null(balance) & is.numeric(y)) {
@@ -221,8 +222,8 @@ nestcv.glmnet <- function(y, x,
   
   if (finalCV) {
     # use CV on whole data to finalise parameters
-    cvafit <- cva.glmnet(filtx, yfinal, alphaSet = alphaSet, family = family, 
-                  penalty.factor = filtpen.factor, ...)
+    cvafit <- cva.glmnet(filtx, yfinal, alphaSet = alphaSet, family = family,
+                         weights = weights, penalty.factor = filtpen.factor, ...)
     alphafit <- cvafit$fits[[cvafit$which_alpha]]
     s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
     fit <- cvafit$fits[[cvafit$which_alpha]]
@@ -233,7 +234,7 @@ nestcv.glmnet <- function(y, x,
     alph <- median(unlist(lapply(outer_res, '[[', 'alpha')))
     final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
     fit <- glmnet(filtx, yfinal, alpha = alph, family = family, 
-                  penalty.factor = filtpen.factor, ...)
+                  weights = weights, penalty.factor = filtpen.factor, ...)
   }
   
   fin_coef <- glmnet_coefs(fit, s = final_param["lambda"])
