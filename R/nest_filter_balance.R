@@ -5,10 +5,17 @@ nest_filt_bal <- function(test, y, x,
                           filterFUN, filter_options,
                           balance, balance_options,
                           penalty.factor = NULL) {
-  ytrain <- y[-test]
-  xtrain <- x[-test, ]
-  ytest <- y[test]
-  xtest <- x[test, ]
+  if (is.null(test)) {
+    ytrain <- y
+    xtrain <- x
+    ytest <- NULL
+    xtest <- NULL
+  } else {
+    ytrain <- y[-test]
+    xtrain <- x[-test, ]
+    ytest <- y[test]
+    xtest <- x[test, ]
+  }
   
   if (!is.null(balance)) {
     args <- list(y = ytrain, x = xtrain)

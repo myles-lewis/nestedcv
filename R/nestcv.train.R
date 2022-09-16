@@ -129,6 +129,7 @@
 #' @importFrom caret createFolds train trainControl mnLogLoss confusionMatrix
 #'   defaultSummary
 #' @importFrom data.table rbindlist
+#' @importFrom doParallel registerDoParallel
 #' @importFrom parallel mclapply
 #' @importFrom pROC roc
 #' @importFrom stats predict setNames
@@ -217,17 +218,23 @@ nestcv.train <- function(y, x,
   bestTunes <- as.data.frame(data.table::rbindlist(bestTunes))
   rownames(bestTunes) <- paste('Fold', seq_len(n_outer_folds))
   
-  
-  filtx <- if (is.null(filterFUN)) x else {
-    args <- list(y = y, x = x)
-    args <- append(args, filter_options)
-    fset <- do.call(filterFUN, args)
-    x[, fset]
-  }
+  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
+                       balance, balance_options)
+  yfinal <- dat$ytrain
+  filtx <- dat$filt_xtrain
   
   if (finalCV) {
     # use CV on whole data to finalise parameters
-    final_fit <- caret::train(x = filtx, y = y, 
+    if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+      cl <- makeCluster(cv.cores)
+      clusterExport(cl, varlist = c("filtx", "yfinal", 
+                                    "metric", "trControl", "tuneGrid",
+                                    "train", ...),
+                    envir = environment())
+      on.exit(stopCluster(cl))
+    }
+    if (cv.cores >= 2) registerDoParallel(cv.cores)
+    final_fit <- caret::train(x = filtx, y = yfinal, 
                               metric = metric,
                               trControl = trControl,
                               tuneGrid = tuneGrid, ...)
@@ -248,6 +255,7 @@ nestcv.train <- function(y, x,
               outer_folds = outer_folds,
               dimx = dim(x),
               y = y,
+              yfinal = yfinal,
               final_fit = final_fit,
               final_vars = colnames(filtx),
               roc = caret.roc,
