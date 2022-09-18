@@ -192,7 +192,7 @@ nestcv.train <- function(y, x,
     varlist <- c("outer_folds", "y", "x", "filterFUN", "filter_options",
                  "weights", "balance", "balance_options",
                  "metric", "trControl", "tuneGrid", "nestcv.trainCore")
-    if (length(dots) > 0) varlist <- c(varlist, "dots")
+    if (length(dots) > 0) varlist <- c(varlist, names(dots))
     clusterExport(cl, varlist = varlist, envir = environment())
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {
       nestcv.trainCore(test, y, x,
@@ -234,10 +234,10 @@ nestcv.train <- function(y, x,
     # use CV on whole data to finalise parameters
     if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
       cl <- makeCluster(cv.cores)
-      clusterExport(cl, varlist = c("filtx", "yfinal", 
-                                    "metric", "trControl", "tuneGrid",
-                                    "train", ...),
-                    envir = environment())
+      varlist <- c("filtx", "yfinal", "metric", "trControl", "tuneGrid",
+                   "train")
+      if (length(dots) > 0) varlist <- c(varlist, names(dots))
+      clusterExport(cl, varlist = varlist, envir = environment())
       on.exit(stopCluster(cl))
     }
     if (cv.cores >= 2) registerDoParallel(cv.cores)
