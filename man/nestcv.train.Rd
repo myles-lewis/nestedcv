@@ -121,6 +121,11 @@ estimation/ accuracy determined. The default is 10x10 nested CV.
 Parallelisation is performed on the outer folds using
 \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply} on windows.
 
+If the outer folds are run using parallelisation, then parallelisation in
+caret must be off, otherwise an error will be generated. Alternatively if
+you wish to use parallelisation in caret, then parallelisation in
+\code{nestcv.train} can be fully disabled by leaving \code{cv.cores = 1}.
+
 For classification, \code{metric} defaults to using 'logLoss' with the
 \code{trControl} arguments \verb{classProbs = TRUE, summaryFunction = mnLogLoss},
 rather than 'Accuracy' which is the default classification metric in

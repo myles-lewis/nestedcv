@@ -75,6 +75,11 @@
 #' @details Parallelisation is performed on the outer folds using
 #'   `parallel::mclapply` on unix/mac and `parallel::parLapply` on windows.
 #'   
+#'   If the outer folds are run using parallelisation, then parallelisation in
+#'   caret must be off, otherwise an error will be generated. Alternatively if
+#'   you wish to use parallelisation in caret, then parallelisation in
+#'   `nestcv.train` can be fully disabled by leaving `cv.cores = 1`.
+#'   
 #'   For classification, `metric` defaults to using 'logLoss' with the
 #'   `trControl` arguments `classProbs = TRUE, summaryFunction = mnLogLoss`,
 #'   rather than 'Accuracy' which is the default classification metric in
