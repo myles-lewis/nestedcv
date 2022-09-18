@@ -233,14 +233,16 @@ nestcv.train <- function(y, x,
   
   if (finalCV) {
     # use CV on whole data to finalise parameters
-    if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
-      cl <- makeCluster(cv.cores)
-      varlist <- c("filtx", "yfinal", "weights", "metric", "trControl",
-                   "tuneGrid", "train")
-      clusterExport(cl, varlist = varlist, envir = environment())
-      on.exit(stopCluster(cl))
+    if (cv.cores >= 2) {
+      if (Sys.info()["sysname"] == "Windows") {
+        cl <- makeCluster(cv.cores)
+        varlist <- c("filtx", "yfinal", "weights", "metric", "trControl",
+                     "tuneGrid", "train")
+        clusterExport(cl, varlist = varlist, envir = environment())
+        registerDoParallel(cl)
+        on.exit(stopCluster(cl))
+      } else registerDoParallel(cv.cores)  # unix
     }
-    if (cv.cores >= 2) registerDoParallel(cv.cores)
     final_fit <- caret::train(x = filtx, y = yfinal,
                               weights = weights,
                               metric = metric,
