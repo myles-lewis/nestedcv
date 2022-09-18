@@ -184,7 +184,7 @@ outercv.default <- function(y, x,
   reg <- !(is.factor(y) | is.character(y))  # y = regression
   if (!is.null(balance) & reg) {
     stop("`balance` can only be used for classification")}
-  if (!checkArg("weights", model)) {
+  if (!is.null(weights) & !checkArg("weights", model)) {
     warning("'weights' argument not found in model function")
   }
   outer_method <- match.arg(outer_method)
