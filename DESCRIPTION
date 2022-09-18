@@ -26,6 +26,7 @@ Imports:
     CORElearn,
     data.table,
     doParallel,
+    foreach,
     ggplot2,
     glmnet,
     hsstan,

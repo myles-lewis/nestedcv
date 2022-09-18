@@ -133,6 +133,7 @@
 #'   defaultSummary
 #' @importFrom data.table rbindlist
 #' @importFrom doParallel registerDoParallel
+#' @importFrom foreach registerDoSEQ
 #' @importFrom parallel mclapply
 #' @importFrom pROC roc
 #' @importFrom stats predict setNames
@@ -236,12 +237,14 @@ nestcv.train <- function(y, x,
     if (cv.cores >= 2) {
       if (Sys.info()["sysname"] == "Windows") {
         cl <- makeCluster(cv.cores)
-        varlist <- c("filtx", "yfinal", "weights", "metric", "trControl",
-                     "tuneGrid", "train")
-        clusterExport(cl, varlist = varlist, envir = environment())
         registerDoParallel(cl)
-        on.exit(stopCluster(cl))
-      } else registerDoParallel(cv.cores)  # unix
+        on.exit({stopCluster(cl)
+          foreach::registerDoSEQ()})
+      } else {
+        # unix
+        registerDoParallel(cores = cv.cores)
+        on.exit(foreach::registerDoSEQ())
+      }
     }
     final_fit <- caret::train(x = filtx, y = yfinal,
                               weights = weights,
