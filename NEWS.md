@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.3.6
+###### 18/09/2022
+* Fix windows parallelisation bugs
+
 # nestedcv 0.3.5
 ###### 16/09/2022
 * Fix bug in `nestcv.train` for caret models with tuning parameters which are
