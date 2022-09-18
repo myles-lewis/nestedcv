@@ -1,4 +1,5 @@
 
+#' @importFrom utils argsAnywhere
 
 checkArg <- function(x, fun) {
   args <- formalArgs(fun)
