@@ -309,7 +309,7 @@ rf_filter <- function(y, x, nfilter = NULL,
   type <- match.arg(type)
   fit <- randomForest::randomForest(x, y, importance = TRUE,
                                     ntree = ntree, mtry = mtry, ...)
-  vi <- as.vector(importance(fit, type = 1))
+  vi <- as.vector(randomForest::importance(fit, type = 1))
   names(vi) <- if (type == "index") 1:ncol(x) else colnames(x)
   if (type == "full") return(vi)
   vi <- sort(vi, decreasing = TRUE)
