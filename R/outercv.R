@@ -197,17 +197,21 @@ outercv.default <- function(y, x,
   
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
+    dots <- list(...)
     clusterExport(cl, varlist = c("outer_folds", "y", "x", "model", "reg",
                                   "filterFUN", "filter_options",
                                   "weights", "balance", "balance_options",
-                                  "predict_type", "outercvCore", ...),
+                                  "predict_type", "outercvCore", "dots"),
                   envir = environment())
+    on.exit(stopCluster(cl))
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {
-      outercvCore(test, y, x, model, reg,
-                  filterFUN, filter_options, weights,
-                  balance, balance_options, predict_type, ...)
+      args <- c(list(test=test, y=y, x=x, model=model, reg=reg,
+                     filterFUN=filterFUN, filter_options=filter_options,
+                     weights=weights, balance=balance,
+                     balance_options=balance_options,
+                     predict_type=predict_type), dots)
+      do.call(outercvCore, args)
     })
-    stopCluster(cl)
   } else {
     outer_res <- mclapply(outer_folds, function(test) {
       outercvCore(test, y, x, model, reg,
