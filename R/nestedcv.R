@@ -179,19 +179,22 @@ nestcv.glmnet <- function(y, x,
   
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
-    clusterExport(cl, varlist = c("outer_folds", "y", "x", "filterFUN",
-                                  "filter_options", "alphaSet", "min_1se", 
-                                  "n_inner_folds", "keep", "family",
-                                  "weights", "balance", "balance_options",
-                                  "penalty.factor", "nestcv.glmnetCore", ...),
-                  envir = environment())
+    dots <- list(...)
+    varlist = c("outer_folds", "y", "x", "filterFUN", "filter_options",
+                "alphaSet", "min_1se",  "n_inner_folds", "keep", "family",
+                "weights", "balance", "balance_options", "penalty.factor",
+                "nestcv.glmnetCore", "dots")
+    clusterExport(cl, varlist = varlist, envir = environment())
+    on.exit(stopCluster(cl))
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {
-      nestcv.glmnetCore(test, y, x, filterFUN, filter_options,
-                        balance, balance_options,
-                        alphaSet, min_1se, n_inner_folds, keep, family,
-                        weights, penalty.factor, ...)
+      args <- c(list(test=test, y=y, x=x, filterFUN=filterFUN,
+                     filter_options=filter_options,
+                     balance=balance, balance_options=balance_options,
+                     alphaSet=alphaSet, min_1se=min_1se,
+                     n_inner_folds=n_inner_folds, keep=keep, family=family,
+                     weights=weights, penalty.factor=penalty.factor), dots)
+      do.call(nestcv.glmnetCore, args)
     })
-    stopCluster(cl)
   } else {
     outer_res <- mclapply(outer_folds, function(test) {
       nestcv.glmnetCore(test, y, x, filterFUN, filter_options,
