@@ -191,14 +191,15 @@ nestcv.train <- function(y, x,
     dots <- list(...)
     varlist <- c("outer_folds", "y", "x", "filterFUN", "filter_options",
                  "weights", "balance", "balance_options",
-                 "metric", "trControl", "tuneGrid", "nestcv.trainCore")
-    if (length(dots) > 0) varlist <- c(varlist, names(dots))
+                 "metric", "trControl", "tuneGrid", "nestcv.trainCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {
-      nestcv.trainCore(test, y, x,
-                       filterFUN, filter_options,
-                       weights, balance, balance_options,
-                       metric, trControl, tuneGrid, ...)
+      args <- c(list(test=test, y=y, x=x,
+                     filterFUN=filterFUN, filter_options=filter_options,
+                     weights=weights, balance=balance,
+                     balance_options=balance_options, metric=metric,
+                     trControl=trControl, tuneGrid=tuneGrid), dots)
+      do.call(nestcv.trainCore, args)
     })
     stopCluster(cl)
   } else {
@@ -234,9 +235,8 @@ nestcv.train <- function(y, x,
     # use CV on whole data to finalise parameters
     if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
       cl <- makeCluster(cv.cores)
-      varlist <- c("filtx", "yfinal", "metric", "trControl", "tuneGrid",
-                   "train")
-      if (length(dots) > 0) varlist <- c(varlist, names(dots))
+      varlist <- c("filtx", "yfinal", "weights", "metric", "trControl",
+                   "tuneGrid", "train")
       clusterExport(cl, varlist = varlist, envir = environment())
       on.exit(stopCluster(cl))
     }
