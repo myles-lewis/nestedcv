@@ -85,7 +85,8 @@ innercv_roc.nestcv.train <- function(x, direction = "<", ...) {
   pROC::roc(ytrain, innerpreds, direction = direction, quiet = TRUE, ...)
 }
 
-#' @export
+
+# glmnet inner CV predictions
 innercv_preds <- function(x) {
   innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
   ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))

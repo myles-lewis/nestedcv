@@ -30,6 +30,7 @@ Imports:
     ggplot2,
     glmnet,
     hsstan,
+    matrixStats,
     matrixTests,
     methods,
     parallel,
@@ -37,11 +38,13 @@ Imports:
     randomForest,
     RcppEigen,
     Rfast,
-    rlang
+    rlang,
+    SuperLearner
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Suggests: 
     mda,
+    ranger,
     rmarkdown,
     knitr
 VignetteBuilder: knitr

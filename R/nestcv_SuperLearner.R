@@ -129,8 +129,7 @@ nestcv.SuperLearner <- function(y, x,
   filtx <- dat$filt_xtrain
   Y <- if (reg) yfinal else as.numeric(yfinal) -1
   
-  fit <- SuperLearner::SuperLearner(Y = Y, X = data.frame(filtx),
-                                    obsWeights = weights, ...)
+  fit <- SuperLearner(Y = Y, X = data.frame(filtx), obsWeights = weights, ...)
   
   out <- list(call = ncv.call,
               output = output,
@@ -187,24 +186,30 @@ nestSLcore <- function(test, y, x,
 }
 
 
+#' @importFrom matrixStats rowSds
 #' @export
 summary.nestcv.SuperLearner <- function(object, 
                                    digits = max(3L, getOption("digits") - 3L), 
                                    ...) {
-  cat("Single cross-validation to measure performance\n")
+  cat("Nested cross-validation with SuperLearner\n")
   cat("Outer loop: ", switch(object$outer_method,
                              cv = paste0(length(object$outer_folds), "-fold CV"),
                              LOOCV = "leave-one-out CV"))
-  # cat("\nNo inner loop\n")
+  cat(paste0("\nInner loop:  ", object$final_fit$cvControl$V,
+             "-fold CV (SuperLearner)\n"))
   balance <- object$call$balance
   if (!is.null(balance)) {
     cat("Balancing: ", balance, "\n")
   }
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
   if (!is.numeric(object$y)) print(c(table(object$y)))
-  cat("\n")
+  cat("\nModel: SuperLearner\n")
   
-  cat("Model: SuperLearner\n")
+  SLcoef <- lapply(object$outer_result, function(x) x$fit$coef)
+  SLcoef <- do.call(cbind, SLcoef)
+  SLrisk <- lapply(object$outer_result, function(x) x$fit$cvRisk)
+  SLrisk <- do.call(cbind, SLrisk)
+  
   if (!is.null(object$call$filterFUN)) {
     cat("Filter: ", object$call$filterFUN, "\n")
     nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
@@ -215,10 +220,16 @@ summary.nestcv.SuperLearner <- function(object,
     nfilter <- NULL
     cat("No filter\n")
   }
-  if (hasMethod2(object$final_fit, "print")) {
-    cat("\nFinal fit:")
-    print(object$final_fit)
-  }
+  
+  res <- data.frame(Risk = rowMeans(SLrisk),
+                    `Risk SE` = rowSds(SLrisk)/sqrt(ncol(SLrisk)),
+                    Coef = rowMeans(SLcoef),
+                    `Coef SE` = rowSds(SLcoef)/sqrt(ncol(SLcoef)),
+                    check.names = FALSE)
+  print(res, digits = digits, print.gap = 2L)
+  
+  cat("\nFinal fit:")
+  print(object$final_fit)
   cat("\nResult:\n")
   print(object$summary, digits = digits, print.gap = 2L)
   out <- list(dimx = object$dimx, nfilter = nfilter,
