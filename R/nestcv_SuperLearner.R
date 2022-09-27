@@ -128,8 +128,8 @@ nestcv.SuperLearner <- function(y, x,
   yfinal <- dat$ytrain
   filtx <- dat$filt_xtrain
   Y <- if (reg) yfinal else as.numeric(yfinal) -1
-  
-  fit <- SuperLearner(Y = Y, X = data.frame(filtx), obsWeights = weights, ...)
+  X <- data.frame(filtx)
+  fit <- SuperLearner(Y = Y, X = X, obsWeights = weights, ...)
   
   out <- list(call = ncv.call,
               output = output,
@@ -165,7 +165,8 @@ nestSLcore <- function(test, y, x,
                       obsWeights = weights[-test], ...)
   
   # test on outer CV
-  predSL <- predict(fit, newdata = filt_xtest, onlySL = TRUE)
+  predSL <- predict(fit, newdata = filt_xtest,
+                    X = filt_xtrain, Y = Y, onlySL = TRUE)
   if (reg) {
     predy <- c(predSL$pred)
   } else {
