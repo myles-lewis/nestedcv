@@ -84,3 +84,10 @@ innercv_roc.nestcv.train <- function(x, direction = "<", ...) {
   ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
   pROC::roc(ytrain, innerpreds, direction = direction, quiet = TRUE, ...)
 }
+
+#' @export
+innercv_preds <- function(x) {
+  innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
+  ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
+  data.frame(obs = ytrain, predyp = innerpreds)
+}
