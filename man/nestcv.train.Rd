@@ -97,8 +97,10 @@ An object with S3 class "nestcv.train"
 \item{outer_result}{List object of results from each outer fold containing
 predictions on left-out outer folds, caret result and number of filtered
 predictors at each fold.}
-\item{dimx}{dimensions of \code{x}}
 \item{outer_folds}{List of indices of outer test folds}
+\item{dimx}{dimensions of \code{x}}
+\item{y}{original response vector}
+\item{yfinal}{final response vector (post-balancing)}
 \item{final_fit}{Final fitted caret model using best tune parameters}
 \item{final_vars}{Column names of filtered predictors entering final model}
 \item{summary_vars}{Summary statistics of filtered predictors}
