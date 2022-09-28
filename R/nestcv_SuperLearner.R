@@ -5,7 +5,8 @@
 #' ensemble models from `SuperLearner` package.
 #'
 #' @param y Response vector
-#' @param x Matrix or dataframe of predictors
+#' @param x Dataframe or matrix of predictors. Matrix will be coerced to
+#'   dataframe as this is the default for SuperLearner.
 #' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
 #'   Any function can be provided and is passed `y` and `x`. Must return a
 #'   character vector with names of filtered predictors. Not available if
@@ -33,7 +34,19 @@
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
 #'   removed from 'x' to preserve cases. Any other value means that `NA` are
 #'   ignored (a message is given).
-#' @param ... Optional arguments passed to [SuperLearner::SuperLearner()]
+#' @param ... Additional arguments passed to [SuperLearner::SuperLearner()]
+#' @details
+#' This performs an outer CV on SuperLearner package ensemble models to measure
+#' performance, allowing balancing of imbalanced datasets as well as filtering
+#' of predictors. SuperLearner prefers dataframes as inputs for the predictors.
+#' If `x` is a matrix it will be coerced to a dataframe and variable names
+#' adjusted by [make.names()].
+#' 
+#' @note
+#' Care should be taken with some `SuperLearner` models e.g. `SL.gbm` as some
+#' models have multicore enabled by default, which can lead to huge numbers of
+#' processes being spawned.
+#' 
 #' @return An object with S3 class "nestcv.SuperLearner"
 #'   \item{call}{the matched call}
 #'   \item{output}{Predictions on the left-out outer folds}
@@ -51,7 +64,9 @@
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
 #'   regression.}
-#'   
+#' 
+#' @seealso [SuperLearner::SuperLearner()]
+#' 
 #' @importFrom SuperLearner SuperLearner
 #' @export
 
@@ -222,10 +237,10 @@ summary.nestcv.SuperLearner <- function(object,
     cat("No filter\n")
   }
   
-  res <- data.frame(Risk = rowMeans(SLrisk),
-                    `Risk SE` = rowSds(SLrisk)/sqrt(ncol(SLrisk)),
-                    Coef = rowMeans(SLcoef),
-                    `Coef SE` = rowSds(SLcoef)/sqrt(ncol(SLcoef)),
+  res <- data.frame(Risk = rowMeans(SLrisk, na.rm = TRUE),
+                    `Risk SE` = rowSds(SLrisk, na.rm = TRUE)/sqrt(ncol(SLrisk)),
+                    Coef = rowMeans(SLcoef, na.rm = TRUE),
+                    `Coef SE` = rowSds(SLcoef, na.rm = TRUE)/sqrt(ncol(SLcoef)),
                     check.names = FALSE)
   print(res, digits = digits, print.gap = 2L)
   

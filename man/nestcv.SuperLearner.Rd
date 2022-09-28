@@ -23,7 +23,8 @@ nestcv.SuperLearner(
 \arguments{
 \item{y}{Response vector}
 
-\item{x}{Matrix or dataframe of predictors}
+\item{x}{Dataframe or matrix of predictors. Matrix will be coerced to
+dataframe as this is the default for SuperLearner.}
 
 \item{filterFUN}{Filter function, e.g. \link{ttest_filter} or \link{relieff_filter}.
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
@@ -62,7 +63,7 @@ if there are \code{NA} in 'y', but columns (predictors) containing \code{NA} are
 removed from 'x' to preserve cases. Any other value means that \code{NA} are
 ignored (a message is given).}
 
-\item{...}{Optional arguments passed to \code{\link[SuperLearner:SuperLearner]{SuperLearner::SuperLearner()}}}
+\item{...}{Additional arguments passed to \code{\link[SuperLearner:SuperLearner]{SuperLearner::SuperLearner()}}}
 }
 \value{
 An object with S3 class "nestcv.SuperLearner"
@@ -86,4 +87,19 @@ regression.}
 \description{
 Provides a single loop of outer cross-validation to evaluate performance of
 ensemble models from \code{SuperLearner} package.
+}
+\details{
+This performs an outer CV on SuperLearner package ensemble models to measure
+performance, allowing balancing of imbalanced datasets as well as filtering
+of predictors. SuperLearner prefers dataframes as inputs for the predictors.
+If \code{x} is a matrix it will be coerced to a dataframe and variable names
+adjusted by \code{\link[=make.names]{make.names()}}.
+}
+\note{
+Care should be taken with some \code{SuperLearner} models e.g. \code{SL.gbm} as some
+models have multicore enabled by default, which can lead to huge numbers of
+processes being spawned.
+}
+\seealso{
+\code{\link[SuperLearner:SuperLearner]{SuperLearner::SuperLearner()}}
 }
