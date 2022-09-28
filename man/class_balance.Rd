@@ -2,18 +2,15 @@
 % Please edit documentation in R/class_balance.R
 \name{class_balance}
 \alias{class_balance}
-\alias{class_balance.nestcv.glmnet}
+\alias{class_balance.default}
 \alias{class_balance.nestcv.train}
-\alias{class_balance.outercv}
 \title{Check class balance in training folds}
 \usage{
 class_balance(object)
 
-\method{class_balance}{nestcv.glmnet}(object)
+\method{class_balance}{default}(object)
 
 \method{class_balance}{nestcv.train}(object)
-
-\method{class_balance}{outercv}(object)
 }
 \arguments{
 \item{object}{Object of class \code{nestedcv.glmnet}, \code{nestcv.train} or \code{outercv}}

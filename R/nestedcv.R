@@ -13,7 +13,8 @@
 #' nested CV.
 #'
 #' @param y Response vector
-#' @param x Matrix of predictors. Dataframes will be coerced to a matrix.
+#' @param x Matrix of predictors. Dataframes will be coerced to a matrix as
+#'   is necessary for glmnet.
 #' @param family Either a character string representing one of the built-in
 #'   families, or else a `glm()` family object. Passed to [cv.glmnet] and
 #'   [glmnet]
@@ -70,9 +71,12 @@
 #'   \item{n_inner_folds}{number of inner folds}
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{dimx}{dimensions of `x`}
+#'   \item{y}{original response vector}
+#'   \item{yfinal}{final response vector (post-balancing)}
 #'   \item{final_param}{Final mean best lambda
 #'   and alpha from each fold}
 #'   \item{final_fit}{Final fitted glmnet model}
+#'   \item{final_coef}{Final model coefficients and mean expression}
 #'   \item{roc}{ROC AUC for binary classification where available.}
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
