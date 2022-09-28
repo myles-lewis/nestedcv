@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.4.0
+###### 28/09/2022
+* Add support for nested CV on ensemble models from `SuperLearner` package
+
 # nestedcv 0.3.6
 ###### 18/09/2022
 * Fix windows parallelisation bugs

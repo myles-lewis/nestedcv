@@ -1,6 +1,6 @@
 Package: nestedcv
 Title: Nested Cross-Validation with 'glmnet' and 'caret'
-Version: 0.3.6
+Version: 0.4.0
 Authors@R: 
     c(person(given = "Myles",family = "Lewis",
     role = c("aut", "cre"),
@@ -44,7 +44,6 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Suggests: 
     mda,
-    ranger,
     rmarkdown,
     knitr
 VignetteBuilder: knitr
