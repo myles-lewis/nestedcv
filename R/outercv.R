@@ -41,6 +41,8 @@
 #'   functions use syntax of the form `predict(..., type = "prob")`. However,
 #'   some models require a different `type` to be specified, which can be passed
 #'   to `predict()` via `predict_type`.
+#' @param returnList Logical whether to return list of results after main outer
+#'   CV loop without concatenating results. Useful for debugging.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
@@ -173,6 +175,7 @@ outercv.default <- function(y, x,
                             cv.cores = 1,
                             predict_type = "prob",
                             na.option = "pass",
+                            returnList = FALSE,
                             ...) {
   outercv.call <- match.call(expand.dots = TRUE)
   ok <- checkxy(y, x, na.option, weights)
@@ -194,6 +197,7 @@ outercv.default <- function(y, x,
                           LOOCV = 1:length(y))
   }
   if (outercv.call$model == "glm") predict_type <- "response"
+  if (outercv.call$model == "mda") predict_type <- "posterior"
   
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
@@ -219,7 +223,7 @@ outercv.default <- function(y, x,
                   balance, balance_options, predict_type, ...)
     }, mc.cores = cv.cores)
   }
-  
+  if (returnList) return(outer_res)
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)

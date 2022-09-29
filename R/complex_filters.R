@@ -34,3 +34,48 @@ boruta_filter <- function(y, x, select = c('Confirmed', 'Tentative'),
          full = ref)
 }
 
+
+# multilayer filter
+
+layer_filter <- function(y, x,
+                         nfilter = NULL,
+                         imbalance = TRUE,
+                         cull = 5,
+                         force_vars = NULL,
+                         verbose = FALSE,
+                         type = c("index", "names", "full")) {
+  type <- match.arg(type)
+  if (imbalance) {
+    tab <- table(y)
+    maj_class <- names(tab)[which.max(tab)]
+  }
+  out <- NULL
+  
+  for (nf in nfilter) {
+    tt <- ttest_filter(y = y, x = x, nfilter = nf, p_cutoff = NULL,
+                       type = "full")
+    tt <- tt[order(tt[, 'pvalue']), ]
+    tt <- tt[1:nf, ]
+    maj_index <- y == maj_class
+    min_index <- !maj_index
+    find_clean <- sapply(rownames(tt), function(i) {
+      xset <- x[maj_index, i]
+      if (tt[i, 'stat'] > 0) {
+        out <- sapply(xset, function(xcut) sum(x[min_index, i] > xcut))
+      } else {
+        out <- sapply(xset, function(xcut) sum(x[min_index, i] < xcut))
+      }
+      out
+    })
+    cleansum <- rowSums(find_clean)
+    cullset <- names(cleansum)[order(cleansum)[1:cull]]
+    if (verbose) print(cullset)
+    ok <- !rownames(x) %in% cullset
+    y <- y[ok]
+    x <- x[ok,]
+    out <- c(out, rownames(tt))
+  }
+  if (type == "index") return(which(colnames(x) %in% unique(out)))
+  if (type == "names") return(unique(out))
+  out
+}
