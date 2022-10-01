@@ -35,7 +35,9 @@ boruta_filter <- function(y, x, select = c('Confirmed', 'Tentative'),
 }
 
 
-# multilayer filter
+#' Multilayer filter
+#' 
+#' @export
 
 layer_filter <- function(y, x,
                          nfilter = NULL,
