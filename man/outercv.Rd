@@ -23,6 +23,7 @@ outercv(y, ...)
   cv.cores = 1,
   predict_type = "prob",
   na.option = "pass",
+  returnList = FALSE,
   ...
 )
 
@@ -90,6 +91,9 @@ to \code{predict()} via \code{predict_type}.}
 if there are \code{NA} in 'y', but columns (predictors) containing \code{NA} are
 removed from 'x' to preserve cases. Any other value means that \code{NA} are
 ignored (a message is given).}
+
+\item{returnList}{Logical whether to return list of results after main outer
+CV loop without concatenating results. Useful for debugging.}
 
 \item{formula}{A formula describing the model to be fitted}
 
