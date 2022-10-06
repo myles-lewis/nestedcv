@@ -269,7 +269,7 @@ nestcv.train <- function(y, x,
     # use outer folds for final parameters, fit single final model
     finalTune <- finaliseTune(bestTunes)
     fitControl <- trainControl(method = "none", classProbs = is.factor(y))
-    final_fit <- caret::train(x = filtx, y = y,
+    final_fit <- caret::train(x = filtx, y = yfinal,
                               weights = weights,
                               trControl = fitControl,
                               tuneGrid = finalTune, ...)
