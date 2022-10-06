@@ -10,3 +10,22 @@ checkArg <- function(x, fun) {
   any(args == x)
 }
 
+
+
+#' @export
+
+supervisedPCA <- function(y, x,
+                          filterFUN = NULL,
+                          filter_options = NULL,
+                          plot = TRUE, ...) {
+  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options)
+  filtx <- dat$filt_xtrain
+  df <- princomp(filtx, ...)
+  data <- data.frame(df$scores)
+  data$outcome <- y
+  if (!plot) return(data)
+  ggplot(data, aes(x = Comp.1, y = Comp.2, color = outcome)) +
+    geom_point() +
+    theme_classic()
+}
+

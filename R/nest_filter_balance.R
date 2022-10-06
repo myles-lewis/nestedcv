@@ -3,7 +3,7 @@
 
 nest_filt_bal <- function(test, y, x,
                           filterFUN, filter_options,
-                          balance, balance_options,
+                          balance = NULL, balance_options,
                           penalty.factor = NULL) {
   if (is.null(test)) {
     ytrain <- y
@@ -17,13 +17,13 @@ nest_filt_bal <- function(test, y, x,
     xtest <- x[test, , drop = FALSE]
   }
   
-  if (!is.null(balance)) {
-    args <- list(y = ytrain, x = xtrain)
-    args <- append(args, balance_options)
-    bal_dat <- do.call(balance, args)
-    ytrain <- bal_dat$y
-    xtrain <- bal_dat$x
-  }
+  # if (!is.null(balance)) {
+  #   args <- list(y = ytrain, x = xtrain)
+  #   args <- append(args, balance_options)
+  #   bal_dat <- do.call(balance, args)
+  #   ytrain <- bal_dat$y
+  #   xtrain <- bal_dat$x
+  # }
   
   if (is.null(filterFUN)) {
     filt_xtrain <- xtrain
@@ -36,6 +36,14 @@ nest_filt_bal <- function(test, y, x,
     filt_xtrain <- xtrain[, fset]
     filt_xtest <- xtest[, fset, drop = FALSE]
     filt_pen.factor <- penalty.factor[fset]
+  }
+  
+  if (!is.null(balance)) {
+    args <- list(y = ytrain, x = filt_xtrain)
+    args <- append(args, balance_options)
+    bal_dat <- do.call(balance, args)
+    ytrain <- bal_dat$y
+    filt_xtrain <- bal_dat$x
   }
   
   list(ytrain = ytrain, ytest = ytest,

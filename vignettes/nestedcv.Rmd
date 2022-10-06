@@ -474,6 +474,13 @@ glmnet_coefs(ncv$final_fit$finalModel, s = ncv$finalTune$lambda)
 
 ### Notes on caret
 
+It is important to try calls to `nestcv.train` with `cv.cores=1` first. With
+`caret` this may flag up that specific packages are not installed or that there
+are problems with input variables `y` and `x` which may have to be corrected for
+the call to run in multicore mode. Once it is clear that the call to
+`nestcv.train` is working ok, you can quit single core execution and restart in
+multicore mode.
+
 It is important to realise that the `train()` function in `caret` sets a
 parameter known as `tuneLength` to 3 by default, so the default tuning grid is
 minimal. `tuneLength` can easily be increased to give a tuning grid of greater
@@ -518,6 +525,7 @@ preds <- predict(ncv, newdata = data.rtx)
 ```
 
 ### Bayesian shrinkage models
+
 The two examples below implement Bayesian linear and logistic regression models
 using the horseshoe prior over parameters to encourage a sparse model. Models
 are fitted using the `hsstan` R package, which performs full Bayesian inference
@@ -697,6 +705,15 @@ Note at time of writing, there appears to be a bug in `rstan` (used by `hsstan`)
 leading to it ignoring the argument `cores` and instead spawning multiple
 processes as specified by the `chain` argument. This behaviour can be limited by
 setting `options(mc.cores = ..)`.
+
+# Troubleshooting
+
+A key problem with parallelisation in R is that errors, warnings and user input
+generally have to be suppressed during multicore processing. If a `nestedcv`
+call is not working, we strongly recommend that you try it with `cv.cores=1`
+first. With `caret` this may flag up that specific packages are not installed or
+that there are problems with input variables `y` and `x` which may have to be
+corrected for the call to run in multicore mode.
 
 # References
 

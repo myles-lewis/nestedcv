@@ -120,8 +120,13 @@ CV. Predictions on the outer test folds are brought back together and error
 estimation/ accuracy determined. The default is 10x10 nested CV.
 }
 \details{
-Parallelisation is performed on the outer folds using
-\code{parallel::mclapply} on unix/mac and \code{parallel::parLapply} on windows.
+Parallelisation is performed on the outer folds using \code{parallel::mclapply} on
+unix/mac and \code{parallel::parLapply} on windows.
+
+We strongly recommend that you try calls to \code{nestcv.train} with \code{cv.cores=1}
+first. With \code{caret} this may flag up that specific packages are not installed
+or that there are problems with input variables \code{y} and \code{x} which may have to
+be corrected for the call to run in multicore mode.
 
 If the outer folds are run using parallelisation, then parallelisation in
 caret must be off, otherwise an error will be generated. Alternatively if

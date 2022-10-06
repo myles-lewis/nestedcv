@@ -74,8 +74,14 @@
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
 #'   regression.}
-#' @details Parallelisation is performed on the outer folds using
-#'   `parallel::mclapply` on unix/mac and `parallel::parLapply` on windows.
+#' @details
+#' Parallelisation is performed on the outer folds using `parallel::mclapply` on
+#' unix/mac and `parallel::parLapply` on windows.
+#'
+#' We strongly recommend that you try calls to `nestcv.train` with `cv.cores=1`
+#' first. With `caret` this may flag up that specific packages are not installed
+#' or that there are problems with input variables `y` and `x` which may have to
+#' be corrected for the call to run in multicore mode.
 #'   
 #'   If the outer folds are run using parallelisation, then parallelisation in
 #'   caret must be off, otherwise an error will be generated. Alternatively if
@@ -263,7 +269,7 @@ nestcv.train <- function(y, x,
     # use outer folds for final parameters, fit single final model
     finalTune <- finaliseTune(bestTunes)
     fitControl <- trainControl(method = "none", classProbs = is.factor(y))
-    final_fit <- caret::train(x = filtx, y = y,
+    final_fit <- caret::train(x = filtx, y = yfinal,
                               weights = weights,
                               trControl = fitControl,
                               tuneGrid = finalTune, ...)
