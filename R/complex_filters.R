@@ -37,6 +37,28 @@ boruta_filter <- function(y, x, select = c('Confirmed', 'Tentative'),
 
 #' Multilayer filter
 #' 
+#' Experimental filter designed for use with imbalanced datasets. Each round a
+#' simple t-test is used to rank predictors and keep a certain number. After
+#' each round a set number of cases are culled determined as the most outlying
+#' cases - those which if used as a cutoff for classification have the smallest
+#' number of misclassified cases. The t-test is repeated on the culled dataset
+#' so that after successive rounds the most influential outlying samples have
+#' been removed and different samples drive the t-test filter.
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param nfilter Vector of number of target predictors to keep at each round.
+#'   The length of this vector determines the number of rounds of culling.
+#' @param imbalance Logical whether to assume the dataset is imbalanced, in
+#'   which case samples are only culled from the majority class.
+#' @param cull number of samples to cull at each round
+#' @param force_vars not implemented yet
+#' @param verbose whether to show sample IDs of culled individuals at each round
+#' @param type Type of vector returned. Default "index" returns indices,
+#' "names" returns predictor names.
+#' 
+#' @return Integer vector of indices of filtered parameters (type = "index") or
+#'   character vector of names (type = "names") of filtered parameters.
 #' @export
 
 layer_filter <- function(y, x,

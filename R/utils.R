@@ -11,7 +11,26 @@ checkArg <- function(x, fun) {
 }
 
 
-
+#' Supervised PCA plot
+#' 
+#' Performs supervised principle component analysis (PCA) after filtering
+#' dataset to help determine whether filtering has been useful for separating
+#' samples according to the outcome variable.
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
+#'   Any function can be provided and is passed `y` and `x`. Must return a
+#'   character vector with names of filtered predictors.
+#' @param filter_options List of additional arguments passed to the filter
+#'   function specified by `filterFUN`.
+#' @param plot Logical whether to plot a ggplot2 object or return the PC scores
+#' @param ... Optional arguments passed to [princomp()]
+#' @return If `plot=TRUE` returns a ggplot2 plot, otherwise returns the
+#'   principle component scores.
+#' 
+#' @importFrom stats princomp
+#' @importFrom ggplot2 theme_classic
 #' @export
 
 supervisedPCA <- function(y, x,
@@ -24,7 +43,7 @@ supervisedPCA <- function(y, x,
   data <- data.frame(df$scores)
   data$outcome <- y
   if (!plot) return(data)
-  ggplot(data, aes(x = Comp.1, y = Comp.2, color = outcome)) +
+  ggplot(data, aes(x = .data$Comp.1, y = .data$Comp.2, color = .data$outcome)) +
     geom_point() +
     theme_classic()
 }
