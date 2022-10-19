@@ -691,6 +691,19 @@ filtering process can be time consuming (e.g. `rf_filter`, `relieff_filter`), we
 tend to recommend parallelisation of the outer CV loop over parallelisation of
 the inner CV loop.
 
+To check the number of physical cores, use:
+
+```{r eval = FALSE}
+parallel::detectCores(logical = FALSE)
+```
+
+To maintain consistency with random numbers during parallelisation set the
+random number seed in the following way:
+
+```{r eval = FALSE}
+set.seed(123, "L'Ecuyer-CMRG")
+```
+
 The `caret` package is set up for parallelisation using `foreach`
 (https://topepo.github.io/caret/parallel-processing.html). We generally do not
 recommend nested parallelisation of both outer and inner loops, although this is
