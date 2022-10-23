@@ -2,6 +2,8 @@
 
 0 errors | 0 warnings | 0 note
 
+* Resubmission with bug fixes and a couple of new features
+
 * Fixed title
 * Fixed Description field
 * Included reference and <doi> in DESCRIPTION
