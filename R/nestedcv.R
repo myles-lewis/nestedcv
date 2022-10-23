@@ -50,10 +50,10 @@
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
 #'   on windows.
-#' @param finalCV Logical whether to use median of hyperparameters from outer CV
-#'   folds for the final model or to perform one last round of CV on the whole
-#'   dataset to determine the final model parameters. Performance metrics are
-#'   independent of this last step.
+#' @param finalCV Logical whether to perform one last round of CV on the whole
+#'   dataset to determine the final model parameters. If set to `FALSE`, the
+#'   median of hyperparameters from outer CV folds are used for the final model.
+#'   Performance metrics are independent of this last step.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` (the default) is equivalent to `na.action = na.omit`. `"omitcol"`
 #'   removes cases if there are `NA` in 'y', but columns (predictors) containing
@@ -158,7 +158,7 @@ nestcv.glmnet <- function(y, x,
                           weights = NULL,
                           penalty.factor = rep(1, ncol(x)),
                           cv.cores = 1,
-                          finalCV = FALSE,
+                          finalCV = TRUE,
                           na.option = "omit",
                           ...) {
   family <- match.arg(family)

@@ -22,7 +22,7 @@ nestcv.glmnet(
   weights = NULL,
   penalty.factor = rep(1, ncol(x)),
   cv.cores = 1,
-  finalCV = FALSE,
+  finalCV = TRUE,
   na.option = "omit",
   ...
 )
@@ -83,10 +83,10 @@ variables. See \link{glmnet}}
 NOTE: this uses \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply}
 on windows.}
 
-\item{finalCV}{Logical whether to use median of hyperparameters from outer CV
-folds for the final model or to perform one last round of CV on the whole
-dataset to determine the final model parameters. Performance metrics are
-independent of this last step.}
+\item{finalCV}{Logical whether to perform one last round of CV on the whole
+dataset to determine the final model parameters. If set to \code{FALSE}, the
+median of hyperparameters from outer CV folds are used for the final model.
+Performance metrics are independent of this last step.}
 
 \item{na.option}{Character value specifying how \code{NA}s are dealt with.
 \code{"omit"} (the default) is equivalent to \code{na.action = na.omit}. \code{"omitcol"}

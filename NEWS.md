@@ -4,6 +4,8 @@ News
 # nestedcv 0.4.0
 ###### 28/09/2022
 * Add support for nested CV on ensemble models from `SuperLearner` package
+* Final CV on whole data is now the default in `nestcv.train` and
+`nestcv.glmnet`
 
 # nestedcv 0.3.6
 ###### 18/09/2022

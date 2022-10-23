@@ -44,10 +44,12 @@
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
 #'   on windows.
-#' @param finalCV Logical whether to use hyperparameters from outer CV folds for
-#'   the final model or to perform one last round of CV on the whole dataset to
-#'   determine the final model parameters. Performance metrics are independent
-#'   of this last step.
+#' @param finalCV Logical whether to perform one last round of CV on the whole
+#'   dataset to determine the final model parameters. If set to `FALSE`, the
+#'   median of the best hyperparameters from outer CV folds for continuous/
+#'   ordinal hyperparameters, or highest voted for categorical hyperparameters,
+#'   are used to fit the final model. Performance metrics are independent of
+#'   this last step.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
@@ -166,7 +168,7 @@ nestcv.train <- function(y, x,
                          trControl = NULL,
                          tuneGrid = NULL,
                          savePredictions = "final",
-                         finalCV = FALSE,
+                         finalCV = TRUE,
                          na.option = "pass",
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)

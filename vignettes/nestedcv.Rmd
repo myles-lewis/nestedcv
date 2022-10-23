@@ -63,9 +63,8 @@ outer folds are compared against the true results for the outer test folds and
 the results concatenated, to give measures of accuracy (e.g. AUC and accuracy
 for classification, or RMSE for regression) across the whole dataset.
 
-Finally, the tuning parameters for each model in the outer folds are averaged to
-give the mean best parameters across all outer folds. A final model is fitted
-across the whole data using these final hyperparameters and can be used for
+A final round of CV is performed on the whole dataset to determine
+hyperparameters to fit the final model to the whole data, which can be used for
 prediction with external data.
 
 ### Variable selection

@@ -20,7 +20,7 @@ nestcv.train(
   trControl = NULL,
   tuneGrid = NULL,
   savePredictions = "final",
-  finalCV = FALSE,
+  finalCV = TRUE,
   na.option = "pass",
   ...
 )
@@ -77,10 +77,12 @@ CV fold should be saved for ROC curves, accuracy etc see
 \link[caret:trainControl]{caret::trainControl}. Default is \code{"final"} to capture predictions for
 inner CV ROC.}
 
-\item{finalCV}{Logical whether to use hyperparameters from outer CV folds for
-the final model or to perform one last round of CV on the whole dataset to
-determine the final model parameters. Performance metrics are independent
-of this last step.}
+\item{finalCV}{Logical whether to perform one last round of CV on the whole
+dataset to determine the final model parameters. If set to \code{FALSE}, the
+median of the best hyperparameters from outer CV folds for continuous/
+ordinal hyperparameters, or highest voted for categorical hyperparameters,
+are used to fit the final model. Performance metrics are independent of
+this last step.}
 
 \item{na.option}{Character value specifying how \code{NA}s are dealt with.
 \code{"omit"} is equivalent to \code{na.action = na.omit}. \code{"omitcol"} removes cases
