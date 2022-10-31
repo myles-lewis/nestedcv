@@ -24,6 +24,7 @@
 
 smote <- function(y, x, k = 5, over = NULL, yminor = NULL) {
   stopifnot(k >= 1)
+  if (is.null(rownames(x))) rownames(x) <- paste0("S", seq_len(nrow(x)))
   y <- droplevels(y)
   ytab <- table(y)
   
