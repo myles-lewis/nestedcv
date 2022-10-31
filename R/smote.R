@@ -73,7 +73,8 @@ smoteN <- function(xminor, k, n) {
     r <- runif(1)
     x1 * r + x2 * (1-r)
   }, numeric(ncol(xminor)))
-  colnames(out) <- paste0(rownames(xminor)[s1], ".sm")
+  colnames(out) <- make.names(paste0(rownames(xminor)[s1], ".sm"),
+                              unique = TRUE)
   t(out)
 }
 
