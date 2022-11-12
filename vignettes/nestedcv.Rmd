@@ -424,6 +424,101 @@ samples into the outer training folds.
 The number of samples in each class in the outer CV folds can be checked on
 `nestedcv` objects using the function `class_balance()`.
 
+The following example simulates an imbalanced dataset with 150 samples and
+20,000 predictors of which only the first 30 are weak predictors.
+
+```{r}
+## Imbalanced dataset
+set.seed(1, "L'Ecuyer-CMRG")
+x <- matrix(rnorm(150 * 2e+04), 150, 2e+04)  # predictors
+y <- factor(rbinom(150, 1, 0.2))  # imbalanced binary response
+table(y)
+
+## first 30 parameters are weak predictors
+x[, 1:30] <- rnorm(150 * 30, 0, 1) + as.numeric(y)*0.5
+```
+
+Here we illustrate the use of `randomsample()` to balance x & y *outside* of the
+CV loop by random oversampling minority group. Then we fit a nested CV glmnet
+model on the balanced data.
+
+```{r}
+out <- randomsample(y, x)
+y2 <- out$y
+x2 <- out$x
+table(y2)
+
+## Nested CV glmnet with unnested balancing by random oversampling on
+## whole dataset
+fit1 <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                      cv.cores=2,
+                      filterFUN = ttest_filter)
+fit1$summary
+```
+
+Alternatively choices for dealing with imbalance include balancing x & y outside
+of CV loop by random oversampling minority group, or by SMOTE.
+
+```{r}
+out <- randomsample(y, x, minor=1, major=0.4)
+y2 <- out$y
+x2 <- out$x
+table(y2)
+
+## Nested CV glmnet with unnested balancing by random undersampling on
+## whole dataset
+fit1b <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                       cv.cores=2,
+                       filterFUN = ttest_filter)
+fit1b$summary
+
+## Balance x & y outside of CV loop by SMOTE
+out <- smote(y, x)
+y2 <- out$y
+x2 <- out$x
+table(y2)
+
+## Nested CV glmnet with unnested balancing by SMOTE on whole dataset
+fit2 <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                      cv.cores=2,
+                      filterFUN = ttest_filter)
+fit2$summary
+```
+
+Finally, we show full nesting of both sample balancing and feature filtering
+within the outer CV loop, using `nestcv.glmnet()`.
+
+```{r}
+## Nested CV glmnet with nested balancing by random oversampling
+fit3 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                      cv.cores=2,
+                      balance = "randomsample",
+                      filterFUN = ttest_filter)
+fit3$summary
+```
+
+Finally we plot ROC curves to illustrate the differences between these
+approaches.
+
+```{r}
+plot(fit1$roc, col='green')
+lines(fit1b$roc, col='red')
+lines(fit2$roc, col='blue')
+lines(fit3$roc)
+legend('bottomright', legend = c("Unnested random oversampling", 
+                                 "Unnested SMOTE",
+                                 "Unnested random undersampling",
+                                 "Nested balancing"), 
+       col = c("green", "blue", "red", "black"), lty = 1, lwd = 2, bty = "n", cex=0.8)
+```
+
+This shows that unnested oversampling and unnested SMOTE leads to a
+data leak resulting in upward bias in apparent performance. The correct unbiased
+estimate of performance is 'nested balancing'. Interestingly unnested random
+undersampling does not lead to any leakage of samples into left-out test folds,
+but the reduction in data size means that training is adversely affected and
+performance of the trained models is poor.
+
 ### Custom balancing function
 
 A custom balancing function can be provided. The function must be of the form:
