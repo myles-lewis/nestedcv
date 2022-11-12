@@ -32,3 +32,72 @@ group to compensate for class imbalance in datasets.
 \details{
 \code{minor} < 1 and \code{major} > 1 are ignored.
 }
+\examples{
+\donttest{
+## Imbalanced dataset
+set.seed(1, "L'Ecuyer-CMRG")
+x <- matrix(rnorm(150 * 2e+04), 150, 2e+04)  #' predictors
+y <- factor(rbinom(150, 1, 0.2))  #' imbalanced binary response
+table(y)
+
+## first 30 parameters are weak predictors
+x[, 1:30] <- rnorm(150 * 30, 0, 1) + as.numeric(y)*0.5
+
+## Balance x & y outside of CV loop by random oversampling minority group
+out <- randomsample(y, x)
+y2 <- out$y
+x2 <- out$x
+table(y2)
+
+## Nested CV glmnet with unnested balancing by random oversampling on
+## whole dataset
+fit1 <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                      cv.cores=2,
+                      filterFUN = ttest_filter)
+fit1$summary
+
+## Balance x & y outside of CV loop by random oversampling minority group
+out <- randomsample(y, x, minor=1, major=0.4)
+y2 <- out$y
+x2 <- out$x
+table(y2)
+
+## Nested CV glmnet with unnested balancing by random undersampling on
+## whole dataset
+fit1b <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                       cv.cores=2,
+                       filterFUN = ttest_filter)
+fit1b$summary
+
+## Balance x & y outside of CV loop by SMOTE
+out <- smote(y, x)
+y2 <- out$y
+x2 <- out$x
+table(y2)
+
+## Nested CV glmnet with unnested balancing by SMOTE on whole dataset
+fit2 <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                      cv.cores=2,
+                      filterFUN = ttest_filter)
+fit2$summary
+
+## Nested CV glmnet with nested balancing by random oversampling
+fit3 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                      cv.cores=2,
+                      balance = "randomsample",
+                      filterFUN = ttest_filter)
+fit3$summary
+
+## Plot ROC curves
+plot(fit1$roc, col='green')
+lines(fit1b$roc, col='red')
+lines(fit2$roc, col='blue')
+lines(fit3$roc)
+legend('bottomright', legend = c("Unnested random oversampling", 
+                                 "Unnested SMOTE",
+                                 "Unnested random undersampling",
+                                 "Nested balancing"), 
+       col = c("green", "blue", "red", "black"), lty=1, lwd=2)
+}
+
+}
