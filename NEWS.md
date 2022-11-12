@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.4.1
+###### 12/11/2022
+* Add examples of imbalance datasets
+* Fix rowname bug in `smote()`
+
 # nestedcv 0.4.0
 ###### 28/09/2022
 * Add support for nested CV on ensemble models from `SuperLearner` package
