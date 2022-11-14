@@ -648,6 +648,7 @@ If we are also using a 10-fold cross-validation procedure, and set
 `cv.cores = 10` to parallelise computation over folds, then 40 cores will be
 used in total.
 
+
 #### Linear regression with a Bayesian shrinkage model (continuous outcomes)
 
 We use cross-validation and apply univariate filtering of predictors and
@@ -692,10 +693,14 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                                                rsq_cutoff = 0.9),
                          n_outer_folds = nfolds, cv.cores = cv.cores,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
-# view prediction performance based on testing folds
+```
+
+We can then view prediction performance based on the testing folds and examine
+the Bayesian model using the `hsstan` package.
+
+```{r}
 summary(res.cv.hsstan)
 
-# load hsstan package to examine the Bayesian model
 library(hsstan)
 sampler.stats(res.cv.hsstan$final_fit)
 print(projsel(res.cv.hsstan$final_fit), digits = 4)  # adding marker2
@@ -706,6 +711,7 @@ Here adding `marker2` improves the model fit: substantial decrease of
 KL-divergence from the full model to the submodel. Adding `marker3` does not
 improve the model fit: no decrease of KL-divergence from the full model to the
 submodel.
+
 
 #### Logistic regression with a Bayesian shrinkage model (continuous outcomes)
 
@@ -722,14 +728,7 @@ sigmoid <- function(x) {1 / (1 + exp(-x))}
 
 # specify options for running the code
 nfolds <- 3
-
-# specify number of cores for parallelising computation
-# the product of cv.cores and mc.cores will be used in total
-# number of cores for parallelising over CV folds
 cv.cores <- 1
-# number of cores for parallelising hsstan sampling
-# to pass CRAN package checks we need to create object oldopt
-# in the end we reset options to the old configuration
 oldopt <- options(mc.cores = 2)
 
 # load iris dataset and create a binary outcome
@@ -741,7 +740,6 @@ dt <- as.data.frame(apply(dt, 2, scale))
 rownames(dt) <- paste0("sample", c(1:nrow(dt)))
 dt$outcome.bin <- sigmoid(0.5 * dt$marker1 + 2 * dt$marker2) > runif(nrow(dt))
 dt$outcome.bin <- factor(dt$outcome.bin)
-
 
 # unpenalised covariates: always retain in the prediction model
 uvars <- "marker1"
@@ -758,9 +756,11 @@ res.cv.hsstan <- outercv(y = dt$outcome.bin,
                                                rsq_cutoff = 0.9),
                          n_outer_folds = nfolds, cv.cores = cv.cores,
                          unpenalized = uvars, warmup = 1000, iter = 2000)
+```
 
+We view prediction performance based on testing folds and examine the model.
 
-# view prediction performance based on testing folds
+```{r}
 summary(res.cv.hsstan)
 
 # examine the Bayesian model
