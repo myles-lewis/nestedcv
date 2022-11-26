@@ -86,9 +86,33 @@ innercv_roc.nestcv.train <- function(x, direction = "<", ...) {
 }
 
 
-# glmnet inner CV predictions
+#' Inner CV predictions
+#' 
+#' Obtain predictions on held-out test inner CV folds
+#' 
+#' @param x Fitted `nestedcv` object
+#' @return Dataframe with 2 columns `obs` and `pred`
+#' @export
+#' 
 innercv_preds <- function(x) {
+  UseMethod("innercv_preds")
+}
+
+
+#' @rdname innercv_preds
+#' @export
+innercv_preds.nestcv.glmnet <- function(x) {
   innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
   ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
-  data.frame(obs = ytrain, predyp = innerpreds)
+  data.frame(obs = ytrain, pred = innerpreds)
 }
+
+
+#' @rdname innercv_preds
+#' @export
+innercv_preds.nestcv.train <- function(x) {
+  innerpreds <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
+  ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
+  data.frame(obs = ytrain, pred = innerpreds)
+}
+
