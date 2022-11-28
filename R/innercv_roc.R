@@ -59,30 +59,9 @@
 #'
 #' @export innercv_roc
 #' 
-innercv_roc <- function(x, ...) {
-  UseMethod("innercv_roc")
-}
-
-
-#' @rdname innercv_roc
-#' @importFrom pROC roc auc
-#' @export
-#' 
-innercv_roc.nestcv.glmnet <- function(x, direction = "<", ...) {
-  innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
-  ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
-  pROC::roc(ytrain, innerpreds, direction = direction, quiet = TRUE, ...)
-}
-
-
-#' @rdname innercv_roc
-#' @importFrom pROC roc auc
-#' @export
-#' 
-innercv_roc.nestcv.train <- function(x, direction = "<", ...) {
-  innerpreds <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
-  ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
-  pROC::roc(ytrain, innerpreds, direction = direction, quiet = TRUE, ...)
+innercv_roc <- function(x, direction = "<", ...) {
+  innerpreds <- innercv_preds(x)
+  pROC::roc(innerpreds$testy, innerpreds$predyp, direction = direction, quiet = TRUE, ...)
 }
 
 
@@ -102,9 +81,17 @@ innercv_preds <- function(x) {
 #' @rdname innercv_preds
 #' @export
 innercv_preds.nestcv.glmnet <- function(x) {
-  innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
   ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
-  data.frame(obs = ytrain, pred = innerpreds)
+  innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
+  if (is.factor(ytrain)) {
+    # currently assume binomial
+    predy <- levels(ytrain)[(innerpreds > 0) + 1]
+    out <- data.frame(testy = ytrain, predy = predy, predyp = innerpreds)
+  } else {
+    # regression
+    out <- data.frame(testy = ytrain, predy = innerpreds)
+  }
+  out
 }
 
 
@@ -113,6 +100,6 @@ innercv_preds.nestcv.glmnet <- function(x) {
 innercv_preds.nestcv.train <- function(x) {
   innerpreds <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
   ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
-  data.frame(obs = ytrain, pred = innerpreds)
+  data.frame(testy = ytrain, predyp = innerpreds)
 }
 
