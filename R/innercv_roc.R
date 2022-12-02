@@ -82,15 +82,31 @@ innercv_preds <- function(x) {
 #' @export
 innercv_preds.nestcv.glmnet <- function(x) {
   ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
-  innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
+  rn <- unlist(lapply(1:length(x$outer_result), function(i) {
+    paste(names(x$outer_result)[i], rownames(x$outer_result[[i]]$innerCV_preds),
+          sep=".")
+    }))
   if (is.factor(ytrain)) {
-    # currently assume binomial
-    predy <- levels(ytrain)[(innerpreds > 0) + 1]
-    out <- data.frame(testy = ytrain, predy = predy, predyp = innerpreds)
+    if (nlevels(ytrain) == 2) {
+      # binomial
+      innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
+      predy <- levels(ytrain)[(innerpreds > 0) + 1]
+      out <- data.frame(testy = ytrain, predy = predy, predyp = innerpreds)
+    } else {
+      # multinomial
+      innerpreds <- lapply(x$outer_result, '[[', 'innerCV_preds')
+      innerpreds <- do.call(rbind, innerpreds)
+      predy <- colnames(innerpreds)[max.col(innerpreds)]
+      predy <- factor(predy, levels = levels(ytrain))
+      out <- data.frame(testy = ytrain, predy = predy)
+      out <- cbind(out, innerpreds)
+    }
   } else {
     # regression
+    innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
     out <- data.frame(testy = ytrain, predy = innerpreds)
   }
+  rownames(out) <- rn
   out
 }
 
