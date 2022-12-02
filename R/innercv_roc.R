@@ -57,7 +57,7 @@
 #'                                  "Test partition, non-nested filtering"), 
 #'        col = c("black", "blue", "red"), lty = 1, lwd = 2, bty = "n")
 #'
-#' @export innercv_roc
+#' @export
 #' 
 innercv_roc <- function(x, direction = "<", ...) {
   innerpreds <- innercv_preds(x)
@@ -123,6 +123,24 @@ innercv_preds.nestcv.train <- function(x) {
 }
 
 
+#' Summarise performance on inner CV test folds
+#' 
+#' Calculates performance metrics on inner CV held-out test folds: confusion
+#' matrix, accuracy and balanced accuracy for classification; ROC AUC for binary
+#' classification; RMSE for regression. 
+#' 
+#' @param x a `nestcv.glmnet` object
+#' @return Returns performance metrics from outer training folds, see
+#'   [predSummary].
+#' @details Note: currently only works for `nestcv.glmnet` objects.
+#' @seealso [predSummary]
+#' @export
+innercv_summary <- function(x) {
+  innerpreds <- innercv_preds(x)
+  predSummary(innerpreds)
+}
+
+
 #' Outer training fold predictions
 #' 
 #' Obtain predictions on outer training folds which can be used for performance
@@ -152,7 +170,8 @@ train_preds <- function(x) {
 #' @param x a `nestcv.glmnet` object
 #' @return Returns performance metrics from outer training folds, see
 #'   [predSummary].
-#' @details Note: currently only works for `nestcv.glmnet` objects.
+#' @details Note: currently only works for `nestcv.glmnet` objects. The argument
+#'   `outer_train_predict` must be set to `TRUE` in the original nested CV call.
 #' @seealso [predSummary]
 #' @export
 train_summary <- function(x) {
@@ -161,4 +180,24 @@ train_summary <- function(x) {
   df <- trainpreds
   colnames(df)[colnames(df) == "ytrain"] <- "testy"
   predSummary(df)
+}
+
+
+#' Build ROC curve from outer CV training folds
+#' 
+#' Build ROC (receiver operating characteristic) curve from outer training
+#' folds. Object can be plotted using `plot()` or passed to functions [auc()]
+#' etc.
+#' 
+#' @param x Fitted `nestcv.glmnet` object 
+#' @param direction Set ROC directionality [pROC::roc]
+#' @param ... Other arguments passed to [pROC::roc]
+#' @return `"roc"` object, see [pROC::roc]
+#' @details Note: currently only works for `nestcv.glmnet` objects. The argument
+#'   `outer_train_predict` must be set to `TRUE` in the original nested CV call.
+#' @export
+train_roc <- function(x, direction = "<", ...) {
+  trainpreds <- train_preds(x)
+  pROC::roc(trainpreds$ytrain, trainpreds$predyp, direction = direction,
+            quiet = TRUE, ...)
 }

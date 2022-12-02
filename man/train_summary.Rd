@@ -19,7 +19,8 @@ accuracy and balanced accuracy for classification; ROC AUC for binary
 classification; RMSE for regression.
 }
 \details{
-Note: currently only works for \code{nestcv.glmnet} objects.
+Note: currently only works for \code{nestcv.glmnet} objects. The argument
+\code{outer_train_predict} must be set to \code{TRUE} in the original nested CV call.
 }
 \seealso{
 \link{predSummary}

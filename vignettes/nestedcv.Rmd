@@ -244,7 +244,12 @@ res.rtx
 ```
 
 Use `summary()` to see full information from the nested model fitting. `coef()`
-can be used to show the coefficients of the final fitted model.
+can be used to show the coefficients of the final fitted model. For comparison
+performance metrics from the left-out inner CV folds can be viewed using
+`innercv_summary()`. Performance metrics on the training folds can be viewed
+with `train_summary()`, provided the argument `outer_train_predict` was set to
+`TRUE` in the original `nestcv.glmnet` call.
+
 Filters can be used by setting the `filterFUN` argument. Options for the filter 
 function are passed as a list through `filter_options`.
 
