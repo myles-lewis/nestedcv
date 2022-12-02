@@ -12,11 +12,14 @@ from test folds; \code{predy} predicted response; \code{predyp} (optional) predi
 probabilities for classification to calculate ROC AUC}
 }
 \value{
-Vector containing accuracy and balanced accuracy for classification,
-ROC AUC for binary classification, RMSE for regression.
+An object of class 'predSummary'. For classification a list is
+returned containing the confusion matrix table and a vector containing
+accuracy and balanced accuracy for classification, ROC AUC for binary
+classification. For regression a vector containing RMSE and R^2 is
+returned.
 }
 \description{
-Quick function to calculate performance metrics: accuracy and balanced
-accuracy for classification; ROC AUC for binary classification; RMSE for
-regression.
+Quick function to calculate performance metrics: confusion matrix, accuracy
+and balanced accuracy for classification; ROC AUC for binary classification;
+RMSE and R^2 for regression.
 }

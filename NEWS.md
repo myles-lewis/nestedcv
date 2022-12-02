@@ -1,10 +1,16 @@
 News
 =====
 
-# nestedcv 0.4.2
+# nestedcv 0.4.3
 ###### 02/12/2022
 * Add contingency table to summary functions
 * Fix bugs in extraction of inner CV predictions for nestcv.glmnet
+* Add `outer_train_predict` argument to `nestcv.glmnet` to enable saving of
+predictions on outer training folds.
+* Add function `train_preds` to obtain training fold predictions (currently
+works only for `nestcv.glmnet`).
+* Add function `train_summary` to show performance metrics on training folds
+(currently works only for `nestcv.glmnet`).
 
 # nestedcv 0.4.1
 ###### 12/11/2022

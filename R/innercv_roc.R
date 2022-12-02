@@ -70,7 +70,9 @@ innercv_roc <- function(x, direction = "<", ...) {
 #' Obtain predictions on held-out test inner CV folds
 #' 
 #' @param x Fitted `nestedcv` object
-#' @return Dataframe with 2 columns `obs` and `pred`
+#' @return Dataframe with columns `testy` and `predy`, and for binomial and
+#'   multinomial models additional columns containing probabilities or log
+#'   likelihood values.
 #' @export
 #' 
 innercv_preds <- function(x) {
@@ -118,4 +120,45 @@ innercv_preds.nestcv.train <- function(x) {
   innerpreds <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
   ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
   data.frame(testy = ytrain, predyp = innerpreds)
+}
+
+
+#' Outer training fold predictions
+#' 
+#' Obtain predictions on outer training folds which can be used for performance
+#' metrics and ROC curves.
+#' 
+#' @param x a `nestcv.glmnet` object
+#' @return Dataframe with columns `ytrain` and `predy` containing observed and
+#'   predicted values from training folds. For binomial and multinomial models
+#'   additional columns are added with class probabilities or log likelihood
+#'   values.
+#' @details Note: currently only works for `nestcv.glmnet` objects.
+#' @export
+train_preds <- function(x) {
+  if (!inherits(x, "nestcv.glmnet")) stop("Only works for nestcv.glmnet objects")
+  trainpreds <- lapply(x$outer_result, '[[', 'train_preds')
+  trainpreds <- do.call(rbind, trainpreds)
+  trainpreds
+}
+
+
+#' Summarise performance on outer training folds
+#' 
+#' Calculates performance metrics on outer training folds: confusion matrix,
+#' accuracy and balanced accuracy for classification; ROC AUC for binary
+#' classification; RMSE for regression.
+#' 
+#' @param x a `nestcv.glmnet` object
+#' @return Returns performance metrics from outer training folds, see
+#'   [predSummary].
+#' @details Note: currently only works for `nestcv.glmnet` objects.
+#' @seealso [predSummary]
+#' @export
+train_summary <- function(x) {
+  trainpreds <- train_preds(x)
+  if (is.null(trainpreds)) stop("No saved training prediction data")
+  df <- trainpreds
+  colnames(df)[colnames(df) == "ytrain"] <- "testy"
+  predSummary(df)
 }
