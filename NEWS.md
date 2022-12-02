@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.4.2
+###### 02/12/2022
+* Add contingency table to summary functions
+* Fix bugs in extraction of inner CV predictions for nestcv.glmnet
+
 # nestedcv 0.4.1
 ###### 12/11/2022
 * Add examples of imbalance datasets

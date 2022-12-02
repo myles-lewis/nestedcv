@@ -59,36 +59,63 @@
 #'
 #' @export innercv_roc
 #' 
-innercv_roc <- function(x, ...) {
-  UseMethod("innercv_roc")
+innercv_roc <- function(x, direction = "<", ...) {
+  innerpreds <- innercv_preds(x)
+  pROC::roc(innerpreds$testy, innerpreds$predyp, direction = direction, quiet = TRUE, ...)
 }
 
 
-#' @rdname innercv_roc
-#' @importFrom pROC roc auc
+#' Inner CV predictions
+#' 
+#' Obtain predictions on held-out test inner CV folds
+#' 
+#' @param x Fitted `nestedcv` object
+#' @return Dataframe with 2 columns `obs` and `pred`
 #' @export
 #' 
-innercv_roc.nestcv.glmnet <- function(x, direction = "<", ...) {
-  innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
+innercv_preds <- function(x) {
+  UseMethod("innercv_preds")
+}
+
+
+#' @rdname innercv_preds
+#' @export
+innercv_preds.nestcv.glmnet <- function(x) {
   ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
-  pROC::roc(ytrain, innerpreds, direction = direction, quiet = TRUE, ...)
+  if (is.character(ytrain)) ytrain <- factor(ytrain)
+  if (x$call$family == "binomial") {
+    # binomial
+    innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
+    predy <- levels(ytrain)[(innerpreds > 0) + 1]
+    out <- data.frame(testy = ytrain, predy = predy, predyp = innerpreds)
+  } else if (x$call$family == "multinomial") {
+    # multinomial
+    innerpreds <- lapply(x$outer_result, '[[', 'innerCV_preds')
+    innerpreds <- do.call(rbind, innerpreds)
+    predy <- colnames(innerpreds)[max.col(innerpreds)]
+    predy <- factor(predy, levels = levels(ytrain))
+    out <- data.frame(testy = ytrain, predy = predy)
+    out <- cbind(out, innerpreds)
+  } else {
+    # regression
+    innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
+    out <- data.frame(testy = ytrain, predy = innerpreds)
+  }
+  if (!is.null(rownames(x$outer_result[[1]]$innerCV_preds))) {
+    rn <- unlist(lapply(1:length(x$outer_result), function(i) {
+      paste(names(x$outer_result)[i], rownames(x$outer_result[[i]]$innerCV_preds),
+            sep=".")
+    }))
+    rownames(out) <- rn
+  }
+  out
 }
 
 
-#' @rdname innercv_roc
-#' @importFrom pROC roc auc
+#' @rdname innercv_preds
 #' @export
-#' 
-innercv_roc.nestcv.train <- function(x, direction = "<", ...) {
+innercv_preds.nestcv.train <- function(x) {
   innerpreds <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
   ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
-  pROC::roc(ytrain, innerpreds, direction = direction, quiet = TRUE, ...)
-}
-
-
-# glmnet inner CV predictions
-innercv_preds <- function(x) {
-  innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
-  ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
-  data.frame(obs = ytrain, predyp = innerpreds)
+  data.frame(testy = ytrain, predyp = innerpreds)
 }
