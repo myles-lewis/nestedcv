@@ -82,10 +82,6 @@ innercv_preds <- function(x) {
 #' @export
 innercv_preds.nestcv.glmnet <- function(x) {
   ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
-  rn <- unlist(lapply(1:length(x$outer_result), function(i) {
-    paste(names(x$outer_result)[i], rownames(x$outer_result[[i]]$innerCV_preds),
-          sep=".")
-    }))
   if (is.factor(ytrain)) {
     if (nlevels(ytrain) == 2) {
       # binomial
@@ -106,7 +102,13 @@ innercv_preds.nestcv.glmnet <- function(x) {
     innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
     out <- data.frame(testy = ytrain, predy = innerpreds)
   }
-  rownames(out) <- rn
+  if (!is.null(rownames(x$outer_result[[1]]))) {
+    rn <- unlist(lapply(1:length(x$outer_result), function(i) {
+      paste(names(x$outer_result)[i], rownames(x$outer_result[[i]]$innerCV_preds),
+            sep=".")
+    }))
+    rownames(out) <- rn
+  }
   out
 }
 
