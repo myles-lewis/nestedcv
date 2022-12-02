@@ -40,6 +40,8 @@
 #' @param keep Logical indicating whether inner CV predictions are retained for
 #'   calculating left-out inner CV fold accuracy etc. See argument `keep` in
 #'   [cv.glmnet].
+#' @param outer_train_predict Logical whether to save predictions on outer
+#'   training folds to calculate performance on outer training folds.
 #' @param weights Weights applied to each sample. Note `weights` and `balance`
 #'   cannot be used at the same time. Weights are only applied in glmnet and not
 #'   in filters.
@@ -155,6 +157,7 @@ nestcv.glmnet <- function(y, x,
                           alphaSet = seq(0, 1, 0.1),
                           min_1se = 0,
                           keep = TRUE,
+                          outer_train_predict = FALSE,
                           weights = NULL,
                           penalty.factor = rep(1, ncol(x)),
                           cv.cores = 1,
@@ -196,7 +199,8 @@ nestcv.glmnet <- function(y, x,
                      balance=balance, balance_options=balance_options,
                      alphaSet=alphaSet, min_1se=min_1se,
                      n_inner_folds=n_inner_folds, keep=keep, family=family,
-                     weights=weights, penalty.factor=penalty.factor), dots)
+                     weights=weights, penalty.factor=penalty.factor,
+                     outer_train_predict=outer_train_predict), dots)
       do.call(nestcv.glmnetCore, args)
     })
   } else {
@@ -204,7 +208,7 @@ nestcv.glmnet <- function(y, x,
       nestcv.glmnetCore(test, y, x, filterFUN, filter_options,
                         balance, balance_options,
                         alphaSet, min_1se, n_inner_folds, keep, family,
-                        weights, penalty.factor, ...)
+                        weights, penalty.factor, outer_train_predict, ...)
     }, mc.cores = cv.cores)
   }
   
@@ -273,7 +277,8 @@ nestcv.glmnet <- function(y, x,
 nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
                               balance, balance_options,
                               alphaSet, min_1se, n_inner_folds, keep, family,
-                              weights, penalty.factor, ...) {
+                              weights, penalty.factor,
+                              outer_train_predict, ...) {
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options, penalty.factor)
   ytrain <- dat$ytrain
@@ -300,8 +305,21 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
     predyp <- predict(alphafit, newx = filt_xtest, s = s)[,, 1]
     preds <- cbind(preds, predyp)
   }
+  if (outer_train_predict) {
+    train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
+    train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
+    if (family == "binomial") {
+      predyp <- as.vector(predict(alphafit, newx = filt_xtrain, s = s))
+      train_preds <- cbind(train_preds, predyp)
+    } else if (family == "multinomial") {
+      # glmnet generates 3d array
+      predyp <- predict(alphafit, newx = filt_xtrain, s = s)[,, 1]
+      train_preds <- cbind(train_preds, predyp)
+    }
+  } else train_preds <- NULL
   rownames(preds) <- rownames(filt_xtest)
   ret <- list(preds = preds,
+              train_preds = train_preds,
               lambda = s,
               alpha = cvafit$best_alpha,
               coef = cf,

@@ -19,6 +19,7 @@ nestcv.glmnet(
   alphaSet = seq(0, 1, 0.1),
   min_1se = 0,
   keep = TRUE,
+  outer_train_predict = FALSE,
   weights = NULL,
   penalty.factor = rep(1, ncol(x)),
   cv.cores = 1,
@@ -69,6 +70,9 @@ CV. If supplied, \code{n_outer_folds} is ignored.}
 \item{keep}{Logical indicating whether inner CV predictions are retained for
 calculating left-out inner CV fold accuracy etc. See argument \code{keep} in
 \link{cv.glmnet}.}
+
+\item{outer_train_predict}{Logical whether to save predictions on outer
+training folds to calculate performance on outer training folds.}
 
 \item{weights}{Weights applied to each sample. Note \code{weights} and \code{balance}
 cannot be used at the same time. Weights are only applied in glmnet and not

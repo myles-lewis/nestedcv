@@ -16,7 +16,9 @@ innercv_preds(x)
 \item{x}{Fitted \code{nestedcv} object}
 }
 \value{
-Dataframe with 2 columns \code{obs} and \code{pred}
+Dataframe with columns \code{testy} and \code{predy}, and for binomial and
+multinomial models additional columns containing probabilities or log
+likelihood values.
 }
 \description{
 Obtain predictions on held-out test inner CV folds

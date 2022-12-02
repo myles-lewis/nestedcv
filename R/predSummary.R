@@ -1,15 +1,18 @@
 
 #' Summarise prediction performance metrics
 #' 
-#' Quick function to calculate performance metrics: accuracy and balanced
-#' accuracy for classification; ROC AUC for binary classification; RMSE for
-#' regression.
+#' Quick function to calculate performance metrics: confusion matrix, accuracy
+#' and balanced accuracy for classification; ROC AUC for binary classification;
+#' RMSE and R^2 for regression.
 #' 
 #' @param output data.frame with columns `testy` containing observed response
 #'   from test folds; `predy` predicted response; `predyp` (optional) predicted
 #'   probabilities for classification to calculate ROC AUC
-#' @return Vector containing accuracy and balanced accuracy for classification,
-#'   ROC AUC for binary classification, RMSE for regression.
+#' @return An object of class 'predSummary'. For classification a list is
+#'   returned containing the confusion matrix table and a vector containing
+#'   accuracy and balanced accuracy for classification, ROC AUC for binary
+#'   classification. For regression a vector containing RMSE and R^2 is
+#'   returned.
 #' 
 #' @export
 predSummary <- function(output) {
