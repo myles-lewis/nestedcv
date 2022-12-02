@@ -503,7 +503,13 @@ predict.nestcv.glmnet <- function(object, newdata,
 #' 
 #' @export
 predSummary <- function(output) {
+  if (is.character(output$testy)) {
+    output$testy <- factor(output$testy)
+  }
   if (is.factor(output$testy)) {
+    if (is.character(output$predy)) {
+      output$predy <- factor(output$predy, levels=levels(output$testy))
+    }
     cm <- table(output$predy, output$testy)
     acc <- sum(diag(cm))/ sum(cm)
     ccm <- caret::confusionMatrix(cm)
