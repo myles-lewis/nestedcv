@@ -82,21 +82,20 @@ innercv_preds <- function(x) {
 #' @export
 innercv_preds.nestcv.glmnet <- function(x) {
   ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
-  if (is.factor(ytrain)) {
-    if (nlevels(ytrain) == 2) {
-      # binomial
-      innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
-      predy <- levels(ytrain)[(innerpreds > 0) + 1]
-      out <- data.frame(testy = ytrain, predy = predy, predyp = innerpreds)
-    } else {
-      # multinomial
-      innerpreds <- lapply(x$outer_result, '[[', 'innerCV_preds')
-      innerpreds <- do.call(rbind, innerpreds)
-      predy <- colnames(innerpreds)[max.col(innerpreds)]
-      predy <- factor(predy, levels = levels(ytrain))
-      out <- data.frame(testy = ytrain, predy = predy)
-      out <- cbind(out, innerpreds)
-    }
+  if (is.character(ytrain)) ytrain <- factor(ytrain)
+  if (x$call$family == "binomial") {
+    # binomial
+    innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
+    predy <- levels(ytrain)[(innerpreds > 0) + 1]
+    out <- data.frame(testy = ytrain, predy = predy, predyp = innerpreds)
+  } else if (x$call$family == "multinomial") {
+    # multinomial
+    innerpreds <- lapply(x$outer_result, '[[', 'innerCV_preds')
+    innerpreds <- do.call(rbind, innerpreds)
+    predy <- colnames(innerpreds)[max.col(innerpreds)]
+    predy <- factor(predy, levels = levels(ytrain))
+    out <- data.frame(testy = ytrain, predy = predy)
+    out <- cbind(out, innerpreds)
   } else {
     # regression
     innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
@@ -120,4 +119,3 @@ innercv_preds.nestcv.train <- function(x) {
   ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
   data.frame(testy = ytrain, predyp = innerpreds)
 }
-
