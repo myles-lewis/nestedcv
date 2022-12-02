@@ -129,7 +129,7 @@ innercv_preds.nestcv.train <- function(x) {
 #' 
 #' Calculates performance metrics on inner CV held-out test folds: confusion
 #' matrix, accuracy and balanced accuracy for classification; ROC AUC for binary
-#' classification; RMSE for regression. 
+#' classification; RMSE, R^2 and mean absolute error (MAE) for regression. 
 #' 
 #' @param x a `nestcv.glmnet` object
 #' @return Returns performance metrics from outer training folds, see
@@ -167,7 +167,7 @@ train_preds <- function(x) {
 #' 
 #' Calculates performance metrics on outer training folds: confusion matrix,
 #' accuracy and balanced accuracy for classification; ROC AUC for binary
-#' classification; RMSE for regression.
+#' classification; RMSE, R^2 and mean absolute error (MAE) for regression.
 #' 
 #' @param x a `nestcv.glmnet` object
 #' @return Returns performance metrics from outer training folds, see

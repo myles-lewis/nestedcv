@@ -16,7 +16,7 @@ Returns performance metrics from outer training folds, see
 \description{
 Calculates performance metrics on outer training folds: confusion matrix,
 accuracy and balanced accuracy for classification; ROC AUC for binary
-classification; RMSE for regression.
+classification; RMSE, R^2 and mean absolute error (MAE) for regression.
 }
 \details{
 Note: currently only works for \code{nestcv.glmnet} objects. The argument
