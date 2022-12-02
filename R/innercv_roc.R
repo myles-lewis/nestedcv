@@ -85,12 +85,14 @@ innercv_preds <- function(x) {
 innercv_preds.nestcv.glmnet <- function(x) {
   ytrain <- unlist(lapply(x$outer_result, '[[', 'ytrain'))
   if (is.character(ytrain)) ytrain <- factor(ytrain)
-  if (x$call$family == "binomial") {
+  fam <- x$call$family
+  if (is.null(fam)) fam <- ""
+  if (fam == "binomial") {
     # binomial
     innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
     predy <- levels(ytrain)[(innerpreds > 0) + 1]
     out <- data.frame(testy = ytrain, predy = predy, predyp = innerpreds)
-  } else if (x$call$family == "multinomial") {
+  } else if (fam == "multinomial") {
     # multinomial
     innerpreds <- lapply(x$outer_result, '[[', 'innerCV_preds')
     innerpreds <- do.call(rbind, innerpreds)
