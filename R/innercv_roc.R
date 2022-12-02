@@ -133,6 +133,7 @@ innercv_preds.nestcv.train <- function(x) {
 #'   predicted values from training folds. For binomial and multinomial models
 #'   additional columns are added with class probabilities or log likelihood
 #'   values.
+#' @details Note: currently only works for `nestcv.glmnet` objects.
 #' @export
 train_preds <- function(x) {
   if (!inherits(x, "nestcv.glmnet")) stop("Only works for nestcv.glmnet objects")
@@ -151,6 +152,7 @@ train_preds <- function(x) {
 #' @param x a `nestcv.glmnet` object
 #' @return Returns performance metrics from outer training folds, see
 #'   [predSummary].
+#' @details Note: currently only works for `nestcv.glmnet` objects.
 #' @seealso [predSummary]
 #' @export
 train_summary <- function(x) {

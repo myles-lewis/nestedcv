@@ -19,3 +19,6 @@ values.
 Obtain predictions on outer training folds which can be used for performance
 metrics and ROC curves.
 }
+\details{
+Note: currently only works for \code{nestcv.glmnet} objects.
+}

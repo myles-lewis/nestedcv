@@ -18,6 +18,9 @@ Calculates performance metrics on outer training folds: confusion matrix,
 accuracy and balanced accuracy for classification; ROC AUC for binary
 classification; RMSE for regression.
 }
+\details{
+Note: currently only works for \code{nestcv.glmnet} objects.
+}
 \seealso{
 \link{predSummary}
 }
