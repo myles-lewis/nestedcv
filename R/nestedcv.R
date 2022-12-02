@@ -461,7 +461,7 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
   cat("\nFinal coefficients:\n")
   print(coef(object), digits = digits)
   cat("\nResult:\n")
-  print(object$summary, digits = digits, print.gap = 2L)
+  print(object$summary, digits = digits, print.gap = 3L)
   out <- list(dimx = object$dimx, folds = foldres,
               final_param = object$final_param,
               coef = coef(object), result = object$summary)

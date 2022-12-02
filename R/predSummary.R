@@ -48,5 +48,5 @@ print.predSummary <- function(x, ...) {
     print(x$table)
     cat("\n")
     print(x$summary, ...)
-  } else print(x, ...)
+  } else print(unclass(x), ...)
 }
