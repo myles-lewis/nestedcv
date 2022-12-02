@@ -101,7 +101,7 @@ innercv_preds.nestcv.glmnet <- function(x) {
     innerpreds <- unlist(lapply(x$outer_result, '[[', 'innerCV_preds'))
     out <- data.frame(testy = ytrain, predy = innerpreds)
   }
-  if (!is.null(rownames(x$outer_result[[1]]))) {
+  if (!is.null(rownames(x$outer_result[[1]]$innerCV_preds))) {
     rn <- unlist(lapply(1:length(x$outer_result), function(i) {
       paste(names(x$outer_result)[i], rownames(x$outer_result[[i]]$innerCV_preds),
             sep=".")

@@ -20,7 +20,7 @@ predSummary <- function(output) {
     if (is.character(output$predy)) {
       output$predy <- factor(output$predy, levels=levels(output$testy))
     }
-    cm <- table(output$predy, output$testy)
+    cm <- table(output$predy, output$testy, dnn=c("Predicted", "Reference"))
     acc <- sum(diag(cm))/ sum(cm)
     ccm <- caret::confusionMatrix(cm)
     b_acc <- ccm$byClass[11]
@@ -32,10 +32,21 @@ predSummary <- function(output) {
     } else {
       summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
     }
+    summary <- list(table = cm, summary = summary)
   } else {
     df <- data.frame(obs = output$testy, pred = output$predy)
     summary <- caret::defaultSummary(df)
   }
   class(summary) <- "predSummary"
   summary
+}
+
+
+#' @export
+print.predSummary <- function(x, ...) {
+  if (is.list(x)) {
+    print(x$table)
+    cat("\n")
+    print(x$summary, ...)
+  } else print(x, ...)
 }
