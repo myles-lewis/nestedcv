@@ -7,7 +7,7 @@
 train_preds(x)
 }
 \arguments{
-\item{x}{a \code{nestcv.glmnet} object}
+\item{x}{a \code{nestedcv} fitted object}
 }
 \value{
 Dataframe with columns \code{ytrain} and \code{predy} containing observed and

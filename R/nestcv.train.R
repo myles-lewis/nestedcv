@@ -211,7 +211,8 @@ nestcv.train <- function(y, x,
     dots <- list(...)
     varlist <- c("outer_folds", "y", "x", "filterFUN", "filter_options",
                  "weights", "balance", "balance_options",
-                 "metric", "trControl", "tuneGrid", "nestcv.trainCore", "dots")
+                 "metric", "trControl", "tuneGrid", "outer_train_predict",
+                 "nestcv.trainCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {
       args <- c(list(test=test, y=y, x=x,

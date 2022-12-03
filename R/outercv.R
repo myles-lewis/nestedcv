@@ -41,6 +41,8 @@
 #'   functions use syntax of the form `predict(..., type = "prob")`. However,
 #'   some models require a different `type` to be specified, which can be passed
 #'   to `predict()` via `predict_type`.
+#' @param outer_train_predict Logical whether to save predictions on outer
+#'   training folds to calculate performance on outer training folds.
 #' @param returnList Logical whether to return list of results after main outer
 #'   CV loop without concatenating results. Useful for debugging.
 #' @param na.option Character value specifying how `NA`s are dealt with.
@@ -174,6 +176,7 @@ outercv.default <- function(y, x,
                             outer_folds = NULL,
                             cv.cores = 1,
                             predict_type = "prob",
+                            outer_train_predict = FALSE,
                             na.option = "pass",
                             returnList = FALSE,
                             ...) {
@@ -205,7 +208,8 @@ outercv.default <- function(y, x,
     clusterExport(cl, varlist = c("outer_folds", "y", "x", "model", "reg",
                                   "filterFUN", "filter_options",
                                   "weights", "balance", "balance_options",
-                                  "predict_type", "outercvCore", "dots"),
+                                  "predict_type", "outer_train_predict",
+                                  "outercvCore", "dots"),
                   envir = environment())
     on.exit(stopCluster(cl))
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {
@@ -213,14 +217,16 @@ outercv.default <- function(y, x,
                      filterFUN=filterFUN, filter_options=filter_options,
                      weights=weights, balance=balance,
                      balance_options=balance_options,
-                     predict_type=predict_type), dots)
+                     predict_type=predict_type,
+                     outer_train_predict=outer_train_predict), dots)
       do.call(outercvCore, args)
     })
   } else {
     outer_res <- mclapply(outer_folds, function(test) {
       outercvCore(test, y, x, model, reg,
                   filterFUN, filter_options, weights,
-                  balance, balance_options, predict_type, ...)
+                  balance, balance_options, predict_type,
+                  outer_train_predict, ...)
     }, mc.cores = cv.cores)
   }
   if (returnList) return(outer_res)
@@ -282,7 +288,9 @@ outercv.default <- function(y, x,
 
 outercvCore <- function(test, y, x, model, reg,
                         filterFUN, filter_options, weights,
-                        balance, balance_options, predict_type, ...) {
+                        balance, balance_options, predict_type,
+                        outer_train_predict,
+                        ...) {
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options)
   ytrain <- dat$ytrain
@@ -318,7 +326,19 @@ outercvCore <- function(test, y, x, model, reg,
     preds$predyp <- predyp
   }
   rownames(preds) <- rownames(filt_xtest)
+  if (outer_train_predict) {
+    predy <- predict(fit, newdata = filt_xtrain)
+    train_preds <- data.frame(ytrain=ytrain, predy=predy)
+    rownames(train_preds) <- rownames(filt_xtrain)
+    # for AUC
+    if (!reg & nlevels(y) == 2) {
+      predyp <- predict(fit, newdata = filt_xtrain, type = predict_type)
+      if (!is.vector(predyp)) predyp <- predyp[,2]
+      train_preds <- cbind(train_preds, predyp)
+    }
+  } else train_preds <- NULL
   list(preds = preds,
+       train_preds = train_preds,
        fit = fit,
        nfilter = ncol(filt_xtest),
        ytrain = ytrain)
@@ -335,8 +355,9 @@ outercv.formula <- function(formula, data,
                             n_outer_folds = 10,
                             outer_folds = NULL,
                             cv.cores = 1,
-                            predict_type = "prob", ...,
-                            na.action = na.fail) {
+                            predict_type = "prob",
+                            outer_train_predict = FALSE,
+                            ..., na.action = na.fail) {
   outercv.call <- match.call(expand.dots = TRUE)
   # if model does not use formula, then revert to outercv.default(x, y, ...)
   if (!"formula" %in% formalArgs(model)) {
@@ -375,6 +396,7 @@ outercv.formula <- function(formula, data,
     dots <- list(...)
     clusterExport(cl, varlist = c("outer_folds", "formula", "data", "y", 
                                   "model", "reg", "predict_type",
+                                  "outer_train_predict",
                                   "outercvFormulaCore", "dots"),
                   envir = environment())
     on.exit(stopCluster(cl))
@@ -386,7 +408,7 @@ outercv.formula <- function(formula, data,
   } else {
     outer_res <- mclapply(outer_folds, function(test) {
       outercvFormulaCore(test, formula, data, y, model,
-                         reg, predict_type, ...)
+                         reg, predict_type, outer_train_predict, ...)
     }, mc.cores = cv.cores)
   }
   
@@ -423,8 +445,8 @@ outercv.formula <- function(formula, data,
 
   
 outercvFormulaCore <- function(test, formula, data, y, model,
-                               reg, predict_type, ...) {
-  fit <- model(formula = formula, data = data, ...)
+                               reg, predict_type, outer_train_predict, ...) {
+  fit <- model(formula = formula, data = data[-test, ], ...)
   # test on outer CV
   predy <- predict(fit, newdata = data[test, ])
   preds <- data.frame(predy=predy, testy=y[test])
@@ -435,10 +457,22 @@ outercvFormulaCore <- function(test, formula, data, y, model,
     preds$predyp <- predyp
   }
   rownames(preds) <- rownames(data)[test]
+  if (outer_train_predict) {
+    predy <- predict(fit, newdata = data[test, ])
+    train_preds <- data.frame(ytrain=y[-test], predy=predy)
+    # for AUC
+    if (!reg & nlevels(y) == 2) {
+      predyp <- predict(fit, newdata = data[-test, ], type = predict_type)
+      if (!is.vector(predyp)) predyp <- predyp[,2]
+      train_preds <- cbind(train_preds, predyp)
+    }
+    rownames(train_preds) <- rownames(data)[-test]
+  } else train_preds <- NULL
   list(preds = preds,
+       train_preds = train_preds,
        fit = fit)
 }
-  
+
 
 #' @export
 summary.outercv <- function(object, 
@@ -473,7 +507,7 @@ summary.outercv <- function(object,
     print(object$final_fit)
   }
   cat("\nResult:\n")
-  print(object$summary, digits = digits, print.gap = 2L)
+  print(object$summary, digits = digits, print.gap = 3L)
   out <- list(dimx = object$dimx, nfilter = nfilter,
               result = object$summary)
   invisible(out)

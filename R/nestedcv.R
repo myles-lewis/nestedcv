@@ -191,7 +191,7 @@ nestcv.glmnet <- function(y, x,
     varlist = c("outer_folds", "y", "x", "filterFUN", "filter_options",
                 "alphaSet", "min_1se",  "n_inner_folds", "keep", "family",
                 "weights", "balance", "balance_options", "penalty.factor",
-                "nestcv.glmnetCore", "dots")
+                "outer_train_predict", "nestcv.glmnetCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
     on.exit(stopCluster(cl))
     outer_res <- parLapply(cl = cl, outer_folds, function(test) {

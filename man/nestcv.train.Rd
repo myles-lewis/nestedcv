@@ -20,6 +20,7 @@ nestcv.train(
   trControl = NULL,
   tuneGrid = NULL,
   savePredictions = "final",
+  outer_train_predict = FALSE,
   finalCV = TRUE,
   na.option = "pass",
   ...
@@ -76,6 +77,9 @@ http://topepo.github.io/caret/using-your-own-model-in-train.html.}
 CV fold should be saved for ROC curves, accuracy etc see
 \link[caret:trainControl]{caret::trainControl}. Default is \code{"final"} to capture predictions for
 inner CV ROC.}
+
+\item{outer_train_predict}{Logical whether to save predictions on outer
+training folds to calculate performance on outer training folds.}
 
 \item{finalCV}{Logical whether to perform one last round of CV on the whole
 dataset to determine the final model parameters. If set to \code{FALSE}, the
