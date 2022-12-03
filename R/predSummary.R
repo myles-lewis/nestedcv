@@ -31,11 +31,11 @@ predSummary <- function(output) {
       outputroc <- pROC::roc(output$testy, output$predyp, direction = "<", 
                              quiet = TRUE)
       auc <- outputroc$auc
-      summary <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
+      metrics <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
     } else {
-      summary <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
+      metrics <- setNames(c(acc, b_acc), c("Accuracy", "Balanced accuracy"))
     }
-    summary <- list(table = cm, summary = summary)
+    summary <- list(table = cm, metrics = metrics)
   } else {
     df <- data.frame(obs = output$testy, pred = output$predy)
     summary <- caret::defaultSummary(df)
@@ -50,6 +50,6 @@ print.predSummary <- function(x, ...) {
   if (is.list(x)) {
     print(x$table)
     cat("\n")
-    print(x$summary, ...)
+    print(x$metrics, ...)
   } else print(unclass(x), ...)
 }
