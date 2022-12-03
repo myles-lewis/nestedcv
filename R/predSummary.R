@@ -46,10 +46,12 @@ predSummary <- function(output) {
 
 
 #' @export
-print.predSummary <- function(x, ...) {
+print.predSummary <- function(x, 
+                              digits = max(3L, getOption("digits") - 3L),
+                              ...) {
   if (is.list(x)) {
     print(x$table)
     cat("\n")
-    print(x$metrics, ...)
-  } else print(unclass(x), ...)
+    print(x$metrics, digits = digits, print.gap = 3L)
+  } else print(unclass(x), digits = digits, print.gap = 3L)
 }
