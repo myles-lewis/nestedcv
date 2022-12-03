@@ -167,6 +167,7 @@ nestcv.glmnet <- function(y, x,
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
+  if (is.character(y)) y <- factor(y)
   x <- as.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
   ok <- checkxy(y, x, na.option, weights)

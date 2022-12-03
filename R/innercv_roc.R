@@ -161,7 +161,7 @@ innercv_summary <- function(x) {
 #' Obtain predictions on outer training folds which can be used for performance
 #' metrics and ROC curves.
 #' 
-#' @param x a `nestcv.glmnet` object
+#' @param x a `nestedcv` fitted object
 #' @return Dataframe with columns `ytrain` and `predy` containing observed and
 #'   predicted values from training folds. For binomial and multinomial models
 #'   additional columns are added with class probabilities or log likelihood
@@ -169,7 +169,6 @@ innercv_summary <- function(x) {
 #' @details Note: currently only works for `nestcv.glmnet` objects.
 #' @export
 train_preds <- function(x) {
-  if (!inherits(x, "nestcv.glmnet")) stop("Only works for nestcv.glmnet objects")
   trainpreds <- lapply(x$outer_result, '[[', 'train_preds')
   trainpreds <- do.call(rbind, trainpreds)
   trainpreds

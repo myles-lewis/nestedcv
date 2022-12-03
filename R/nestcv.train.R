@@ -41,6 +41,8 @@
 #'   CV fold should be saved for ROC curves, accuracy etc see
 #'   [caret::trainControl]. Default is `"final"` to capture predictions for
 #'   inner CV ROC.
+#' @param outer_train_predict Logical whether to save predictions on outer
+#'   training folds to calculate performance on outer training folds.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
 #'   on windows.
@@ -168,11 +170,13 @@ nestcv.train <- function(y, x,
                          trControl = NULL,
                          tuneGrid = NULL,
                          savePredictions = "final",
+                         outer_train_predict = FALSE,
                          finalCV = TRUE,
                          na.option = "pass",
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
+  if (is.character(y)) y <- factor(y)
   if (!is.null(balance) & is.numeric(y)) {
     stop("`balance` can only be used for classification")}
   ok <- checkxy(y, x, na.option, weights)
@@ -214,7 +218,8 @@ nestcv.train <- function(y, x,
                      filterFUN=filterFUN, filter_options=filter_options,
                      weights=weights, balance=balance,
                      balance_options=balance_options, metric=metric,
-                     trControl=trControl, tuneGrid=tuneGrid), dots)
+                     trControl=trControl, tuneGrid=tuneGrid,
+                     outer_train_predict=outer_train_predict), dots)
       do.call(nestcv.trainCore, args)
     })
     stopCluster(cl)
@@ -223,7 +228,7 @@ nestcv.train <- function(y, x,
       nestcv.trainCore(test, y, x,
                        filterFUN, filter_options,
                        weights, balance, balance_options,
-                       metric, trControl, tuneGrid, ...)
+                       metric, trControl, tuneGrid, outer_train_predict, ...)
     }, mc.cores = cv.cores)
   }
   
@@ -300,7 +305,8 @@ nestcv.train <- function(y, x,
 nestcv.trainCore <- function(test, y, x,
                              filterFUN, filter_options,
                              weights, balance, balance_options,
-                             metric, trControl, tuneGrid, ...) {
+                             metric, trControl, tuneGrid,
+                             outer_train_predict, ...) {
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options)
   ytrain <- dat$ytrain
@@ -317,11 +323,21 @@ nestcv.trainCore <- function(test, y, x,
   preds <- data.frame(predy=predy, testy=ytest)
   if (is.factor(y)) {
     predyp <- predict(fit, newdata = filt_xtest, type = "prob")
-    # note predyp has 2 columns
-    preds$predyp <- predyp[,2]
+    if (nlevels(y) == 2) predyp <- predyp[,2]  # binomial
+    preds <- cbind(preds, predyp)
   }
   rownames(preds) <- rownames(filt_xtest)
+  if (outer_train_predict) {
+    predy <- predict(fit, newdata = filt_xtrain)
+    train_preds <- data.frame(ytrain=ytrain, predy=predy)
+    if (is.factor(y)) {
+      predyp <- predict(fit, newdata = filt_xtrain, type = "prob")
+      if (nlevels(y) == 2) predyp <- predyp[,2]  # binomial
+      train_preds <- cbind(train_preds, predyp)
+    }
+  } else train_preds <- NULL
   ret <- list(preds = preds,
+              train_preds = train_preds,
               fit = fit,
               nfilter = ncol(filt_xtrain))
   ret
