@@ -119,9 +119,22 @@ innercv_preds.nestcv.glmnet <- function(x) {
 #' @rdname innercv_preds
 #' @export
 innercv_preds.nestcv.train <- function(x) {
-  innerpreds <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
+  names(x$outer_result) <- paste0(names(x$outer_result), ".")
   ytrain <- unlist(lapply(x$outer_result, function(i) i$fit$pred$obs))
-  data.frame(testy = ytrain, predyp = innerpreds)
+  predy <- unlist(lapply(x$outer_result, function(i) i$fit$pred$pred))
+  res <- data.frame(testy = ytrain, predy = predy)
+  if (x$outer_result[[1]]$fit$modelType == "Classification") {
+    if (length(x$outer_result[[1]]$fit$levels) == 2) {
+      # binomial
+      predyp <- unlist(lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels[2]]))
+    } else {
+      # multinomial
+      predyp <- lapply(x$outer_result, function(i) i$fit$pred[, i$fit$levels])
+      predyp <- do.call(rbind, predyp)
+    }
+    res <- cbind(res, predyp)
+  }
+  res
 }
 
 
