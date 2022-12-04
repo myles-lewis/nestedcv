@@ -7,7 +7,7 @@
 train_roc(x, direction = "<", ...)
 }
 \arguments{
-\item{x}{Fitted \code{nestcv.glmnet} object}
+\item{x}{a \code{nestcv.glmnet}, \code{nestcv.train} or \code{outercv} object}
 
 \item{direction}{Set ROC directionality \link[pROC:roc]{pROC::roc}}
 
@@ -22,6 +22,6 @@ folds. Object can be plotted using \code{plot()} or passed to functions \code{\l
 etc.
 }
 \details{
-Note: currently only works for \code{nestcv.glmnet} objects. The argument
-\code{outer_train_predict} must be set to \code{TRUE} in the original nested CV call.
+Note: the argument \code{outer_train_predict} must be set to \code{TRUE} in
+the original call to either \code{nestcv.glmnet}, \code{nestcv.train} or \code{outercv}.
 }

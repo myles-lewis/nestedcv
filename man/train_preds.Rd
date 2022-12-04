@@ -7,7 +7,7 @@
 train_preds(x)
 }
 \arguments{
-\item{x}{a \code{nestedcv} fitted object}
+\item{x}{a \code{nestcv.glmnet}, \code{nestcv.train} or \code{outercv} fitted object}
 }
 \value{
 Dataframe with columns \code{ytrain} and \code{predy} containing observed and
@@ -20,5 +20,6 @@ Obtain predictions on outer training folds which can be used for performance
 metrics and ROC curves.
 }
 \details{
-Note: currently only works for \code{nestcv.glmnet} objects.
+Note: the argument \code{outer_train_predict} must be set to \code{TRUE} in
+the original call to either \code{nestcv.glmnet}, \code{nestcv.train} or \code{outercv}.
 }

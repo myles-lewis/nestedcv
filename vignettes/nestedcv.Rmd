@@ -244,11 +244,12 @@ res.rtx
 ```
 
 Use `summary()` to see full information from the nested model fitting. `coef()`
-can be used to show the coefficients of the final fitted model. For comparison
-performance metrics from the left-out inner CV folds can be viewed using
-`innercv_summary()`. Performance metrics on the training folds can be viewed
-with `train_summary()`, provided the argument `outer_train_predict` was set to
-`TRUE` in the original `nestcv.glmnet` call.
+can be used to show the coefficients of the final fitted model. For comparison,
+performance metrics from the left-out inner CV test folds can be viewed using
+`innercv_summary()`. Performance metrics on the outer training folds can be
+viewed with `train_summary()`, provided the argument `outer_train_predict` was
+set to `TRUE` in the original call to either `nestcv.glmnet()`, `nestcv.train()`
+or `outercv()`.
 
 Filters can be used by setting the `filterFUN` argument. Options for the filter 
 function are passed as a list through `filter_options`.
@@ -611,9 +612,9 @@ ggplot(ncv$outer_result[[1]]$fit) +
 
 ### Making predictions
 
-For all of the nestedcv model training functions described above, predictions on
-new data can be made by referencing the final fitted object which is fitted to
-the whole dataset.
+For all of the `nestedcv` model training functions described above, predictions
+on new data can be made by referencing the final fitted object which is fitted
+to the whole dataset.
 
 ```{r eval = FALSE}
 # for nestcv.glmnet object

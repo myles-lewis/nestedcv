@@ -7,11 +7,11 @@
 train_summary(x)
 }
 \arguments{
-\item{x}{a \code{nestcv.glmnet} object}
+\item{x}{a \code{nestcv.glmnet}, \code{nestcv.train} or \code{outercv} object}
 }
 \value{
 Returns performance metrics from outer training folds, see
-\link{predSummary}.
+\link{predSummary}
 }
 \description{
 Calculates performance metrics on outer training folds: confusion matrix,
@@ -19,8 +19,41 @@ accuracy and balanced accuracy for classification; ROC AUC for binary
 classification; RMSE, R^2 and mean absolute error (MAE) for regression.
 }
 \details{
-Note: currently only works for \code{nestcv.glmnet} objects. The argument
-\code{outer_train_predict} must be set to \code{TRUE} in the original nested CV call.
+Note: the argument \code{outer_train_predict} must be set to \code{TRUE} in
+the original call to either \code{nestcv.glmnet}, \code{nestcv.train} or \code{outercv}.
+}
+\examples{
+data(iris)
+x <- iris[, 1:4]
+y <- iris[, 5]
+
+library(randomForest)
+fit <- outercv(y, x, model = randomForest,
+               outer_train_predict = TRUE,
+               n_outer_folds = 3,
+               cv.cores = 1)
+summary(fit)
+train_summary(fit)
+
+fit2 <- nestcv.glmnet(y, x,
+                     family = "multinomial",
+                     alpha = 1,
+                     outer_train_predict = TRUE,
+                     n_outer_folds = 3,
+                     cv.cores = 1)
+summary(fit2)
+innercv_summary(fit2)
+train_summary(fit2)
+
+fit3 <- nestcv.train(y, x,
+                    model="svm",
+                    outer_train_predict = TRUE,
+                    n_outer_folds = 3,
+                    cv.cores = 1)
+summary(fit3)
+innercv_summary(fit3)
+train_summary(fit3)
+
 }
 \seealso{
 \link{predSummary}

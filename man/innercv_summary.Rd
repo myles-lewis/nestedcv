@@ -7,7 +7,7 @@
 innercv_summary(x)
 }
 \arguments{
-\item{x}{a \code{nestcv.glmnet} object}
+\item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} object}
 }
 \value{
 Returns performance metrics from outer training folds, see
@@ -18,8 +18,26 @@ Calculates performance metrics on inner CV held-out test folds: confusion
 matrix, accuracy and balanced accuracy for classification; ROC AUC for binary
 classification; RMSE, R^2 and mean absolute error (MAE) for regression.
 }
-\details{
-Note: currently only works for \code{nestcv.glmnet} objects.
+\examples{
+data(iris)
+x <- iris[, 1:4]
+y <- iris[, 5]
+
+fit <- nestcv.glmnet(y, x,
+                     family = "multinomial",
+                     alpha = 1,
+                     n_outer_folds = 3,
+                     cv.cores = 1)
+summary(fit)
+innercv_summary(fit)
+
+fit2 <- nestcv.train(y, x,
+                    model="rf",
+                    n_outer_folds = 3,
+                    cv.cores = 1)
+summary(fit2)
+innercv_summary(fit2)
+
 }
 \seealso{
 \link{predSummary}

@@ -13,7 +13,7 @@ innercv_preds(x)
 \method{innercv_preds}{nestcv.train}(x)
 }
 \arguments{
-\item{x}{Fitted \code{nestedcv} object}
+\item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object}
 }
 \value{
 Dataframe with columns \code{testy} and \code{predy}, and for binomial and

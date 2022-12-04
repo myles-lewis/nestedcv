@@ -7,7 +7,7 @@
 innercv_roc(x, direction = "<", ...)
 }
 \arguments{
-\item{x}{Fitted \code{nestedcv} object}
+\item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object}
 
 \item{direction}{Set ROC directionality \link[pROC:roc]{pROC::roc}}
 

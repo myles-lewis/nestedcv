@@ -1,4 +1,4 @@
-# Extract inner CV ROC curve
+# Extract inner CV predictions or outer training fold predictions
 
 
 #' Build ROC curve from left-out folds from inner CV
@@ -7,7 +7,7 @@
 #' from inner CV. Object can be plotted using `plot()` or passed to functions 
 #' [auc()] etc.
 #' 
-#' @param x Fitted `nestedcv` object 
+#' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
 #' @param direction Set ROC directionality [pROC::roc]
 #' @param ... Other arguments passed to [pROC::roc]
 #' @return `"roc"` object, see [pROC::roc]
@@ -69,7 +69,7 @@ innercv_roc <- function(x, direction = "<", ...) {
 #' 
 #' Obtain predictions on held-out test inner CV folds
 #' 
-#' @param x Fitted `nestedcv` object
+#' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
 #' @return Dataframe with columns `testy` and `predy`, and for binomial and
 #'   multinomial models additional columns containing probabilities or log
 #'   likelihood values.
@@ -144,11 +144,30 @@ innercv_preds.nestcv.train <- function(x) {
 #' matrix, accuracy and balanced accuracy for classification; ROC AUC for binary
 #' classification; RMSE, R^2 and mean absolute error (MAE) for regression. 
 #' 
-#' @param x a `nestcv.glmnet` object
+#' @param x a `nestcv.glmnet` or `nestcv.train` object
 #' @return Returns performance metrics from outer training folds, see
 #'   [predSummary].
-#' @details Note: currently only works for `nestcv.glmnet` objects.
 #' @seealso [predSummary]
+#' @examples
+#' data(iris)
+#' x <- iris[, 1:4]
+#' y <- iris[, 5]
+#' 
+#' fit <- nestcv.glmnet(y, x,
+#'                      family = "multinomial",
+#'                      alpha = 1,
+#'                      n_outer_folds = 3,
+#'                      cv.cores = 1)
+#' summary(fit)
+#' innercv_summary(fit)
+#' 
+#' fit2 <- nestcv.train(y, x,
+#'                     model="rf",
+#'                     n_outer_folds = 3,
+#'                     cv.cores = 1)
+#' summary(fit2)
+#' innercv_summary(fit2)
+#' 
 #' @export
 innercv_summary <- function(x) {
   innerpreds <- innercv_preds(x)
@@ -161,12 +180,13 @@ innercv_summary <- function(x) {
 #' Obtain predictions on outer training folds which can be used for performance
 #' metrics and ROC curves.
 #' 
-#' @param x a `nestedcv` fitted object
+#' @param x a `nestcv.glmnet`, `nestcv.train` or `outercv` fitted object
 #' @return Dataframe with columns `ytrain` and `predy` containing observed and
 #'   predicted values from training folds. For binomial and multinomial models
 #'   additional columns are added with class probabilities or log likelihood
 #'   values.
-#' @details Note: currently only works for `nestcv.glmnet` objects.
+#' @details Note: the argument `outer_train_predict` must be set to `TRUE` in
+#'   the original call to either `nestcv.glmnet`, `nestcv.train` or `outercv`.
 #' @export
 train_preds <- function(x) {
   trainpreds <- lapply(x$outer_result, '[[', 'train_preds')
@@ -181,12 +201,44 @@ train_preds <- function(x) {
 #' accuracy and balanced accuracy for classification; ROC AUC for binary
 #' classification; RMSE, R^2 and mean absolute error (MAE) for regression.
 #' 
-#' @param x a `nestcv.glmnet` object
+#' @param x a `nestcv.glmnet`, `nestcv.train` or `outercv` object
 #' @return Returns performance metrics from outer training folds, see
-#'   [predSummary].
-#' @details Note: currently only works for `nestcv.glmnet` objects. The argument
-#'   `outer_train_predict` must be set to `TRUE` in the original nested CV call.
+#'   [predSummary]
+#' @details Note: the argument `outer_train_predict` must be set to `TRUE` in
+#'   the original call to either `nestcv.glmnet`, `nestcv.train` or `outercv`.
 #' @seealso [predSummary]
+#' @examples
+#' data(iris)
+#' x <- iris[, 1:4]
+#' y <- iris[, 5]
+#' 
+#' library(randomForest)
+#' fit <- outercv(y, x, model = randomForest,
+#'                outer_train_predict = TRUE,
+#'                n_outer_folds = 3,
+#'                cv.cores = 1)
+#' summary(fit)
+#' train_summary(fit)
+#' 
+#' fit2 <- nestcv.glmnet(y, x,
+#'                      family = "multinomial",
+#'                      alpha = 1,
+#'                      outer_train_predict = TRUE,
+#'                      n_outer_folds = 3,
+#'                      cv.cores = 1)
+#' summary(fit2)
+#' innercv_summary(fit2)
+#' train_summary(fit2)
+#' 
+#' fit3 <- nestcv.train(y, x,
+#'                     model="svm",
+#'                     outer_train_predict = TRUE,
+#'                     n_outer_folds = 3,
+#'                     cv.cores = 1)
+#' summary(fit3)
+#' innercv_summary(fit3)
+#' train_summary(fit3)
+#' 
 #' @export
 train_summary <- function(x) {
   trainpreds <- train_preds(x)
@@ -203,12 +255,12 @@ train_summary <- function(x) {
 #' folds. Object can be plotted using `plot()` or passed to functions [auc()]
 #' etc.
 #' 
-#' @param x Fitted `nestcv.glmnet` object 
+#' @param x a `nestcv.glmnet`, `nestcv.train` or `outercv` object
 #' @param direction Set ROC directionality [pROC::roc]
 #' @param ... Other arguments passed to [pROC::roc]
 #' @return `"roc"` object, see [pROC::roc]
-#' @details Note: currently only works for `nestcv.glmnet` objects. The argument
-#'   `outer_train_predict` must be set to `TRUE` in the original nested CV call.
+#' @details Note: the argument `outer_train_predict` must be set to `TRUE` in
+#'   the original call to either `nestcv.glmnet`, `nestcv.train` or `outercv`.
 #' @export
 train_roc <- function(x, direction = "<", ...) {
   trainpreds <- train_preds(x)
