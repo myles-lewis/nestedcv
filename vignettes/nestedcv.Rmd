@@ -457,6 +457,7 @@ table(y2)
 ## Nested CV glmnet with unnested balancing by random oversampling on
 ## whole dataset
 fit1 <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                      n_outer_folds = 3,
                       cv.cores=2,
                       filterFUN = ttest_filter)
 fit1$summary
@@ -474,6 +475,7 @@ table(y2)
 ## Nested CV glmnet with unnested balancing by random undersampling on
 ## whole dataset
 fit1b <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                       n_outer_folds = 3,
                        cv.cores=2,
                        filterFUN = ttest_filter)
 fit1b$summary
@@ -486,6 +488,7 @@ table(y2)
 
 ## Nested CV glmnet with unnested balancing by SMOTE on whole dataset
 fit2 <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                      n_outer_folds = 3,
                       cv.cores=2,
                       filterFUN = ttest_filter)
 fit2$summary
@@ -497,6 +500,7 @@ within the outer CV loop, using `nestcv.glmnet()`.
 ```{r}
 ## Nested CV glmnet with nested balancing by random oversampling
 fit3 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                      n_outer_folds = 3,
                       cv.cores=2,
                       balance = "randomsample",
                       filterFUN = ttest_filter)
@@ -664,6 +668,9 @@ of model performance on the left-out data (testing fold), repeated in each fold.
 Only one cross-validation split is needed (function `outercv`) as the Bayesian
 model does not require cross-validation for meta-parameters.
 
+Note, in the examples below length of sampling and number of chains is curtailed
+for speed. We recommend 4 chains, warmup 1000 and iter 2000 in practice.
+
 ```{r}
 
 # specify options for running the code
@@ -697,8 +704,9 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = nfolds, cv.cores = cv.cores,
-                         unpenalized = uvars, warmup = 1000, iter = 2000)
+                         n_outer_folds = nfolds, chains = 2,
+                         cv.cores = cv.cores,
+                         unpenalized = uvars, warmup = 100, iter = 200)
 ```
 
 We can then view prediction performance based on the testing folds and examine
@@ -760,8 +768,9 @@ res.cv.hsstan <- outercv(y = dt$outcome.bin,
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = nfolds, cv.cores = cv.cores,
-                         unpenalized = uvars, warmup = 1000, iter = 2000)
+                         n_outer_folds = nfolds, chains = 2,
+                         cv.cores = cv.cores,
+                         unpenalized = uvars, warmup = 100, iter = 200)
 ```
 
 We view prediction performance based on testing folds and examine the model.

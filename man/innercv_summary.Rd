@@ -27,16 +27,9 @@ fit <- nestcv.glmnet(y, x,
                      family = "multinomial",
                      alpha = 1,
                      n_outer_folds = 3,
-                     cv.cores = 1)
+                     cv.cores = 2)
 summary(fit)
 innercv_summary(fit)
-
-fit2 <- nestcv.train(y, x,
-                    model="rf",
-                    n_outer_folds = 3,
-                    cv.cores = 1)
-summary(fit2)
-innercv_summary(fit2)
 
 }
 \seealso{

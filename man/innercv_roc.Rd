@@ -53,7 +53,9 @@ predSummary(output)
 ## Nested CV
 fit2 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
                       filterFUN = ttest_filter,
-                      filter_options = list(nfilter = 100))
+                      filter_options = list(nfilter = 100),
+                      n_outer_folds = 3,
+                      cv.cores = 2)
 summary(fit2)
 
 ## ROC plots
