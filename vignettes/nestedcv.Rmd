@@ -840,8 +840,8 @@ outcomes of a stratified, biopsy-driven, multicentre, open-label, phase 4
 randomised controlled trial. *Lancet* 2021; 397(10271):305-317.
 https://doi.org/10.1016/s0140-6736(20)32341-2
 
-Kuhn, M. Building Predictive Models in R Using the caret Package. *Journal
-of Statistical Software} 2008; 28(5):1-26.
+Kuhn, M. Building Predictive Models in R Using the caret Package.
+*Journal of Statistical Software* 2008; 28(5):1-26.
 
 Rivellese F, Surace AEA, Goldmann K, et al, Lewis MJ, Pitzalis C and the R4RA
 collaborative group. Rituximab versus tocilizumab in rheumatoid arthritis:
