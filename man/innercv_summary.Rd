@@ -26,8 +26,7 @@ y <- iris[, 5]
 fit <- nestcv.glmnet(y, x,
                      family = "multinomial",
                      alpha = 1,
-                     n_outer_folds = 3,
-                     cv.cores = 2)
+                     n_outer_folds = 3)
 summary(fit)
 innercv_summary(fit)
 

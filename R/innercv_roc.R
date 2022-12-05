@@ -44,8 +44,7 @@
 #' fit2 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
 #'                       filterFUN = ttest_filter,
 #'                       filter_options = list(nfilter = 100),
-#'                       n_outer_folds = 3,
-#'                       cv.cores = 2)
+#'                       n_outer_folds = 3)
 #' summary(fit2)
 #' 
 #' ## ROC plots
@@ -158,8 +157,7 @@ innercv_preds.nestcv.train <- function(x) {
 #' fit <- nestcv.glmnet(y, x,
 #'                      family = "multinomial",
 #'                      alpha = 1,
-#'                      n_outer_folds = 3,
-#'                      cv.cores = 2)
+#'                      n_outer_folds = 3)
 #' summary(fit)
 #' innercv_summary(fit)
 #' 
@@ -203,6 +201,7 @@ train_preds <- function(x) {
 #'   the original call to either `nestcv.glmnet`, `nestcv.train` or `outercv`.
 #' @seealso [predSummary]
 #' @examples
+#' \donttest{
 #' data(iris)
 #' x <- iris[, 1:4]
 #' y <- iris[, 5]
@@ -219,8 +218,7 @@ train_preds <- function(x) {
 #'                      family = "multinomial",
 #'                      alpha = 1,
 #'                      outer_train_predict = TRUE,
-#'                      n_outer_folds = 3,
-#'                      cv.cores = 2)
+#'                      n_outer_folds = 3)
 #' summary(fit2)
 #' innercv_summary(fit2)
 #' train_summary(fit2)
@@ -233,7 +231,7 @@ train_preds <- function(x) {
 #' summary(fit3)
 #' innercv_summary(fit3)
 #' train_summary(fit3)
-#' 
+#' }
 #' @export
 train_summary <- function(x) {
   trainpreds <- train_preds(x)

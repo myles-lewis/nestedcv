@@ -669,7 +669,7 @@ Only one cross-validation split is needed (function `outercv`) as the Bayesian
 model does not require cross-validation for meta-parameters.
 
 Note, in the examples below length of sampling and number of chains is curtailed
-for speed. We recommend 4 chains, warmup 1000 and iter 2000 in practice.
+for speed. We recommend 4 chains, `warmup` 1000 and `iter` 2000 in practice.
 
 ```{r}
 

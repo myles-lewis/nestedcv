@@ -23,6 +23,7 @@ Note: the argument \code{outer_train_predict} must be set to \code{TRUE} in
 the original call to either \code{nestcv.glmnet}, \code{nestcv.train} or \code{outercv}.
 }
 \examples{
+\donttest{
 data(iris)
 x <- iris[, 1:4]
 y <- iris[, 5]
@@ -39,8 +40,7 @@ fit2 <- nestcv.glmnet(y, x,
                      family = "multinomial",
                      alpha = 1,
                      outer_train_predict = TRUE,
-                     n_outer_folds = 3,
-                     cv.cores = 2)
+                     n_outer_folds = 3)
 summary(fit2)
 innercv_summary(fit2)
 train_summary(fit2)
@@ -53,7 +53,7 @@ fit3 <- nestcv.train(y, x,
 summary(fit3)
 innercv_summary(fit3)
 train_summary(fit3)
-
+}
 }
 \seealso{
 \link{predSummary}
