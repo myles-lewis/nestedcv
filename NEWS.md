@@ -3,7 +3,7 @@ News
 
 # nestedcv 0.4.4
 ###### 05/12/2022
-* Add contingency table to summary functions for classification
+* Add confusion matrix to results summaries for classification
 * Fix bugs in extraction of inner CV predictions for `nestcv.glmnet`
 * Fix multinomial `nestcv.glmnet`
 * Add `outer_train_predict` argument to enable saving of predictions on outer
