@@ -247,7 +247,7 @@ summary.nestcv.SuperLearner <- function(object,
   cat("\nFinal fit:")
   print(object$final_fit)
   cat("\nResult:\n")
-  print(object$summary, digits = digits, print.gap = 2L)
+  print(object$summary, digits = digits, print.gap = 3L)
   out <- list(dimx = object$dimx, nfilter = nfilter,
               result = object$summary)
   invisible(out)
