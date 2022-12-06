@@ -206,6 +206,33 @@ nestcv.train <- function(y, x,
                           LOOCV = 1:length(y))
   }
   
+  # fit final model with CV on whole dataset first
+  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
+                       balance, balance_options)
+  yfinal <- dat$ytrain
+  filtx <- dat$filt_xtrain
+  if (finalCV) {
+    # use CV on whole data to finalise parameters
+    if (cv.cores >= 2) {
+      if (Sys.info()["sysname"] == "Windows") {
+        cl <- makeCluster(cv.cores)
+        registerDoParallel(cl)
+        on.exit({stopCluster(cl)
+          foreach::registerDoSEQ()})
+      } else {
+        # unix
+        registerDoParallel(cores = cv.cores)
+        on.exit(foreach::registerDoSEQ())
+      }
+    }
+    final_fit <- caret::train(x = filtx, y = yfinal,
+                              weights = weights,
+                              metric = metric,
+                              trControl = trControl,
+                              tuneGrid = tuneGrid, ...)
+    finalTune <- final_fit$bestTune
+  }
+  
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
@@ -248,32 +275,7 @@ nestcv.train <- function(y, x,
   bestTunes <- as.data.frame(data.table::rbindlist(bestTunes))
   rownames(bestTunes) <- paste('Fold', seq_len(nrow(bestTunes)))
   
-  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                       balance, balance_options)
-  yfinal <- dat$ytrain
-  filtx <- dat$filt_xtrain
-  
-  if (finalCV) {
-    # use CV on whole data to finalise parameters
-    if (cv.cores >= 2) {
-      if (Sys.info()["sysname"] == "Windows") {
-        cl <- makeCluster(cv.cores)
-        registerDoParallel(cl)
-        on.exit({stopCluster(cl)
-          foreach::registerDoSEQ()})
-      } else {
-        # unix
-        registerDoParallel(cores = cv.cores)
-        on.exit(foreach::registerDoSEQ())
-      }
-    }
-    final_fit <- caret::train(x = filtx, y = yfinal,
-                              weights = weights,
-                              metric = metric,
-                              trControl = trControl,
-                              tuneGrid = tuneGrid, ...)
-    finalTune <- final_fit$bestTune
-  } else {
+  if (!finalCV) {
     # use outer folds for final parameters, fit single final model
     finalTune <- finaliseTune(bestTunes)
     fitControl <- trainControl(method = "none", classProbs = is.factor(y))
