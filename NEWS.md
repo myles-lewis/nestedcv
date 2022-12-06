@@ -1,6 +1,12 @@
 News
 =====
 
+# nestedcv 0.4.5
+###### 06/12/2022
+* Add check model exists in `outercv`
+* Perform final model fit first in `nestcv.train` which improves error detection
+in caret
+
 # nestedcv 0.4.4
 ###### 05/12/2022
 * Add confusion matrix to results summaries for classification
