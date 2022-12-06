@@ -181,6 +181,9 @@ outercv.default <- function(y, x,
                             returnList = FALSE,
                             ...) {
   outercv.call <- match.call(expand.dots = TRUE)
+  if (!exists(substitute(model))) {
+    stop("model '", substitute(model), "' not found", call. = FALSE)
+  }
   ok <- checkxy(y, x, na.option, weights)
   y <- y[ok$r]
   x <- x[ok$r, ok$c]
@@ -359,6 +362,9 @@ outercv.formula <- function(formula, data,
                             outer_train_predict = FALSE,
                             ..., na.action = na.fail) {
   outercv.call <- match.call(expand.dots = TRUE)
+  if (!exists(substitute(model))) {
+    stop("model '", substitute(model), "' not found", call. = FALSE)
+  }
   # if model does not use formula, then revert to outercv.default(x, y, ...)
   if (!"formula" %in% formalArgs(model)) {
     # sample code from randomForest.formula/ svm.formula/ train.formula
