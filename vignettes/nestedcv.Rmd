@@ -828,6 +828,13 @@ leading to it ignoring the argument `cores` and instead spawning multiple
 processes as specified by the `chain` argument. This behaviour can be limited by
 setting `options(mc.cores = ..)`.
 
+# Troubleshooting
+
+A key problem with parallelisation in R is that errors, warnings and user input
+have to be suppressed during multicore processing. If a `nestedcv` call is not
+working, we recommend that you try it with `cv.cores=1` first to check it starts
+up without error messages.
+
 # References
 
 Chawla, NV, Bowyer KW, Hall LO, Kegelmeyer WP. Smote: Synthetic minority
