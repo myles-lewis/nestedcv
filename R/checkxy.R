@@ -24,5 +24,11 @@ checkxy <- function(y, x, na.option, weights = NULL) {
     okr <- !nay
     okc <- !naxc
   }
+  vars <- apply(x, 2, sd, na.rm = TRUE)
+  var0 <- vars == 0
+  if (any(var0)) {
+    message(sum(var0), " predictor(s) have var=0")
+    okc <- okc & !var0
+  }
   list(r = okr, c = okc)
 }
