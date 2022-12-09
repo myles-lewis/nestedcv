@@ -24,9 +24,9 @@ checkxy <- function(y, x, na.option, weights = NULL) {
     okr <- !nay
     okc <- !naxc
   }
-  vars <- apply(x, 2, sd, na.rm = TRUE)
-  # Rfast and matrixStats have bugs if var=0
-  var0 <- vars == 0
+  sc <- scale(x)
+  sds <- attr(sc, "scaled:scale")  # Rfast & matrixStats have bugs if var=0
+  var0 <- sds == 0
   if (any(var0)) {
     message(sum(var0), " predictor(s) have var=0")
     okc <- okc & !var0
