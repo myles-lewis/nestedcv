@@ -10,7 +10,7 @@
 #'   to 0.
 #' @seealso [cv_varImp()]
 #' @export
-cv_coefs <- function(x) {
+cv_coef <- function(x) {
   if (!inherits(x, "nestcv.glmnet")) stop("Not a `nestcv.glmnet` object")
   cfset <- lapply(x$outer_result, function(i) {
     i$coef[-1]
@@ -86,7 +86,7 @@ var_stability <- function(x, ...) {
 #' @importFrom stats sd
 #' @export
 var_stability.nestcv.glmnet <- function(x, percent = FALSE, ...) {
-  m <- cv_coefs(x)
+  m <- cv_coef(x)
   if (percent) {
     cm <- Rfast::colMaxs(m, value = TRUE)
     m <- t(t(m) / cm * 100)
