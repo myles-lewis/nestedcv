@@ -1,5 +1,5 @@
 
-checkxy <- function(y, x, na.option, weights = NULL) {
+checkxy <- function(y, x, na.option = "pass", weights = NULL) {
   if (length(y) != nrow(x))
     stop("Mismatch in length of 'y' and number of rows in 'x'", call. = FALSE)
   if (!is.null(weights)) {

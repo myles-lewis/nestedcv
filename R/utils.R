@@ -37,6 +37,9 @@ supervisedPCA <- function(y, x,
                           filterFUN = NULL,
                           filter_options = NULL,
                           plot = TRUE, ...) {
+  ok <- checkxy(y, x)
+  y <- y[ok$r]
+  x <- x[ok$r, ok$c]
   dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options)
   filtx <- dat$filt_xtrain
   df <- princomp(filtx, ...)
