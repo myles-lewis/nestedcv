@@ -24,5 +24,5 @@ in order to function. During the fitting process \code{caret} often only loads t
 package by namespace.
 }
 \seealso{
-\link{cv_coefs}
+\code{\link[=cv_coefs]{cv_coefs()}}
 }

@@ -28,6 +28,11 @@ frequency by which each variable is selected in outer folds.
 Uses variable importance across models trained and tested across outer CV
 folds to assess stability of variable importance.
 }
+\details{
+Note that for caret models \code{\link[caret:varImp]{caret::varImp()}} may require the model package to
+be fully loaded in order to function. During the fitting process \code{caret}
+often only loads the package by namespace.
+}
 \seealso{
-\link{cv_coefs} \link{cv_varImp}
+\code{\link[=cv_coefs]{cv_coefs()}} \code{\link[=cv_varImp]{cv_varImp()}}
 }

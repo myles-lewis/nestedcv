@@ -8,7 +8,7 @@
 #' @return matrix of coefficients from outer CV glmnet models. Coefficients for
 #'   variables which are not present in a particular outer CV fold model are set
 #'   to 0.
-#' @seealso [cv_varImp]
+#' @seealso [cv_varImp()]
 #' @export
 cv_coefs <- function(x) {
   if (!inherits(x, "nestcv.glmnet")) stop("Not a `nestcv.glmnet` object")
@@ -34,7 +34,7 @@ cv_coefs <- function(x) {
 #' Note that [caret::varImp()] may require the model package to be fully loaded
 #' in order to function. During the fitting process `caret` often only loads the
 #' package by namespace.
-#' @seealso [cv_coefs]
+#' @seealso [cv_coefs()]
 #' @importFrom caret varImp
 #' @export
 cv_varImp <- function(x) {
@@ -71,7 +71,11 @@ list2matrix <- function(x, na.val = 0) {
 #' @param ... Optional arguments for compatibility
 #' @return Dataframe containing mean, sd, sem of variable importance and
 #'   frequency by which each variable is selected in outer folds.
-#' @seealso [cv_coefs] [cv_varImp]
+#' @details
+#' Note that for caret models [caret::varImp()] may require the model package to
+#' be fully loaded in order to function. During the fitting process `caret`
+#' often only loads the package by namespace.
+#' @seealso [cv_coefs()] [cv_varImp()]
 #' @export
 var_stability <- function(x, ...) {
   UseMethod("var_stability")
@@ -125,7 +129,7 @@ var_stability.nestcv.train <- function(x, ...) {
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model
 #' @return A ggplot2 plot
-#' @seealso [var_stability]
+#' @seealso [var_stability()]
 #' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller scale_size
 #' @export
 plot_var_stability <- function(x, abs = TRUE,

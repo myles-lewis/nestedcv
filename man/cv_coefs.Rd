@@ -19,5 +19,5 @@ Extracts coefficients from outer CV glmnet models from a \code{nestcv.glmnet}
 fitted object.
 }
 \seealso{
-\link{cv_varImp}
+\code{\link[=cv_varImp]{cv_varImp()}}
 }

@@ -38,5 +38,5 @@ Produces a ggplot2 plot of stability of variable importance across models traine
 tested across outer CV folds.
 }
 \seealso{
-\link{var_stability}
+\code{\link[=var_stability]{var_stability()}}
 }
