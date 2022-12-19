@@ -41,10 +41,16 @@ cv_varImp <- function(x) {
   if (!inherits(x, "nestcv.train")) stop("Not a `nestcv.train` object")
   vset <- lapply(x$outer_result, function(i) {
     v <- varImp(i$fit)$importance
+    if (ncol(v) > 2) {
+      v <- rowMeans(v, na.rm = TRUE)
+      return(v)
+    } else if (ncol(v) == 2) {
+      v <- v[,1, drop = FALSE]
+    }
     setNames(unlist(v), rownames(v))
   })
   m <- list2matrix(vset)
-  mr <- rowMeans(m)
+  mr <- rowMeans(m, na.rm = TRUE)
   m[order(abs(mr), decreasing = TRUE), ]
 }
 
@@ -147,11 +153,12 @@ plot_var_stability <- function(x, abs = TRUE,
     }
     if (!all(fv %in% rownames(df))) {
       message(paste(fv[!fv %in% rownames(df)], collapse = ", "),
-              "not in final model")
+              " not in final model")
       fv <- fv[fv %in% rownames(df)]
     }
     df <- df[rownames(df) %in% fv, ]
   } else {
+    top <- min(top, nrow(df))
     df <- df[1:top, ]
   }
   if (abs) df$mean <- abs(df$mean)
