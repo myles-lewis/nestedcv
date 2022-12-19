@@ -90,7 +90,9 @@ on windows.}
 \item{finalCV}{Logical whether to perform one last round of CV on the whole
 dataset to determine the final model parameters. If set to \code{FALSE}, the
 median of hyperparameters from outer CV folds are used for the final model.
-Performance metrics are independent of this last step.}
+Performance metrics are independent of this last step. If set to \code{NA},
+final model fitting is skipped altogether, which gives a useful speed boost
+if performance metrics are all that is needed.}
 
 \item{na.option}{Character value specifying how \code{NA}s are dealt with.
 \code{"omit"} (the default) is equivalent to \code{na.action = na.omit}. \code{"omitcol"}
