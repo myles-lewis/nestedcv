@@ -53,7 +53,9 @@
 #'   median of the best hyperparameters from outer CV folds for continuous/
 #'   ordinal hyperparameters, or highest voted for categorical hyperparameters,
 #'   are used to fit the final model. Performance metrics are independent of
-#'   this last step.
+#'   this last step. If set to `NA`, final model fitting is skipped altogether,
+#'   which gives a useful speed boost if performance metrics are all that is
+#'   needed.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
@@ -209,32 +211,36 @@ nestcv.train <- function(y, x,
                           LOOCV = 1:length(y))
   }
   
-  # fit final model with CV on whole dataset first
-  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                       balance, balance_options)
-  yfinal <- dat$ytrain
-  filtx <- dat$filt_xtrain
-  if (finalCV) {
-    # use CV on whole data to finalise parameters
-    if (cv.cores >= 2) {
-      if (Sys.info()["sysname"] == "Windows") {
-        cl <- makeCluster(cv.cores)
-        registerDoParallel(cl)
-      } else {
-        # unix
-        registerDoParallel(cores = cv.cores)
+  if (is.na(finalCV)) {
+    final_fit <- finalTune <- filtx <- yfinal <- NA
+  } else {
+    # fit final model with CV on whole dataset first
+    dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
+                         balance, balance_options)
+    yfinal <- dat$ytrain
+    filtx <- dat$filt_xtrain
+    if (finalCV) {
+      # use CV on whole data to finalise parameters
+      if (cv.cores >= 2) {
+        if (Sys.info()["sysname"] == "Windows") {
+          cl <- makeCluster(cv.cores)
+          registerDoParallel(cl)
+        } else {
+          # unix
+          registerDoParallel(cores = cv.cores)
+        }
       }
-    }
-    final_fit <- caret::train(x = filtx, y = yfinal,
-                              method = method,
-                              weights = weights,
-                              metric = metric,
-                              trControl = trControl,
-                              tuneGrid = tuneGrid, ...)
-    finalTune <- final_fit$bestTune
-    if (cv.cores >= 2) {
-      if (Sys.info()["sysname"] == "Windows") stopCluster(cl)
-      foreach::registerDoSEQ()
+      final_fit <- caret::train(x = filtx, y = yfinal,
+                                method = method,
+                                weights = weights,
+                                metric = metric,
+                                trControl = trControl,
+                                tuneGrid = tuneGrid, ...)
+      finalTune <- final_fit$bestTune
+      if (cv.cores >= 2) {
+        if (Sys.info()["sysname"] == "Windows") stopCluster(cl)
+        foreach::registerDoSEQ()
+      }
     }
   }
   
@@ -280,7 +286,7 @@ nestcv.train <- function(y, x,
   bestTunes <- as.data.frame(data.table::rbindlist(bestTunes))
   rownames(bestTunes) <- paste('Fold', seq_len(nrow(bestTunes)))
   
-  if (!finalCV) {
+  if (!is.na(finalCV) && !finalCV) {
     # use outer folds for final parameters, fit single final model
     finalTune <- finaliseTune(bestTunes)
     fitControl <- trainControl(method = "none", classProbs = is.factor(y))
@@ -394,7 +400,11 @@ summary.nestcv.train <- function(object,
   foldres$n.filter <- nfilter
   print(foldres, digits = digits, print.gap = 2L)
   cat("\nFinal parameters:\n")
-  print(object$finalTune, digits = digits, print.gap = 2L, row.names = FALSE)
+  if (length(object$finalTune)==1 && is.na(object$finalTune)) {
+    cat("NA\n")
+  } else {
+    print(object$finalTune, digits = digits, print.gap = 2L, row.names = FALSE)
+  }
   cat("\nResult:\n")
   print(object$summary, digits = digits, print.gap = 2L)
   out <- list(dimx = object$dimx, folds = foldres,
