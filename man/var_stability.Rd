@@ -34,5 +34,5 @@ be fully loaded in order to function. During the fitting process \code{caret}
 often only loads the package by namespace.
 }
 \seealso{
-\code{\link[=cv_coefs]{cv_coefs()}} \code{\link[=cv_varImp]{cv_varImp()}}
+\code{\link[=cv_coef]{cv_coef()}} \code{\link[=cv_varImp]{cv_varImp()}}
 }

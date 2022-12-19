@@ -1,5 +1,5 @@
 
-#' Extract coefficients from outer CV glmnet models
+#' Coefficients from outer CV glmnet models
 #' 
 #' Extracts coefficients from outer CV glmnet models from a `nestcv.glmnet`
 #' fitted object.
@@ -34,7 +34,7 @@ cv_coef <- function(x) {
 #' Note that [caret::varImp()] may require the model package to be fully loaded
 #' in order to function. During the fitting process `caret` often only loads the
 #' package by namespace.
-#' @seealso [cv_coefs()]
+#' @seealso [cv_coef()]
 #' @importFrom caret varImp
 #' @export
 cv_varImp <- function(x) {
@@ -81,7 +81,7 @@ list2matrix <- function(x, na.val = 0) {
 #' Note that for caret models [caret::varImp()] may require the model package to
 #' be fully loaded in order to function. During the fitting process `caret`
 #' often only loads the package by namespace.
-#' @seealso [cv_coefs()] [cv_varImp()]
+#' @seealso [cv_coef()] [cv_varImp()]
 #' @export
 var_stability <- function(x, ...) {
   UseMethod("var_stability")

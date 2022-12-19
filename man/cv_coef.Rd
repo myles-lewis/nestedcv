@@ -2,7 +2,7 @@
 % Please edit documentation in R/varImp.R
 \name{cv_coef}
 \alias{cv_coef}
-\title{Extract coefficients from outer CV glmnet models}
+\title{Coefficients from outer CV glmnet models}
 \usage{
 cv_coef(x)
 }
