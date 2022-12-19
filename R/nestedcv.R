@@ -55,7 +55,9 @@
 #' @param finalCV Logical whether to perform one last round of CV on the whole
 #'   dataset to determine the final model parameters. If set to `FALSE`, the
 #'   median of hyperparameters from outer CV folds are used for the final model.
-#'   Performance metrics are independent of this last step.
+#'   Performance metrics are independent of this last step. If set to `NA`,
+#'   final model fitting is skipped altogether, which gives a useful speed boost
+#'   if performance metrics are all that is needed.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` (the default) is equivalent to `na.action = na.omit`. `"omitcol"`
 #'   removes cases if there are `NA` in 'y', but columns (predictors) containing
@@ -225,36 +227,41 @@ nestcv.glmnet <- function(y, x,
     glmnet.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
                            quiet = TRUE)
   }
-  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                       balance, balance_options,
-                       penalty.factor = penalty.factor)
-  yfinal <- dat$ytrain
-  filtx <- dat$filt_xtrain
-  filtpen.factor <- dat$filt_pen.factor
   
-  if (finalCV) {
-    # use CV on whole data to finalise parameters
-    cvafit <- cva.glmnet(filtx, yfinal, alphaSet = alphaSet, family = family,
-                         weights = weights, penalty.factor = filtpen.factor, ...)
-    alphafit <- cvafit$fits[[cvafit$which_alpha]]
-    s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
-    fit <- cvafit$fits[[cvafit$which_alpha]]
-    final_param <- setNames(c(s, cvafit$best_alpha), c("lambda", "alpha"))
+  if (is.na(finalCV)) {
+    fit <- final_coef <- final_param <- yfinal <- NA
   } else {
-    # use outer folds for final parameters
-    lam <- exp(median(log(unlist(lapply(outer_res, '[[', 'lambda')))))
-    alph <- median(unlist(lapply(outer_res, '[[', 'alpha')))
-    final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
-    fit <- glmnet(filtx, yfinal, alpha = alph, family = family, 
-                  weights = weights, penalty.factor = filtpen.factor, ...)
-  }
-  
-  fin_coef <- glmnet_coefs(fit, s = final_param["lambda"])
-  if (is.list(fin_coef)) {
-    final_coef <- fin_coef  # multinomial
-  } else {
-    cfmean <- colmeans(x[, names(fin_coef)[-1]])
-    final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
+    dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
+                         balance, balance_options,
+                         penalty.factor = penalty.factor)
+    yfinal <- dat$ytrain
+    filtx <- dat$filt_xtrain
+    filtpen.factor <- dat$filt_pen.factor
+    
+    if (finalCV) {
+      # use CV on whole data to finalise parameters
+      cvafit <- cva.glmnet(filtx, yfinal, alphaSet = alphaSet, family = family,
+                           weights = weights, penalty.factor = filtpen.factor, ...)
+      alphafit <- cvafit$fits[[cvafit$which_alpha]]
+      s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
+      fit <- cvafit$fits[[cvafit$which_alpha]]
+      final_param <- setNames(c(s, cvafit$best_alpha), c("lambda", "alpha"))
+    } else {
+      # use outer folds for final parameters
+      lam <- exp(median(log(unlist(lapply(outer_res, '[[', 'lambda')))))
+      alph <- median(unlist(lapply(outer_res, '[[', 'alpha')))
+      final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
+      fit <- glmnet(filtx, yfinal, alpha = alph, family = family, 
+                    weights = weights, penalty.factor = filtpen.factor, ...)
+    }
+    
+    fin_coef <- glmnet_coefs(fit, s = final_param["lambda"])
+    if (is.list(fin_coef)) {
+      final_coef <- fin_coef  # multinomial
+    } else {
+      cfmean <- colmeans(x[, names(fin_coef)[-1]])
+      final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
+    }
   }
   out <- list(call = nestcv.call,
               output = output,
