@@ -451,13 +451,13 @@ print.nestcv.glmnet <- function(x, digits = max(3L, getOption("digits") - 3L), .
   if (!is.null(x$call$filterFUN)) 
     cat("Filter: ", x$call$filterFUN, "\n") else cat("No filter\n")
   cat("\nFinal parameters:\n")
-  if (!is.na(x$final_param)) {
-    print(x$final_param, digits = digits, print.gap = 2L)
-  } else cat("NA\n")
+  if (length(x$final_param)==1 && is.na(x$final_param)) {
+    cat("NA\n")
+  } else print(x$final_param, digits = digits, print.gap = 2L)
   cat("\nFinal coefficients:\n")
-  if (!is.na(x$final_fit)) {
-    print(coef(x), digits = digits)
-  } else cat("NA\n")
+  if (length(x$final_fit)==1 && is.na(x$final_fit)) {
+    cat("NA\n")
+  } else print(coef(x), digits = digits)
   cat("\nResult:\n")
   print(x$summary, digits = digits, print.gap = 2L)
 }
@@ -488,13 +488,13 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
   
   print(foldres, digits = digits)
   cat("\nFinal parameters:\n")
-  if (!is.na(object$final_param)) {
-    print(object$final_param, digits = digits, print.gap = 2L)
-  } else cat("NA\n")
+  if (length(object$final_param)==1 && is.na(object$final_param)) {
+    cat("NA\n")
+  } else print(object$final_param, digits = digits, print.gap = 2L)
   cat("\nFinal coefficients:\n")
-  if (!is.na(object$final_fit)) {
-    print(coef(object), digits = digits)
-  } else cat("NA\n")
+  if (length(object$final_fit)==1 && is.na(object$final_fit)) {
+    cat("NA\n")
+  } else print(coef(object), digits = digits)
   cat("\nResult:\n")
   print(object$summary, digits = digits, print.gap = 3L)
   out <- list(dimx = object$dimx, folds = foldres,
