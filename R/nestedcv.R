@@ -408,7 +408,7 @@ cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...) {
 #' @export
 #' 
 glmnet_coefs <- function(fit, s, ...) {
-  if (is.na(fit)) return(NA)
+  if (length(fit) == 1 && is.na(fit)) return(NA)
   cf <- coef(fit, s = s, ...)
   if (is.list(cf)) {
     cf <- lapply(cf, function(i) {
