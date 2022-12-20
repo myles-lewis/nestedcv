@@ -205,9 +205,9 @@ outercv.default <- function(y, x,
   if (outercv.call$model == "glm") predict_type <- "response"
   if (outercv.call$model == "mda") predict_type <- "posterior"
   
+  dots <- list(...)
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
-    dots <- list(...)
     clusterExport(cl, varlist = c("outer_folds", "y", "x", "model", "reg",
                                   "filterFUN", "filter_options",
                                   "weights", "balance", "balance_options",
@@ -259,18 +259,20 @@ outercv.default <- function(y, x,
     } else as.data.frame(filtx, stringsAsFactors = TRUE)
     dat$.outcome <- yfinal
     if (is.null(weights)) {
-      fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
+      args <- c(list(as.formula(".outcome ~ ."), data = dat), dots)
     } else {
-      fit <- model(as.formula(".outcome ~ ."), data = dat,
-                   weights = weights, ...)
+      args <- c(list(as.formula(".outcome ~ ."), data = dat,
+                   weights = weights), dots)
     }
   } else {
     if (is.null(weights)) {
-      fit <- model(y = yfinal, x = filtx, ...)
+      args <- c(list(y = yfinal, x = filtx), dots)
     } else {
-      fit <- model(y = yfinal, x = filtx, weights = weights, ...)
+      args <- c(list(y = yfinal, x = filtx, weights = weights), dots)
     }
   }
+  fit <- do.call(model, args)
+  
   out <- list(call = outercv.call,
               output = output,
               outer_result = outer_res,
@@ -300,6 +302,7 @@ outercvCore <- function(test, y, x, model, reg,
   ytest <- dat$ytest
   filt_xtrain <- dat$filt_xtrain
   filt_xtest <- dat$filt_xtest
+  dots <- list(...)
   
   # check if model uses formula
   if ("formula" %in% formalArgs(model)) {
@@ -307,18 +310,22 @@ outercvCore <- function(test, y, x, model, reg,
     } else as.data.frame(filt_xtrain, stringsAsFactors = TRUE)
     dat$.outcome <- ytrain
     if (is.null(weights)) {
-      fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
+      args <- c(list(as.formula(".outcome ~ ."), data = dat), dots)
     } else {
-      fit <- model(as.formula(".outcome ~ ."), data = dat,
-                   weights = weights[-test], ...)
+      args <- c(list(as.formula(".outcome ~ ."), data = dat,
+                   weights = weights[-test]), dots)
     }
   } else {
     if (is.null(weights)) {
-      fit <- model(y = ytrain, x = filt_xtrain, ...)
+      args <- c(list(y = ytrain, x = filt_xtrain), dots)
     } else {
-      fit <- model(y = ytrain, x = filt_xtrain, weights = weights[-test], ...)
+      args <- c(list(y = ytrain, x = filt_xtrain, weights = weights[-test]),
+                dots)
     }
+    
   }
+  fit <- do.call(model, args)
+  
   # test on outer CV
   predy <- predict(fit, newdata = filt_xtest)
   preds <- data.frame(predy=predy, testy=ytest)
@@ -397,9 +404,9 @@ outercv.formula <- function(formula, data,
   }
   if (outercv.call$model == "glm") predict_type <- "response"
   
+  dots <- list(...)
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
-    dots <- list(...)
     clusterExport(cl, varlist = c("outer_folds", "formula", "data", "y", 
                                   "model", "reg", "predict_type",
                                   "outer_train_predict",
@@ -433,7 +440,9 @@ outercv.formula <- function(formula, data,
   }
   
   # fit final model
-  fit <- model(formula = formula, data = data, ...)
+  args <- c(list(formula = formula, data = data), dots)
+  fit <- do.call(model, args)
+  
   out <- list(call = outercv.call,
               output = output,
               outer_result = outer_res,
@@ -452,7 +461,10 @@ outercv.formula <- function(formula, data,
   
 outercvFormulaCore <- function(test, formula, data, y, model,
                                reg, predict_type, outer_train_predict, ...) {
-  fit <- model(formula = formula, data = data[-test, ], ...)
+  dots <- list(...)
+  args <- c(list(formula = formula, data = data[-test, ]), dots)
+  fit <- do.call(model, args)
+  
   # test on outer CV
   predy <- predict(fit, newdata = data[test, ])
   preds <- data.frame(predy=predy, testy=y[test])
@@ -508,10 +520,10 @@ summary.outercv <- function(object,
     nfilter <- NULL
     cat("No filter\n")
   }
-  if (hasMethod2(object$final_fit, "print")) {
-    cat("\nFinal fit:")
-    print(object$final_fit)
-  }
+  # if (hasMethod2(object$final_fit, "print")) {
+  #   cat("\nFinal fit:")
+  #   print(object$final_fit)
+  # }
   cat("\nResult:\n")
   print(object$summary, digits = digits, print.gap = 3L)
   out <- list(dimx = object$dimx, nfilter = nfilter,
