@@ -125,14 +125,14 @@
 #' 
 #' ## Random forest
 #' library(randomForest)
-#' cvfit <- outercv(y2, x, randomForest)
+#' cvfit <- outercv(y2, x, "randomForest")
 #' summary(cvfit)
 #' plot(cvfit$roc)
 #' 
 #' ## Mixture discriminant analysis (MDA)
 #' if (requireNamespace("mda", quietly = TRUE)) {
 #'   library(mda)
-#'   cvfit <- outercv(y2, x, mda, predict_type = "posterior")
+#'   cvfit <- outercv(y2, x, "mda", predict_type = "posterior")
 #'   summary(cvfit)
 #' }
 #' 
@@ -142,15 +142,15 @@
 #' dt$outcome <- y
 #' 
 #' ## simple linear model - formula interface
-#' cvfit <- outercv(outcome ~ ., data = dt, model = lm)
+#' cvfit <- outercv(outcome ~ ., data = dt, model = "lm")
 #' summary(cvfit)
 #' 
 #' ## random forest for regression
-#' cvfit <- outercv(y, x, randomForest)
+#' cvfit <- outercv(y, x, "randomForest")
 #' summary(cvfit)
 #' 
 #' ## example with lm_filter() to reduce input predictors
-#' cvfit <- outercv(y, x, randomForest, filterFUN = lm_filter,
+#' cvfit <- outercv(y, x, "randomForest", filterFUN = lm_filter,
 #'                  filter_options = list(nfilter = 2))
 #' summary(cvfit)
 #' 
