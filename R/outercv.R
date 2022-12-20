@@ -259,16 +259,16 @@ outercv.default <- function(y, x,
     } else as.data.frame(filtx, stringsAsFactors = TRUE)
     dat$.outcome <- yfinal
     if (is.null(weights)) {
-      args <- c(list(as.formula(".outcome ~ ."), data = dat), dots)
+      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat)), dots)
     } else {
-      args <- c(list(as.formula(".outcome ~ ."), data = dat,
-                   weights = weights), dots)
+      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat),
+                   weights = quote(weights)), dots)
     }
   } else {
     if (is.null(weights)) {
-      args <- c(list(y = yfinal, x = filtx), dots)
+      args <- c(alist(y = yfinal, x = filtx), dots)  # prevents evaluation
     } else {
-      args <- c(list(y = yfinal, x = filtx, weights = weights), dots)
+      args <- c(alist(y = yfinal, x = filtx, weights = weights), dots)
     }
   }
   fit <- do.call(model, args)
@@ -310,16 +310,16 @@ outercvCore <- function(test, y, x, model, reg,
     } else as.data.frame(filt_xtrain, stringsAsFactors = TRUE)
     dat$.outcome <- ytrain
     if (is.null(weights)) {
-      args <- c(list(as.formula(".outcome ~ ."), data = dat), dots)
+      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat)), dots)
     } else {
-      args <- c(list(as.formula(".outcome ~ ."), data = dat,
-                   weights = weights[-test]), dots)
+      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat),
+                   weights = quote(weights[-test])), dots)
     }
   } else {
     if (is.null(weights)) {
-      args <- c(list(y = ytrain, x = filt_xtrain), dots)
+      args <- c(alist(y = ytrain, x = filt_xtrain), dots)
     } else {
-      args <- c(list(y = ytrain, x = filt_xtrain, weights = weights[-test]),
+      args <- c(alist(y = ytrain, x = filt_xtrain, weights = weights[-test]),
                 dots)
     }
     
@@ -440,7 +440,7 @@ outercv.formula <- function(formula, data,
   }
   
   # fit final model
-  args <- c(list(formula = formula, data = data), dots)
+  args <- c(list(formula = formula, data = quote(data)), dots)
   fit <- do.call(model, args)
   
   out <- list(call = outercv.call,
@@ -462,7 +462,7 @@ outercv.formula <- function(formula, data,
 outercvFormulaCore <- function(test, formula, data, y, model,
                                reg, predict_type, outer_train_predict, ...) {
   dots <- list(...)
-  args <- c(list(formula = formula, data = data[-test, ]), dots)
+  args <- c(list(formula = formula, data = quote(data[-test, ])), dots)
   fit <- do.call(model, args)
   
   # test on outer CV
@@ -520,10 +520,10 @@ summary.outercv <- function(object,
     nfilter <- NULL
     cat("No filter\n")
   }
-  # if (hasMethod2(object$final_fit, "print")) {
-  #   cat("\nFinal fit:")
-  #   print(object$final_fit)
-  # }
+  if (hasMethod2(object$final_fit, "print")) {
+    cat("\nFinal fit:")
+    print(object$final_fit)
+  }
   cat("\nResult:\n")
   print(object$summary, digits = digits, print.gap = 3L)
   out <- list(dimx = object$dimx, nfilter = nfilter,
