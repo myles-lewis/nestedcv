@@ -285,7 +285,9 @@ selectCol <- function(x, colIndex) {
 #' 
 boxplot_model <- function(x, data,
                           scheme = NULL, palette = "Dark 3", ...) {
-  m <- if (is.character(x)) x else names(coef(x))[-1]
+  m <- if (is.character(x)) x else names(coef(x))
+  if (is.null(m)) m <- x$final_vars
+  m <- m[m != "(Intercept)"]
   df <- data.frame(vars = rep(m, each = nrow(data)), 
                    y = unlist(lapply(m, function(i) data[, i])))
   x_med <- Rfast::colMedians(data[, m])
