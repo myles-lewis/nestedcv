@@ -94,7 +94,8 @@ var_stability <- function(x, ...) {
 var_stability.nestcv.glmnet <- function(x, percent = FALSE, ...) {
   m <- cv_coef(x)
   if (percent) {
-    cm <- Rfast::colMaxs(m, value = TRUE)
+    # cm <- Rfast::colMaxs(m, value = TRUE)
+    cm <- colSums(abs(m))
     m <- t(t(m) / cm * 100)
   }
   mm <- rowMeans(m)
