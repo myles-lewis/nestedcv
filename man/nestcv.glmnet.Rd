@@ -119,7 +119,10 @@ predictors at each fold.}
 \item{final_param}{Final mean best lambda
 and alpha from each fold}
 \item{final_fit}{Final fitted glmnet model}
-\item{final_coef}{Final model coefficients and mean expression}
+\item{final_coef}{Final model coefficients and mean expression. Variables
+with coefficients shrunk to 0 are removed.}
+\item{final_vars}{Column names of filtered predictors entering final model.
+This is useful for subsetting new data for predictions.}
 \item{roc}{ROC AUC for binary classification where available.}
 \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 for classification. ROC AUC for binary classification. RMSE for
