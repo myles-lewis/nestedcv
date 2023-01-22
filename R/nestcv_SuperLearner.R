@@ -55,7 +55,8 @@
 #'   predictors at each fold.}
 #'   \item{dimx}{vector of number of observations and number of predictors}
 #'   \item{y}{original response vector}
-#'   \item{yfinal}{final response vector (post-balancing)}
+#'   \item{final_data}{list containing `y` final response vector
+#'   (post-balancing) and `x` filtered input matrix of predictors}
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{final_fit}{Final fitted model on whole data}
 #'   \item{final_vars}{Column names of filtered predictors entering final model}
@@ -145,6 +146,7 @@ nestcv.SuperLearner <- function(y, x,
   Y <- if (reg) yfinal else as.numeric(yfinal) -1
   X <- data.frame(filtx)
   fit <- SuperLearner(Y = Y, X = X, obsWeights = weights, ...)
+  final_data <- list(y = Y, x = X)
   
   out <- list(call = ncv.call,
               output = output,
@@ -153,7 +155,7 @@ nestcv.SuperLearner <- function(y, x,
               outer_folds = outer_folds,
               dimx = dim(x),
               y = y,
-              yfinal = yfinal,
+              final_data = final_data,
               final_fit = fit,
               final_vars = colnames(filtx),
               summary_vars = summary_vars(filtx),
