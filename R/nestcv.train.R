@@ -71,6 +71,7 @@
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{dimx}{dimensions of `x`}
 #'   \item{y}{original response vector}
+#'   \item{yfinal}{final response vector (post-balancing)}
 #'   \item{final_fit}{Final fitted caret model using best tune parameters}
 #'   \item{final_vars}{Column names of filtered predictors entering final model}
 #'   \item{summary_vars}{Summary statistics of filtered predictors}
@@ -211,7 +212,7 @@ nestcv.train <- function(y, x,
   }
   
   if (is.na(finalCV)) {
-    final_fit <- finalTune <- filtx <- NA
+    final_fit <- finalTune <- filtx <- yfinal <- NA
   } else {
     # fit final model with CV on whole dataset first
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
@@ -302,6 +303,7 @@ nestcv.train <- function(y, x,
               outer_folds = outer_folds,
               dimx = dim(x),
               y = y,
+              yfinal = yfinal,
               final_fit = final_fit,
               final_vars = colnames(filtx),
               roc = caret.roc,
