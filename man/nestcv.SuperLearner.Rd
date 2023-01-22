@@ -74,8 +74,7 @@ predictions on left-out outer folds, model result and number of filtered
 predictors at each fold.}
 \item{dimx}{vector of number of observations and number of predictors}
 \item{y}{original response vector}
-\item{final_data}{list containing \code{y} final response vector
-(post-balancing) and \code{x} filtered input matrix of predictors}
+\item{yfinal}{final response vector (post-balancing)}
 \item{outer_folds}{List of indices of outer test folds}
 \item{final_fit}{Final fitted model on whole data}
 \item{final_vars}{Column names of filtered predictors entering final model}
