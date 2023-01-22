@@ -19,7 +19,7 @@ class_balance.default <- function(object) {
   tab <- table(ytrain)
   cat("Training folds:\n")
   print(c(tab))
-  yfinal <- object$yfinal
+  yfinal <- object$final_data$y
   if (!is.null(yfinal)) {
     cat("Final fit:\n")
     print(c(table(yfinal)))
@@ -37,7 +37,7 @@ class_balance.nestcv.train <- function(object) {
   tab <- table(ytrain)
   cat("Training folds:\n")
   print(c(tab))
-  yfinal <- object$yfinal
+  yfinal <- object$final_fit$trainingData$.outcome
   if (!is.null(yfinal)) {
     cat("Final fit:\n")
     print(c(table(yfinal)))

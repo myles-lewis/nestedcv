@@ -76,7 +76,8 @@
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{dimx}{dimensions of `x`}
 #'   \item{y}{original response vector}
-#'   \item{yfinal}{final response vector (post-balancing)}
+#'   \item{final_data}{list containing `y` final response vector
+#'   (post-balancing) and `x` filtered input matrix of predictors}
 #'   \item{final_param}{Final mean best lambda
 #'   and alpha from each fold}
 #'   \item{final_fit}{Final fitted glmnet model}
@@ -232,7 +233,7 @@ nestcv.glmnet <- function(y, x,
   }
   
   if (is.na(finalCV)) {
-    fit <- final_coef <- final_param <- yfinal <- final_vars <- NA
+    fit <- final_coef <- final_param <- final_data <- final_vars <- NA
   } else {
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                          balance, balance_options,
@@ -240,6 +241,8 @@ nestcv.glmnet <- function(y, x,
     yfinal <- dat$ytrain
     filtx <- dat$filt_xtrain
     filtpen.factor <- dat$filt_pen.factor
+    final_data <- list(y = yfinal, x = filtx)
+    final_vars <- colnames(filtx)
     
     if (finalCV) {
       # use CV on whole data to finalise parameters
@@ -265,7 +268,6 @@ nestcv.glmnet <- function(y, x,
       cfmean <- colmeans(x[, names(fin_coef)[-1]])
       final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
     }
-    final_vars <- colnames(filtx)
   }
   out <- list(call = nestcv.call,
               output = output,
@@ -275,7 +277,7 @@ nestcv.glmnet <- function(y, x,
               outer_folds = outer_folds,
               dimx = dim(x),
               y = y,
-              yfinal = yfinal,
+              final_data = final_data,
               final_param = final_param,
               final_fit = fit,
               final_coef = final_coef,

@@ -115,7 +115,8 @@ predictors at each fold.}
 \item{outer_folds}{List of indices of outer test folds}
 \item{dimx}{dimensions of \code{x}}
 \item{y}{original response vector}
-\item{yfinal}{final response vector (post-balancing)}
+\item{final_data}{list containing \code{y} final response vector
+(post-balancing) and \code{x} filtered input matrix of predictors}
 \item{final_param}{Final mean best lambda
 and alpha from each fold}
 \item{final_fit}{Final fitted glmnet model}
