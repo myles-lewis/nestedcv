@@ -232,7 +232,7 @@ nestcv.glmnet <- function(y, x,
   }
   
   if (is.na(finalCV)) {
-    fit <- final_coef <- final_param <- yfinal <- NA
+    fit <- final_coef <- final_param <- yfinal <- final_vars <- NA
   } else {
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                          balance, balance_options,
@@ -265,6 +265,7 @@ nestcv.glmnet <- function(y, x,
       cfmean <- colmeans(x[, names(fin_coef)[-1]])
       final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
     }
+    final_vars <- colnames(filtx)
   }
   out <- list(call = nestcv.call,
               output = output,
@@ -278,7 +279,7 @@ nestcv.glmnet <- function(y, x,
               final_param = final_param,
               final_fit = fit,
               final_coef = final_coef,
-              final_vars = colnames(filtx),
+              final_vars = final_vars,
               roc = glmnet.roc,
               summary = summary)
   class(out) <- "nestcv.glmnet"

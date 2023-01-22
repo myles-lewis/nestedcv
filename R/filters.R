@@ -586,3 +586,9 @@ lm_filter <- function(y, x,
          index = match(out, colnames(x)),
          names = out)
 }
+
+
+var_dir <- function(y, x) {
+  tt <- ttest_filter(y, x, p_cutoff = NULL, type = "full")
+  sign(tt[, "stat"])
+}
