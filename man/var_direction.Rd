@@ -4,7 +4,7 @@
 \alias{var_direction}
 \alias{var_direction.default}
 \alias{var_direction.nestcv.train}
-\title{Directionality of final predictors}
+\title{Variable directionality}
 \usage{
 var_direction(object)
 
@@ -12,6 +12,12 @@ var_direction(object)
 
 \method{var_direction}{nestcv.train}(object)
 }
+\arguments{
+\item{object}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted model}
+}
+\value{
+named vector showing sign of final predictors
+}
 \description{
-Directionality of final predictors
+Determines directionality of final predictors for binary models.
 }
