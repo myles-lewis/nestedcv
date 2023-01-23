@@ -6,18 +6,15 @@
 \usage{
 plot_var_stability(
   x,
-  abs = TRUE,
   final = TRUE,
   top = 25,
-  breaks = c(1, 2, 5, 10),
-  percent = TRUE
+  direction = FALSE,
+  percent = TRUE,
+  breaks = c(1, 2, 5, 10)
 )
 }
 \arguments{
 \item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object}
-
-\item{abs}{Logical for \code{nestcv.glmnet} objects only, whether to show absolute
-coefficients}
 
 \item{final}{Logical whether to restrict variables to only those which ended
 up in the final fitted model or to include all variables selected across
@@ -25,10 +22,13 @@ all outer folds.}
 
 \item{top}{Limits number of variables plotted. Ignored if \code{final = TRUE}.}
 
-\item{breaks}{Vector of continuous breaks for legend colour/size}
+\item{direction}{Logical whether to show directionality for binary models.}
 
 \item{percent}{Logical for \code{nestcv.glmnet} objects only, whether to scale
-coefficients to percentage of the largest coefficient in each model}
+coefficients to percentage of the largest coefficient in each model. If set
+to \code{FALSE}, model coefficients are shown and \code{direction} is ignored.}
+
+\item{breaks}{Vector of continuous breaks for legend colour/size}
 }
 \value{
 A ggplot2 plot

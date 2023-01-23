@@ -96,15 +96,15 @@ var_stability.nestcv.glmnet <- function(x, percent = FALSE, ...) {
   if (percent) {
     # cm <- Rfast::colMaxs(m, value = TRUE)
     cm <- colSums(abs(m))
-    m <- t(t(m) / cm * 100)
+    m <- t(t(abs(m)) / cm * 100)
   }
   mm <- rowMeans(m)
   msd <- apply(m, 1, sd)
   msem <- msd/sqrt(ncol(m))
   freq <- apply(m, 1, function(i) sum(i!=0))
-  vdir <- var_direction(x)
   df <- data.frame(mean = mm, sd = msd, sem = msem, freq = freq, check.names = FALSE)
-  df$dir <- vdir[rownames(df)]
+  vdir <- var_direction(x)
+  if (!is.null(vdir)) df$dir <- vdir[rownames(df)]
   df[order(abs(df$mean), decreasing = TRUE), ]
 }
 
@@ -117,9 +117,9 @@ var_stability.nestcv.train <- function(x, ...) {
   msd <- apply(m, 1, sd)
   msem <- msd/sqrt(ncol(m))
   freq <- apply(m, 1, function(i) sum(i!=0))
-  vdir <- var_direction(x)
   df <- data.frame(mean = mm, sd = msd, sem = msem, freq = freq, check.names = FALSE)
-  df$dir <- vdir[rownames(df)]
+  vdir <- var_direction(x)
+  if (!is.null(vdir)) df$dir <- vdir[rownames(df)]
   df[df$freq > 0, ]
 }
 
@@ -130,24 +130,25 @@ var_stability.nestcv.train <- function(x, ...) {
 #' tested across outer CV folds.
 #'
 #' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
-#' @param abs Logical for `nestcv.glmnet` objects only, whether to show absolute
-#'   coefficients
 #' @param final Logical whether to restrict variables to only those which ended
 #'   up in the final fitted model or to include all variables selected across
 #'   all outer folds.
 #' @param top Limits number of variables plotted. Ignored if `final = TRUE`.
-#' @param breaks Vector of continuous breaks for legend colour/size
+#' @param direction Logical whether to show directionality for binary models.
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
-#'   coefficients to percentage of the largest coefficient in each model
+#'   coefficients to percentage of the largest coefficient in each model. If set
+#'   to `FALSE`, model coefficients are shown and `direction` is ignored.
+#' @param breaks Vector of continuous breaks for legend colour/size
 #' @return A ggplot2 plot
 #' @seealso [var_stability()]
 #' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller scale_size
 #' @export
-plot_var_stability <- function(x, abs = TRUE,
+plot_var_stability <- function(x,
                                final = TRUE,
                                top = 25,
-                               breaks = c(1,2,5,10),
-                               percent = TRUE) {
+                               direction = FALSE,
+                               percent = TRUE,
+                               breaks = c(1,2,5,10)) {
   df <- var_stability(x, percent = percent)
   df$name <- factor(rownames(df), levels = rownames(df))
   if (final) {
@@ -166,12 +167,17 @@ plot_var_stability <- function(x, abs = TRUE,
     top <- min(top, nrow(df))
     df <- df[1:top, ]
   }
-  if (abs) df$mean <- abs(df$mean)
   xtitle <- if (!percent & inherits(x, "nestcv.glmnet")) {
-    if (abs) "Mean absolute coefficient" else "Mean coefficient"
-  } else "Mean variable importance"
+    "Coefficient"
+  } else "Variable importance"
+  
+  if (is.numeric(x$y) | nlevels(x$y) != 2 | !percent) direction <- FALSE
+  if (direction && "dir" %in% colnames(df)) {
+    df$mean <- df$mean * df$dir
+  }
+  
   ggplot(df, aes(x = .data$mean, y = .data$name)) +
-    (if (!abs) geom_vline(xintercept = 0)) +
+    (if (direction | !percent) geom_vline(xintercept = 0)) +
     geom_errorbarh(aes(xmin = .data$mean - .data$sem,
                        xmax = .data$mean + .data$sem), height = 0.2) +
     geom_point(aes(size = .data$freq,
