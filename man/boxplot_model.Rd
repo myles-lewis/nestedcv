@@ -4,13 +4,10 @@
 \alias{boxplot_model}
 \title{Boxplot model predictors}
 \usage{
-boxplot_model(x, data, scheme = NULL, palette = "Dark 3", ...)
+boxplot_model(x, scheme = NULL, palette = "Dark 3", ...)
 }
 \arguments{
-\item{x}{Either a "nestedcv" object or a character vector of predictors to
-be plotted}
-
-\item{data}{matrix of predictors}
+\item{x}{a "nestedcv" object}
 
 \item{scheme}{colour scheme}
 

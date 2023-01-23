@@ -268,9 +268,7 @@ selectCol <- function(x, colIndex) {
 #' Boxplots to show range of model predictors to identify exceptional predictors
 #' with excessively low or high values.
 #'
-#' @param x Either a "nestedcv" object or a character vector of predictors to
-#'   be plotted
-#' @param data matrix of predictors
+#' @param x a "nestedcv" object
 #' @param scheme colour scheme
 #' @param palette palette name (one of `hcl.pals()`) which is passed to
 #'   [hcl.colors]
@@ -283,9 +281,10 @@ selectCol <- function(x, colIndex) {
 #' @importFrom stats formula
 #' @export
 #' 
-boxplot_model <- function(x, data,
+boxplot_model <- function(x,
                           scheme = NULL, palette = "Dark 3", ...) {
-  m <- if (is.character(x)) x else names(coef(x))
+  data <- x$xsub
+  m <- names(coef(x))
   if (is.null(m)) m <- x$final_vars
   m <- m[m != "(Intercept)"]
   df <- data.frame(vars = rep(m, each = nrow(data)), 
