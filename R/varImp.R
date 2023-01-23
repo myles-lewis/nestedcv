@@ -148,7 +148,7 @@ plot_var_stability <- function(x,
                                top = 25,
                                direction = FALSE,
                                percent = TRUE,
-                               breaks = c(1,2,5,10)) {
+                               breaks = c(2, 4, 6, 8, 10)) {
   df <- var_stability(x, percent = percent)
   df$name <- factor(rownames(df), levels = rownames(df))
   if (final) {
@@ -182,7 +182,7 @@ plot_var_stability <- function(x,
                        xmax = .data$mean + .data$sem), height = 0.2) +
     geom_point(aes(size = .data$freq,
                    fill = .data$freq), shape = 21) +
-    scale_fill_distiller(guide = "legend", palette = "Blues", direction = 1,
+    scale_fill_distiller(guide = "legend", palette = "Spectral", direction = 1,
                          breaks = breaks, limits = c(1, NA)) +
     scale_radius(guide = "legend", breaks = breaks,
                limits = c(1, NA)) +
