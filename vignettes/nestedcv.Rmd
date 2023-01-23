@@ -316,7 +316,7 @@ The overall expression level of each gene selected in the final model can be
 compared with a boxplot.
 
 ```{r eval = FALSE}
-boxplot_model(res.rtx, data.rtx, ylab = "VST")
+boxplot_model(res.rtx, ylab = "VST")
 ```
 
 ```{r, out.width='70%', fig.align="center", echo=FALSE}
