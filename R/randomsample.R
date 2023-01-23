@@ -72,6 +72,7 @@
 #'                       balance = "randomsample",
 #'                       filterFUN = ttest_filter)
 #' fit3$summary
+#' class_balance(fit3)
 #' 
 #' ## Plot ROC curves
 #' plot(fit1$roc, col='green')

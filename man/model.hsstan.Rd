@@ -61,7 +61,7 @@ pvars <- c("marker2", "marker3", "marker4") # penalised covariates
 # recommend 4 chains, warmup 1000, iter 2000 in practice
 oldopt <- options(mc.cores = 2)
 res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
-                         model = model.hsstan,
+                         model = "model.hsstan",
                          filterFUN = lm_filter,
                          filter_options = list(force_vars = uvars,
                                                nfilter = 2,

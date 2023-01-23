@@ -55,7 +55,9 @@
 #' @param finalCV Logical whether to perform one last round of CV on the whole
 #'   dataset to determine the final model parameters. If set to `FALSE`, the
 #'   median of hyperparameters from outer CV folds are used for the final model.
-#'   Performance metrics are independent of this last step.
+#'   Performance metrics are independent of this last step. If set to `NA`,
+#'   final model fitting is skipped altogether, which gives a useful speed boost
+#'   if performance metrics are all that is needed.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` (the default) is equivalent to `na.action = na.omit`. `"omitcol"`
 #'   removes cases if there are `NA` in 'y', but columns (predictors) containing
@@ -73,12 +75,17 @@
 #'   \item{n_inner_folds}{number of inner folds}
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{dimx}{dimensions of `x`}
+#'   \item{xsub}{subset of `x` containing all predictors used in both outer CV
+#'   folds and the final model}
 #'   \item{y}{original response vector}
 #'   \item{yfinal}{final response vector (post-balancing)}
 #'   \item{final_param}{Final mean best lambda
 #'   and alpha from each fold}
 #'   \item{final_fit}{Final fitted glmnet model}
-#'   \item{final_coef}{Final model coefficients and mean expression}
+#'   \item{final_coef}{Final model coefficients and mean expression. Variables
+#'   with coefficients shrunk to 0 are removed.}
+#'   \item{final_vars}{Column names of filtered predictors entering final model.
+#'   This is useful for subsetting new data for predictions.}
 #'   \item{roc}{ROC AUC for binary classification where available.}
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
@@ -225,36 +232,53 @@ nestcv.glmnet <- function(y, x,
     glmnet.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
                            quiet = TRUE)
   }
-  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                       balance, balance_options,
-                       penalty.factor = penalty.factor)
-  yfinal <- dat$ytrain
-  filtx <- dat$filt_xtrain
-  filtpen.factor <- dat$filt_pen.factor
   
-  if (finalCV) {
-    # use CV on whole data to finalise parameters
-    cvafit <- cva.glmnet(filtx, yfinal, alphaSet = alphaSet, family = family,
-                         weights = weights, penalty.factor = filtpen.factor, ...)
-    alphafit <- cvafit$fits[[cvafit$which_alpha]]
-    s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
-    fit <- cvafit$fits[[cvafit$which_alpha]]
-    final_param <- setNames(c(s, cvafit$best_alpha), c("lambda", "alpha"))
+  if (is.na(finalCV)) {
+    fit <- final_coef <- final_param <- yfinal <- final_vars <- xsub <- NA
   } else {
-    # use outer folds for final parameters
-    lam <- exp(median(log(unlist(lapply(outer_res, '[[', 'lambda')))))
-    alph <- median(unlist(lapply(outer_res, '[[', 'alpha')))
-    final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
-    fit <- glmnet(filtx, yfinal, alpha = alph, family = family, 
-                  weights = weights, penalty.factor = filtpen.factor, ...)
-  }
-  
-  fin_coef <- glmnet_coefs(fit, s = final_param["lambda"])
-  if (is.list(fin_coef)) {
-    final_coef <- fin_coef  # multinomial
-  } else {
-    cfmean <- colmeans(x[, names(fin_coef)[-1]])
-    final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
+    dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
+                         balance, balance_options,
+                         penalty.factor = penalty.factor)
+    yfinal <- dat$ytrain
+    filtx <- dat$filt_xtrain
+    filtpen.factor <- dat$filt_pen.factor
+    
+    if (finalCV) {
+      # use CV on whole data to finalise parameters
+      cvafit <- cva.glmnet(filtx, yfinal, alphaSet = alphaSet, family = family,
+                           weights = weights, penalty.factor = filtpen.factor, ...)
+      alphafit <- cvafit$fits[[cvafit$which_alpha]]
+      s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
+      fit <- cvafit$fits[[cvafit$which_alpha]]
+      final_param <- setNames(c(s, cvafit$best_alpha), c("lambda", "alpha"))
+    } else {
+      # use outer folds for final parameters
+      lam <- exp(median(log(unlist(lapply(outer_res, '[[', 'lambda')))))
+      alph <- median(unlist(lapply(outer_res, '[[', 'alpha')))
+      final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
+      fit <- glmnet(filtx, yfinal, alpha = alph, family = family, 
+                    weights = weights, penalty.factor = filtpen.factor, ...)
+    }
+    
+    fin_coef <- glmnet_coefs(fit, s = final_param["lambda"])
+    if (is.list(fin_coef)) {
+      final_coef <- fin_coef  # multinomial
+    } else {
+      cfmean <- colmeans(x[, names(fin_coef)[-1]])
+      final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
+    }
+    final_vars <- colnames(filtx)
+    # collect all vars from outer_res
+    all_vars <- unlist(lapply(outer_res, function(i) {
+      cf <- i$coef
+      if (!is.list(cf)) return(names(cf)[-1])
+      # multinomial
+      unlist(lapply(cf, function(j) {
+        names(j)[-1]
+      }))
+    }))
+    all_vars <- unique(c(all_vars, final_vars))
+    xsub <- x[, all_vars]
   }
   out <- list(call = nestcv.call,
               output = output,
@@ -263,11 +287,13 @@ nestcv.glmnet <- function(y, x,
               n_inner_folds = n_inner_folds,
               outer_folds = outer_folds,
               dimx = dim(x),
+              xsub = xsub,
               y = y,
               yfinal = yfinal,
               final_param = final_param,
               final_fit = fit,
               final_coef = final_coef,
+              final_vars = final_vars,
               roc = glmnet.roc,
               summary = summary)
   class(out) <- "nestcv.glmnet"
@@ -401,6 +427,7 @@ cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...) {
 #' @export
 #' 
 glmnet_coefs <- function(fit, s, ...) {
+  if (length(fit) == 1 && is.na(fit)) return(NA)
   cf <- coef(fit, s = s, ...)
   if (is.list(cf)) {
     cf <- lapply(cf, function(i) {
@@ -443,9 +470,13 @@ print.nestcv.glmnet <- function(x, digits = max(3L, getOption("digits") - 3L), .
   if (!is.null(x$call$filterFUN)) 
     cat("Filter: ", x$call$filterFUN, "\n") else cat("No filter\n")
   cat("\nFinal parameters:\n")
-  print(x$final_param, digits = digits, print.gap = 2L)
+  if (length(x$final_param)==1 && is.na(x$final_param)) {
+    cat("NA\n")
+  } else print(x$final_param, digits = digits, print.gap = 2L)
   cat("\nFinal coefficients:\n")
-  print(coef(x), digits = digits)
+  if (length(x$final_fit)==1 && is.na(x$final_fit)) {
+    cat("NA\n")
+  } else print(coef(x), digits = digits)
   cat("\nResult:\n")
   print(x$summary, digits = digits, print.gap = 2L)
 }
@@ -476,9 +507,13 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
   
   print(foldres, digits = digits)
   cat("\nFinal parameters:\n")
-  print(object$final_param, digits = digits, print.gap = 2L)
+  if (length(object$final_param)==1 && is.na(object$final_param)) {
+    cat("NA\n")
+  } else print(object$final_param, digits = digits, print.gap = 2L)
   cat("\nFinal coefficients:\n")
-  print(coef(object), digits = digits)
+  if (length(object$final_fit)==1 && is.na(object$final_fit)) {
+    cat("NA\n")
+  } else print(coef(object), digits = digits)
   cat("\nResult:\n")
   print(object$summary, digits = digits, print.gap = 3L)
   out <- list(dimx = object$dimx, folds = foldres,

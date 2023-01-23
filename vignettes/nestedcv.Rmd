@@ -316,7 +316,7 @@ The overall expression level of each gene selected in the final model can be
 compared with a boxplot.
 
 ```{r eval = FALSE}
-boxplot_model(res.rtx, data.rtx, ylab = "VST")
+boxplot_model(res.rtx, ylab = "VST")
 ```
 
 ```{r, out.width='70%', fig.align="center", echo=FALSE}
@@ -698,7 +698,7 @@ uvars <- "marker1"
 pvars <- c("marker2", "marker3", "marker4") # penalised covariates
 # run cross-validation with univariate filter and hsstan
 res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
-                         model = model.hsstan,
+                         model = "model.hsstan",
                          filterFUN = lm_filter,
                          filter_options = list(force_vars = uvars,
                                                nfilter = 2,
@@ -762,7 +762,7 @@ pvars <- c("marker2", "marker3", "marker4") # penalised covariates
 # run cross-validation with univariate filter and hsstan
 res.cv.hsstan <- outercv(y = dt$outcome.bin,
                          x = as.matrix(dt[, c(uvars, pvars)]),
-                         model = model.hsstan,
+                         model = "model.hsstan",
                          filterFUN = ttest_filter,
                          filter_options = list(force_vars = uvars,
                                                nfilter = 2,

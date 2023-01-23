@@ -13,7 +13,7 @@
 #' @param x Matrix or dataframe of predictors
 #' @param formula A formula describing the model to be fitted
 #' @param data A matrix or data frame containing variables in the model.
-#' @param model Model function to be fitted.
+#' @param model Character value or function of the model to be fitted.
 #' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
 #'   Any function can be provided and is passed `y` and `x`. Must return a
 #'   character vector with names of filtered predictors. Not available if
@@ -92,10 +92,10 @@
 #'   `outercv` assumes that these are passed to the model via an argument named
 #'   `weights`.
 #'
-#'   Note that in the case of `model = lm`, although additional arguments e.g.
+#'   Note that in the case of `model = "lm"`, although additional arguments e.g.
 #'   `subset`, `weights`, `offset` are passed into the model function via
 #'   `"..."` the scoping is known to go awry. Avoid using these arguments with
-#'   `model = lm`.
+#'   `model = "lm"`.
 #'   
 #'   `NA` handling differs between the default S3 method and the formula S3
 #'   method. The `na.option` argument takes a character string, while the more
@@ -125,14 +125,14 @@
 #' 
 #' ## Random forest
 #' library(randomForest)
-#' cvfit <- outercv(y2, x, randomForest)
+#' cvfit <- outercv(y2, x, "randomForest")
 #' summary(cvfit)
 #' plot(cvfit$roc)
 #' 
 #' ## Mixture discriminant analysis (MDA)
 #' if (requireNamespace("mda", quietly = TRUE)) {
 #'   library(mda)
-#'   cvfit <- outercv(y2, x, mda, predict_type = "posterior")
+#'   cvfit <- outercv(y2, x, "mda", predict_type = "posterior")
 #'   summary(cvfit)
 #' }
 #' 
@@ -142,15 +142,15 @@
 #' dt$outcome <- y
 #' 
 #' ## simple linear model - formula interface
-#' cvfit <- outercv(outcome ~ ., data = dt, model = lm)
+#' cvfit <- outercv(outcome ~ ., data = dt, model = "lm")
 #' summary(cvfit)
 #' 
 #' ## random forest for regression
-#' cvfit <- outercv(y, x, randomForest)
+#' cvfit <- outercv(y, x, "randomForest")
 #' summary(cvfit)
 #' 
 #' ## example with lm_filter() to reduce input predictors
-#' cvfit <- outercv(y, x, randomForest, filterFUN = lm_filter,
+#' cvfit <- outercv(y, x, "randomForest", filterFUN = lm_filter,
 #'                  filter_options = list(nfilter = 2))
 #' summary(cvfit)
 #' 
@@ -205,9 +205,9 @@ outercv.default <- function(y, x,
   if (outercv.call$model == "glm") predict_type <- "response"
   if (outercv.call$model == "mda") predict_type <- "posterior"
   
+  dots <- list(...)
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
-    dots <- list(...)
     clusterExport(cl, varlist = c("outer_folds", "y", "x", "model", "reg",
                                   "filterFUN", "filter_options",
                                   "weights", "balance", "balance_options",
@@ -259,18 +259,20 @@ outercv.default <- function(y, x,
     } else as.data.frame(filtx, stringsAsFactors = TRUE)
     dat$.outcome <- yfinal
     if (is.null(weights)) {
-      fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
+      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat)), dots)
     } else {
-      fit <- model(as.formula(".outcome ~ ."), data = dat,
-                   weights = weights, ...)
+      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat),
+                   weights = quote(weights)), dots)
     }
   } else {
     if (is.null(weights)) {
-      fit <- model(y = yfinal, x = filtx, ...)
+      args <- c(alist(y = yfinal, x = filtx), dots)  # prevents evaluation
     } else {
-      fit <- model(y = yfinal, x = filtx, weights = weights, ...)
+      args <- c(alist(y = yfinal, x = filtx, weights = weights), dots)
     }
   }
+  fit <- do.call(model, args)
+  
   out <- list(call = outercv.call,
               output = output,
               outer_result = outer_res,
@@ -300,6 +302,7 @@ outercvCore <- function(test, y, x, model, reg,
   ytest <- dat$ytest
   filt_xtrain <- dat$filt_xtrain
   filt_xtest <- dat$filt_xtest
+  dots <- list(...)
   
   # check if model uses formula
   if ("formula" %in% formalArgs(model)) {
@@ -307,18 +310,22 @@ outercvCore <- function(test, y, x, model, reg,
     } else as.data.frame(filt_xtrain, stringsAsFactors = TRUE)
     dat$.outcome <- ytrain
     if (is.null(weights)) {
-      fit <- model(as.formula(".outcome ~ ."), data = dat, ...)
+      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat)), dots)
     } else {
-      fit <- model(as.formula(".outcome ~ ."), data = dat,
-                   weights = weights[-test], ...)
+      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat),
+                   weights = quote(weights[-test])), dots)
     }
   } else {
     if (is.null(weights)) {
-      fit <- model(y = ytrain, x = filt_xtrain, ...)
+      args <- c(alist(y = ytrain, x = filt_xtrain), dots)
     } else {
-      fit <- model(y = ytrain, x = filt_xtrain, weights = weights[-test], ...)
+      args <- c(alist(y = ytrain, x = filt_xtrain, weights = weights[-test]),
+                dots)
     }
+    
   }
+  fit <- do.call(model, args)
+  
   # test on outer CV
   predy <- predict(fit, newdata = filt_xtest)
   preds <- data.frame(predy=predy, testy=ytest)
@@ -397,9 +404,9 @@ outercv.formula <- function(formula, data,
   }
   if (outercv.call$model == "glm") predict_type <- "response"
   
+  dots <- list(...)
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
-    dots <- list(...)
     clusterExport(cl, varlist = c("outer_folds", "formula", "data", "y", 
                                   "model", "reg", "predict_type",
                                   "outer_train_predict",
@@ -433,7 +440,9 @@ outercv.formula <- function(formula, data,
   }
   
   # fit final model
-  fit <- model(formula = formula, data = data, ...)
+  args <- c(list(formula = formula, data = quote(data)), dots)
+  fit <- do.call(model, args)
+  
   out <- list(call = outercv.call,
               output = output,
               outer_result = outer_res,
@@ -452,7 +461,10 @@ outercv.formula <- function(formula, data,
   
 outercvFormulaCore <- function(test, formula, data, y, model,
                                reg, predict_type, outer_train_predict, ...) {
-  fit <- model(formula = formula, data = data[-test, ], ...)
+  dots <- list(...)
+  args <- c(list(formula = formula, data = quote(data[-test, ])), dots)
+  fit <- do.call(model, args)
+  
   # test on outer CV
   predy <- predict(fit, newdata = data[test, ])
   preds <- data.frame(predy=predy, testy=y[test])

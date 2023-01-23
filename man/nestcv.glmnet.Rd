@@ -90,7 +90,9 @@ on windows.}
 \item{finalCV}{Logical whether to perform one last round of CV on the whole
 dataset to determine the final model parameters. If set to \code{FALSE}, the
 median of hyperparameters from outer CV folds are used for the final model.
-Performance metrics are independent of this last step.}
+Performance metrics are independent of this last step. If set to \code{NA},
+final model fitting is skipped altogether, which gives a useful speed boost
+if performance metrics are all that is needed.}
 
 \item{na.option}{Character value specifying how \code{NA}s are dealt with.
 \code{"omit"} (the default) is equivalent to \code{na.action = na.omit}. \code{"omitcol"}
@@ -112,12 +114,17 @@ predictors at each fold.}
 \item{n_inner_folds}{number of inner folds}
 \item{outer_folds}{List of indices of outer test folds}
 \item{dimx}{dimensions of \code{x}}
+\item{xsub}{subset of \code{x} containing all predictors used in both outer CV
+folds and the final model}
 \item{y}{original response vector}
 \item{yfinal}{final response vector (post-balancing)}
 \item{final_param}{Final mean best lambda
 and alpha from each fold}
 \item{final_fit}{Final fitted glmnet model}
-\item{final_coef}{Final model coefficients and mean expression}
+\item{final_coef}{Final model coefficients and mean expression. Variables
+with coefficients shrunk to 0 are removed.}
+\item{final_vars}{Column names of filtered predictors entering final model.
+This is useful for subsetting new data for predictions.}
 \item{roc}{ROC AUC for binary classification where available.}
 \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 for classification. ROC AUC for binary classification. RMSE for

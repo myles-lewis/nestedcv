@@ -49,7 +49,7 @@ outercv(y, ...)
 
 \item{x}{Matrix or dataframe of predictors}
 
-\item{model}{Model function to be fitted.}
+\item{model}{Character value or function of the model to be fitted.}
 
 \item{filterFUN}{Filter function, e.g. \link{ttest_filter} or \link{relieff_filter}.
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
@@ -155,10 +155,10 @@ Case weights can be passed to model function which accept these, however
 \code{outercv} assumes that these are passed to the model via an argument named
 \code{weights}.
 
-Note that in the case of \code{model = lm}, although additional arguments e.g.
+Note that in the case of \code{model = "lm"}, although additional arguments e.g.
 \code{subset}, \code{weights}, \code{offset} are passed into the model function via
 \code{"..."} the scoping is known to go awry. Avoid using these arguments with
-\code{model = lm}.
+\code{model = "lm"}.
 
 \code{NA} handling differs between the default S3 method and the formula S3
 method. The \code{na.option} argument takes a character string, while the more
@@ -182,14 +182,14 @@ y2 <- factor(y2)
 
 ## Random forest
 library(randomForest)
-cvfit <- outercv(y2, x, randomForest)
+cvfit <- outercv(y2, x, "randomForest")
 summary(cvfit)
 plot(cvfit$roc)
 
 ## Mixture discriminant analysis (MDA)
 if (requireNamespace("mda", quietly = TRUE)) {
   library(mda)
-  cvfit <- outercv(y2, x, mda, predict_type = "posterior")
+  cvfit <- outercv(y2, x, "mda", predict_type = "posterior")
   summary(cvfit)
 }
 
@@ -199,15 +199,15 @@ y <- -3 + 0.5 * dt$marker1 + 2 * dt$marker2 + rnorm(nrow(dt), 0, 2)
 dt$outcome <- y
 
 ## simple linear model - formula interface
-cvfit <- outercv(outcome ~ ., data = dt, model = lm)
+cvfit <- outercv(outcome ~ ., data = dt, model = "lm")
 summary(cvfit)
 
 ## random forest for regression
-cvfit <- outercv(y, x, randomForest)
+cvfit <- outercv(y, x, "randomForest")
 summary(cvfit)
 
 ## example with lm_filter() to reduce input predictors
-cvfit <- outercv(y, x, randomForest, filterFUN = lm_filter,
+cvfit <- outercv(y, x, "randomForest", filterFUN = lm_filter,
                  filter_options = list(nfilter = 2))
 summary(cvfit)
 
