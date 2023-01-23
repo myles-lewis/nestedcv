@@ -10,7 +10,7 @@ plot_var_stability(
   top = 25,
   direction = FALSE,
   percent = TRUE,
-  breaks = c(1, 2, 5, 10)
+  breaks = c(2, 4, 6, 8, 10)
 )
 }
 \arguments{
