@@ -13,7 +13,7 @@
 #' @param x Matrix or dataframe of predictors
 #' @param formula A formula describing the model to be fitted
 #' @param data A matrix or data frame containing variables in the model.
-#' @param model Model function to be fitted.
+#' @param model Character value or function of the model to be fitted.
 #' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
 #'   Any function can be provided and is passed `y` and `x`. Must return a
 #'   character vector with names of filtered predictors. Not available if
@@ -92,10 +92,10 @@
 #'   `outercv` assumes that these are passed to the model via an argument named
 #'   `weights`.
 #'
-#'   Note that in the case of `model = lm`, although additional arguments e.g.
+#'   Note that in the case of `model = "lm"`, although additional arguments e.g.
 #'   `subset`, `weights`, `offset` are passed into the model function via
 #'   `"..."` the scoping is known to go awry. Avoid using these arguments with
-#'   `model = lm`.
+#'   `model = "lm"`.
 #'   
 #'   `NA` handling differs between the default S3 method and the formula S3
 #'   method. The `na.option` argument takes a character string, while the more

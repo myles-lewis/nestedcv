@@ -1,6 +1,23 @@
 News
 =====
 
+# nestedcv 0.5.0
+###### 23/01/2023
+* `nestedcv` models now return `xsub` containing a subset of the predictor
+matrix `x` with filtered variables across outer folds and the final fit
+* `boxplot_model()` no longer needs the predictor matrix to be specified as it 
+is contained in `xsub` in `nestedcv` models
+* `boxplot_model()` now works for all `nestedcv` model types
+* Add function `var_stability()` to assess variance and stability of variable 
+importance across outer folds, and directionality for binary outcome
+* Add function `plot_var_stability()` to plot variable stability across outer 
+folds
+* Add `finalCV = NA` option which skips fitting the final model completely. This
+gives a useful speed boost if performance metrics are all that is needed.
+* `model` argument in `outercv` now prefers a character value instead of a 
+function for the model to be fitted
+* Bugfixes
+
 # nestedcv 0.4.6
 ###### 07/12/2022
 * Add check model exists in `outercv`

@@ -49,7 +49,7 @@ outercv(y, ...)
 
 \item{x}{Matrix or dataframe of predictors}
 
-\item{model}{Model function to be fitted.}
+\item{model}{Character value or function of the model to be fitted.}
 
 \item{filterFUN}{Filter function, e.g. \link{ttest_filter} or \link{relieff_filter}.
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
@@ -155,10 +155,10 @@ Case weights can be passed to model function which accept these, however
 \code{outercv} assumes that these are passed to the model via an argument named
 \code{weights}.
 
-Note that in the case of \code{model = lm}, although additional arguments e.g.
+Note that in the case of \code{model = "lm"}, although additional arguments e.g.
 \code{subset}, \code{weights}, \code{offset} are passed into the model function via
 \code{"..."} the scoping is known to go awry. Avoid using these arguments with
-\code{model = lm}.
+\code{model = "lm"}.
 
 \code{NA} handling differs between the default S3 method and the formula S3
 method. The \code{na.option} argument takes a character string, while the more
