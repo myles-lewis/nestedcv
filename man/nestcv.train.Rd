@@ -111,6 +111,8 @@ predictions on left-out outer folds, caret result and number of filtered
 predictors at each fold.}
 \item{outer_folds}{List of indices of outer test folds}
 \item{dimx}{dimensions of \code{x}}
+\item{xsub}{subset of \code{x} containing all predictors used in both outer CV
+folds and the final model}
 \item{y}{original response vector}
 \item{yfinal}{final response vector (post-balancing)}
 \item{final_fit}{Final fitted caret model using best tune parameters}

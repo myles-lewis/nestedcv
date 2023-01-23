@@ -2,21 +2,16 @@
 % Please edit documentation in R/directionality.R
 \name{var_direction}
 \alias{var_direction}
-\alias{var_direction.default}
-\alias{var_direction.nestcv.train}
 \title{Variable directionality}
 \usage{
 var_direction(object)
-
-\method{var_direction}{default}(object)
-
-\method{var_direction}{nestcv.train}(object)
 }
 \arguments{
 \item{object}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted model}
 }
 \value{
-named vector showing sign of final predictors
+named vector showing sign of final predictors. If the response vector
+is not binary \code{NULL} is returned.
 }
 \description{
 Determines directionality of final predictors for binary models.

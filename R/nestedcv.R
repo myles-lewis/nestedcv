@@ -75,6 +75,8 @@
 #'   \item{n_inner_folds}{number of inner folds}
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{dimx}{dimensions of `x`}
+#'   \item{xsub}{subset of `x` containing all predictors used in both outer CV
+#'   folds and the final model}
 #'   \item{y}{original response vector}
 #'   \item{yfinal}{final response vector (post-balancing)}
 #'   \item{final_param}{Final mean best lambda

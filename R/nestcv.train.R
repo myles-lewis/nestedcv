@@ -70,6 +70,8 @@
 #'   predictors at each fold.}
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{dimx}{dimensions of `x`}
+#'   \item{xsub}{subset of `x` containing all predictors used in both outer CV
+#'   folds and the final model}
 #'   \item{y}{original response vector}
 #'   \item{yfinal}{final response vector (post-balancing)}
 #'   \item{final_fit}{Final fitted caret model using best tune parameters}
@@ -212,7 +214,7 @@ nestcv.train <- function(y, x,
   }
   
   if (is.na(finalCV)) {
-    final_fit <- finalTune <- filtx <- yfinal <- NA
+    final_fit <- finalTune <- filtx <- yfinal <- xsub <- NA
   } else {
     # fit final model with CV on whole dataset first
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
@@ -296,12 +298,22 @@ nestcv.train <- function(y, x,
                               tuneGrid = finalTune, ...)
   }
   
+  if (!is.na(finalCV)) {
+    all_vars <- unlist(lapply(outer_res, function(i) {
+      vars <- colnames(i$fit$trainingData)
+      vars[vars != ".outcome"]
+    }))
+    all_vars <- unique(c(all_vars, colnames(filtx)))
+    xsub <- x[, all_vars]
+  }
+  
   out <- list(call = nestcv.call,
               output = output,
               outer_result = outer_res,
               outer_method = outer_method,
               outer_folds = outer_folds,
               dimx = dim(x),
+              xsub = xsub,
               y = y,
               yfinal = yfinal,
               final_fit = final_fit,

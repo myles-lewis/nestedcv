@@ -102,7 +102,9 @@ var_stability.nestcv.glmnet <- function(x, percent = FALSE, ...) {
   msd <- apply(m, 1, sd)
   msem <- msd/sqrt(ncol(m))
   freq <- apply(m, 1, function(i) sum(i!=0))
+  vdir <- var_direction(x)
   df <- data.frame(mean = mm, sd = msd, sem = msem, freq = freq, check.names = FALSE)
+  df$dir <- vdir[rownames(df)]
   df[order(abs(df$mean), decreasing = TRUE), ]
 }
 
@@ -115,7 +117,9 @@ var_stability.nestcv.train <- function(x, ...) {
   msd <- apply(m, 1, sd)
   msem <- msd/sqrt(ncol(m))
   freq <- apply(m, 1, function(i) sum(i!=0))
+  vdir <- var_direction(x)
   df <- data.frame(mean = mm, sd = msd, sem = msem, freq = freq, check.names = FALSE)
+  df$dir <- vdir[rownames(df)]
   df[df$freq > 0, ]
 }
 
