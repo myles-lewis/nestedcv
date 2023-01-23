@@ -232,7 +232,7 @@ nestcv.glmnet <- function(y, x,
   }
   
   if (is.na(finalCV)) {
-    fit <- final_coef <- final_param <- yfinal <- final_vars <- NA
+    fit <- final_coef <- final_param <- yfinal <- final_vars <- xsub <- NA
   } else {
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                          balance, balance_options,
@@ -266,6 +266,17 @@ nestcv.glmnet <- function(y, x,
       final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
     }
     final_vars <- colnames(filtx)
+    # collect all vars from outer_res
+    all_vars <- unlist(lapply(outer_res, function(i) {
+      cf <- i$coef
+      if (!is.list(cf)) return(names(cf)[-1])
+      # multinomial
+      unlist(lapply(cf, function(j) {
+        names(j)[-1]
+      }))
+    }))
+    all_vars <- unique(c(all_vars, final_vars))
+    xsub <- x[, all_vars]
   }
   out <- list(call = nestcv.call,
               output = output,
@@ -274,6 +285,7 @@ nestcv.glmnet <- function(y, x,
               n_inner_folds = n_inner_folds,
               outer_folds = outer_folds,
               dimx = dim(x),
+              xsub = xsub,
               y = y,
               yfinal = yfinal,
               final_param = final_param,
