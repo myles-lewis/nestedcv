@@ -34,8 +34,10 @@ to \code{FALSE}, model coefficients are shown and \code{direction} is ignored.}
 A ggplot2 plot
 }
 \description{
-Produces a ggplot2 plot of stability of variable importance across models trained and
-tested across outer CV folds.
+Produces a ggplot2 plot of stability (as SEM) of variable importance across
+models trained and tested across outer CV folds. Overlays frequency with
+which variables are selected across the outer folds and optionally overlays
+directionality for binary response outcome.
 }
 \seealso{
 \code{\link[=var_stability]{var_stability()}}

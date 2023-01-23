@@ -126,8 +126,10 @@ var_stability.nestcv.train <- function(x, ...) {
 
 #' Plot variable stability
 #'
-#' Produces a ggplot2 plot of stability of variable importance across models trained and
-#' tested across outer CV folds.
+#' Produces a ggplot2 plot of stability (as SEM) of variable importance across
+#' models trained and tested across outer CV folds. Overlays frequency with
+#' which variables are selected across the outer folds and optionally overlays
+#' directionality for binary response outcome.
 #'
 #' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
 #' @param final Logical whether to restrict variables to only those which ended
@@ -141,7 +143,8 @@ var_stability.nestcv.train <- function(x, ...) {
 #' @param breaks Vector of continuous breaks for legend colour/size
 #' @return A ggplot2 plot
 #' @seealso [var_stability()]
-#' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller scale_size
+#' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller
+#'   scale_radius
 #' @export
 plot_var_stability <- function(x,
                                final = TRUE,
