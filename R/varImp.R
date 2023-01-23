@@ -183,8 +183,9 @@ plot_var_stability <- function(x,
     geom_point(aes(size = .data$freq,
                    fill = .data$freq), shape = 21) +
     scale_fill_distiller(guide = "legend", palette = "Blues", direction = 1,
-                         breaks = breaks) +
-    scale_size(guide = "legend", breaks = breaks) +
+                         breaks = breaks, limits = c(1, NA)) +
+    scale_radius(guide = "legend", breaks = breaks,
+               limits = c(1, NA)) +
     scale_y_discrete(limits=rev) + ylab("") +
     xlab(xtitle) +
     theme_minimal() +
