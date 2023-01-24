@@ -8,7 +8,7 @@ plot_var_stability(
   x,
   final = TRUE,
   top = 25,
-  direction = FALSE,
+  direction = 0,
   percent = TRUE,
   breaks = c(2, 4, 6, 8, 10)
 )
@@ -22,7 +22,10 @@ all outer folds.}
 
 \item{top}{Limits number of variables plotted. Ignored if \code{final = TRUE}.}
 
-\item{direction}{Logical whether to show directionality for binary models.}
+\item{direction}{Integer controlling plotting of directionality for binary
+models. 0 means no directionality is shown, 1 means directionality is
+overlaid as a colour, 2 means directionality is reflected in the sign of
+variable importance.}
 
 \item{percent}{Logical for \code{nestcv.glmnet} objects only, whether to scale
 coefficients to percentage of the largest coefficient in each model. If set

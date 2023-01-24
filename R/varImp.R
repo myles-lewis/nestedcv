@@ -102,9 +102,12 @@ var_stability.nestcv.glmnet <- function(x, percent = FALSE, ...) {
   msd <- apply(m, 1, sd)
   msem <- msd/sqrt(ncol(m))
   freq <- apply(m, 1, function(i) sum(i!=0))
-  df <- data.frame(mean = mm, sd = msd, sem = msem, freq = freq, check.names = FALSE)
+  df <- data.frame(mean = mm, sd = msd, sem = msem, frequency = freq, check.names = FALSE)
   vdir <- var_direction(x)
-  if (!is.null(vdir)) df$dir <- vdir[rownames(df)]
+  if (!is.null(vdir)) {
+    df$sign <- vdir[rownames(df)]
+    df$direction <- factor(df$sign, labels = paste("Up in", levels(x$y)))
+  }
   df[order(abs(df$mean), decreasing = TRUE), ]
 }
 
@@ -117,9 +120,12 @@ var_stability.nestcv.train <- function(x, ...) {
   msd <- apply(m, 1, sd)
   msem <- msd/sqrt(ncol(m))
   freq <- apply(m, 1, function(i) sum(i!=0))
-  df <- data.frame(mean = mm, sd = msd, sem = msem, freq = freq, check.names = FALSE)
+  df <- data.frame(mean = mm, sd = msd, sem = msem, frequency = freq, check.names = FALSE)
   vdir <- var_direction(x)
-  if (!is.null(vdir)) df$dir <- vdir[rownames(df)]
+  if (!is.null(vdir)) {
+    df$sign <- vdir[rownames(df)]
+    df$direction <- factor(df$sign, labels = paste("Up in", levels(x$y)))
+  }
   df[df$freq > 0, ]
 }
 
@@ -136,7 +142,10 @@ var_stability.nestcv.train <- function(x, ...) {
 #'   up in the final fitted model or to include all variables selected across
 #'   all outer folds.
 #' @param top Limits number of variables plotted. Ignored if `final = TRUE`.
-#' @param direction Logical whether to show directionality for binary models.
+#' @param direction Integer controlling plotting of directionality for binary
+#'   models. 0 means no directionality is shown, 1 means directionality is
+#'   overlaid as a colour, 2 means directionality is reflected in the sign of
+#'   variable importance.
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model. If set
 #'   to `FALSE`, model coefficients are shown and `direction` is ignored.
@@ -144,12 +153,12 @@ var_stability.nestcv.train <- function(x, ...) {
 #' @return A ggplot2 plot
 #' @seealso [var_stability()]
 #' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller
-#'   scale_radius
+#'   scale_fill_manual scale_radius
 #' @export
 plot_var_stability <- function(x,
                                final = TRUE,
                                top = 25,
-                               direction = FALSE,
+                               direction = 0,
                                percent = TRUE,
                                breaks = c(2, 4, 6, 8, 10)) {
   df <- var_stability(x, percent = percent)
@@ -174,23 +183,39 @@ plot_var_stability <- function(x,
     "Coefficient"
   } else "Variable importance"
   
-  if (is.numeric(x$y) | nlevels(x$y) != 2 | !percent) direction <- FALSE
-  if (direction && "dir" %in% colnames(df)) {
-    df$mean <- df$mean * df$dir
+  if (is.numeric(x$y) | nlevels(x$y) != 2 | !percent) direction <- 0
+  if (direction == 2 && "sign" %in% colnames(df)) {
+    df$mean <- df$mean * df$sign
   }
   
-  ggplot(df, aes(x = .data$mean, y = .data$name)) +
-    (if (direction | !percent) geom_vline(xintercept = 0)) +
-    geom_errorbarh(aes(xmin = .data$mean - .data$sem,
-                       xmax = .data$mean + .data$sem), height = 0.2) +
-    geom_point(aes(size = .data$freq,
-                   fill = .data$freq), shape = 21) +
-    scale_fill_distiller(guide = "legend", palette = "Spectral", direction = 1,
-                         breaks = breaks, limits = c(1, NA)) +
-    scale_radius(guide = "legend", breaks = breaks,
-               limits = c(1, NA)) +
-    scale_y_discrete(limits=rev) + ylab("") +
-    xlab(xtitle) +
-    theme_minimal() +
-    theme(axis.text = element_text(colour = "black"))
+  if (direction == 1) {
+    ggplot(df, aes(x = .data$mean, y = .data$name)) +
+      (if (!percent) geom_vline(xintercept = 0)) +
+      geom_errorbarh(aes(xmin = .data$mean - .data$sem,
+                         xmax = .data$mean + .data$sem), height = 0.2) +
+      geom_point(aes(size = .data$frequency,
+                     fill = .data$direction), shape = 21) +
+      scale_fill_manual(values=c("red", "royalblue")) +
+      scale_radius(breaks = breaks,
+                   limits = c(1, NA)) +
+      scale_y_discrete(limits=rev) + ylab("") +
+      xlab(xtitle) +
+      theme_minimal() +
+      theme(axis.text = element_text(colour = "black"))
+  } else {
+    ggplot(df, aes(x = .data$mean, y = .data$name)) +
+      (if (direction | !percent) geom_vline(xintercept = 0)) +
+      geom_errorbarh(aes(xmin = .data$mean - .data$sem,
+                         xmax = .data$mean + .data$sem), height = 0.2) +
+      geom_point(aes(size = .data$frequency,
+                     fill = .data$frequency), shape = 21) +
+      scale_fill_distiller(guide = "legend", palette = "Spectral", direction = 1,
+                           breaks = breaks, limits = c(1, NA)) +
+      scale_radius(guide = "legend", breaks = breaks,
+                   limits = c(1, NA)) +
+      scale_y_discrete(limits=rev) + ylab("") +
+      xlab(xtitle) +
+      theme_minimal() +
+      theme(axis.text = element_text(colour = "black"))
+  }
 }
