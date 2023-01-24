@@ -232,12 +232,14 @@ nestcv.train <- function(y, x,
           registerDoParallel(cores = cv.cores)
         }
       }
+      log <- capture.output({
       final_fit <- caret::train(x = filtx, y = yfinal,
                                 method = method,
                                 weights = weights,
                                 metric = metric,
                                 trControl = trControl,
                                 tuneGrid = tuneGrid, ...)
+      })
       finalTune <- final_fit$bestTune
       if (cv.cores >= 2) {
         if (Sys.info()["sysname"] == "Windows") stopCluster(cl)
@@ -270,7 +272,7 @@ nestcv.train <- function(y, x,
                        filterFUN, filter_options,
                        weights, balance, balance_options,
                        metric, trControl, tuneGrid, outer_train_predict, ...)
-    }, mc.cores = cv.cores)
+    }, mc.cores = cv.cores, mc.silent = TRUE, mc.allow.recursive = FALSE)
   }
   
   predslist <- lapply(outer_res, '[[', 'preds')
@@ -340,12 +342,15 @@ nestcv.trainCore <- function(test, y, x, method,
   filt_xtrain <- dat$filt_xtrain
   filt_xtest <- dat$filt_xtest
   
-  fit <- caret::train(x = filt_xtrain, y = ytrain,
-                      method = method,
-                      weights = weights[-test],
-                      metric = metric,
-                      trControl = trControl,
-                      tuneGrid = tuneGrid, ...)
+  log <- capture.output({
+    fit <- caret::train(x = filt_xtrain, y = ytrain,
+                        method = method,
+                        weights = weights[-test],
+                        metric = metric,
+                        trControl = trControl,
+                        tuneGrid = tuneGrid, ...)
+  })
+  
   predy <- predict(fit, newdata = filt_xtest)
   preds <- data.frame(predy=predy, testy=ytest)
   if (is.factor(y)) {
