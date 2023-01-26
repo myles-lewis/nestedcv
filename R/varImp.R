@@ -5,9 +5,9 @@
 #' fitted object.
 #' 
 #' @param x a `nestcv.glmnet` fitted object
-#' @return matrix of coefficients from outer CV glmnet models. Coefficients for
-#'   variables which are not present in a particular outer CV fold model are set
-#'   to 0.
+#' @return matrix of coefficients from outer CV glmnet models plus the final
+#'   glmnet model. Coefficients for variables which are not present in a
+#'   particular outer CV fold model are set to 0.
 #' @seealso [cv_varImp()]
 #' @export
 cv_coef <- function(x) {
@@ -15,6 +15,9 @@ cv_coef <- function(x) {
   cfset <- lapply(x$outer_result, function(i) {
     i$coef[-1]
   })
+  if (inherits(x$final_fit, "cv.glmnet")) {
+    cfset$Final <- coef(x)[-1]
+  }
   m <- list2matrix(cfset)
   mr <- rowMeans(m)
   m[order(abs(mr), decreasing = TRUE), ]
@@ -27,9 +30,9 @@ cv_coef <- function(x) {
 #' fitted object.
 #' 
 #' @param x a `nestcv.train` fitted object
-#' @return matrix of variable importance from outer CV caret models. Variable
-#'   importance for variables which are not present in a particular outer CV
-#'   fold model is set to 0.
+#' @return matrix of variable importance from outer CV caret models as well as
+#'   the final model. Variable importance for variables which are not present in
+#'   a particular outer CV fold model is set to 0.
 #' @details
 #' Note that [caret::varImp()] may require the model package to be fully loaded
 #' in order to function. During the fitting process `caret` often only loads the
@@ -40,18 +43,27 @@ cv_coef <- function(x) {
 cv_varImp <- function(x) {
   if (!inherits(x, "nestcv.train")) stop("Not a `nestcv.train` object")
   vset <- lapply(x$outer_result, function(i) {
-    v <- varImp(i$fit)$importance
-    if (ncol(v) > 2) {
-      v <- rowMeans(v, na.rm = TRUE)
-      return(v)
-    } else if (ncol(v) == 2) {
-      v <- v[,1, drop = FALSE]
-    }
-    setNames(unlist(v), rownames(v))
+    extractImp(i$fit)
   })
+  if (inherits(x$final_fit, "train")) {
+    vset$Final <- extractImp(x$final_fit)
+  }
   m <- list2matrix(vset)
   mr <- rowMeans(m, na.rm = TRUE)
   m[order(abs(mr), decreasing = TRUE), ]
+}
+
+
+# extract importance from a caret model
+extractImp <- function(x) {
+  v <- caret::varImp(x)$importance
+  if (ncol(v) > 2) {
+    v <- rowMeans(v, na.rm = TRUE)
+    return(v)
+  } else if (ncol(v) == 2) {
+    v <- v[,1, drop = FALSE]
+  }
+  setNames(unlist(v), rownames(v))
 }
 
 
