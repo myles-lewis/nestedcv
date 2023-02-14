@@ -261,10 +261,10 @@ nestcv.glmnet <- function(y, x,
     }
     
     fin_coef <- glmnet_coefs(fit, s = final_param["lambda"])
-    if (is.list(fin_coef)) {
+    if (is.list(fin_coef) | length(fin_coef) == 1) {
       final_coef <- fin_coef  # multinomial
     } else {
-      cfmean <- colmeans(x[, names(fin_coef)[-1]])
+      cfmean <- colmeans(x[, names(fin_coef)[-1], drop = FALSE])
       final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
     }
     final_vars <- colnames(filtx)
