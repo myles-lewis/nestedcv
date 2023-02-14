@@ -1,6 +1,12 @@
 News
 =====
 
+# nestedcv 0.5.1
+###### 14/02/2023
+* Disable printing in `nestcv.train()` from models such as `gbm`. This fixes 
+multicore bug when using standard R gui on mac/linux.
+* Bugfix if `nestcv.glmnet()` model has 0 or 1 coefficients.
+
 # nestedcv 0.5.0
 ###### 23/01/2023
 * `nestedcv` models now return `xsub` containing a subset of the predictor
