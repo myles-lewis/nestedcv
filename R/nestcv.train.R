@@ -232,13 +232,13 @@ nestcv.train <- function(y, x,
           registerDoParallel(cores = cv.cores)
         }
       }
-      log <- capture.output({
-      final_fit <- caret::train(x = filtx, y = yfinal,
-                                method = method,
-                                weights = weights,
-                                metric = metric,
-                                trControl = trControl,
-                                tuneGrid = tuneGrid, ...)
+      printlog <- capture.output({
+        final_fit <- caret::train(x = filtx, y = yfinal,
+                                  method = method,
+                                  weights = weights,
+                                  metric = metric,
+                                  trControl = trControl,
+                                  tuneGrid = tuneGrid, ...)
       })
       finalTune <- final_fit$bestTune
       if (cv.cores >= 2) {
@@ -342,7 +342,7 @@ nestcv.trainCore <- function(test, y, x, method,
   filt_xtrain <- dat$filt_xtrain
   filt_xtest <- dat$filt_xtest
   
-  log <- capture.output({
+  printlog <- capture.output({
     fit <- caret::train(x = filt_xtrain, y = ytrain,
                         method = method,
                         weights = weights[-test],
