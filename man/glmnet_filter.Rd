@@ -42,7 +42,7 @@ character vector of names (type = "names") of filtered parameters. If
 \code{type} is \code{"full"} a named vector of variable importance is returned.
 }
 \description{
-Filter using properties of elastic net regression using glmnet to calculate
+Filter using sparsity of elastic net regression using glmnet to calculate
 variable importance.
 }
 \details{

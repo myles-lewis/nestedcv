@@ -396,7 +396,7 @@ combo_filter <- function(y, x,
 
 #' glmnet filter
 #'
-#' Filter using properties of elastic net regression using glmnet to calculate
+#' Filter using sparsity of elastic net regression using glmnet to calculate
 #' variable importance.
 #'
 #' @param y Response vector
