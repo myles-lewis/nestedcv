@@ -2,6 +2,7 @@
 
 S3method(class_balance,default)
 S3method(class_balance,nestcv.train)
+S3method(coef,cva.glmnet)
 S3method(coef,nestcv.glmnet)
 S3method(innercv_preds,nestcv.glmnet)
 S3method(innercv_preds,nestcv.train)

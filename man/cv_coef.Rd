@@ -10,9 +10,9 @@ cv_coef(x)
 \item{x}{a \code{nestcv.glmnet} fitted object}
 }
 \value{
-matrix of coefficients from outer CV glmnet models. Coefficients for
-variables which are not present in a particular outer CV fold model are set
-to 0.
+matrix of coefficients from outer CV glmnet models plus the final
+glmnet model. Coefficients for variables which are not present in a
+particular outer CV fold model are set to 0.
 }
 \description{
 Extracts coefficients from outer CV glmnet models from a \code{nestcv.glmnet}

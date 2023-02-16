@@ -412,6 +412,19 @@ cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...) {
 }
 
 
+#' Extract coefficients from a cva.glmnet object
+#' 
+#' Extracts model coefficients from a fitted [cva.glmnet()] object.
+#' 
+#' @param object Fitted `cva.glmnet` object.
+#' @param ... Other arguments passed to `coef.glmnet()` e.g. `s` the value of
+#'   lambda at which coefficients are required.
+#' @export
+coef.cva.glmnet <- function(object, ...) {
+  coef(object$fits[[object$which_alpha]], ...)
+}
+
+
 #' glmnet coefficients
 #' 
 #' Convenience function for retrieving coefficients from a [cv.glmnet] model at 
