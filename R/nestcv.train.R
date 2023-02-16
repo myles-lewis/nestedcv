@@ -160,6 +160,7 @@
 #' @importFrom parallel mclapply
 #' @importFrom pROC roc
 #' @importFrom stats predict setNames
+#' @importFrom utils capture.output
 #' @export
 #' 
 nestcv.train <- function(y, x,
