@@ -401,6 +401,10 @@ combo_filter <- function(y, x,
 #'
 #' @param y Response vector
 #' @param x Matrix of predictors
+#' @param family Either a character string representing one of the built-in
+#'   families, or else a `glm()` family object. See [glmnet()]. If not
+#'   specified, the function tries to set this automatically to one of either
+#'   "gaussian", "binomial" or "multinomial".
 #' @param nfilter Number of predictors to return
 #' @param method String indicating method of determining variable importance.
 #'   "mean" (the default) uses the mean absolute coefficients across the range
@@ -423,13 +427,19 @@ combo_filter <- function(y, x,
 #' 
 glmnet_filter <- function(y,
                           x,
+                          family = NULL,
                           nfilter = NULL,
                           method = c("mean", "nonzero"),
                           type = c("index", "names", "full"),
                           ...) {
   type <- match.arg(type)
   method <- match.arg(method)
-  fit <- glmnet(x, y, ...)
+  if (is.null(family)) {
+    family <- if (is.factor(y) | is.character(y)) {
+      if (nlevels(factor(y)) == 2) "binomial" else "multinomial"
+    } else "gaussian"
+  }
+  fit <- glmnet(x, y, family = family, ...)
   cf <- as.matrix(coef(fit))
   if (method == "mean") {
     cf <- abs(cf)

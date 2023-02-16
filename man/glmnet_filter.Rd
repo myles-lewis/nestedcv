@@ -7,6 +7,7 @@
 glmnet_filter(
   y,
   x,
+  family = NULL,
   nfilter = NULL,
   method = c("mean", "nonzero"),
   type = c("index", "names", "full"),
@@ -17,6 +18,11 @@ glmnet_filter(
 \item{y}{Response vector}
 
 \item{x}{Matrix of predictors}
+
+\item{family}{Either a character string representing one of the built-in
+families, or else a \code{glm()} family object. See \code{\link[=glmnet]{glmnet()}}. If not
+specified, the function tries to set this automatically to one of either
+"gaussian", "binomial" or "multinomial".}
 
 \item{nfilter}{Number of predictors to return}
 
