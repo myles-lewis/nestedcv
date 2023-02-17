@@ -21,5 +21,10 @@ returned.
 \description{
 Quick function to calculate performance metrics: confusion matrix, accuracy
 and balanced accuracy for classification; ROC AUC for binary classification;
-RMSE and R^2 for regression.
+RMSE and R^2 for regression. Multi class AUC is returned for multinomial
+classification.
+}
+\details{
+For multinomial classification, multi-class AUC as defined by Hand and Till
+is calculated using \code{\link[pROC:multiclass]{pROC::multiclass.roc()}}.
 }
