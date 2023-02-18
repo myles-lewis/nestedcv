@@ -20,6 +20,7 @@
 #'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a matrix of p values.
+#' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #'
 #' @return Integer vector of indices of filtered parameters (type = "index") or
 #'   character vector of names (type = "names") of filtered parameters in order
@@ -46,12 +47,13 @@
 #' @export
 #'
 ttest_filter <- function(y,
-                       x,
-                       force_vars = NULL,
-                       nfilter = NULL,
-                       p_cutoff = 0.05,
-                       rsq_cutoff = NULL,
-                       type = c("index", "names", "full")) {
+                         x,
+                         force_vars = NULL,
+                         nfilter = NULL,
+                         p_cutoff = 0.05,
+                         rsq_cutoff = NULL,
+                         type = c("index", "names", "full"),
+                         ...) {
   type <- match.arg(type)
   y <- factor(y)
   indx1 <- as.numeric(y) == 1
@@ -62,12 +64,12 @@ ttest_filter <- function(y,
   rownames(res) <- colnames(x)
   if (type == "full") return(res)
   filter_end(res[, "pvalue"],
-                x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
+             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, ...)
 }
 
 
 filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
-                          type) {
+                          type, ...) {
   check_vars <- which(!colnames(x) %in% force_vars)
   outp <- pval[check_vars]
   outorder <- order(outp)
@@ -75,7 +77,7 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
   outp <- outp[outorder]
   if (!is.null(p_cutoff)) out <- out[outp < p_cutoff]
   if (!is.null(rsq_cutoff)) {
-    co <- collinear(x[, out], rsq_cutoff = rsq_cutoff)
+    co <- collinear(x[, out], rsq_cutoff = rsq_cutoff, ...)
     if (length(co) > 0) out <- out[-co]
   }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
@@ -107,6 +109,7 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
 #'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a matrix of p values.
+#' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
 #' `type` is `"full"` full output from [Rfast::ftests] is returned.
@@ -128,7 +131,8 @@ anova_filter <- function(y,
                          nfilter = NULL,
                          p_cutoff = 0.05,
                          rsq_cutoff = NULL,
-                         type = c("index", "names", "full")) {
+                         type = c("index", "names", "full"),
+                         ...) {
   type <- match.arg(type)
   y <- factor(y)
   x <- as.matrix(x)
@@ -136,7 +140,7 @@ anova_filter <- function(y,
   rownames(res) <- colnames(x)
   if (type == "full") return(res)
   filter_end(res[, "pval"],
-                x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
+             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, ...)
 }
 
 
@@ -158,6 +162,9 @@ anova_filter <- function(y,
 #'   on Wilcoxon test. If 2 or more predictors are collinear, the first ranked
 #'   predictor by Wilcoxon test is retained, while the other collinear predictors are
 #'   removed. See [collinear()].
+#' @param rsq_method character string indicating which correlation coefficient
+#'   is to be computed. One of "pearson" (default), "kendall", or "spearman".
+#'   See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a matrix of p-values.
 #' @param exact Logical whether exact or approximate p-value is calculated. 
@@ -176,6 +183,7 @@ wilcoxon_filter <- function(y,
                             nfilter = NULL,
                             p_cutoff = 0.05,
                             rsq_cutoff = NULL,
+                            rsq_method = "pearson",
                             type = c("index", "names", "full"),
                             exact = FALSE,
                             ...) {
@@ -189,7 +197,8 @@ wilcoxon_filter <- function(y,
   )
   if (type == "full") return(res)
   filter_end(res[, "pvalue"],
-                x, force_vars, nfilter, p_cutoff, rsq_cutoff, type)
+             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type,
+             rsq_method = rsq_method)
 }
 
 
@@ -213,8 +222,8 @@ wilcoxon_filter <- function(y,
 #' @export
 #' 
 correls2 <- function(y, x,
-                    method = "pearson",
-                    use = "complete.obs") {
+                     method = "pearson",
+                     use = "complete.obs") {
   ok <- complete.cases(x, y)
   x <- x[ok, ]
   y <- y[ok]
@@ -475,13 +484,17 @@ glmnet_filter <- function(y,
 #'   determine which columns to retain, so the columns in `x` should be sorted
 #'   with the most important columns first.
 #' @param rsq_cutoff Value of cut-off for r-squared
+#' @param rsq_method character string indicating which correlation coefficient
+#'   is to be computed. One of "pearson" (default), "kendall", or "spearman".
+#'   See [cor()].
 #' @param verbose Boolean whether to print details
 #' @return Integer vector of the indices of columns in `x` to remove due to
 #'   collinearity
 #' @export
 #' 
-collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
-  rsq <- cor(x)^2
+collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
+                      verbose = FALSE) {
+  rsq <- cor(x, method = rsq_method)^2
   rsq[lower.tri(rsq, diag = TRUE)] <- NA
   combsAboveCutoff <- which(rsq > rsq_cutoff)
   colsToCheck <- ceiling(combsAboveCutoff / nrow(rsq))
@@ -533,6 +546,9 @@ collinear <- function(x, rsq_cutoff = 0.9, verbose = FALSE) {
 #'   on AIC from a linear model. If 2 or more predictors are collinear, the
 #'   first ranked predictor by AIC is retained, while the other collinear
 #'   predictors are removed. See [collinear()].
+#' @param rsq_method character string indicating which correlation coefficient
+#'   is to be computed. One of "pearson" (default), "kendall", or "spearman".
+#'   See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a matrix of p values.
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
@@ -549,6 +565,7 @@ lm_filter <- function(y, x,
                       nfilter = NULL,
                       p_cutoff = NULL,
                       rsq_cutoff = NULL,
+                      rsq_method = "pearson",
                       type = c("index", "names", "full")) {
   type <- match.arg(type)
   if (is.data.frame(x)) {
@@ -586,7 +603,8 @@ lm_filter <- function(y, x,
   out <- out[order(out[,1]), ]
   if (!is.null(p_cutoff)) out <- out[out[, 'pval'] < p_cutoff, ]
   if (!is.null(rsq_cutoff)) {
-    co <- collinear(x[, rownames(out)], rsq_cutoff = rsq_cutoff)
+    co <- collinear(x[, rownames(out)], rsq_cutoff = rsq_cutoff,
+                    rsq_method = rsq_method)
     if (length(co) > 0) out <- out[-co, ]
   }
   if (!is.null(nfilter)) out <- out[1:min(nfilter, nrow(out)), ]

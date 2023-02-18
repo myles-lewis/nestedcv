@@ -11,6 +11,7 @@ wilcoxon_filter(
   nfilter = NULL,
   p_cutoff = 0.05,
   rsq_cutoff = NULL,
+  rsq_method = "pearson",
   type = c("index", "names", "full"),
   exact = FALSE,
   ...
@@ -35,6 +36,10 @@ Default \code{NULL} means no collinearity filtering. Predictors are ranked based
 on Wilcoxon test. If 2 or more predictors are collinear, the first ranked
 predictor by Wilcoxon test is retained, while the other collinear predictors are
 removed. See \code{\link[=collinear]{collinear()}}.}
+
+\item{rsq_method}{character string indicating which correlation coefficient
+is to be computed. One of "pearson" (default), "kendall", or "spearman".
+See \code{\link[=collinear]{collinear()}}.}
 
 \item{type}{Type of vector returned. Default "index" returns indices,
 "names" returns predictor names, "full" returns a matrix of p-values.}

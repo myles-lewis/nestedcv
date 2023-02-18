@@ -4,7 +4,7 @@
 \alias{collinear}
 \title{Filter to reduce collinearity in predictors}
 \usage{
-collinear(x, rsq_cutoff = 0.9, verbose = FALSE)
+collinear(x, rsq_cutoff = 0.9, rsq_method = "pearson", verbose = FALSE)
 }
 \arguments{
 \item{x}{A matrix or data.frame of values. The order of columns is used to
@@ -12,6 +12,10 @@ determine which columns to retain, so the columns in \code{x} should be sorted
 with the most important columns first.}
 
 \item{rsq_cutoff}{Value of cut-off for r-squared}
+
+\item{rsq_method}{character string indicating which correlation coefficient
+is to be computed. One of "pearson" (default), "kendall", or "spearman".
+See \code{\link[=cor]{cor()}}.}
 
 \item{verbose}{Boolean whether to print details}
 }

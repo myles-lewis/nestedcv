@@ -11,7 +11,8 @@ ttest_filter(
   nfilter = NULL,
   p_cutoff = 0.05,
   rsq_cutoff = NULL,
-  type = c("index", "names", "full")
+  type = c("index", "names", "full"),
+  ...
 )
 }
 \arguments{
@@ -36,6 +37,8 @@ removed. See \code{\link[=collinear]{collinear()}}.}
 
 \item{type}{Type of vector returned. Default "index" returns indices, "names"
 returns predictor names, "full" returns a matrix of p values.}
+
+\item{...}{optional arguments, e.g. \code{rsq_method}: see \code{\link[=collinear]{collinear()}}.}
 }
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
