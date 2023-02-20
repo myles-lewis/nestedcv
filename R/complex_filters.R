@@ -73,6 +73,7 @@ layer_filter <- function(y, x,
     tab <- table(y)
     maj_class <- names(tab)[which.max(tab)]
   }
+  x <- as.matrix(x)
   out <- NULL
   
   for (nf in nfilter) {
