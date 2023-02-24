@@ -158,10 +158,10 @@ var_stability.nestcv.train <- function(x, ...) {
 #'   up in the final fitted model or to include all variables selected across
 #'   all outer folds.
 #' @param top Limits number of variables plotted. Ignored if `final = TRUE`.
-#' @param direction Integer controlling plotting of directionality for binary
-#'   models. 0 means no directionality is shown, 1 means directionality is
-#'   overlaid as a colour, 2 means directionality is reflected in the sign of
-#'   variable importance.
+#' @param direction Integer controlling plotting of directionality for binary or
+#'   regression models. 0 means no directionality is shown, 1 means
+#'   directionality is overlaid as a colour, 2 means directionality is reflected
+#'   in the sign of variable importance.
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model. If set
 #'   to `FALSE`, model coefficients are shown and `direction` is ignored.

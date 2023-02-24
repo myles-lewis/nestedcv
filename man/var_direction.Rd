@@ -11,8 +11,9 @@ var_direction(object)
 }
 \value{
 named vector showing sign of final predictors. If the response vector
-is not binary \code{NULL} is returned.
+is multinomial \code{NULL} is returned.
 }
 \description{
-Determines directionality of final predictors for binary models.
+Determines directionality of final predictors for binary or regression
+models.
 }

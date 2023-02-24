@@ -27,16 +27,17 @@ An object of class \code{hsstan}
 }
 \description{
 This function applies a cross-validation (CV) procedure for training Bayesian
-models with hierarchical shrinkage priors using the \code{hsstan} package.
-The function allows the option of embedded filtering of predictors for
-feature selection within the CV loop. Within each training fold, an optional
+models with hierarchical shrinkage priors using the \code{hsstan} package. The
+function allows the option of embedded filtering of predictors for feature
+selection within the CV loop. Within each training fold, an optional
 filtering of predictors is performed, followed by fitting of an \code{hsstsan}
 model. Predictions on the testing folds are brought back together and error
-estimation/ accuracy determined. The default is 10-fold CV.
-The function is implemented within the \code{nestedcv} package. The \code{hsstan}
-models do not require tuning of meta-parameters and therefore only a single
-CV procedure is needed to evaluate performance. This is implemented using the
-\code{outer} CV procedure in the \code{nestedcv} package.
+estimation/ accuracy determined. The default is 10-fold CV. The function is
+implemented within the \code{nestedcv} package. The \code{hsstan} models do not require
+tuning of meta-parameters and therefore only a single CV procedure is needed
+to evaluate performance. This is implemented using the \code{outer} CV procedure
+in the \code{nestedcv} package. Supports binary outcome (logistic regression) or
+continuous outcome. Multinomial models are currently not supported.
 }
 \examples{
 \donttest{

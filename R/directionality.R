@@ -14,7 +14,7 @@ var_dir <- function(y, x) {
 
 #' Variable directionality
 #'
-#' Determines directionality of final predictors for regression or binary
+#' Determines directionality of final predictors for binary or regression
 #' models.
 #'
 #' @param object a `nestcv.glmnet` or `nestcv.train` fitted model
