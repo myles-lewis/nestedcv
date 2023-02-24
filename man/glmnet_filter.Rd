@@ -8,6 +8,7 @@ glmnet_filter(
   y,
   x,
   family = NULL,
+  force_vars = NULL,
   nfilter = NULL,
   method = c("mean", "nonzero"),
   type = c("index", "names", "full"),
@@ -23,6 +24,9 @@ glmnet_filter(
 families, or else a \code{glm()} family object. See \code{\link[=glmnet]{glmnet()}}. If not
 specified, the function tries to set this automatically to one of either
 "gaussian", "binomial" or "multinomial".}
+
+\item{force_vars}{Vector of column names \code{x} which have no shrinkage and are
+always included in the model.}
 
 \item{nfilter}{Number of predictors to return}
 

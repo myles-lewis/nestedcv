@@ -414,6 +414,8 @@ combo_filter <- function(y, x,
 #'   families, or else a `glm()` family object. See [glmnet()]. If not
 #'   specified, the function tries to set this automatically to one of either
 #'   "gaussian", "binomial" or "multinomial".
+#' @param force_vars Vector of column names `x` which have no shrinkage and are
+#'   always included in the model.
 #' @param nfilter Number of predictors to return
 #' @param method String indicating method of determining variable importance.
 #'   "mean" (the default) uses the mean absolute coefficients across the range
@@ -437,6 +439,7 @@ combo_filter <- function(y, x,
 glmnet_filter <- function(y,
                           x,
                           family = NULL,
+                          force_vars = NULL,
                           nfilter = NULL,
                           method = c("mean", "nonzero"),
                           type = c("index", "names", "full"),
@@ -448,7 +451,12 @@ glmnet_filter <- function(y,
       if (nlevels(factor(y)) == 2) "binomial" else "multinomial"
     } else "gaussian"
   }
-  fit <- glmnet(x, y, family = family, ...)
+  penalty.factor <- rep(1, ncol(x))
+  if (!is.null(force_vars)) {
+    keep <- which(colnames(x) %in% force_vars)
+    penalty.factor[keep] <- 0
+  } else keep <- NULL
+  fit <- glmnet(x, y, family = family, penalty.factor = penalty.factor, ...)
   cf <- as.matrix(coef(fit))
   if (method == "mean") {
     cf <- abs(cf)
@@ -460,8 +468,10 @@ glmnet_filter <- function(y,
   out <- out[-1]  # remove intercept
   if (type == "full") return(out)
   if (type == "index") names(out) <- 1:ncol(x)
+  if (!is.null(force_vars)) {
+    out <- out[c(keep, order(out[-keep], decreasing = TRUE))]
+  } else out <- sort(out, decreasing = TRUE)
   out <- out[out != 0]
-  out <- sort(out, decreasing = TRUE)
   if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
   out <- names(out)
   if (length(out) == 0) stop("No predictors selected")
