@@ -170,6 +170,8 @@ var_stability.nestcv.train <- function(x, ...) {
 #'   regression models. 0 means no directionality is shown, 1 means
 #'   directionality is overlaid as a colour, 2 means directionality is reflected
 #'   in the sign of variable importance.
+#' @param dir_labels Character vector for controlling the legend when
+#'   `direction = 1`
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model. If set
 #'   to `FALSE`, model coefficients are shown and `direction` is ignored.
@@ -183,6 +185,7 @@ plot_var_stability <- function(x,
                                final = TRUE,
                                top = 25,
                                direction = 0,
+                               dir_labels = NULL,
                                percent = TRUE,
                                breaks = c(2, 4, 6, 8, 10)) {
   df <- var_stability(x, percent = percent)
@@ -210,6 +213,9 @@ plot_var_stability <- function(x,
   if ((!is.numeric(x$y) & nlevels(x$y) != 2) | !percent) direction <- 0
   if (direction == 2 && "sign" %in% colnames(df)) {
     df$mean <- df$mean * df$sign
+  }
+  if (direction > 0 && !is.null(dir_labels)) {
+    df$direction <- factor(df$direction, labels = dir_labels)
   }
   
   if (direction == 1) {

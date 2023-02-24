@@ -9,6 +9,7 @@ plot_var_stability(
   final = TRUE,
   top = 25,
   direction = 0,
+  dir_labels = NULL,
   percent = TRUE,
   breaks = c(2, 4, 6, 8, 10)
 )
@@ -26,6 +27,9 @@ all outer folds.}
 regression models. 0 means no directionality is shown, 1 means
 directionality is overlaid as a colour, 2 means directionality is reflected
 in the sign of variable importance.}
+
+\item{dir_labels}{Character vector for controlling the legend when
+\code{direction = 1}}
 
 \item{percent}{Logical for \code{nestcv.glmnet} objects only, whether to scale
 coefficients to percentage of the largest coefficient in each model. If set
