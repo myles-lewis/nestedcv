@@ -123,9 +123,9 @@ var_stability.nestcv.glmnet <- function(x, percent = FALSE, ...) {
   if (!is.null(vdir)) {
     df$sign <- vdir[rownames(df)]
     df$direction <- if (nlevels(x$y) == 2) {
-      factor(df$sign, labels = paste("Up in", levels(x$y)))
+      factor(df$sign, levels = c(-1, 1), labels = paste("Up in", levels(x$y)))
     } else {
-      factor(df$sign, labels = c("Negative", "Positive"))
+      factor(df$sign, levels = c(-1, 1), labels = c("Negative", "Positive"))
     }
   }
   df[order(abs(df$mean), decreasing = TRUE), ]
@@ -145,9 +145,9 @@ var_stability.nestcv.train <- function(x, ...) {
   if (!is.null(vdir)) {
     df$sign <- vdir[rownames(df)]
     df$direction <- if (nlevels(x$y) == 2) {
-      factor(df$sign, labels = paste("Up in", levels(x$y)))
+      factor(df$sign, levels = c(-1, 1), labels = paste("Up in", levels(x$y)))
     } else {
-      factor(df$sign, labels = c("Negative", "Positive"))
+      factor(df$sign, levels = c(-1, 1), labels = c("Negative", "Positive"))
     }
   }
   df[df$freq > 0, ]
