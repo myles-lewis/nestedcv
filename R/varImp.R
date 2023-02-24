@@ -199,7 +199,7 @@ plot_var_stability <- function(x,
     "Coefficient"
   } else "Variable importance"
   
-  if (is.numeric(x$y) | nlevels(x$y) != 2 | !percent) direction <- 0
+  if ((!is.numeric(x$y) & nlevels(x$y) != 2) | !percent) direction <- 0
   if (direction == 2 && "sign" %in% colnames(df)) {
     df$mean <- df$mean * df$sign
   }

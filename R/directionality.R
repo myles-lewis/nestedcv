@@ -1,6 +1,12 @@
 
 var_dir <- function(y, x) {
-  if (is.numeric(y) | nlevels(y) != 2) return(NULL)
+  if (is.numeric(y)) {
+    # regression
+    cc <- correl_filter(y, x, p_cutoff = NULL, type = "full")
+    return(sign(cc[, "r"]))
+  }
+  # classification
+  if (nlevels(y) != 2) return(NULL)
   tt <- ttest_filter(y, x, p_cutoff = NULL, type = "full")
   -sign(tt[, "stat"])
 }
@@ -8,11 +14,12 @@ var_dir <- function(y, x) {
 
 #' Variable directionality
 #'
-#' Determines directionality of final predictors for binary models.
-#' 
+#' Determines directionality of final predictors for regression or binary
+#' models.
+#'
 #' @param object a `nestcv.glmnet` or `nestcv.train` fitted model
 #' @return named vector showing sign of final predictors. If the response vector
-#'   is not binary `NULL` is returned.
+#'   is multinomial `NULL` is returned.
 #' @export
 
 var_direction <- function(object) {
