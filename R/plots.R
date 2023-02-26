@@ -2,7 +2,8 @@
 
 #' Plot cross-validated glmnet alpha
 #' 
-#' Plot of cross-validated glmnet alpha parameter against deviance.
+#' Plot of cross-validated glmnet alpha parameter against deviance for each 
+#' outer CV fold.
 #' 
 #' @param x Fitted "nestcv.glmnet" object
 #' @param col Optional vector of line colours for each fold

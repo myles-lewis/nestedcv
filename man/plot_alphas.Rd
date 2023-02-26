@@ -17,7 +17,8 @@ plot_alphas(x, col = NULL, ...)
 No return value
 }
 \description{
-Plot of cross-validated glmnet alpha parameter against deviance.
+Plot of cross-validated glmnet alpha parameter against deviance for each
+outer CV fold.
 }
 \seealso{
 \link{nestcv.glmnet}
