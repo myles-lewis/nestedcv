@@ -539,12 +539,16 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
 #'
 #' Obtains predictions from the final fitted model from a [nestcv.glmnet]
 #' object.
+#' 
 #' @param object Fitted `nestcv.glmnet` object
 #' @param newdata New data to predict outcome on
 #' @param s Value of lambda for glmnet prediction
 #' @param ... Other arguments passed to `predict.glmnet`.
 #' @return Object returned depends on the `...` argument passed to predict
 #'   method for `glmnet` objects.
+#' @details Checks for missing predictors and if these are sparse (i.e. have
+#'   zero coefficients) columns of 0 are automatically added to enable
+#'   prediction to proceed.
 #' @seealso [glmnet::glmnet]
 #' @method predict nestcv.glmnet
 #' @export
@@ -557,7 +561,7 @@ predict.nestcv.glmnet <- function(object, newdata,
 
 
 # fills in zero coefficent columns if missing
-fix_cols <- function(x, newx, s = "lambda.min") {
+fix_cols <- function(x, newx, s) {
   cf <- coef(x, s = s)
   final_vars <- rownames(cf)[-1]
   cf <- cf[-1,]
