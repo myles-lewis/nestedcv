@@ -551,8 +551,31 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
 predict.nestcv.glmnet <- function(object, newdata,
                                   s = object$final_param["lambda"],
                                   ...) {
-  final_vars <- rownames(coef(object$final_fit))[-1]
-  newx <- newdata[, final_vars]
+  newx <- fix_cols(object$final_fit, newdata, s = s)
   predict(object$final_fit, newx = newx, s = unname(s), ...)
 }
 
+
+# fills in zero coefficent columns if missing
+fix_cols <- function(x, newx, s = "lambda.min") {
+  cf <- coef(x, s = s)
+  final_vars <- rownames(cf)[-1]
+  cf <- cf[-1,]
+  # if full subset present
+  if (all(final_vars %in% colnames(newx))) return(newx[, final_vars])
+  # some cols missing
+  nz <- if (is.vector(cf)) {
+    cf != 0
+  } else apply(cf, 1, function(i) any(i != 0))  # multinomial
+  nonzeros <- final_vars[nz]
+  if (!all(nonzeros %in% colnames(newx))) {
+    stop("Some non-zero coefficient predictors are missing")}
+  zeros <- final_vars[!nz]
+  if (length(zeros) == 0) return(newx[, final_vars])
+  miss <- zeros[!zeros %in% colnames(newx)] 
+  if (length(miss) == 0) return(newx[, final_vars])
+  mat <- matrix(0, nrow = nrow(newx), ncol = length(miss),
+                dimnames = list(rownames(newx), miss))
+  out <- cbind(newx, mat)
+  out[, final_vars]  # col order seems to matter
+}
