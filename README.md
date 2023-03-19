@@ -173,6 +173,7 @@ Only one CV split is needed (outercv) as the Bayesian model does not require
 learning of meta-parameters.
 
 ```
+library(hsstan)
 # specify options for running the code
 nfolds <- 3
 
@@ -209,8 +210,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
 # view prediction performance based on testing folds
 summary(res.cv.hsstan)
 
-# load hsstan package to examine the Bayesian model
-library(hsstan)
+# use hsstan package to examine the Bayesian model
 sampler.stats(res.cv.hsstan$final_fit)
 print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
 ```
@@ -251,7 +251,6 @@ rownames(dt) <- paste0("sample", c(1:nrow(dt)))
 dt$outcome.bin <- sigmoid(0.5 * dt$marker1 + 2 * dt$marker2) > runif(nrow(dt))
 dt$outcome.bin <- factor(dt$outcome.bin)
 
-
 # unpenalised covariates: always retain in the prediction model
 uvars <- "marker1"
 # penalised covariates: coefficients are drawn from hierarchical shrinkage prior
@@ -272,8 +271,7 @@ res.cv.hsstan <- outercv(y = dt$outcome.bin,
 # view prediction performance based on testing folds
 summary(res.cv.hsstan)
 
-# load hsstan package to examine the Bayesian model
-library(hsstan)
+# use hsstan package to examine the Bayesian model
 sampler.stats(res.cv.hsstan$final_fit)
 print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
 ```
