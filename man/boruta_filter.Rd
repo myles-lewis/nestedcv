@@ -24,7 +24,7 @@ and/or "Tentative".}
 "names" returns predictor names, "full" returns a named vector of variable
 importance.}
 
-\item{...}{Other arguments passed to \link[Boruta:Boruta]{Boruta::Boruta}}
+\item{...}{Other arguments passed to \code{\link[Boruta:Boruta]{Boruta::Boruta()}}}
 }
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
