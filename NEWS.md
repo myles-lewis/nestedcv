@@ -1,6 +1,14 @@
 News
 =====
 
+# nestedcv 0.6.0
+###### 19/03/2023
+* Switch some packages from Imports to Suggests to make basic installation 
+simpler.
+* Provide helper prediction wrapper functions to make it easier to use package 
+`fastshap` for calculating SHAP values.
+* Add `force_vars` argument to `glmnet_filter()`
+
 # nestedcv 0.5.2
 ###### 17/02/2023
 * Disable printing in `nestcv.train()` from models such as `gbm`. This fixes 
