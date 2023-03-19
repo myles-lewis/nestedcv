@@ -347,13 +347,16 @@ rf_filter <- function(y, x, nfilter = NULL,
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
 #' `type` is `"full"` a named vector of variable importance is returned.
-#' @seealso [CORElearn::attrEval]
-#' @importFrom CORElearn attrEval
+#' @seealso [CORElearn::attrEval()]
 #' @export
 #'
 relieff_filter <- function(y, x, nfilter = NULL, 
                            estimator = "ReliefFequalK",
                            type = c("index", "names", "full"), ...) {
+  if (!requireNamespace("CORElearn", quietly = TRUE)) {
+    stop("Package 'CORElearn' must be installed to use this filter",
+         call. = FALSE)
+  }
   type <- match.arg(type)
   df <- as.data.frame(x)
   df$y <- y
