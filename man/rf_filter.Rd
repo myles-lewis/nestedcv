@@ -26,12 +26,12 @@ returned.}
 "names" returns predictor names, "full" returns a named vector of variable
 importance.}
 
-\item{ntree}{Number of trees to grow. See \link{randomForest}.}
+\item{ntree}{Number of trees to grow. See \link[randomForest:randomForest]{randomForest::randomForest}.}
 
 \item{mtry}{Number of predictors randomly sampled as candidates at each
-split. See \link{randomForest}.}
+split. See \link[randomForest:randomForest]{randomForest::randomForest}.}
 
-\item{...}{Optional arguments passed to \link{randomForest}.}
+\item{...}{Optional arguments passed to \link[randomForest:randomForest]{randomForest::randomForest}.}
 }
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
@@ -42,7 +42,8 @@ character vector of names (type = "names") of filtered parameters. If
 Fits a random forest model and ranks variables by variable importance.
 }
 \details{
-This filter uses the \link{randomForest} function from the randomForest package.
-Variable importance is calculated using the \link{importance} function, specifying
-type 1 = mean decrease in accuracy. See \link{importance}.
+This filter uses the \code{randomForest()} function from the \code{randomForest}
+package. Variable importance is calculated using the
+\link[randomForest:importance]{randomForest::importance} function, specifying type 1 = mean decrease in
+accuracy. See \link[randomForest:importance]{randomForest::importance}.
 }

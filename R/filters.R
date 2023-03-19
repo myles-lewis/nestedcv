@@ -297,18 +297,18 @@ correl_filter <- function(y,
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a named vector of variable 
 #' importance.
-#' @param ntree Number of trees to grow. See [randomForest].
+#' @param ntree Number of trees to grow. See [randomForest::randomForest].
 #' @param mtry Number of predictors randomly sampled as candidates at each 
-#' split. See [randomForest].
-#' @param ... Optional arguments passed to [randomForest].
+#' split. See [randomForest::randomForest].
+#' @param ... Optional arguments passed to [randomForest::randomForest].
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
 #' `type` is `"full"` a named vector of variable importance is returned.
 #' @details
-#' This filter uses the [randomForest] function from the randomForest package.
-#' Variable importance is calculated using the [importance] function, specifying
-#' type 1 = mean decrease in accuracy. See [importance].
-#' @importFrom randomForest randomForest importance
+#' This filter uses the `randomForest()` function from the `randomForest`
+#' package. Variable importance is calculated using the
+#' [randomForest::importance] function, specifying type 1 = mean decrease in
+#' accuracy. See [randomForest::importance].
 #' @export
 #' 
 rf_filter <- function(y, x, nfilter = NULL,
@@ -316,6 +316,10 @@ rf_filter <- function(y, x, nfilter = NULL,
                       ntree = 1000,
                       mtry = ncol(x) * 0.2,
                       ...) {
+  if (!requireNamespace("randomForest", quietly = TRUE)) {
+    stop("Package 'randomForest' must be installed to use this filter",
+         call. = FALSE)
+  }
   type <- match.arg(type)
   fit <- randomForest::randomForest(x, y, importance = TRUE,
                                     ntree = ntree, mtry = mtry, ...)
@@ -329,6 +333,7 @@ rf_filter <- function(y, x, nfilter = NULL,
   if (type == "index") out <- as.integer(out)
   out
 }
+
 
 #' ReliefF filter
 #' 
@@ -482,6 +487,7 @@ glmnet_filter <- function(y,
   out
 }
 
+
 # Code modified from caret::findCorrelation
 # https://github.com/topepo/caret/blob/master/pkg/caret/R/findCorrelation.R
 
@@ -627,4 +633,3 @@ lm_filter <- function(y, x,
          index = match(out, colnames(x)),
          names = out)
 }
-

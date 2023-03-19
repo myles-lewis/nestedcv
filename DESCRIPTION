@@ -32,7 +32,6 @@ Imports:
     methods,
     parallel,
     pROC,
-    randomForest,
     RcppEigen,
     reshape2,
     Rfast,
@@ -46,6 +45,7 @@ Suggests:
     ggbeeswarm,
     hsstan,
     mda,
+    randomForest,
     rmarkdown,
     knitr,
     SuperLearner
