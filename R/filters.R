@@ -335,6 +335,57 @@ rf_filter <- function(y, x, nfilter = NULL,
 }
 
 
+#' Random forest ranger filter
+#' 
+#' Fits a random forest model via the `ranger` package and ranks variables by
+#' variable importance.
+#' 
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param nfilter Number of predictors to return. If `NULL` all predictors are 
+#' returned.
+#' @param type Type of vector returned. Default "index" returns indices,
+#' "names" returns predictor names, "full" returns a named vector of variable 
+#' importance.
+#' @param num.trees Number of trees to grow. See [ranger::ranger].
+#' @param mtry Number of predictors randomly sampled as candidates at each 
+#' split. See [ranger::ranger].
+#' @param ... Optional arguments passed to [ranger::ranger].
+#' @return Integer vector of indices of filtered parameters (type = "index") or 
+#' character vector of names (type = "names") of filtered parameters. If 
+#' `type` is `"full"` a named vector of variable importance is returned.
+#' @details
+#' This filter uses the `ranger()` function from the `ranger` package. Variable
+#' importance is calculated using mean decrease in gini impurity.
+#' @export
+#' 
+ranger_filter <- function(y, x, nfilter = NULL,
+                          type = c("index", "names", "full"),
+                          num.trees = 1000,
+                          mtry = ncol(x) * 0.2,
+                          ...) {
+  if (!requireNamespace("ranger", quietly = TRUE)) {
+    stop("Package 'ranger' must be installed to use this filter",
+         call. = FALSE)
+  }
+  type <- match.arg(type)
+  fit <- ranger::ranger(x = x, y = y, importance = "impurity",
+                        num.trees = num.trees, mtry = mtry,
+                        write.forest = FALSE,
+                        verbose = FALSE,
+                        num.threads = 1, ...)
+  vi <- fit$variable.importance
+  names(vi) <- if (type == "index") 1:ncol(x) else colnames(x)
+  if (type == "full") return(vi)
+  vi <- sort(vi, decreasing = TRUE)
+  vi <- vi[vi != 0]
+  if (!is.null(nfilter)) vi <- vi[1:min(nfilter, length(vi))]
+  out <- names(vi)
+  if (type == "index") out <- as.integer(out)
+  out
+}
+
+
 #' ReliefF filter
 #' 
 #' Uses ReliefF algorithm from the CORElearn package to rank predictors in order 
