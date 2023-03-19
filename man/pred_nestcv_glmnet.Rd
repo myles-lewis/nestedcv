@@ -22,3 +22,10 @@ prediction wrapper function designed for use with
 Prediction wrapper functions to enable the use of the \code{fastshap} package for
 generating SHAP values from \code{nestedcv} trained models.
 }
+\details{
+These prediction wrapper functions are designed to be used with the
+\code{fastshap} package. They currently work for both \code{nestcv.glmnet} and
+\code{nestcv.train} models for binary classification or regression. For multiclass
+classification they need to be recoded to specify which class is being
+investigated.
+}

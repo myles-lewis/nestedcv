@@ -10,6 +10,12 @@
 #' @param newdata a matrix of new data
 #' @return prediction wrapper function designed for use with
 #'   [fastshap::explain()]
+#' @details
+#' These prediction wrapper functions are designed to be used with the
+#' `fastshap` package. They currently work for both `nestcv.glmnet` and
+#' `nestcv.train` models for binary classification or regression. For multiclass
+#' classification they need to be recoded to specify which class is being
+#' investigated.
 #' @export
 #' 
 pred_nestcv_glmnet <- function(x, newdata) {
@@ -59,7 +65,13 @@ plot_shap_importance <- function(shap, x, bee.cex = 0.5) {
     ggbeeswarm::geom_beeswarm(cex = bee.cex) +
     scale_color_gradient2(low="deepskyblue2", mid="purple3", high="red",
                           breaks = c(-1.5, 1.5),
-                          labels = c("Low", "High"), name="Feature\nvalue") +
+                          labels = c("Low", "High"), name="Feature\nvalue\n",
+                          guide = guide_colorbar(
+                            barwidth = 0.5,
+                            barheight = 8)
+                          #   title.theme = element_text(angle = 90, hjust = 0.5, vjust = 0),
+                          #   title.position = "left")
+                          ) +
     scale_y_discrete(limits = rev) +
     ylab("") +
     xlab("SHAP value") +
