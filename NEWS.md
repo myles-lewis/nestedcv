@@ -8,6 +8,7 @@ simpler.
 * Provide helper prediction wrapper functions to make it easier to use package 
 `fastshap` for calculating SHAP values.
 * Add `force_vars` argument to `glmnet_filter()`
+* Add `ranger_filter()`
 
 # nestedcv 0.5.2
 ###### 17/02/2023
