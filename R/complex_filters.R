@@ -10,7 +10,7 @@
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a named vector of variable 
 #' importance.
-#' @param ... Other arguments passed to [Boruta::Boruta]
+#' @param ... Other arguments passed to [Boruta::Boruta()]
 #' @details
 #' Boruta works differently from other filters in that it does not rank
 #' variables by variable importance, but tries to determine relevant features
@@ -19,11 +19,13 @@
 #'   character vector of names (type = "names") of filtered parameters. If
 #'   `type` is `"full"` full output from `Boruta` is returned.
 #' 
-#' @importFrom Boruta Boruta
 #' @export
 
 boruta_filter <- function(y, x, select = c('Confirmed', 'Tentative'),
                            type = c("index", "names", "full"), ...) {
+  if (!requireNamespace("Boruta", quietly = TRUE)) {
+    stop("Package 'Boruta' must be installed", call. = FALSE)
+  }
   type <- match.arg(type)
   ref <- Boruta::Boruta(x, y, ...)$finalDecision
   out <- which(ref %in% select)

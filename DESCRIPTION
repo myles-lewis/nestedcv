@@ -21,15 +21,12 @@ Language: en-gb
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
-    Boruta,
     caret,
-    CORElearn,
     data.table,
     doParallel,
     foreach,
     ggplot2,
     glmnet,
-    hsstan,
     matrixStats,
     matrixTests,
     methods,
@@ -37,13 +34,19 @@ Imports:
     pROC,
     randomForest,
     RcppEigen,
+    reshape2,
     Rfast,
-    rlang,
-    SuperLearner
+    rlang
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
-Suggests: 
+Suggests:
+    Boruta,
+    CORElearn,
+    fastshap,
+    ggbeeswarm,
+    hsstan,
     mda,
     rmarkdown,
-    knitr
+    knitr,
+    SuperLearner
 VignetteBuilder: knitr

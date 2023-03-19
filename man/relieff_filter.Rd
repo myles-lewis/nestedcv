@@ -39,5 +39,5 @@ Uses ReliefF algorithm from the CORElearn package to rank predictors in order
 of importance.
 }
 \seealso{
-\link[CORElearn:attrEval]{CORElearn::attrEval}
+\code{\link[CORElearn:attrEval]{CORElearn::attrEval()}}
 }

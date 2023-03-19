@@ -67,7 +67,6 @@
 #' 
 #' @seealso [SuperLearner::SuperLearner()]
 #' 
-#' @importFrom SuperLearner SuperLearner
 #' @export
 
 nestcv.SuperLearner <- function(y, x,
@@ -82,6 +81,9 @@ nestcv.SuperLearner <- function(y, x,
                                 cv.cores = 1,
                                 na.option = "pass",
                                 ...) {
+  if (!requireNamespace("SuperLearner", quietly = TRUE)) {
+    stop("Package 'SuperLearner' must be installed", call. = FALSE)
+  }
   ncv.call <- match.call(expand.dots = TRUE)
   ok <- checkxy(y, x, na.option, weights)
   y <- y[ok$r]
@@ -144,7 +146,7 @@ nestcv.SuperLearner <- function(y, x,
   filtx <- dat$filt_xtrain
   Y <- if (reg) yfinal else as.numeric(yfinal) -1
   X <- data.frame(filtx)
-  fit <- SuperLearner(Y = Y, X = X, obsWeights = weights, ...)
+  fit <- SuperLearner::SuperLearner(Y = Y, X = X, obsWeights = weights, ...)
   
   out <- list(call = ncv.call,
               output = output,
@@ -176,8 +178,8 @@ nestSLcore <- function(test, y, x,
   
   reg <- !is.factor(y)
   Y <- if (reg) ytrain else as.numeric(ytrain) -1
-  fit <- SuperLearner(Y = Y, X = filt_xtrain,
-                      obsWeights = weights[-test], ...)
+  fit <- SuperLearner::SuperLearner(Y = Y, X = filt_xtrain,
+                                    obsWeights = weights[-test], ...)
   
   # test on outer CV
   predSL <- predict(fit, newdata = filt_xtest,

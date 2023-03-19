@@ -23,6 +23,11 @@ method for \code{glmnet} objects.
 Obtains predictions from the final fitted model from a \link{nestcv.glmnet}
 object.
 }
+\details{
+Checks for missing predictors and if these are sparse (i.e. have
+zero coefficients) columns of 0 are automatically added to enable
+prediction to proceed.
+}
 \seealso{
 \link[glmnet:glmnet]{glmnet::glmnet}
 }
