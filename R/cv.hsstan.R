@@ -31,7 +31,6 @@
 #' @return An object of class `hsstan`
 #'
 #' @author Athina Spiliopoulou
-#' @importFrom hsstan hsstan
 #' @importFrom data.table as.data.table
 #' @examples
 #' \donttest{
@@ -46,6 +45,7 @@
 #' dt <- as.data.frame(apply(dt, 2, scale))
 #' dt$outcome.cont <- -3 + 0.5 * dt$marker1 + 2 * dt$marker2 + rnorm(nrow(dt), 0, 2)
 #' 
+#' library(hsstan)
 #' # unpenalised covariates: always retain in the prediction model
 #' uvars <- "marker1"
 #' # penalised covariates: coefficients are drawn from hierarchical shrinkage
@@ -71,8 +71,7 @@
 #' # view covariates selected by the univariate filter
 #' res.cv.hsstan$final_vars
 #' 
-#' # load hsstan package to examine the Bayesian model
-#' library(hsstan)
+#' # use hsstan package to examine the Bayesian model
 #' sampler.stats(res.cv.hsstan$final_fit)
 #' print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
 #' options(oldopt)
@@ -85,6 +84,9 @@
 #' @export
 #'
 model.hsstan <- function(y, x, unpenalized = NULL, ...) {
+  if (!requireNamespace("hsstan", quietly = TRUE)) {
+    stop("Package 'hsstan' must be installed", call. = FALSE)
+  }
 
   ## reformat outcome and predictors to work with hsstan
   if (!is.numeric(y)) {
@@ -114,7 +116,7 @@ model.hsstan <- function(y, x, unpenalized = NULL, ...) {
     }
 
     ## fit the model
-    fit <- hsstan(x = dt, covs.model = covs.model, penalized = penalized,
+    fit <- hsstan::hsstan(x = dt, covs.model = covs.model, penalized = penalized,
                   family = family, ...)
 
     if(exists("y.levels")) {
@@ -147,14 +149,13 @@ model.hsstan <- function(y, x, unpenalized = NULL, ...) {
 #'   each sample.
 #'
 #' @author Athina Spiliopoulou
-#' @importFrom hsstan posterior_predict
 #' @export
 #'
 predict.hsstan <- function(object, newdata = NULL, type = NULL, ...) {
     if (object$family[1] == "gaussian") {
-        preds <- colMeans(posterior_predict(object, newdata = newdata, ...))
+        preds <- colMeans(hsstan::posterior_predict(object, newdata = newdata, ...))
     } else if (object$family[1] == "binomial") {
-        probs <- colMeans(posterior_predict(object, newdata = newdata,
+        probs <- colMeans(hsstan::posterior_predict(object, newdata = newdata,
                                             transform = TRUE, ...))
         if(is.null(type)) {
             # convert to binary

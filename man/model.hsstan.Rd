@@ -52,6 +52,7 @@ colnames(dt) <- c("marker1", "marker2", "marker3", "marker4")
 dt <- as.data.frame(apply(dt, 2, scale))
 dt$outcome.cont <- -3 + 0.5 * dt$marker1 + 2 * dt$marker2 + rnorm(nrow(dt), 0, 2)
 
+library(hsstan)
 # unpenalised covariates: always retain in the prediction model
 uvars <- "marker1"
 # penalised covariates: coefficients are drawn from hierarchical shrinkage
@@ -77,8 +78,7 @@ res.cv.hsstan$final_fit
 # view covariates selected by the univariate filter
 res.cv.hsstan$final_vars
 
-# load hsstan package to examine the Bayesian model
-library(hsstan)
+# use hsstan package to examine the Bayesian model
 sampler.stats(res.cv.hsstan$final_fit)
 print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
 options(oldopt)

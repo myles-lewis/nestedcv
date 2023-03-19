@@ -40,13 +40,13 @@ pred_train <- function(x, newdata) {
 #'   training data. The rows must match rows in `shap`.
 #' @param bee.cex Scaling for adjusting point spacing. See `cex` in
 #'   `ggbeeswarm::geom_beeswarm()`.
-#' @importFrom ggplot2 scale_color_gradient2
+#' @importFrom ggplot2 scale_color_gradient2 guide_colorbar
 #' @importFrom reshape2 melt
 #' @export
 #' 
 plot_shap_importance <- function(shap, x, bee.cex = 0.5) {
   if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
-    stop("ggbeeswarm package is not installed", call. = FALSE)
+    stop("Package 'ggbeeswarm' must be installed", call. = FALSE)
   }
   if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
   meanshap <- colMeans(abs(as.matrix(shap)))
