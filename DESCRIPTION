@@ -37,12 +37,15 @@ Imports:
     pROC,
     randomForest,
     RcppEigen,
+    reshape2,
     Rfast,
     rlang,
     SuperLearner
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Suggests: 
+    fastshap,
+    ggbeeswarm,
     mda,
     rmarkdown,
     knitr
