@@ -555,6 +555,7 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
 predict.nestcv.glmnet <- function(object, newdata,
                                   s = object$final_param["lambda"],
                                   ...) {
+  newdata <- as.matrix(newdata)
   newx <- fix_cols(object$final_fit, newdata, s = s)
   predict(object$final_fit, newx = newx, s = unname(s), ...)
 }
@@ -563,6 +564,11 @@ predict.nestcv.glmnet <- function(object, newdata,
 # fills in zero coefficent columns if missing
 fix_cols <- function(x, newx, s) {
   cf <- coef(x, s = s)
+  # check for multinomial
+  if (is.list(cf)) {
+    cf <- do.call(cbind, cf)
+    cf <- as.matrix(cf)
+  }
   final_vars <- rownames(cf)[-1]
   cf <- cf[-1,]
   # if full subset present
