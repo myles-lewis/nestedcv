@@ -40,25 +40,29 @@ pred_train <- function(x, newdata) {
 #'   training data. The rows must match rows in `shap`.
 #' @param bee.cex Scaling for adjusting point spacing. See `cex` in
 #'   `ggbeeswarm::geom_beeswarm()`.
+#' @param sort Logical whether to sort predictors by mean absolute SHAP value.
 #' @importFrom ggplot2 scale_color_gradient2 guide_colorbar
 #' @importFrom reshape2 melt
 #' @export
 #' 
-plot_shap_importance <- function(shap, x, bee.cex = 0.5) {
+plot_shap_importance <- function(shap, x,
+                                 bee.cex = 0.5, sort = TRUE) {
   if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
     stop("Package 'ggbeeswarm' must be installed", call. = FALSE)
   }
   if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
   meanshap <- colMeans(abs(as.matrix(shap)))
-  zeros <- meanshap == 0
+  zeros <- if (sort) meanshap == 0 else FALSE
   if (any(zeros)) {
     message(paste(colnames(shap[zeros]), collapse = ", "),
             " have mean abs SHAP value 0")
   }
-  ord <- sort(meanshap[!zeros], decreasing = TRUE)
   df <- suppressMessages(melt(shap[, !zeros], value.name = "SHAP"))
   df$val <- melt(scale2(x[, !zeros]))[, "value"]
-  df$variable <- factor(df$variable, levels = names(ord))
+  if (sort) {
+    ord <- sort(meanshap[!zeros], decreasing = TRUE)
+    df$variable <- factor(df$variable, levels = names(ord))
+  }
   
   ggplot(df, aes(y=.data$variable, x=.data$SHAP, col=.data$val)) +
     geom_vline(xintercept = 0) +

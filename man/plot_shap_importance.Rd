@@ -4,7 +4,7 @@
 \alias{plot_shap_importance}
 \title{SHAP importance beeswarm plot}
 \usage{
-plot_shap_importance(shap, x, bee.cex = 0.5)
+plot_shap_importance(shap, x, bee.cex = 0.5, sort = TRUE)
 }
 \arguments{
 \item{shap}{a matrix of SHAP values}
@@ -14,6 +14,8 @@ training data. The rows must match rows in \code{shap}.}
 
 \item{bee.cex}{Scaling for adjusting point spacing. See \code{cex} in
 \code{ggbeeswarm::geom_beeswarm()}.}
+
+\item{sort}{Logical whether to sort predictors by mean absolute SHAP value.}
 }
 \description{
 SHAP importance beeswarm plot
