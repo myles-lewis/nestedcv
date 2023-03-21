@@ -12,14 +12,37 @@
 #'   [fastshap::explain()]
 #' @details
 #' These prediction wrapper functions are designed to be used with the
-#' `fastshap` package. They currently work for both `nestcv.glmnet` and
-#' `nestcv.train` models for binary classification or regression. For multiclass
-#' classification they need to be recoded to specify which class is being
-#' investigated.
+#' `fastshap` package. The functions `pred_nestcv_glmnet` and `pred_train` work
+#' for `nestcv.glmnet` and `nestcv.train` models respectively for either binary
+#' classification or regression.
+#' 
+#' For multiclass classification use `pred_nestcv_glmnet_class1`, `2` and `3`
+#' for the first 3 classes. Similarly `pred_train_class1` etc for [nestcv.train]
+#' objects. These functions can be inspected and easily modified to analyse
+#' further classes.
+#' 
 #' @export
 #' 
 pred_nestcv_glmnet <- function(x, newdata) {
   predict(x, newdata)[,1]
+}
+
+#' @rdname pred_nestcv_glmnet
+#' @export
+pred_nestcv_glmnet_class1 <- function(x, newdata) {
+  predict(x, newdata)[, 1, 1]
+}
+
+#' @rdname pred_nestcv_glmnet
+#' @export
+pred_nestcv_glmnet_class2 <- function(x, newdata) {
+  predict(x, newdata)[, 2, 1]
+}
+
+#' @rdname pred_nestcv_glmnet
+#' @export
+pred_nestcv_glmnet_class3 <- function(x, newdata) {
+  predict(x, newdata)[, 3, 1]
 }
 
 #' @rdname pred_nestcv_glmnet
@@ -31,6 +54,25 @@ pred_train <- function(x, newdata) {
     predict(x, newdata)
   }
 }
+
+#' @rdname pred_nestcv_glmnet
+#' @export
+pred_train_class1 <- function(x, newdata) {
+  predict(x, newdata, type="prob")[,1]
+}
+
+#' @rdname pred_nestcv_glmnet
+#' @export
+pred_train_class2 <- function(x, newdata) {
+  predict(x, newdata, type="prob")[,2]
+}
+
+#' @rdname pred_nestcv_glmnet
+#' @export
+pred_train_class3 <- function(x, newdata) {
+  predict(x, newdata, type="prob")[,3]
+}
+
 
 
 #' SHAP importance beeswarm plot

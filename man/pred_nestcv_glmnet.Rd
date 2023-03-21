@@ -2,12 +2,30 @@
 % Please edit documentation in R/shap.R
 \name{pred_nestcv_glmnet}
 \alias{pred_nestcv_glmnet}
+\alias{pred_nestcv_glmnet_class1}
+\alias{pred_nestcv_glmnet_class2}
+\alias{pred_nestcv_glmnet_class3}
 \alias{pred_train}
+\alias{pred_train_class1}
+\alias{pred_train_class2}
+\alias{pred_train_class3}
 \title{Prediction wrappers to use fastshap with nestedcv}
 \usage{
 pred_nestcv_glmnet(x, newdata)
 
+pred_nestcv_glmnet_class1(x, newdata)
+
+pred_nestcv_glmnet_class2(x, newdata)
+
+pred_nestcv_glmnet_class3(x, newdata)
+
 pred_train(x, newdata)
+
+pred_train_class1(x, newdata)
+
+pred_train_class2(x, newdata)
+
+pred_train_class3(x, newdata)
 }
 \arguments{
 \item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} object}
@@ -24,8 +42,12 @@ generating SHAP values from \code{nestedcv} trained models.
 }
 \details{
 These prediction wrapper functions are designed to be used with the
-\code{fastshap} package. They currently work for both \code{nestcv.glmnet} and
-\code{nestcv.train} models for binary classification or regression. For multiclass
-classification they need to be recoded to specify which class is being
-investigated.
+\code{fastshap} package. The functions \code{pred_nestcv_glmnet} and \code{pred_train} work
+for \code{nestcv.glmnet} and \code{nestcv.train} models respectively for either binary
+classification or regression.
+
+For multiclass classification use \code{pred_nestcv_glmnet_class1}, \code{2} and \code{3}
+for the first 3 classes. Similarly \code{pred_train_class1} etc for \link{nestcv.train}
+objects. These functions can be inspected and easily modified to analyse
+further classes.
 }
