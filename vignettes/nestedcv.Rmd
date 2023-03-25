@@ -10,7 +10,7 @@ output:
     number_sections: false
 fig_width: 6
 vignette: >
-  %\VignetteIndexEntry{nestedcv}
+  %\VignetteIndexEntry{nestedcv guide}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -400,11 +400,11 @@ dataset.
 ### Class imbalance
 
 Class imbalance is known to impact on model fitting for certain model types,
-e.g. random forest. Models may tend to aim to predict the majority class and
-ignore the minority class as selecting the majority class can give high accuracy
-purely by chance. While performance measures such as balanced accuracy can give
-improved estimates of model performance, techniques for rebalancing data have
-been developed. These include:
+e.g. random forest, SVM. Models may tend to aim to predict the majority class
+and ignore the minority class since selecting the majority class can give high
+accuracy purely by chance. While performance measures such as balanced accuracy
+can give improved estimates of model performance, techniques for rebalancing
+data have been developed. These include:
 
 * Random oversampling of the minority class
 * Random undersampling of the majority class
@@ -430,6 +430,10 @@ samples into the outer training folds.
 The number of samples in each class in the outer CV folds can be checked on
 `nestedcv` objects using the function `class_balance()`.
 
+For logistic regression methods like glmnet, balancing may actually be
+deleterious. Using weights to apply increased weight to minority samples is
+typically preferred as a method for improving model fitting.
+
 The following example simulates an imbalanced dataset with 150 samples and
 20,000 predictors of which only the first 30 are weak predictors.
 
@@ -441,7 +445,7 @@ y <- factor(rbinom(150, 1, 0.2))  # imbalanced binary response
 table(y)
 
 ## first 30 parameters are weak predictors
-x[, 1:30] <- rnorm(150 * 30, 0, 1) + as.numeric(y)*0.5
+x[, 1:30] <- rnorm(150 * 30, 0, 1) + as.numeric(y)*0.7
 ```
 
 Here we illustrate the use of `randomsample()` to balance x & y *outside* of the
@@ -457,7 +461,7 @@ table(y2)
 ## Nested CV glmnet with unnested balancing by random oversampling on
 ## whole dataset
 fit1 <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
-                      n_outer_folds = 3,
+                      n_outer_folds = 4,
                       cv.cores=2,
                       filterFUN = ttest_filter)
 fit1$summary
@@ -475,7 +479,7 @@ table(y2)
 ## Nested CV glmnet with unnested balancing by random undersampling on
 ## whole dataset
 fit1b <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
-                       n_outer_folds = 3,
+                       n_outer_folds = 4,
                        cv.cores=2,
                        filterFUN = ttest_filter)
 fit1b$summary
@@ -488,7 +492,7 @@ table(y2)
 
 ## Nested CV glmnet with unnested balancing by SMOTE on whole dataset
 fit2 <- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
-                      n_outer_folds = 3,
+                      n_outer_folds = 4,
                       cv.cores=2,
                       filterFUN = ttest_filter)
 fit2$summary
@@ -500,11 +504,30 @@ within the outer CV loop, using `nestcv.glmnet()`.
 ```{r}
 ## Nested CV glmnet with nested balancing by random oversampling
 fit3 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
-                      n_outer_folds = 3,
+                      n_outer_folds = 4,
                       cv.cores=2,
                       balance = "randomsample",
                       filterFUN = ttest_filter)
 fit3$summary
+```
+
+For regression, an alternative method is to use weights. Increasing the weight
+of the minority class can improve performance. A simple function `weight()` is
+provided which increases weight for minority samples to give equal balance
+across classes according to their overall proportions. This function works for
+both binary and multiclass classification.
+
+```{r}
+## Nested CV glmnet with weights
+w <- weight(y)
+table(w)
+
+fit4 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                      n_outer_folds = 4,
+                      cv.cores=2,
+                      weights = w,
+                      filterFUN = ttest_filter)
+fit4$summary
 ```
 
 Finally we plot ROC curves to illustrate the differences between these
@@ -515,16 +538,18 @@ plot(fit1$roc, col='green')
 lines(fit1b$roc, col='red')
 lines(fit2$roc, col='blue')
 lines(fit3$roc)
+lines(fit4$roc, col='purple')
 legend('bottomright', legend = c("Unnested random oversampling", 
                                  "Unnested SMOTE",
                                  "Unnested random undersampling",
-                                 "Nested balancing"), 
-       col = c("green", "blue", "red", "black"), lty = 1, lwd = 2, bty = "n", cex=0.8)
+                                 "Nested random oversampling",
+                                 "Nested glmnet with weights"), 
+       col = c("green", "blue", "red", "black", "purple"), lty = 1, lwd = 2, bty = "n", cex=0.8)
 ```
 
-This shows that unnested oversampling and unnested SMOTE leads to a
-data leak resulting in upward bias in apparent performance. The correct unbiased
-estimate of performance is 'nested balancing'. Interestingly unnested random
+This shows that unnested oversampling and unnested SMOTE leads to a data leak
+resulting in upward bias in apparent performance. The correct unbiased estimate
+of performance is 'nested random oversampling'. Interestingly unnested random
 undersampling does not lead to any leakage of samples into left-out test folds,
 but the reduction in data size means that training is adversely affected and
 performance of the trained models is poor.
@@ -630,243 +655,7 @@ preds <- predict(ncv, newdata = data.rtx)
 
 ### Bayesian shrinkage models
 
-The two examples below implement Bayesian linear and logistic regression models
-using the horseshoe prior over parameters to encourage a sparse model. Models
-are fitted using the `hsstan` R package, which performs full Bayesian inference
-through a `Stan` implementation. In Bayesian inference model meta-parameters
-such as the amount of shrinkage are also given prior distributions and are
-thus directly learned from the data through sampling. This bypasses the need to
-cross-validate results over a grid of values for the meta-parameters, as would
-be required to find the optimal lambda in a lasso or elastic net model.
-
-However, Bayesian inference is computationally intensive. In high-dimensional
-settings, with e.g. more than 10,000 biomarkers, pre-filtering of inputs based
-on univariate measures of association with the outcome may be beneficial. If
-pre-filtering of inputs is used then a cross-validation procedure is needed to
-ensure that the data points used for pre-filtering and model fitting differ
-from the data points used to quantify model performance. The `outercv()`
-function is used to perform univariate pre-filtering and cross-validate model
-performance in this setting.
-
-CAUTION should be used when setting the number of cores available for
-parallelisation. The code will use the product of `cv.cores` and `mc.cores`.
-The former controls parallelisation over folds, while the latter controls
-parallelisation in the Bayesian inference procedure. The default setting for
-`hsstan` is to use 4 Markov chains for sampling. We recommend setting
-`options(mc.cores = 4)` which will parallelise computation over the chains.
-If we are also using a 10-fold cross-validation procedure, and set
-`cv.cores = 10` to parallelise computation over folds, then 40 cores will be
-used in total.
-
-
-#### Linear regression with a Bayesian shrinkage model (continuous outcomes)
-
-We use cross-validation and apply univariate filtering of predictors and
-model fitting in one part of the data (training fold), followed by evaluation
-of model performance on the left-out data (testing fold), repeated in each fold.
-
-Only one cross-validation split is needed (function `outercv`) as the Bayesian
-model does not require cross-validation for meta-parameters.
-
-Note, in the examples below length of sampling and number of chains is curtailed
-for speed. We recommend 4 chains, `warmup` 1000 and `iter` 2000 in practice.
-
-```{r eval = FALSE}
-
-# specify options for running the code
-nfolds <- 3
-
-# specify number of cores for parallelising computation
-# the product of cv.cores and mc.cores will be used in total
-# number of cores for parallelising over CV folds
-cv.cores <- 1
-# number of cores for parallelising hsstan sampling
-# to pass CRAN package checks we need to create object oldopt
-# in the end we reset options to the old configuration
-oldopt <- options(mc.cores = 2)
-
-# load iris dataset and simulate a continuous outcome
-data(iris)
-dt <- iris[, 1:4]
-colnames(dt) <- c("marker1", "marker2", "marker3", "marker4")
-dt <- as.data.frame(apply(dt, 2, scale))
-dt$outcome.cont <- -3 + 0.5 * dt$marker1 + 2 * dt$marker2 + rnorm(nrow(dt), 0, 2)
-
-# unpenalised covariates: always retain in the prediction model
-uvars <- "marker1"
-# penalised covariates: coefficients are drawn from hierarchical shrinkage prior
-pvars <- c("marker2", "marker3", "marker4") # penalised covariates
-# run cross-validation with univariate filter and hsstan
-res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
-                         model = "model.hsstan",
-                         filterFUN = lm_filter,
-                         filter_options = list(force_vars = uvars,
-                                               nfilter = 2,
-                                               p_cutoff = NULL,
-                                               rsq_cutoff = 0.9),
-                         n_outer_folds = nfolds, chains = 2,
-                         cv.cores = cv.cores,
-                         unpenalized = uvars, warmup = 100, iter = 200)
-```
-
-We can then view prediction performance based on the testing folds and examine
-the Bayesian model using the `hsstan` package.
-
-```{r eval = FALSE}
-summary(res.cv.hsstan)
-#> Single cross-validation to measure performance
-#> Outer loop:  3-fold CV
-#> No inner loop
-#> 150 observations, 4 predictors
-#> 
-#> Model:  model.hsstan 
-#> Filter:  lm_filter 
-#>         n.filter
-#> Fold 1         3
-#> Fold 2         3
-#> Fold 3         3
-#> 
-#> Final fit:             mean   sd  2.5% 97.5% n_eff Rhat
-#> (Intercept) -3.17 0.14 -3.40 -2.89   221 0.99
-#> marker1      0.37 0.32 -0.36  0.90   209 1.00
-#> marker2      2.07 0.22  1.70  2.47   196 1.00
-#> marker3      0.11 0.31 -0.43  0.92   104 1.00
-#> 
-#> Result:
-#>     RMSE   Rsquared        MAE   
-#>   2.1226     0.4772     1.6971
-
-library(hsstan)
-#> hsstan 0.8.1: using 2 cores, set 'options(mc.cores)' to change.
-sampler.stats(res.cv.hsstan$final_fit)
-#>         accept.stat stepsize divergences treedepth gradients warmup sample
-#> chain:1      0.9843   0.0241           0         8     14844   0.25   0.12
-#> chain:2      0.9722   0.0316           0         8     11356   0.12   0.09
-#> all          0.9783   0.0279           0         8     26200   0.37   0.21
-print(projsel(res.cv.hsstan$final_fit), digits = 4)  # adding marker2
-#>                                                      Model        KL        ELPD
-#>                                             Intercept only   0.32508  -374.99055
-#>                                           Initial submodel   0.32031  -374.72416
-#>                                                    marker2   0.00151  -325.82289
-#>                                                    marker3   0.00000  -325.88824
-#>                var       kl rel.kl.null rel.kl   elpd delta.elpd
-#> 1   Intercept only 0.325077     0.00000     NA -375.0  -49.10230
-#> 2 Initial submodel 0.320306     0.01468 0.0000 -374.7  -48.83591
-#> 3          marker2 0.001506     0.99537 0.9953 -325.8    0.06535
-#> 4          marker3 0.000000     1.00000 1.0000 -325.9    0.00000
-options(oldopt)  # reset options
-```
-
-Here adding `marker2` improves the model fit: substantial decrease of
-KL-divergence from the full model to the submodel. Adding `marker3` does not
-improve the model fit: no decrease of KL-divergence from the full model to the
-submodel.
-
-
-#### Logistic regression with a Bayesian shrinkage model (continuous outcomes)
-
-We use cross-validation and apply univariate filtering of predictors and
-model fitting in one part of the data (training fold), followed by evaluation
-of model performance on the left-out data (testing fold), repeated in each fold.
-
-Only one cross-validation split is needed (function `outercv`) as the Bayesian
-model does not require cross-validation for meta-parameters.
-
-```{r eval = FALSE}
-# sigmoid function
-sigmoid <- function(x) {1 / (1 + exp(-x))}
-
-# specify options for running the code
-nfolds <- 3
-cv.cores <- 1
-oldopt <- options(mc.cores = 2)
-
-# load iris dataset and create a binary outcome
-set.seed(267)
-data(iris)
-dt <- iris[, 1:4]
-colnames(dt) <- c("marker1", "marker2", "marker3", "marker4")
-dt <- as.data.frame(apply(dt, 2, scale))
-rownames(dt) <- paste0("sample", c(1:nrow(dt)))
-dt$outcome.bin <- sigmoid(0.5 * dt$marker1 + 2 * dt$marker2) > runif(nrow(dt))
-dt$outcome.bin <- factor(dt$outcome.bin)
-
-# unpenalised covariates: always retain in the prediction model
-uvars <- "marker1"
-# penalised covariates: coefficients are drawn from hierarchical shrinkage prior
-pvars <- c("marker2", "marker3", "marker4") # penalised covariates
-# run cross-validation with univariate filter and hsstan
-res.cv.hsstan <- outercv(y = dt$outcome.bin,
-                         x = as.matrix(dt[, c(uvars, pvars)]),
-                         model = "model.hsstan",
-                         filterFUN = ttest_filter,
-                         filter_options = list(force_vars = uvars,
-                                               nfilter = 2,
-                                               p_cutoff = NULL,
-                                               rsq_cutoff = 0.9),
-                         n_outer_folds = nfolds, chains = 2,
-                         cv.cores = cv.cores,
-                         unpenalized = uvars, warmup = 100, iter = 200)
-```
-
-We view prediction performance based on testing folds and examine the model.
-
-```{r eval = FALSE}
-summary(res.cv.hsstan)
-#> Single cross-validation to measure performance
-#> Outer loop:  3-fold CV
-#> No inner loop
-#> 150 observations, 4 predictors
-#> FALSE  TRUE 
-#>    78    72 
-#> 
-#> Model:  model.hsstan 
-#> Filter:  ttest_filter 
-#>         n.filter
-#> Fold 1         3
-#> Fold 2         3
-#> Fold 3         3
-#> 
-#> Final fit:             mean   sd  2.5% 97.5% n_eff Rhat
-#> (Intercept) -0.12 0.23 -0.56  0.27   200    1
-#> marker1      0.50 0.30 -0.10  1.16   208    1
-#> marker2      1.91 0.36  1.26  2.66   263    1
-#> marker3      0.01 0.24 -0.55  0.69   171    1
-#> 
-#> Result:
-#>          Reference
-#> Predicted FALSE TRUE
-#>     FALSE    56   23
-#>     TRUE     22   49
-#> 
-#>               AUC            Accuracy   Balanced accuracy   
-#>            0.8284              0.7000              0.6993
-
-# examine the Bayesian model
-sampler.stats(res.cv.hsstan$final_fit)
-#>         accept.stat stepsize divergences treedepth gradients warmup sample
-#> chain:1      0.9826   0.0611           0         7      6792   0.08   0.07
-#> chain:2      0.9797   0.0651           0         7      5620   0.13   0.06
-#> all          0.9811   0.0631           0         7     12412   0.21   0.13
-print(projsel(res.cv.hsstan$final_fit), digits = 4)  # adding marker2
-#>                                                      Model        KL        ELPD
-#>                                             Intercept only   0.20643  -104.26957
-#>                                           Initial submodel   0.20118  -104.17411
-#>                                                    marker2   0.00060  -73.84232
-#>                                                    marker3   0.00000  -73.93210
-#>                var        kl rel.kl.null rel.kl    elpd delta.elpd
-#> 1   Intercept only 2.064e-01     0.00000     NA -104.27  -30.33748
-#> 2 Initial submodel 2.012e-01     0.02543  0.000 -104.17  -30.24201
-#> 3          marker2 5.964e-04     0.99711  0.997  -73.84    0.08977
-#> 4          marker3 9.133e-18     1.00000  1.000  -73.93    0.00000
-options(oldopt)  # reset options
-```
-
-Here adding `marker2` improves the model fit: substantial decrease of
-KL-divergence from the full model to the submodel. Adding `marker3` does not
-improve the model fit: no decrease of KL-divergence from the full model to the
-submodel.
-
+See the accompanying vignette "Using *outercv* with Bayesian shrinkage models".
 
 # Parallelisation
 
@@ -900,11 +689,6 @@ processes being generated. We generally find this does not lead to much speed up
 once the number of processes reaches the number of physical cores, as all
 processors are saturated and there is both time and memory overheads for
 duplicating data and packages for each process.
-
-Note at time of writing, there appears to be a bug in `rstan` (used by `hsstan`)
-leading to it ignoring the argument `cores` and instead spawning multiple
-processes as specified by the `chain` argument. This behaviour can be limited by
-setting `options(mc.cores = ..)`.
 
 # Troubleshooting
 
