@@ -131,7 +131,9 @@
 #' predSummary(output)
 #' 
 #' ## Nested CV
+#' ## n_outer_folds reduced to speed up example
 #' fit2 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+#'                       n_outer_folds = 3,
 #'                       filterFUN = ttest_filter,
 #'                       filter_options = list(nfilter = 100))
 #' summary(fit2)

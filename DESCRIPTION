@@ -43,6 +43,7 @@ Suggests:
     CORElearn,
     fastshap,
     ggbeeswarm,
+    ggpubr,
     hsstan,
     mda,
     mlbench,

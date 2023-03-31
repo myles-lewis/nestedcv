@@ -21,6 +21,31 @@
 #' objects. These functions can be inspected and easily modified to analyse
 #' further classes.
 #' 
+#' @examples
+#' library(fastshap)
+#' library(ggplot2)
+#' 
+#' # Boston housing dataset
+#' library(mlbench)
+#' data(BostonHousing2)
+#' dat <- BostonHousing2
+#' y <- dat$cmedv
+#' x <- subset(dat, select = -c(cmedv, medv, town, chas))
+#' 
+#' # Fit a glmnet model using nested CV
+#' # Only 3 outer CV folds and 1 alpha value for speed
+#' fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
+#' 
+#' # Generate SHAP values using fastshap::explain
+#' # Only using 5 repeats here for speed, but recommend higher values of nsim
+#' sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet, nsim = 1)
+#' 
+#' # Plot overall variable importance
+#' autoplot(sh)
+#' 
+#' # Plot beeswarm plot
+#' plot_shap_importance(sh, x, size = 1)
+#' 
 #' @export
 #' 
 pred_nestcv_glmnet <- function(x, newdata) {
