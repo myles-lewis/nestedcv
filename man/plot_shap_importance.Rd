@@ -4,7 +4,15 @@
 \alias{plot_shap_importance}
 \title{SHAP importance beeswarm plot}
 \usage{
-plot_shap_importance(shap, x, bee.cex = 0.5, sort = TRUE)
+plot_shap_importance(
+  shap,
+  x,
+  cex = 0.2,
+  corral = "random",
+  corral.width = 0.7,
+  sort = TRUE,
+  ...
+)
 }
 \arguments{
 \item{shap}{a matrix of SHAP values}
@@ -12,10 +20,18 @@ plot_shap_importance(shap, x, bee.cex = 0.5, sort = TRUE)
 \item{x}{a matrix of feature values containing only features values from the
 training data. The rows must match rows in \code{shap}.}
 
-\item{bee.cex}{Scaling for adjusting point spacing. See \code{cex} in
+\item{cex}{Scaling for adjusting point spacing. See
 \code{ggbeeswarm::geom_beeswarm()}.}
 
+\item{corral}{String specifying method used to corral points. See
+\code{ggbeeswarm::geom_beeswarm()}.}
+
+\item{corral.width}{Numeric specifying width of corral, passed to
+\code{geom_beeswarm}}
+
 \item{sort}{Logical whether to sort predictors by mean absolute SHAP value.}
+
+\item{...}{Other arguments passed to \code{ggbeeswarm::geom_beeswarm()}}
 }
 \description{
 SHAP importance beeswarm plot

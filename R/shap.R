@@ -80,15 +80,23 @@ pred_train_class3 <- function(x, newdata) {
 #' @param shap a matrix of SHAP values
 #' @param x a matrix of feature values containing only features values from the
 #'   training data. The rows must match rows in `shap`.
-#' @param bee.cex Scaling for adjusting point spacing. See `cex` in
+#' @param cex Scaling for adjusting point spacing. See
 #'   `ggbeeswarm::geom_beeswarm()`.
+#' @param corral String specifying method used to corral points. See
+#'   `ggbeeswarm::geom_beeswarm()`.
+#' @param corral.width Numeric specifying width of corral, passed to
+#'   `geom_beeswarm`
 #' @param sort Logical whether to sort predictors by mean absolute SHAP value.
+#' @param ... Other arguments passed to `ggbeeswarm::geom_beeswarm()`
 #' @importFrom ggplot2 scale_color_gradient2 guide_colorbar
 #' @importFrom reshape2 melt
 #' @export
 #' 
 plot_shap_importance <- function(shap, x,
-                                 bee.cex = 0.5, sort = TRUE) {
+                                 cex = 0.2,
+                                 corral = "random",
+                                 corral.width = 0.7,
+                                 sort = TRUE, ...) {
   if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
     stop("Package 'ggbeeswarm' must be installed", call. = FALSE)
   }
@@ -108,7 +116,9 @@ plot_shap_importance <- function(shap, x,
   
   ggplot(df, aes(y=.data$variable, x=.data$SHAP, col=.data$val)) +
     geom_vline(xintercept = 0) +
-    ggbeeswarm::geom_beeswarm(cex = bee.cex) +
+    ggbeeswarm::geom_beeswarm(cex = cex, corral = corral,
+                              corral.width = corral.width,
+                              ...) +
     scale_color_gradient2(low="deepskyblue2", mid="purple3", high="red",
                           breaks = c(-1.5, 1.5),
                           labels = c("Low", "High"), name="Feature\nvalue\n",

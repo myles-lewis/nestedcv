@@ -1,0 +1,56 @@
+---
+title: "Explaining nestedcv models with Shapley values"
+author: "Myles Lewis"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 3
+    number_sections: false
+fig_width: 6
+vignette: >
+  %\VignetteIndexEntry{Explaining nestedcv models with Shapley values}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE
+)
+library(nestedcv)
+```
+
+# Explainable AI with Shapley values
+
+```{r}
+library(fastshap)
+
+# Boston housing dataset
+library(mlbench)
+data(BostonHousing2)
+dat <- BostonHousing2
+y <- dat$cmedv
+x <- subset(dat, select = -c(cmedv, medv, town, chas))
+
+# Fit a glmnet model using nested CV
+fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
+
+# Generate SHAP values using fastshap::explain
+sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet)
+
+# Plot overall variable importance
+autoplot(sh)
+```
+
+`nestedcv` provides a quick plotting function for generating beeswarm plots
+similar to those made by the original python `shap` package.
+
+```{r}
+# Plot beeswarm plot
+plot_shap_importance(sh, x, size = 1)
+```
+
+
