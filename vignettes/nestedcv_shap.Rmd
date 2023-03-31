@@ -3,11 +3,6 @@ title: "Explaining nestedcv models with Shapley values"
 author: "Myles Lewis"
 output:
   html_document:
-    toc: true
-    toc_float:
-      collapsed: false
-    toc_depth: 3
-    number_sections: false
 fig_width: 6
 vignette: >
   %\VignetteIndexEntry{Explaining nestedcv models with Shapley values}
@@ -23,10 +18,22 @@ knitr::opts_chunk$set(
 library(nestedcv)
 ```
 
-# Explainable AI with Shapley values
+### Explainable AI with Shapley values
+
+The original implementation of [shap](https://github.com/slundberg/shap) by
+Scott Lundberg is a python package. We suggest using the R package
+[fastshap](https://cran.r-project.org/package=fastshap) for examining `nestedcv`
+models since it works with classification or regression as well as any model
+type (regression such as glmnet or tree based such as random forest, GBM or
+xgboost).
+
+In the example below using the Boston housing dataset, a glmnet regression model
+is fitted and the variable importance for predictors is measured using Shapley
+values.
 
 ```{r}
 library(fastshap)
+library(ggplot2)
 
 # Boston housing dataset
 library(mlbench)
@@ -36,21 +43,75 @@ y <- dat$cmedv
 x <- subset(dat, select = -c(cmedv, medv, town, chas))
 
 # Fit a glmnet model using nested CV
+# Only 3 outer CV folds and 1 alpha value for speed
 fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
 
 # Generate SHAP values using fastshap::explain
-sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet)
+# Only using 5 repeats here for speed, but recommend higher values of nsim
+sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet, nsim = 5)
 
 # Plot overall variable importance
 autoplot(sh)
 ```
 
-`nestedcv` provides a quick plotting function for generating beeswarm plots
-similar to those made by the original python `shap` package.
+The function `explain()` from the `fastshap` package needs a wrapper function
+for prediction using the model. `nestedcv` provides `pred_nestcv_glmnet` which
+is a wrapper function for binary classification or regression with
+`nestcv.glmnet` fitted models.
+
+`nestedcv` provides a quick plotting function `plot_shap_importance` for
+generating beeswarm plots similar to those made by the original python `shap`
+package.
 
 ```{r}
 # Plot beeswarm plot
 plot_shap_importance(sh, x, size = 1)
 ```
 
+The process for a caret model fitted using `nestedcv` is similar. Use the
+`pred_train` wrapper when calling `explain()`.
 
+```{r}
+# Only 3 outer folds to speed up process
+fit <- nestcv.train(y, x,
+                    method = "gbm",
+                    n_outer_folds = 3, cv.cores = 2)
+
+# Only using 5 repeats here for speed, but recommend higher values of nsim
+sh <- explain(fit, X=x, pred_wrapper = pred_train, nsim = 5)
+plot_shap_importance(sh, x, size = 1)
+```
+
+For multinomial classification, a wrapper is needed for each class. For
+nestcv.glmnet models, we provide wrappers for the first 3 classes:
+`pred_nestcv_glmnet_class1`, `pred_nestcv_glmnet_class2` etc. They are very
+simple functions and easy to extend to other classes.
+
+For `nestcv.train()` models, similarly we provide `pred_train_class1`,
+`pred_train_class2` etc for the first 3 classes. Again these are easily
+extended.
+
+As a toy example, we show the iris dataset which has 3 classes.
+
+```{r, fig.width = 9, fig.height = 3}
+data("iris")
+dat <- iris
+y <- dat$Species
+x <- dat[, 1:4]
+
+# Only 3 outer folds to speed up process
+fit <- nestcv.glmnet(y, x, family = "multinomial", n_outer_folds = 3, alphaSet = 0.6)
+
+# SHAP values for each of the 3 classes
+sh1 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class1, nsim = 5)
+sh2 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class2, nsim = 5)
+sh3 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class3, nsim = 5)
+
+# Beeswarm plots for the first two classes
+s1 <- plot_shap_importance(sh1, x, sort = FALSE, cex = 0.7) +
+  theme(legend.position = "none")
+s2 <- plot_shap_importance(sh3, x, sort = FALSE, cex = 0.7) +
+  guides(y = "none")
+
+ggpubr::ggarrange(s1, s2, ncol=2)
+```

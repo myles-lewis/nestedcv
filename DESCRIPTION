@@ -45,6 +45,7 @@ Suggests:
     ggbeeswarm,
     hsstan,
     mda,
+    mlbench,
     randomForest,
     ranger,
     rmarkdown,
