@@ -187,7 +187,7 @@ plot_var_stability <- function(x,
                                direction = 0,
                                dir_labels = NULL,
                                percent = TRUE,
-                               breaks = c(2, 4, 6, 8, 10)) {
+                               breaks = NULL) {
   df <- var_stability(x, percent = percent)
   df$name <- factor(rownames(df), levels = rownames(df))
   if (final) {
@@ -209,6 +209,11 @@ plot_var_stability <- function(x,
   xtitle <- if (!percent & inherits(x, "nestcv.glmnet")) {
     "Coefficient"
   } else "Variable importance"
+  if (is.null(breaks)) {
+    nof <- length(x$outer_folds)
+    pr <- pretty(c(1, nof))
+    breaks <- setNames(c(pr, nof+1), c(as.character(pr), "all"))
+  }
   
   if ((!is.numeric(x$y) & nlevels(x$y) != 2) | !percent) direction <- 0
   if (direction == 2 && "sign" %in% colnames(df)) {
