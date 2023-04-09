@@ -167,9 +167,9 @@ var_stability.nestcv.train <- function(x, ...) {
 #'   all outer folds.
 #' @param top Limits number of variables plotted. Ignored if `final = TRUE`.
 #' @param direction Integer controlling plotting of directionality for binary or
-#'   regression models. 0 means no directionality is shown, 1 means
-#'   directionality is overlaid as a colour, 2 means directionality is reflected
-#'   in the sign of variable importance.
+#'   regression models. `0` means no directionality is shown, `1` means
+#'   directionality is overlaid as a colour, `2` means directionality is
+#'   reflected in the sign of variable importance.
 #' @param dir_labels Character vector for controlling the legend when
 #'   `direction = 1`
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
@@ -211,7 +211,7 @@ plot_var_stability <- function(x,
   } else "Variable importance"
   if (is.null(breaks)) {
     nof <- length(x$outer_folds)
-    pr <- pretty(c(1, nof))
+    pr <- unique(round(pretty(c(1, nof), n = 4)))
     breaks <- setNames(c(pr, nof+1), c(as.character(pr), "all"))
   }
   

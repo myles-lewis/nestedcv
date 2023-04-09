@@ -24,9 +24,9 @@ all outer folds.}
 \item{top}{Limits number of variables plotted. Ignored if \code{final = TRUE}.}
 
 \item{direction}{Integer controlling plotting of directionality for binary or
-regression models. 0 means no directionality is shown, 1 means
-directionality is overlaid as a colour, 2 means directionality is reflected
-in the sign of variable importance.}
+regression models. \code{0} means no directionality is shown, \code{1} means
+directionality is overlaid as a colour, \code{2} means directionality is
+reflected in the sign of variable importance.}
 
 \item{dir_labels}{Character vector for controlling the legend when
 \code{direction = 1}}
