@@ -46,6 +46,7 @@ y <- dat$cmedv
 x <- subset(dat, select = -c(cmedv, medv, town, chas))
 
 # Fit a glmnet model using nested CV
+set.seed(1, "L'Ecuyer-CMRG")
 fit <- nestcv.glmnet(y, x, family = "gaussian",
                      min_1se = 1, alphaSet = 1, cv.cores = 2)
 

@@ -11,7 +11,7 @@ plot_var_stability(
   direction = 0,
   dir_labels = NULL,
   percent = TRUE,
-  breaks = c(2, 4, 6, 8, 10)
+  breaks = NULL
 )
 }
 \arguments{
