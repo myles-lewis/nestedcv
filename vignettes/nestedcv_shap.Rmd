@@ -18,6 +18,65 @@ knitr::opts_chunk$set(
 library(nestedcv)
 ```
 
+`nestedcv` provides two methods for understanding fitted models. The simplest of
+these is to plot variable importance. The newer method is to calculate Shapley
+values for each predictor.
+
+### Variable importance and variable stability
+
+For regression model systems such as glmnet variable importance is represented
+as the coefficients of the model scaled by absolute value from largest to
+smallest. However, the outer folds of nested CV allow us to show the variance of
+model coefficients across each outer fold plus the final model, and hence see
+how stable the model is. We can also overlay how often predictors are selected
+in each model to give a sense of the stability of predictor selection.
+
+In the example below using the Boston housing dataset, a glmnet regression model
+is fitted and the variable importance for predictors is shown based on the
+coefficients in the final model and tuned models from 10 outer folds. `min_1se`
+is set to 1 which is the equivalent of specifying `s = "lambda.1se"` with
+`glmnet` to encourage a more sparse model.
+
+```{r}
+# Boston housing dataset
+library(mlbench)
+data(BostonHousing2)
+dat <- BostonHousing2
+y <- dat$cmedv
+x <- subset(dat, select = -c(cmedv, medv, town, chas))
+
+# Fit a glmnet model using nested CV
+fit <- nestcv.glmnet(y, x, family = "gaussian",
+                     min_1se = 1, alphaSet = 1, cv.cores = 2)
+
+plot_var_stability(fit)
+```
+
+By default only the predictors chosen in the final model are shown. If the
+argument `final` is set to `FALSE` all predictors are shown to help understand
+how often they are selected which is helpful when pushing sparsity in models.
+
+We can overlay directionality for binary classification or regression models
+using either colour (`direction = 1`) or the sign of the variable importance to
+splay the plot (`direction = 2`).
+
+```{r, fig.width = 9, fig.height = 5}
+# overlay directionality using colour
+p1 <- plot_var_stability(fit, final = FALSE, direction = 1)
+
+# show directionality with the sign of the variable importance
+p2 <- plot_var_stability(fit, final = FALSE, direction = 2)
+
+ggpubr::ggarrange(p1, p2, ncol=2)
+```
+
+The `caret` package allows variable importance to be calculated for other models
+types. This is model dependent. For example, with random forest variable
+importance is usually calculated as the mean decrease in Gini impurity each time
+a variable is chosen in a tree. With caret models, you may have to load the
+appropriate package for that model to calculate the variable importance, e.g.
+this is necessary for GBM models with the `gbm` package.
+
 ### Explainable AI with Shapley values
 
 The original implementation of [shap](https://github.com/slundberg/shap) by
@@ -27,24 +86,12 @@ models since it works with classification or regression as well as any model
 type (regression such as glmnet or tree based such as random forest, GBM or
 xgboost).
 
-In the example below using the Boston housing dataset, a glmnet regression model
-is fitted and the variable importance for predictors is measured using Shapley
-values.
+In the example below using the same glmnet regression model the variable
+importance for predictors is measured using Shapley values.
 
 ```{r}
 library(fastshap)
 library(ggplot2)
-
-# Boston housing dataset
-library(mlbench)
-data(BostonHousing2)
-dat <- BostonHousing2
-y <- dat$cmedv
-x <- subset(dat, select = -c(cmedv, medv, town, chas))
-
-# Fit a glmnet model using nested CV
-# Only 3 outer CV folds and 1 alpha value for speed
-fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
 
 # Generate SHAP values using fastshap::explain
 # Only using 5 repeats here for speed, but recommend higher values of nsim
@@ -83,7 +130,7 @@ plot_shap_importance(sh, x, size = 1)
 ```
 
 For multinomial classification, a wrapper is needed for each class. For
-nestcv.glmnet models, we provide wrappers for the first 3 classes:
+`nestcv.glmnet` models, we provide wrappers for the first 3 classes:
 `pred_nestcv_glmnet_class1`, `pred_nestcv_glmnet_class2` etc. They are very
 simple functions and easy to extend to other classes.
 
@@ -93,7 +140,7 @@ extended.
 
 As a toy example, we show the iris dataset which has 3 classes.
 
-```{r, fig.width = 9, fig.height = 3}
+```{r, fig.width = 9, fig.height = 3.5}
 data("iris")
 dat <- iris
 y <- dat$Species
@@ -109,8 +156,10 @@ sh3 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class3, nsim = 5)
 
 # Beeswarm plots for the first two classes
 s1 <- plot_shap_importance(sh1, x, sort = FALSE, cex = 0.7) +
+  ggtitle("setosa") +
   theme(legend.position = "none")
 s2 <- plot_shap_importance(sh3, x, sort = FALSE, cex = 0.7) +
+  ggtitle("virginica") +
   guides(y = "none")
 
 ggpubr::ggarrange(s1, s2, ncol=2)
