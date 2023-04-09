@@ -37,7 +37,8 @@ predSummary <- function(output) {
       auc <- outputroc$auc
       metrics <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
     } else {
-      auc <- try(pROC::multiclass.roc(output$testy, output[, -c(1,2)])$auc)
+      auc <- try(pROC::multiclass.roc(output$testy, output[, -c(1,2)])$auc,
+                 silent = TRUE)
       if (inherits(auc, "try-error")) auc <- NA
       metrics <- setNames(c(auc, acc, b_acc), c("Multiclass AUC", "Accuracy", 
                                                 "Balanced accuracy"))
