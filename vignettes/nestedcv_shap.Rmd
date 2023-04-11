@@ -165,3 +165,14 @@ s2 <- plot_shap_importance(sh3, x, sort = FALSE, cex = 0.7) +
 
 ggpubr::ggarrange(s1, s2, ncol=2)
 ```
+
+### References
+
+Lundberg SM & Lee SI (2017). A Unified Approach to Interpreting Model Predictions. *Advances in Neural Information Processing Systems* 30; 4768–4777. http://papers.nips.cc/ paper/7062-a-unified-approach-to-interpreting-model-predictions.pdf
+
+Lundberg SM et al (2020). From Local Explanations to Global Understanding with Explainable AI for Trees. *Nat Mach Intell* 2020; 2(1): 56-67. https://arxiv.org/abs/1905.04610
+
+Software:
+[fastshap](https://cran.r-project.org/package=fastshap): Brandon Greenwell. fastshap: Fast Approximate Shapley Values
+
+
