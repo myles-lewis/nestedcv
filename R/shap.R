@@ -208,7 +208,7 @@ plot_shap_bar <- function(shap, x,
   
   ggplot(df, aes(y = .data$var, x = .data$meanshap, fill = .data$Direction)) +
     geom_bar(stat = "identity", width = 0.75) +
-    scale_fill_manual(values=c("royalblue", "red")) +
+    scale_fill_manual(values = c("royalblue", "red")) +
     xlab("mean(|SHAP|)") +
     ylab("") +
     theme_classic() +
