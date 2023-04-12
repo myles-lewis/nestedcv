@@ -179,21 +179,21 @@ var_stability.nestcv.train <- function(x, ...) {
 #'   up in the final fitted model or to include all variables selected across
 #'   all outer folds.
 #' @param top Limits number of variables plotted. Ignored if `final = TRUE`.
-#' @param sort Logical whether to sort by mean variable importance. Passed to
-#'   [var_stability()].
 #' @param direction Integer controlling plotting of directionality for binary or
 #'   regression models. `0` means no directionality is shown, `1` means
 #'   directionality is overlaid as a colour, `2` means directionality is
 #'   reflected in the sign of variable importance.
 #' @param dir_labels Character vector for controlling the legend when
 #'   `direction = 1`
+#' @param breaks Vector of continuous breaks for legend colour/size
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model. If set
 #'   to `FALSE`, model coefficients are shown and `direction` is ignored.
-#' @param breaks Vector of continuous breaks for legend colour/size
 #' @param level For multinomial `nestcv.glmnet` models only, either an integer
 #'   specifying which level of outcome is being examined, or the level can be
 #'   specified as a character value.
+#' @param sort Logical whether to sort by mean variable importance. Passed to
+#'   [var_stability()].
 #' @return A ggplot2 plot
 #' @seealso [var_stability()]
 #' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller
@@ -202,12 +202,12 @@ var_stability.nestcv.train <- function(x, ...) {
 plot_var_stability <- function(x,
                                final = TRUE,
                                top = 25,
-                               sort = TRUE,
                                direction = 0,
                                dir_labels = NULL,
-                               percent = TRUE,
                                breaks = NULL,
-                               level = 1) {
+                               percent = TRUE,
+                               level = 1,
+                               sort = TRUE) {
   df <- var_stability(x, percent = percent, level = level, sort = sort)
   df$name <- factor(rownames(df), levels = rownames(df))
   if (!sort) final <- FALSE

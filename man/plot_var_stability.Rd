@@ -8,12 +8,12 @@ plot_var_stability(
   x,
   final = TRUE,
   top = 25,
-  sort = TRUE,
   direction = 0,
   dir_labels = NULL,
-  percent = TRUE,
   breaks = NULL,
-  level = 1
+  percent = TRUE,
+  level = 1,
+  sort = TRUE
 )
 }
 \arguments{
@@ -25,9 +25,6 @@ all outer folds.}
 
 \item{top}{Limits number of variables plotted. Ignored if \code{final = TRUE}.}
 
-\item{sort}{Logical whether to sort by mean variable importance. Passed to
-\code{\link[=var_stability]{var_stability()}}.}
-
 \item{direction}{Integer controlling plotting of directionality for binary or
 regression models. \code{0} means no directionality is shown, \code{1} means
 directionality is overlaid as a colour, \code{2} means directionality is
@@ -36,15 +33,18 @@ reflected in the sign of variable importance.}
 \item{dir_labels}{Character vector for controlling the legend when
 \code{direction = 1}}
 
+\item{breaks}{Vector of continuous breaks for legend colour/size}
+
 \item{percent}{Logical for \code{nestcv.glmnet} objects only, whether to scale
 coefficients to percentage of the largest coefficient in each model. If set
 to \code{FALSE}, model coefficients are shown and \code{direction} is ignored.}
 
-\item{breaks}{Vector of continuous breaks for legend colour/size}
-
 \item{level}{For multinomial \code{nestcv.glmnet} models only, either an integer
 specifying which level of outcome is being examined, or the level can be
 specified as a character value.}
+
+\item{sort}{Logical whether to sort by mean variable importance. Passed to
+\code{\link[=var_stability]{var_stability()}}.}
 }
 \value{
 A ggplot2 plot
