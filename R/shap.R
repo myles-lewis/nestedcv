@@ -113,6 +113,7 @@ pred_train_class3 <- function(x, newdata) {
 #'   `geom_beeswarm`
 #' @param sort Logical whether to sort predictors by mean absolute SHAP value.
 #' @param ... Other arguments passed to `ggbeeswarm::geom_beeswarm()`
+#' @return A ggplot2 plot
 #' @importFrom ggplot2 scale_color_gradient2 guide_colorbar
 #' @importFrom reshape2 melt
 #' @export
@@ -129,8 +130,8 @@ plot_shap_beeswarm <- function(shap, x,
   meanshap <- colMeans(abs(as.matrix(shap)))
   zeros <- if (sort) meanshap == 0 else FALSE
   if (any(zeros)) {
-    message(paste(colnames(shap[zeros]), collapse = ", "),
-            " have mean abs SHAP value 0")
+    message("Variables with mean(|SHAP|)=0: ",
+            paste(colnames(shap[zeros]), collapse = ", "))
   }
   df <- suppressMessages(melt(shap[, !zeros], value.name = "SHAP"))
   df$val <- melt(scale2(x[, !zeros]))[, "value"]
@@ -167,3 +168,50 @@ scale2 <- function(x) {
   scx[which(scx > 1.5, arr.ind = TRUE)] <- 1.5
   scx
 }
+
+
+#' SHAP importance bar plot
+#'
+#' @param shap a matrix of SHAP values
+#' @param x a matrix of feature values containing only features values from the
+#'   training data. The rows must match rows in `shap`.
+#' @param sort Logical whether to sort predictors by mean absolute SHAP value
+#' @param labels Character vector of labels for directionality
+#' @return A ggplot2 plot
+#' @importFrom ggplot2 geom_bar
+#' @export
+#' 
+plot_shap_bar <- function(shap, x,
+                      sort = TRUE,
+                      labels = c("Negative", "Positive")) {
+  if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
+  meanshap <- colMeans(abs(as.matrix(shap)))
+  cor1 <- diag(suppressWarnings(cor(shap, x)))
+  sign1 <- sign(cor1)
+  sign1[is.na(sign1)] <- 1
+  sign1 <- factor(sign1, levels = c(-1, 1), labels = labels)
+  df <- data.frame(var = names(meanshap), meanshap = meanshap,
+                   Direction = sign1)
+  if (sort) {
+    zeros <- meanshap == 0
+    if (any(zeros)) {
+      message("Variables with mean(|SHAP|)=0: ",
+              paste(colnames(shap[zeros]), collapse = ", "))
+              
+    }
+    df <- df[!zeros, ]
+    ord <- sort(meanshap[!zeros])
+    df$var <- factor(df$var, levels = names(ord))
+  } else {
+    df$var <- factor(df$var, levels = rev(names(meanshap)))
+  }
+  
+  ggplot(df, aes(y = .data$var, x = .data$meanshap, fill = .data$Direction)) +
+    geom_bar(stat = "identity", width = 0.75) +
+    scale_fill_manual(values=c("royalblue", "red")) +
+    xlab("mean(|SHAP|)") +
+    ylab("") +
+    theme_classic() +
+    theme(axis.text = element_text(colour = "black"))
+}
+

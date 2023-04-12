@@ -88,7 +88,11 @@ type (regression such as glmnet or tree based such as random forest, GBM or
 xgboost).
 
 In the example below using the same glmnet regression model, the variable
-importance for predictors is measured using Shapley values.
+importance for predictors is measured using Shapley values. The function
+`explain()` from the `fastshap` package needs a wrapper function for prediction
+using the model. `nestedcv` provides `pred_nestcv_glmnet` which is a wrapper
+function for binary classification or regression with `nestcv.glmnet` fitted
+models.
 
 ```{r}
 library(fastshap)
@@ -99,15 +103,10 @@ library(ggplot2)
 sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet, nsim = 5)
 
 # Plot overall variable importance
-autoplot(sh)
+plot_shap_bar(sh, x)
 ```
 
-The function `explain()` from the `fastshap` package needs a wrapper function
-for prediction using the model. `nestedcv` provides `pred_nestcv_glmnet` which
-is a wrapper function for binary classification or regression with
-`nestcv.glmnet` fitted models.
-
-`nestedcv` provides a quick plotting function `plot_shap_beeswarm` for
+`nestedcv` also provides a quick plotting function `plot_shap_beeswarm` for
 generating beeswarm plots similar to those made by the original python `shap`
 package.
 

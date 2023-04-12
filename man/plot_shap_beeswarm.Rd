@@ -33,6 +33,9 @@ training data. The rows must match rows in \code{shap}.}
 
 \item{...}{Other arguments passed to \code{ggbeeswarm::geom_beeswarm()}}
 }
+\value{
+A ggplot2 plot
+}
 \description{
 SHAP importance beeswarm plot
 }
