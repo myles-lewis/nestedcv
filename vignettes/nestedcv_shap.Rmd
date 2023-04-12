@@ -168,10 +168,10 @@ Or using beeswarm plots.
 
 ```{r, fig.width = 9, fig.height = 3.5}
 s1 <- plot_shap_beeswarm(sh1, x, sort = FALSE, cex = 0.7) +
-  ggtitle("setosa") +
+  ggtitle("Setosa") +
   theme(legend.position = "none")
 s3 <- plot_shap_beeswarm(sh3, x, sort = FALSE, cex = 0.7) +
-  ggtitle("virginica") +
+  ggtitle("Virginica") +
   guides(y = "none")
 
 ggpubr::ggarrange(s1, s3, ncol=2)
@@ -185,5 +185,4 @@ Lundberg SM et al (2020). From Local Explanations to Global Understanding with E
 
 Software:
 [fastshap](https://cran.r-project.org/package=fastshap): Brandon Greenwell. fastshap: Fast Approximate Shapley Values
-
 
