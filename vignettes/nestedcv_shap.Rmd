@@ -157,7 +157,7 @@ sh3 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class3, nsim = 5)
 s1 <- plot_shap_bar(sh1, x, sort = F) +
   ggtitle("Setosa")
 s2 <- plot_shap_bar(sh2, x, sort = F) +
-  ggtitle("Versicola")
+  ggtitle("Versicolor")
 s3 <- plot_shap_bar(sh3, x, sort = F) +
   ggtitle("Virginica")
 
@@ -166,15 +166,15 @@ ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "bottom", common.legend = TRUE)
 
 Or using beeswarm plots.
 
-```{r, fig.width = 9, fig.height = 3.5}
+```{r, fig.width = 9.5, fig.height = 3.5}
 s1 <- plot_shap_beeswarm(sh1, x, sort = FALSE, cex = 0.7) +
-  ggtitle("Setosa") +
-  theme(legend.position = "none")
+  ggtitle("Setosa")
+s2 <- plot_shap_beeswarm(sh2, x, sort = FALSE, cex = 0.7) +
+  ggtitle("Versicolor")
 s3 <- plot_shap_beeswarm(sh3, x, sort = FALSE, cex = 0.7) +
-  ggtitle("Virginica") +
-  guides(y = "none")
+  ggtitle("Virginica")
 
-ggpubr::ggarrange(s1, s3, ncol=2)
+ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "right", common.legend = TRUE)
 ```
 
 ### References
