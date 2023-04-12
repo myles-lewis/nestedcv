@@ -182,8 +182,8 @@ scale2 <- function(x) {
 #' @export
 #' 
 plot_shap_bar <- function(shap, x,
-                      sort = TRUE,
-                      labels = c("Negative", "Positive")) {
+                          sort = TRUE,
+                          labels = c("Negative", "Positive")) {
   if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
   meanshap <- colMeans(abs(as.matrix(shap)))
   cor1 <- diag(suppressWarnings(cor(shap, x)))
