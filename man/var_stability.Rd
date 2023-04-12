@@ -8,7 +8,7 @@
 \usage{
 var_stability(x, ...)
 
-\method{var_stability}{nestcv.glmnet}(x, percent = FALSE, ...)
+\method{var_stability}{nestcv.glmnet}(x, percent = FALSE, level = 1, sort = TRUE, ...)
 
 \method{var_stability}{nestcv.train}(x, ...)
 }
@@ -19,6 +19,12 @@ var_stability(x, ...)
 
 \item{percent}{Logical for \code{nestcv.glmnet} objects only, whether to scale
 coefficients to percentage of the largest coefficient in each model}
+
+\item{level}{For multinomial \code{nestcv.glmnet} models only, either an integer
+specifying which level of outcome is being examined, or the level can be
+specified as a character value}
+
+\item{sort}{Logical whether to sort variables by mean importance}
 }
 \value{
 Dataframe containing mean, sd, sem of variable importance and

@@ -5,22 +5,27 @@
 #' fitted object.
 #' 
 #' @param x a `nestcv.glmnet` fitted object
+#' @param level For multinomial models only, either an integer specifying which
+#'   level of outcome is being examined, or the level can be specified as a
+#'   character value
 #' @return matrix of coefficients from outer CV glmnet models plus the final
 #'   glmnet model. Coefficients for variables which are not present in a
 #'   particular outer CV fold model are set to 0.
 #' @seealso [cv_varImp()]
 #' @export
-cv_coef <- function(x) {
+cv_coef <- function(x, level = 1) {
   if (!inherits(x, "nestcv.glmnet")) stop("Not a `nestcv.glmnet` object")
   cfset <- lapply(x$outer_result, function(i) {
-    i$coef[-1]
+    if (is.list(i$coef)) {
+      coef(i$cvafit)[[level]][,1][-1]  # multinomial
+    } else i$coef[-1]
   })
   if (inherits(x$final_fit, "cv.glmnet")) {
-    cfset$Final <- coef(x)[-1]
+    if (is.list(coef(x))) {
+      cfset$Final <- coef(x)[[level]][-1]
+    } else cfset$Final <- coef(x)[-1]
   }
-  m <- list2matrix(cfset)
-  mr <- rowMeans(m)
-  m[order(abs(mr), decreasing = TRUE), ]
+  list2matrix(cfset)
 }
 
 
@@ -86,6 +91,10 @@ list2matrix <- function(x, na.val = 0) {
 #' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model
+#' @param level For multinomial `nestcv.glmnet` models only, either an integer
+#'   specifying which level of outcome is being examined, or the level can be
+#'   specified as a character value
+#' @param sort Logical whether to sort variables by mean importance
 #' @param ... Optional arguments for compatibility
 #' @return Dataframe containing mean, sd, sem of variable importance and
 #'   frequency by which each variable is selected in outer folds.
@@ -103,8 +112,11 @@ var_stability <- function(x, ...) {
 #' @rdname var_stability
 #' @importFrom stats sd
 #' @export
-var_stability.nestcv.glmnet <- function(x, percent = FALSE, ...) {
-  m <- cv_coef(x)
+var_stability.nestcv.glmnet <- function(x,
+                                        percent = FALSE,
+                                        level = 1,
+                                        sort = TRUE, ...) {
+  m <- cv_coef(x, level)
   if (percent) {
     # cm <- Rfast::colMaxs(m, value = TRUE)
     cm <- colSums(abs(m))
@@ -128,6 +140,7 @@ var_stability.nestcv.glmnet <- function(x, percent = FALSE, ...) {
       factor(df$sign, levels = c(-1, 1), labels = c("Negative", "Positive"))
     }
   }
+  if (!sort) return(df)
   df[order(abs(df$mean), decreasing = TRUE), ]
 }
 
@@ -166,6 +179,8 @@ var_stability.nestcv.train <- function(x, ...) {
 #'   up in the final fitted model or to include all variables selected across
 #'   all outer folds.
 #' @param top Limits number of variables plotted. Ignored if `final = TRUE`.
+#' @param sort Logical whether to sort by mean variable importance. Passed to
+#'   [var_stability()].
 #' @param direction Integer controlling plotting of directionality for binary or
 #'   regression models. `0` means no directionality is shown, `1` means
 #'   directionality is overlaid as a colour, `2` means directionality is
@@ -176,23 +191,32 @@ var_stability.nestcv.train <- function(x, ...) {
 #'   coefficients to percentage of the largest coefficient in each model. If set
 #'   to `FALSE`, model coefficients are shown and `direction` is ignored.
 #' @param breaks Vector of continuous breaks for legend colour/size
+#' @param level For multinomial `nestcv.glmnet` models only, either an integer
+#'   specifying which level of outcome is being examined, or the level can be
+#'   specified as a character value.
 #' @return A ggplot2 plot
 #' @seealso [var_stability()]
 #' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller
-#'   scale_fill_manual scale_radius
+#'   scale_fill_manual scale_radius xlim
 #' @export
 plot_var_stability <- function(x,
                                final = TRUE,
                                top = 25,
+                               sort = TRUE,
                                direction = 0,
                                dir_labels = NULL,
                                percent = TRUE,
-                               breaks = NULL) {
-  df <- var_stability(x, percent = percent)
+                               breaks = NULL,
+                               level = 1) {
+  df <- var_stability(x, percent = percent, level = level, sort = sort)
   df$name <- factor(rownames(df), levels = rownames(df))
+  if (!sort) final <- FALSE
   if (final) {
     fv <- if (inherits(x, "nestcv.glmnet")) {
-      names(coef(x))[-1]
+      if (is.list(coef(x))) {
+        # multinomial
+        names(coef(x)[[level]])[-1]
+      } else names(coef(x))[-1]
     } else if (inherits(x, "nestcv.train")) {
       x$final_vars
     }
@@ -248,6 +272,7 @@ plot_var_stability <- function(x,
                            breaks = breaks, limits = c(1, NA)) +
       scale_radius(guide = "legend", breaks = breaks,
                    limits = c(1, NA)) +
+      (if (direction == 0 & percent) xlim(0, NA)) +
       scale_y_discrete(limits=rev) + ylab("") +
       xlab(xtitle) +
       theme_minimal() +
