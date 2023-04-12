@@ -118,10 +118,10 @@ pred_train_class3 <- function(x, newdata) {
 #' @export
 #' 
 plot_shap_beeswarm <- function(shap, x,
-                                 cex = 0.2,
-                                 corral = "random",
-                                 corral.width = 0.7,
-                                 sort = TRUE, ...) {
+                               cex = 0.2,
+                               corral = "random",
+                               corral.width = 0.7,
+                               sort = TRUE, ...) {
   if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
     stop("Package 'ggbeeswarm' must be installed", call. = FALSE)
   }
