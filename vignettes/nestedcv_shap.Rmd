@@ -154,11 +154,11 @@ sh1 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class1, nsim = 5)
 sh2 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class2, nsim = 5)
 sh3 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class3, nsim = 5)
 
-s1 <- plot_shap_bar(sh1, x, sort = F) +
+s1 <- plot_shap_bar(sh1, x, sort = FALSE) +
   ggtitle("Setosa")
-s2 <- plot_shap_bar(sh2, x, sort = F) +
+s2 <- plot_shap_bar(sh2, x, sort = FALSE) +
   ggtitle("Versicolor")
-s3 <- plot_shap_bar(sh3, x, sort = F) +
+s3 <- plot_shap_bar(sh3, x, sort = FALSE) +
   ggtitle("Virginica")
 
 ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "bottom", common.legend = TRUE)
