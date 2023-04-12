@@ -56,6 +56,8 @@ plot_var_stability(fit)
 By default only the predictors chosen in the final model are shown. If the
 argument `final` is set to `FALSE` all predictors are shown to help understand
 how often they are selected which is helpful when pushing sparsity in models.
+Original coefficients can be shown instead of being scaled as a percentage by
+setting `percent = FALSE`.
 
 We can overlay directionality for binary classification or regression models
 using either colour (`direction = 1`) or the sign of the variable importance to
