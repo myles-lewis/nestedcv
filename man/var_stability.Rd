@@ -8,7 +8,7 @@
 \usage{
 var_stability(x, ...)
 
-\method{var_stability}{nestcv.glmnet}(x, percent = FALSE, level = 1, sort = TRUE, ...)
+\method{var_stability}{nestcv.glmnet}(x, percent = TRUE, level = 1, sort = TRUE, ...)
 
 \method{var_stability}{nestcv.train}(x, ...)
 }

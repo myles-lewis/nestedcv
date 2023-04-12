@@ -113,7 +113,7 @@ var_stability <- function(x, ...) {
 #' @importFrom stats sd
 #' @export
 var_stability.nestcv.glmnet <- function(x,
-                                        percent = FALSE,
+                                        percent = TRUE,
                                         level = 1,
                                         sort = TRUE, ...) {
   m <- cv_coef(x, level)

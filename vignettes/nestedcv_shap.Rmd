@@ -34,8 +34,8 @@ in each model to give a sense of the stability of predictor selection.
 In the example below using the Boston housing dataset, a glmnet regression model
 is fitted and the variable importance for predictors is shown based on the
 coefficients in the final model and tuned models from 10 outer folds. `min_1se`
-is set to 1 which is the equivalent of specifying `s = "lambda.1se"` with
-`glmnet` to encourage a more sparse model.
+is set to 1, which is the equivalent of specifying `s = "lambda.1se"` with
+`glmnet`, to encourage a more sparse model.
 
 ```{r}
 # Boston housing dataset
@@ -49,7 +49,13 @@ x <- subset(dat, select = -c(cmedv, medv, town, chas))
 set.seed(1, "L'Ecuyer-CMRG")
 fit <- nestcv.glmnet(y, x, family = "gaussian",
                      min_1se = 1, alphaSet = 1, cv.cores = 2)
+vs <- var_stability(fit)
+vs
+```
 
+Variable stability can be plotted using `plot_var_stability()`.
+
+```{r}
 plot_var_stability(fit)
 ```
 
