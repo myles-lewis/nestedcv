@@ -28,31 +28,23 @@ data(iris)
 x <- iris[, 1:4]
 y <- iris[, 5]
 
-library(randomForest)
-fit <- outercv(y, x, model = randomForest,
-               outer_train_predict = TRUE,
-               n_outer_folds = 3,
-               cv.cores = 1)
-summary(fit)
-train_summary(fit)
-
-fit2 <- nestcv.glmnet(y, x,
+fit <- nestcv.glmnet(y, x,
                      family = "multinomial",
                      alpha = 1,
                      outer_train_predict = TRUE,
                      n_outer_folds = 3)
-summary(fit2)
-innercv_summary(fit2)
-train_summary(fit2)
+summary(fit)
+innercv_summary(fit)
+train_summary(fit)
 
-fit3 <- nestcv.train(y, x,
+fit2 <- nestcv.train(y, x,
                     model="svm",
                     outer_train_predict = TRUE,
                     n_outer_folds = 3,
                     cv.cores = 2)
-summary(fit3)
-innercv_summary(fit3)
-train_summary(fit3)
+summary(fit2)
+innercv_summary(fit2)
+train_summary(fit2)
 }
 }
 \seealso{

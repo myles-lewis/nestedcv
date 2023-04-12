@@ -135,7 +135,8 @@
 #' fit2 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
 #'                       n_outer_folds = 3,
 #'                       filterFUN = ttest_filter,
-#'                       filter_options = list(nfilter = 100))
+#'                       filter_options = list(nfilter = 100),
+#'                       cv.cores = 2)
 #' summary(fit2)
 #' plot_lambdas(fit2, showLegend = "bottomright")
 #' 
