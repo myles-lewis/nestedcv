@@ -44,7 +44,7 @@
 #' autoplot(sh)
 #' 
 #' # Plot beeswarm plot
-#' plot_shap_importance(sh, x, size = 1)
+#' plot_shap_beeswarm(sh, x, size = 1)
 #' 
 #' @export
 #' 
@@ -117,7 +117,7 @@ pred_train_class3 <- function(x, newdata) {
 #' @importFrom reshape2 melt
 #' @export
 #' 
-plot_shap_importance <- function(shap, x,
+plot_shap_beeswarm <- function(shap, x,
                                  cex = 0.2,
                                  corral = "random",
                                  corral.width = 0.7,

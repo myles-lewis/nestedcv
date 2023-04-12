@@ -74,6 +74,6 @@ sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet, nsim = 1)
 autoplot(sh)
 
 # Plot beeswarm plot
-plot_shap_importance(sh, x, size = 1)
+plot_shap_beeswarm(sh, x, size = 1)
 
 }
