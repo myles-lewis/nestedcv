@@ -154,15 +154,27 @@ sh1 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class1, nsim = 5)
 sh2 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class2, nsim = 5)
 sh3 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class3, nsim = 5)
 
-# Beeswarm plots for the first two classes
+s1 <- plot_shap_bar(sh1, x, sort = F) +
+  ggtitle("Setosa")
+s2 <- plot_shap_bar(sh2, x, sort = F) +
+  ggtitle("Versicola")
+s3 <- plot_shap_bar(sh3, x, sort = F) +
+  ggtitle("Virginica")
+
+ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "bottom", common.legend = TRUE)
+```
+
+Or using beeswarm plots.
+
+```{r, fig.width = 9, fig.height = 3.5}
 s1 <- plot_shap_beeswarm(sh1, x, sort = FALSE, cex = 0.7) +
   ggtitle("setosa") +
   theme(legend.position = "none")
-s2 <- plot_shap_beeswarm(sh3, x, sort = FALSE, cex = 0.7) +
+s3 <- plot_shap_beeswarm(sh3, x, sort = FALSE, cex = 0.7) +
   ggtitle("virginica") +
   guides(y = "none")
 
-ggpubr::ggarrange(s1, s2, ncol=2)
+ggpubr::ggarrange(s1, s3, ncol=2)
 ```
 
 ### References
