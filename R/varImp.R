@@ -53,9 +53,7 @@ cv_varImp <- function(x) {
   if (inherits(x$final_fit, "train")) {
     vset$Final <- extractImp(x$final_fit)
   }
-  m <- list2matrix(vset)
-  mr <- rowMeans(m, na.rm = TRUE)
-  m[order(abs(mr), decreasing = TRUE), ]
+  list2matrix(vset)
 }
 
 
@@ -147,7 +145,8 @@ var_stability.nestcv.glmnet <- function(x,
 
 #' @rdname var_stability
 #' @export
-var_stability.nestcv.train <- function(x, ...) {
+var_stability.nestcv.train <- function(x,
+                                       sort = TRUE, ...) {
   m <- cv_varImp(x)
   mm <- rowMeans(m)
   msd <- apply(m, 1, sd)
@@ -163,7 +162,9 @@ var_stability.nestcv.train <- function(x, ...) {
       factor(df$sign, levels = c(-1, 1), labels = c("Negative", "Positive"))
     }
   }
-  df[df$freq > 0, ]
+  df <- df[df$freq > 0, ]
+  if (!sort) return(df)
+  df[order(abs(df$mean), decreasing = TRUE), ]
 }
 
 
