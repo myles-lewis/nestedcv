@@ -29,15 +29,15 @@ cv_coef <- function(x, level = 1) {
 }
 
 
-#' Extract coefficients from outer CV caret models
+#' Extract variable importance from outer CV caret models
 #' 
-#' Extracts coefficients from outer CV glmnet models from a `nestcv.train`
-#' fitted object.
+#' Extracts variable importance or coefficients from outer CV glmnet models from
+#' a `nestcv.train` fitted object.
 #' 
 #' @param x a `nestcv.train` fitted object
-#' @return matrix of variable importance from outer CV caret models as well as
-#'   the final model. Variable importance for variables which are not present in
-#'   a particular outer CV fold model is set to 0.
+#' @return matrix of variable importance from outer CV fold caret models as well
+#'   as the final model. Variable importance for variables which are not present
+#'   in a particular outer CV fold model is set to 0.
 #' @details
 #' Note that [caret::varImp()] may require the model package to be fully loaded
 #' in order to function. During the fitting process `caret` often only loads the
