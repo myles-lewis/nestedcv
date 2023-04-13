@@ -257,6 +257,7 @@ plot_var_stability <- function(x,
       scale_fill_manual(values=c("red", "royalblue")) +
       scale_radius(breaks = breaks,
                    limits = c(1, NA)) +
+      (if (min(df$mean) > 0) xlim(0, NA)) +
       scale_y_discrete(limits=rev) + ylab("") +
       xlab(xtitle) +
       theme_minimal() +
@@ -272,7 +273,7 @@ plot_var_stability <- function(x,
                            breaks = breaks, limits = c(1, NA)) +
       scale_radius(guide = "legend", breaks = breaks,
                    limits = c(1, NA)) +
-      (if (direction == 0 & percent) xlim(0, NA)) +
+      (if (min(df$mean) > 0) xlim(0, NA)) +
       scale_y_discrete(limits=rev) + ylab("") +
       xlab(xtitle) +
       theme_minimal() +
