@@ -31,7 +31,6 @@ Imports:
     methods,
     parallel,
     pROC,
-    RcppEigen,
     reshape2,
     Rfast,
     rlang
@@ -49,6 +48,7 @@ Suggests:
     mlbench,
     randomForest,
     ranger,
+    RcppEigen,
     rmarkdown,
     knitr,
     SuperLearner

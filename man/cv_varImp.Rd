@@ -2,7 +2,7 @@
 % Please edit documentation in R/varImp.R
 \name{cv_varImp}
 \alias{cv_varImp}
-\title{Extract coefficients from outer CV caret models}
+\title{Extract variable importance from outer CV caret models}
 \usage{
 cv_varImp(x)
 }
@@ -10,13 +10,13 @@ cv_varImp(x)
 \item{x}{a \code{nestcv.train} fitted object}
 }
 \value{
-matrix of variable importance from outer CV caret models as well as
-the final model. Variable importance for variables which are not present in
-a particular outer CV fold model is set to 0.
+matrix of variable importance from outer CV fold caret models as well
+as the final model. Variable importance for variables which are not present
+in a particular outer CV fold model is set to 0.
 }
 \description{
-Extracts coefficients from outer CV glmnet models from a \code{nestcv.train}
-fitted object.
+Extracts variable importance or coefficients from outer CV glmnet models from
+a \code{nestcv.train} fitted object.
 }
 \details{
 Note that \code{\link[caret:varImp]{caret::varImp()}} may require the model package to be fully loaded

@@ -627,7 +627,6 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #'   incorporated into all models are listed first. If `type = "full"` a matrix
 #'   of AIC values, sigma, the residual standard error (see [summary.lm]),
 #'   t-statistic and p-values for the tested predictor is returned.
-#' @importFrom RcppEigen fastLmPure
 #' @export
 #'
 lm_filter <- function(y, x,
@@ -637,6 +636,10 @@ lm_filter <- function(y, x,
                       rsq_cutoff = NULL,
                       rsq_method = "pearson",
                       type = c("index", "names", "full")) {
+  if (!requireNamespace("RcppEigen", quietly = TRUE)) {
+    stop("Package 'RcppEigen' must be installed to use this filter",
+         call. = FALSE)
+  }
   type <- match.arg(type)
   if (is.data.frame(x)) {
     is_factor <- vapply(x, is.factor, logical(1))
@@ -652,7 +655,7 @@ lm_filter <- function(y, x,
   } else xset <- startx
   res <- sapply(check_vars, function(i) {
     xset[, 2] <- x[, i]
-    fit <- fastLmPure(xset, y, method = 3L)
+    fit <- RcppEigen::fastLmPure(xset, y, method = 3L)
     rss <- sum(fit$residuals^2)
     tval <- fit$coefficients[2] / fit$se[2]
     c(rss, tval)
