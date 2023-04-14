@@ -94,10 +94,10 @@ list2matrix <- function(x, na.val = 0) {
 #' readily available, so as a substitute, the directionality of each predictor
 #' is determined by the function [var_direction()] using the sign of a t-test
 #' for binary classification or the sign of regression coefficient for
-#' continuous outcomes. To understand direction of effect of each predictor
-#' within the final model, we recommend using SHAP values, see the vignette
-#' "Explaining nestedcv models with Shapley values". See [pred_train()] for an
-#' example.
+#' continuous outcomes (not available for multiclass caret models). To better
+#' understand direction of effect of each predictor within the final model, we
+#' recommend using SHAP values - see the vignette "Explaining nestedcv models
+#' with Shapley values". See [pred_train()] for an example.
 #' 
 #' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale

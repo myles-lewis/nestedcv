@@ -65,9 +65,21 @@ how often they are selected which is helpful when pushing sparsity in models.
 Original coefficients can be shown instead of being scaled as a percentage by
 setting `percent = FALSE`.
 
-We can overlay directionality for binary classification or regression models
-using either colour (`direction = 1`) or the sign of the variable importance to
-splay the plot (`direction = 2`).
+The frequency with which each variable is selected in outer folds as well as the
+final model is shown by as bubble size, which is helpful for sparse models or
+with filters to determine how often variables end up in the model in each fold.
+
+We can overlay directionality using either colour (`direction = 1`) or the sign
+of the variable importance to splay the plot (`direction = 2`).
+
+For glmnet, the direction of effect is taken directly from the sign of model
+coefficients. For `caret` models, direction of effect is not readily available,
+so as a substitute, the directionality of each predictor is determined by the
+function `var_direction()` using the sign of a *t*-test for binary
+classification or the sign of regression coefficient for continuous outcomes
+(not available for multiclass caret models). To better understand relationship
+and direction of effect of each predictor within the final model, we recommend
+using SHAP values.
 
 ```{r, fig.width = 9, fig.height = 5}
 # overlay directionality using colour
@@ -125,9 +137,9 @@ variable on the model, based on correlating the value of each variable against
 the SHAP value to see if the overall correlation for that variable is positive
 or negative. For regression models such as glmnet this corresponds to the sign
 of each coefficient. For more complex models with interactions the direction of
-effect may vary and be more complex.
+effect may be variable and non-linear.
 
-Note that these SHAP plots only show the final fitted model on the whole data,
+Note that these SHAP plots only show the final fitted model (on the whole data),
 whereas the variable stability plots examine models across the outer CV folds as
 well as the final model.
 
