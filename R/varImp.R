@@ -250,12 +250,12 @@ plot_var_stability <- function(x,
   
   if (direction == 1) {
     ggplot(df, aes(x = .data$mean, y = .data$name)) +
-      (if (!percent) geom_vline(xintercept = 0)) +
+      (if (min(df$mean) < 0) geom_vline(xintercept = 0)) +
       geom_errorbarh(aes(xmin = .data$mean - .data$sem,
                          xmax = .data$mean + .data$sem), height = 0.2) +
       geom_point(aes(size = .data$frequency,
                      fill = .data$direction), shape = 21) +
-      scale_fill_manual(values=c("red", "royalblue")) +
+      scale_fill_manual(values=c("royalblue", "red")) +
       scale_radius(breaks = breaks,
                    limits = c(1, NA)) +
       (if (min(df$mean) > 0) xlim(0, NA)) +
@@ -265,7 +265,7 @@ plot_var_stability <- function(x,
       theme(axis.text = element_text(colour = "black"))
   } else {
     ggplot(df, aes(x = .data$mean, y = .data$name)) +
-      (if (direction | !percent) geom_vline(xintercept = 0)) +
+      (if (min(df$mean) < 0) geom_vline(xintercept = 0)) +
       geom_errorbarh(aes(xmin = .data$mean - .data$sem,
                          xmax = .data$mean + .data$sem), height = 0.2) +
       geom_point(aes(size = .data$frequency,
@@ -281,3 +281,104 @@ plot_var_stability <- function(x,
       theme(axis.text = element_text(colour = "black"))
   }
 }
+
+
+#' Barplot variable stability
+#'
+#' Produces a ggplot2 plot of stability (as SEM) of variable importance across
+#' models trained and tested across outer CV folds. Optionally overlays
+#' directionality for binary response or regression outcomes.
+#'
+#' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
+#' @param final Logical whether to restrict variables to only those which ended
+#'   up in the final fitted model or to include all variables selected across
+#'   all outer folds.
+#' @param top Limits number of variables plotted. Ignored if `final = TRUE`.
+#' @param direction Integer controlling plotting of directionality for binary or
+#'   regression models. `0` means no directionality is shown, `1` means
+#'   directionality is overlaid as a colour, `2` means directionality is
+#'   reflected in the sign of variable importance.
+#' @param dir_labels Character vector for controlling the legend when
+#'   `direction = 1`
+#' @param breaks Vector of continuous breaks for legend colour/size
+#' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
+#'   coefficients to percentage of the largest coefficient in each model. If set
+#'   to `FALSE`, model coefficients are shown and `direction` is ignored.
+#' @param level For multinomial `nestcv.glmnet` models only, either an integer
+#'   specifying which level of outcome is being examined, or the level can be
+#'   specified as a character value.
+#' @param sort Logical whether to sort by mean variable importance. Passed to
+#'   [var_stability()].
+#' @return A ggplot2 plot
+#' @seealso [var_stability()]
+#' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller
+#'   scale_fill_manual scale_radius xlim
+#' @export
+barplot_var_stability <- function(x,
+                                  final = TRUE,
+                                  top = 25,
+                                  direction = 0,
+                                  dir_labels = NULL,
+                                  breaks = NULL,
+                                  percent = TRUE,
+                                  level = 1,
+                                  sort = TRUE) {
+  df <- var_stability(x, percent = percent, level = level, sort = sort)
+  df$name <- factor(rownames(df), levels = rownames(df))
+  if (!sort) final <- FALSE
+  if (final) {
+    fv <- if (inherits(x, "nestcv.glmnet")) {
+      if (is.list(coef(x))) {
+        # multinomial
+        names(coef(x)[[level]])[-1]
+      } else names(coef(x))[-1]
+    } else if (inherits(x, "nestcv.train")) {
+      x$final_vars
+    }
+    if (!all(fv %in% rownames(df))) {
+      message(paste(fv[!fv %in% rownames(df)], collapse = ", "),
+              " not in final model")
+      fv <- fv[fv %in% rownames(df)]
+    }
+    df <- df[rownames(df) %in% fv, ]
+  } else {
+    top <- min(top, nrow(df))
+    df <- df[1:top, ]
+  }
+  xtitle <- if (!percent & inherits(x, "nestcv.glmnet")) {
+    "Coefficient"
+  } else "Variable importance"
+  
+  if ((!is.numeric(x$y) & nlevels(x$y) != 2)) direction <- 0
+  if (direction == 2 && "sign" %in% colnames(df) && percent) {
+    df$mean <- df$mean * df$sign
+  }
+  if (direction > 0 && !is.null(dir_labels)) {
+    df$direction <- factor(df$direction, labels = dir_labels)
+  }
+  
+  if (direction == 0) {
+    ggplot(df, aes(x = .data$mean, y = .data$name)) +
+      (if (min(df$mean) < 0) geom_vline(xintercept = 0)) +
+      geom_col(width = 0.75) +
+      geom_errorbarh(aes(xmin = .data$mean - .data$sem,
+                         xmax = .data$mean + .data$sem), height = 0.3) +
+      scale_y_discrete(limits=rev) + ylab("") +
+      xlab(xtitle) +
+      theme_minimal() +
+      theme(axis.text = element_text(colour = "black"))
+  } else {
+    ggplot(df, aes(x = .data$mean, y = .data$name)) +
+      (if (min(df$mean) < 0) geom_vline(xintercept = 0)) +
+      geom_col(aes(fill = .data$direction), width = 0.75) +
+      geom_errorbarh(aes(xmin = .data$mean - .data$sem,
+                         xmax = .data$mean + .data$sem), height = 0.3) +
+      scale_fill_manual(values=c("royalblue", "red")) +
+      scale_y_discrete(limits=rev) + ylab("") +
+      xlab(xtitle) +
+      theme_minimal() +
+      theme(axis.text = element_text(colour = "black"))
+  }
+}
+
+

@@ -119,7 +119,7 @@ pred_train_class3 <- function(x, newdata) {
 #' @export
 #' 
 plot_shap_beeswarm <- function(shap, x,
-                               cex = 0.2,
+                               cex = 0.3,
                                corral = "random",
                                corral.width = 0.7,
                                sort = TRUE, ...) {
