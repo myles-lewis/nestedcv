@@ -10,7 +10,7 @@ var_stability(x, ...)
 
 \method{var_stability}{nestcv.glmnet}(x, percent = TRUE, level = 1, sort = TRUE, ...)
 
-\method{var_stability}{nestcv.train}(x, ...)
+\method{var_stability}{nestcv.train}(x, sort = TRUE, ...)
 }
 \arguments{
 \item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object}
@@ -32,7 +32,20 @@ frequency by which each variable is selected in outer folds.
 }
 \description{
 Uses variable importance across models trained and tested across outer CV
-folds to assess stability of variable importance.
+folds to assess stability of variable importance. For glmnet, variable
+importance is measured as the absolute model coefficients, optionally scaled
+as a percentage. The frequency with which each variable is selected in outer
+folds as well as the final model is also returned which is helpful for sparse
+models or with filters to determine how often variables end up in the model
+in each fold. For glmnet, the direction of effect is taken directly from the
+sign of model coefficients. For \code{caret} models, direction of effect is not
+readily available, so as a substitute, the directionality of each predictor
+is determined by the function \code{\link[=var_direction]{var_direction()}} using the sign of a t-test
+for binary classification or the sign of regression coefficient for
+continuous outcomes. To understand direction of effect of each predictor
+within the final model, we recommend using SHAP values, see the vignette
+"Explaining nestedcv models with Shapley values". See \code{\link[=pred_train]{pred_train()}} for an
+example.
 }
 \details{
 Note that for caret models \code{\link[caret:varImp]{caret::varImp()}} may require the model package to
@@ -40,5 +53,5 @@ be fully loaded in order to function. During the fitting process \code{caret}
 often only loads the package by namespace.
 }
 \seealso{
-\code{\link[=cv_coef]{cv_coef()}} \code{\link[=cv_varImp]{cv_varImp()}}
+\code{\link[=cv_coef]{cv_coef()}} \code{\link[=cv_varImp]{cv_varImp()}} \code{\link[=pred_train]{pred_train()}}
 }

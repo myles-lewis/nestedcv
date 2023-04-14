@@ -15,11 +15,12 @@ var_dir <- function(y, x) {
 #' Variable directionality
 #'
 #' Determines directionality of final predictors for binary or regression
-#' models.
+#' models, using the sign of the t-statistic or correlation coefficient
+#' respectively for each variable compared to the outcomes.
 #'
 #' @param object a `nestcv.glmnet` or `nestcv.train` fitted model
-#' @return named vector showing sign of final predictors. If the response vector
-#'   is multinomial `NULL` is returned.
+#' @return named vector showing the directionality of final predictors. If the
+#'   response vector is multinomial `NULL` is returned.
 #' @export
 
 var_direction <- function(object) {

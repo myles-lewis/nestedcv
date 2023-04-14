@@ -10,10 +10,11 @@ var_direction(object)
 \item{object}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted model}
 }
 \value{
-named vector showing sign of final predictors. If the response vector
-is multinomial \code{NULL} is returned.
+named vector showing the directionality of final predictors. If the
+response vector is multinomial \code{NULL} is returned.
 }
 \description{
 Determines directionality of final predictors for binary or regression
-models.
+models, using the sign of the t-statistic or correlation coefficient
+respectively for each variable compared to the outcomes.
 }

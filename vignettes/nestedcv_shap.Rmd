@@ -74,7 +74,7 @@ splay the plot (`direction = 2`).
 p1 <- plot_var_stability(fit, final = FALSE, direction = 1)
 
 # show directionality with the sign of the variable importance
-p2 <- plot_var_stability(fit, final = FALSE, direction = 2)
+p2 <- plot_var_stability(fit, final = FALSE, percent = F)
 
 ggpubr::ggarrange(p1, p2, ncol=2)
 ```
@@ -102,7 +102,7 @@ using the model. `nestedcv` provides `pred_nestcv_glmnet` which is a wrapper
 function for binary classification or regression with `nestcv.glmnet` fitted
 models.
 
-```{r}
+```{r, fig.width = 9}
 library(fastshap)
 library(ggplot2)
 
@@ -111,8 +111,25 @@ library(ggplot2)
 sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet, nsim = 5)
 
 # Plot overall variable importance
-plot_shap_bar(sh, x)
+p1 <- autoplot(sh)
+
+# Overlay main direction
+p2 <- plot_shap_bar(sh, x)
+
+ggpubr::ggarrange(p1, p2, ncol = 2)
 ```
+
+The `autoplot` function from `fastshap` gives a quick barplot. `plot_shap_bar`
+from `nestedcv` overlays colour for the direction of the main effect of each
+variable on the model, based on correlating the value of each variable against
+the SHAP value to see if the overall correlation for that variable is positive
+or negative. For regression models such as glmnet this corresponds to the sign
+of each coefficient. For more complex models with interactions the direction of
+effect may vary and be more complex.
+
+Note that these SHAP plots only show the final fitted model on the whole data,
+whereas the variable stability plots examine models across the outer CV folds as
+well as the final model.
 
 `nestedcv` also provides a quick plotting function `plot_shap_beeswarm` for
 generating beeswarm plots similar to those made by the original python `shap`

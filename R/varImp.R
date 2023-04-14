@@ -84,7 +84,20 @@ list2matrix <- function(x, na.val = 0) {
 #' Variable stability
 #' 
 #' Uses variable importance across models trained and tested across outer CV
-#' folds to assess stability of variable importance.
+#' folds to assess stability of variable importance. For glmnet, variable
+#' importance is measured as the absolute model coefficients, optionally scaled
+#' as a percentage. The frequency with which each variable is selected in outer
+#' folds as well as the final model is also returned which is helpful for sparse
+#' models or with filters to determine how often variables end up in the model
+#' in each fold. For glmnet, the direction of effect is taken directly from the
+#' sign of model coefficients. For `caret` models, direction of effect is not
+#' readily available, so as a substitute, the directionality of each predictor
+#' is determined by the function [var_direction()] using the sign of a t-test
+#' for binary classification or the sign of regression coefficient for
+#' continuous outcomes. To understand direction of effect of each predictor
+#' within the final model, we recommend using SHAP values, see the vignette
+#' "Explaining nestedcv models with Shapley values". See [pred_train()] for an
+#' example.
 #' 
 #' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
@@ -100,7 +113,7 @@ list2matrix <- function(x, na.val = 0) {
 #' Note that for caret models [caret::varImp()] may require the model package to
 #' be fully loaded in order to function. During the fitting process `caret`
 #' often only loads the package by namespace.
-#' @seealso [cv_coef()] [cv_varImp()]
+#' @seealso [cv_coef()] [cv_varImp()] [pred_train()]
 #' @export
 var_stability <- function(x, ...) {
   UseMethod("var_stability")
@@ -115,6 +128,7 @@ var_stability.nestcv.glmnet <- function(x,
                                         level = 1,
                                         sort = TRUE, ...) {
   m <- cv_coef(x, level)
+  vdir <- sign(rowMeans(m))
   if (percent) {
     # cm <- Rfast::colMaxs(m, value = TRUE)
     cm <- colSums(abs(m))
@@ -128,16 +142,11 @@ var_stability.nestcv.glmnet <- function(x,
   msd <- apply(m, 1, sd)
   msem <- msd/sqrt(ncol(m))
   freq <- apply(m, 1, function(i) sum(i!=0))
-  df <- data.frame(mean = mm, sd = msd, sem = msem, frequency = freq, check.names = FALSE)
-  vdir <- var_direction(x)
-  if (!is.null(vdir)) {
-    df$sign <- vdir[rownames(df)]
-    df$direction <- if (nlevels(x$y) == 2) {
-      factor(df$sign, levels = c(-1, 1), labels = paste("Up in", levels(x$y)))
-    } else {
-      factor(df$sign, levels = c(-1, 1), labels = c("Negative", "Positive"))
-    }
-  }
+  df <- data.frame(mean = mm, sd = msd, sem = msem, frequency = freq,
+                   check.names = FALSE)
+  df$sign <- vdir[rownames(df)]
+  df$direction <- factor(df$sign, levels = c(-1, 1),
+                         labels = c("Negative", "Positive"))
   if (!sort) return(df)
   df[order(abs(df$mean), decreasing = TRUE), ]
 }
@@ -380,5 +389,3 @@ barplot_var_stability <- function(x,
       theme(axis.text = element_text(colour = "black"))
   }
 }
-
-
