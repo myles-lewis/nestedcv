@@ -42,10 +42,10 @@ sign of model coefficients. For \code{caret} models, direction of effect is not
 readily available, so as a substitute, the directionality of each predictor
 is determined by the function \code{\link[=var_direction]{var_direction()}} using the sign of a t-test
 for binary classification or the sign of regression coefficient for
-continuous outcomes. To understand direction of effect of each predictor
-within the final model, we recommend using SHAP values, see the vignette
-"Explaining nestedcv models with Shapley values". See \code{\link[=pred_train]{pred_train()}} for an
-example.
+continuous outcomes (not available for multiclass caret models). To better
+understand direction of effect of each predictor within the final model, we
+recommend using SHAP values - see the vignette "Explaining nestedcv models
+with Shapley values". See \code{\link[=pred_train]{pred_train()}} for an example.
 }
 \details{
 Note that for caret models \code{\link[caret:varImp]{caret::varImp()}} may require the model package to

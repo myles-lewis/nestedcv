@@ -7,7 +7,7 @@
 plot_shap_beeswarm(
   shap,
   x,
-  cex = 0.3,
+  cex = 0.25,
   corral = "random",
   corral.width = 0.7,
   sort = TRUE,
