@@ -234,7 +234,7 @@ If you use this package, please cite as:
 Lewis MJ, Spiliopoulou A, Goldmann K, Pitzalis C, McKeigue P, Barnes MR (2023).
 nestedcv: an R package for fast implementation of nested cross-validation with
 embedded feature selection designed for transcriptomics and high dimensional
-data. *Bioinformatics Advances*, vbad048. https://doi.org/10.1093/bioadv/vbad048
+data. *Bioinformatics Advances*. https://doi.org/10.1093/bioadv/vbad048
 
 ### References
 

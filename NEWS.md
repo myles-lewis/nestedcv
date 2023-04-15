@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.6.1
+###### 15/04/2023
+* Add vignette for variable stability and SHAP value analysis
+* Refine variable stability and shap plots
+
 # nestedcv 0.6.0
 ###### 19/03/2023
 * Switch some packages from Imports to Suggests to make basic installation 
