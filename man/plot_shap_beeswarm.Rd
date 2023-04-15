@@ -10,6 +10,7 @@ plot_shap_beeswarm(
   cex = 0.25,
   corral = "random",
   corral.width = 0.7,
+  scheme = c("deepskyblue2", "purple3", "red"),
   sort = TRUE,
   ...
 )
@@ -28,6 +29,8 @@ training data. The rows must match rows in \code{shap}.}
 
 \item{corral.width}{Numeric specifying width of corral, passed to
 \code{geom_beeswarm}}
+
+\item{scheme}{Colour scheme as a vector of 3 colours}
 
 \item{sort}{Logical whether to sort predictors by mean absolute SHAP value.}
 

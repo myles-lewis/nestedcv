@@ -15,7 +15,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE
 )
-library(nestedcv)
 ```
 
 `nestedcv` provides two methods for understanding fitted models. The simplest of
@@ -38,8 +37,9 @@ is set to 1, which is the equivalent of specifying `s = "lambda.1se"` with
 `glmnet`, to encourage a more sparse model.
 
 ```{r}
-# Boston housing dataset
-library(mlbench)
+library(nestedcv)
+library(mlbench)  # Boston housing dataset
+
 data(BostonHousing2)
 dat <- BostonHousing2
 y <- dat$cmedv
@@ -91,12 +91,21 @@ p2 <- plot_var_stability(fit, final = FALSE, percent = F)
 ggpubr::ggarrange(p1, p2, ncol=2)
 ```
 
+Alternatively a barplot is available using `barplot_var_stability()`.
+
 The `caret` package allows variable importance to be calculated for other models
 types. This is model dependent. For example, with random forest variable
 importance is usually calculated as the mean decrease in Gini impurity each time
 a variable is chosen in a tree. With caret models, you may have to load the
 appropriate package for that model to calculate the variable importance, e.g.
 this is necessary for GBM models with the `gbm` package.
+
+To change the colour scheme for `direction = 1` overwrite `scale_fill_manual()`.
+
+```{r, eval=FALSE}
+# change bubble colour scheme
+p1 + scale_fill_manual(values=c("orange", "green3"))
+```
 
 ### Explainable AI with Shapley values
 
@@ -144,13 +153,17 @@ whereas the variable stability plots examine models across the outer CV folds as
 well as the final model.
 
 `nestedcv` also provides a quick plotting function `plot_shap_beeswarm` for
-generating beeswarm plots similar to those made by the original python `shap`
-package.
+generating ggplot2 beeswarm plots similar to those made by the original python
+`shap` package.
 
 ```{r}
 # Plot beeswarm plot
 plot_shap_beeswarm(sh, x, size = 1)
 ```
+
+`size` can be set to control the size of points. `cex` controls the amount of
+overlap of the beeswarm. `scheme` controls the colour scheme as a vector of 3
+colours.
 
 The process for a caret model fitted using `nestedcv` is similar. Use the
 `pred_train` wrapper when calling `explain()`.
@@ -214,12 +227,19 @@ s3 <- plot_shap_beeswarm(sh3, x, sort = FALSE, cex = 0.7) +
 ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "right", common.legend = TRUE)
 ```
 
+### Citation
+
+If you use this package, please cite as:
+
+Lewis MJ, Spiliopoulou A, Goldmann K, Pitzalis C, McKeigue P, Barnes MR (2023).
+nestedcv: an R package for fast implementation of nested cross-validation with
+embedded feature selection designed for transcriptomics and high dimensional
+data. *Bioinformatics Advances*, vbad048. https://doi.org/10.1093/bioadv/vbad048
+
 ### References
+
+Brandon Greenwell. [fastshap](https://cran.r-project.org/package=fastshap): Fast Approximate Shapley Values
 
 Lundberg SM & Lee SI (2017). A Unified Approach to Interpreting Model Predictions. *Advances in Neural Information Processing Systems* 30; 4768–4777. http://papers.nips.cc/ paper/7062-a-unified-approach-to-interpreting-model-predictions.pdf
 
 Lundberg SM et al (2020). From Local Explanations to Global Understanding with Explainable AI for Trees. *Nat Mach Intell* 2020; 2(1): 56-67. https://arxiv.org/abs/1905.04610
-
-Software:
-[fastshap](https://cran.r-project.org/package=fastshap): Brandon Greenwell. fastshap: Fast Approximate Shapley Values
-

@@ -111,6 +111,7 @@ pred_train_class3 <- function(x, newdata) {
 #'   `ggbeeswarm::geom_beeswarm()`.
 #' @param corral.width Numeric specifying width of corral, passed to
 #'   `geom_beeswarm`
+#' @param scheme Colour scheme as a vector of 3 colours
 #' @param sort Logical whether to sort predictors by mean absolute SHAP value.
 #' @param ... Other arguments passed to `ggbeeswarm::geom_beeswarm()`
 #' @return A ggplot2 plot
@@ -122,6 +123,7 @@ plot_shap_beeswarm <- function(shap, x,
                                cex = 0.25,
                                corral = "random",
                                corral.width = 0.7,
+                               scheme = c("deepskyblue2", "purple3", "red"),
                                sort = TRUE, ...) {
   if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
     stop("Package 'ggbeeswarm' must be installed", call. = FALSE)
@@ -145,7 +147,7 @@ plot_shap_beeswarm <- function(shap, x,
     ggbeeswarm::geom_beeswarm(cex = cex, corral = corral,
                               corral.width = corral.width,
                               ...) +
-    scale_color_gradient2(low="deepskyblue2", mid="purple3", high="red",
+    scale_color_gradient2(low=scheme[1], mid=scheme[2], high=scheme[3],
                           breaks = c(-1.5, 1.5),
                           labels = c("Low", "High"), name="Feature\nvalue\n",
                           guide = guide_colorbar(

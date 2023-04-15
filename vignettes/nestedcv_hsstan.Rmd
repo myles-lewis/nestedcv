@@ -276,6 +276,18 @@ have to be suppressed during multicore processing. If a `nestedcv` call is not
 working, we recommend that you try it with `cv.cores=1` first to check it starts
 up without error messages.
 
+# Citation
+
+If you use this package, please cite as:
+
+Lewis MJ, Spiliopoulou A, Goldmann K, Pitzalis C, McKeigue P, Barnes MR (2023).
+nestedcv: an R package for fast implementation of nested cross-validation with
+embedded feature selection designed for transcriptomics and high dimensional
+data. *Bioinformatics Advances*, vbad048. https://doi.org/10.1093/bioadv/vbad048
+
 # References
 
+Carpenter, B., et al. Stan: A Probabilistic Programming Language. *Journal of Statistical Software* 2017;76(1):1-32.
+
+Piironen, J. and Vehtari, A. Sparsity information and regularization in the horseshoe and other shrinkage priors. *Electronic Journal of Statistics* 2017;11(2):5018-5051, 5034.
 

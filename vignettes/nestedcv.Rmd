@@ -697,6 +697,15 @@ have to be suppressed during multicore processing. If a `nestedcv` call is not
 working, we recommend that you try it with `cv.cores=1` first to check it starts
 up without error messages.
 
+# Citation
+
+If you use this package, please cite as:
+
+Lewis MJ, Spiliopoulou A, Goldmann K, Pitzalis C, McKeigue P, Barnes MR (2023).
+nestedcv: an R package for fast implementation of nested cross-validation with
+embedded feature selection designed for transcriptomics and high dimensional
+data. *Bioinformatics Advances*, vbad048. https://doi.org/10.1093/bioadv/vbad048
+
 # References
 
 Chawla, NV, Bowyer KW, Hall LO, Kegelmeyer WP. Smote: Synthetic minority
