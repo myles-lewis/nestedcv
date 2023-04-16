@@ -238,8 +238,13 @@ data. *Bioinformatics Advances*. https://doi.org/10.1093/bioadv/vbad048
 
 ### References
 
-Brandon Greenwell. [fastshap](https://cran.r-project.org/package=fastshap): Fast Approximate Shapley Values
+Brandon Greenwell. [fastshap](https://cran.r-project.org/package=fastshap): Fast
+Approximate Shapley Values
 
-Lundberg SM & Lee SI (2017). A Unified Approach to Interpreting Model Predictions. *Advances in Neural Information Processing Systems* 30; 4768–4777. http://papers.nips.cc/ paper/7062-a-unified-approach-to-interpreting-model-predictions.pdf
+Lundberg SM & Lee SI (2017). A Unified Approach to Interpreting Model
+Predictions. *Advances in Neural Information Processing Systems* 30; 4768–4777.
+http://papers.nips.cc/paper/7062-a-unified-approach-to-interpreting-model-predictions.pdf
 
-Lundberg SM et al (2020). From Local Explanations to Global Understanding with Explainable AI for Trees. *Nat Mach Intell* 2020; 2(1): 56-67. https://arxiv.org/abs/1905.04610
+Lundberg SM et al (2020). From Local Explanations to Global Understanding with
+Explainable AI for Trees. *Nat Mach Intell* 2020; 2(1): 56-67.
+https://arxiv.org/abs/1905.04610
