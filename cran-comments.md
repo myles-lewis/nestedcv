@@ -2,6 +2,7 @@
 
 0 errors | 0 warnings | 0 note
 
+* Fixed NOTE from example timing
 * Resubmission with bug fixes and a couple of new features
 
 * Fixed title
