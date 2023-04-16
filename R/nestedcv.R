@@ -102,7 +102,7 @@
 #' @importFrom Rfast colmeans
 #' @importFrom stats predict setNames
 #' @examples
-#' 
+#' \donttest{
 #' ## Example binary classification problem with P >> n
 #' x <- matrix(rnorm(150 * 2e+04), 150, 2e+04)  # predictors
 #' y <- factor(rbinom(150, 1, 0.5))  # binary response
@@ -150,7 +150,7 @@
 #' legend('bottomright', legend = c("Nested CV", "Left-out inner CV folds", 
 #'                                  "Test partition, non-nested filtering"), 
 #'        col = c("black", "blue", "red"), lty = 1, lwd = 2, bty = "n")
-#' 
+#' }
 #' @export
 #' 
 nestcv.glmnet <- function(y, x,
