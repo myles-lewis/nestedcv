@@ -12,7 +12,7 @@ nest_filt_bal <- function(test, y, x,
     xtest <- NULL
   } else {
     ytrain <- y[-test]
-    xtrain <- x[-test, ]
+    xtrain <- x[-test, , drop = FALSE]
     ytest <- y[test]
     xtest <- x[test, , drop = FALSE]
   }
