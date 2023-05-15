@@ -2,6 +2,8 @@
 
 0 errors | 0 warnings | 0 note
 
+* Minor update to fix impending bug from forthcoming update to fastshap package
+
 * Fixed NOTE from example timing
 * Resubmission with bug fixes and a couple of new features
 
