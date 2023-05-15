@@ -53,7 +53,6 @@ further classes.
 }
 \examples{
 library(fastshap)
-library(ggplot2)
 
 # Boston housing dataset
 library(mlbench)
@@ -71,7 +70,7 @@ fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
 sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet, nsim = 1)
 
 # Plot overall variable importance
-autoplot(sh)
+plot_shap_bar(sh, x)
 
 # Plot beeswarm plot
 plot_shap_beeswarm(sh, x, size = 1)

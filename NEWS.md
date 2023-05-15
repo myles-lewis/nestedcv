@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.6.2
+###### 15/05/2023
+* Modified examples and vignette in anticipation of new version of fastshap 0.1.0
+
 # nestedcv 0.6.1
 ###### 15/04/2023
 * Add vignette for variable stability and SHAP value analysis
