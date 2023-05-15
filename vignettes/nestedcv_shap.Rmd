@@ -186,6 +186,7 @@ extended.
 As a toy example, we show the iris dataset which has 3 classes.
 
 ```{r, fig.width = 9, fig.height = 3.5}
+library(ggplot2)
 data("iris")
 dat <- iris
 y <- dat$Species
