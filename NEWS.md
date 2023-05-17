@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.6.3
+###### 15/05/2023
+* Improve `plot_var_stability()` to be more user friendly
+
 # nestedcv 0.6.2
 ###### 15/05/2023
 * Modified examples and vignette in anticipation of new version of fastshap 0.1.0

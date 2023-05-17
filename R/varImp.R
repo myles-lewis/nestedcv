@@ -188,11 +188,13 @@ var_stability.nestcv.train <- function(x,
 #' @param final Logical whether to restrict variables to only those which ended
 #'   up in the final fitted model or to include all variables selected across
 #'   all outer folds.
-#' @param top Limits number of variables plotted. Ignored if `final = TRUE`.
+#' @param top Limits number of variables plotted. Set to `NULL` to plot all
+#'   variables.
 #' @param direction Integer controlling plotting of directionality for binary or
 #'   regression models. `0` means no directionality is shown, `1` means
 #'   directionality is overlaid as a colour, `2` means directionality is
-#'   reflected in the sign of variable importance.
+#'   reflected in the sign of variable importance. Not available for multiclass
+#'   caret models.
 #' @param dir_labels Character vector for controlling the legend when
 #'   `direction = 1`
 #' @param breaks Vector of continuous breaks for legend colour/size
@@ -306,11 +308,13 @@ plot_var_stability <- function(x,
 #' @param final Logical whether to restrict variables to only those which ended
 #'   up in the final fitted model or to include all variables selected across
 #'   all outer folds.
-#' @param top Limits number of variables plotted. Ignored if `final = TRUE`.
+#' @param top Limits number of variables plotted. Set to `NULL` to plot all
+#'   variables.
 #' @param direction Integer controlling plotting of directionality for binary or
 #'   regression models. `0` means no directionality is shown, `1` means
 #'   directionality is overlaid as a colour, `2` means directionality is
-#'   reflected in the sign of variable importance.
+#'   reflected in the sign of variable importance. Not available for multiclass
+#'   caret models.
 #' @param dir_labels Character vector for controlling the legend when
 #'   `direction = 1`
 #' @param breaks Vector of continuous breaks for legend colour/size

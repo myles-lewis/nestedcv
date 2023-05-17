@@ -23,12 +23,14 @@ plot_var_stability(
 up in the final fitted model or to include all variables selected across
 all outer folds.}
 
-\item{top}{Limits number of variables plotted. Ignored if \code{final = TRUE}.}
+\item{top}{Limits number of variables plotted. Set to \code{NULL} to plot all
+variables.}
 
 \item{direction}{Integer controlling plotting of directionality for binary or
 regression models. \code{0} means no directionality is shown, \code{1} means
 directionality is overlaid as a colour, \code{2} means directionality is
-reflected in the sign of variable importance.}
+reflected in the sign of variable importance. Not available for multiclass
+caret models.}
 
 \item{dir_labels}{Character vector for controlling the legend when
 \code{direction = 1}}
