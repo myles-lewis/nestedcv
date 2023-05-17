@@ -7,7 +7,7 @@
 plot_var_stability(
   x,
   final = TRUE,
-  top = 25,
+  top = NULL,
   direction = 0,
   dir_labels = NULL,
   breaks = NULL,

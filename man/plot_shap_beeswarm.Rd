@@ -12,6 +12,7 @@ plot_shap_beeswarm(
   corral.width = 0.7,
   scheme = c("deepskyblue2", "purple3", "red"),
   sort = TRUE,
+  top = NULL,
   ...
 )
 }
@@ -33,6 +34,10 @@ training data. The rows must match rows in \code{shap}.}
 \item{scheme}{Colour scheme as a vector of 3 colours}
 
 \item{sort}{Logical whether to sort predictors by mean absolute SHAP value.}
+
+\item{top}{Sets a limit on the number of variables plotted or \code{NULL} to plot
+all variables. If \code{top} is set then variables are sorted and \code{sort} is
+overrode.}
 
 \item{...}{Other arguments passed to \code{ggbeeswarm::geom_beeswarm()}}
 }

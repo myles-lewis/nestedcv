@@ -4,7 +4,13 @@
 \alias{plot_shap_bar}
 \title{SHAP importance bar plot}
 \usage{
-plot_shap_bar(shap, x, sort = TRUE, labels = c("Negative", "Positive"))
+plot_shap_bar(
+  shap,
+  x,
+  sort = TRUE,
+  labels = c("Negative", "Positive"),
+  top = NULL
+)
 }
 \arguments{
 \item{shap}{a matrix of SHAP values}
@@ -15,6 +21,10 @@ training data. The rows must match rows in \code{shap}.}
 \item{sort}{Logical whether to sort predictors by mean absolute SHAP value}
 
 \item{labels}{Character vector of labels for directionality}
+
+\item{top}{Sets a limit on the number of variables plotted or \code{NULL} to plot
+all variables. If \code{top} is set then variables are sorted and \code{sort} is
+overrode.}
 }
 \value{
 A ggplot2 plot
