@@ -112,9 +112,12 @@ pred_train_class3 <- function(x, newdata) {
 #'   `geom_beeswarm`
 #' @param scheme Colour scheme as a vector of 3 colours
 #' @param sort Logical whether to sort predictors by mean absolute SHAP value.
+#' @param top Sets a limit on the number of variables plotted or `NULL` to plot
+#'   all variables. If `top` is set then variables are sorted and `sort` is
+#'   overrode.
 #' @param ... Other arguments passed to `ggbeeswarm::geom_beeswarm()`
 #' @return A ggplot2 plot
-#' @importFrom ggplot2 scale_color_gradient2 guide_colorbar
+#' @importFrom ggplot2 scale_color_gradient2 guide_colorbar rel
 #' @importFrom reshape2 melt
 #' @export
 #' 
@@ -123,7 +126,8 @@ plot_shap_beeswarm <- function(shap, x,
                                corral = "random",
                                corral.width = 0.7,
                                scheme = c("deepskyblue2", "purple3", "red"),
-                               sort = TRUE, ...) {
+                               sort = TRUE,
+                               top = NULL, ...) {
   if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
     stop("Package 'ggbeeswarm' must be installed", call. = FALSE)
   }
@@ -134,10 +138,15 @@ plot_shap_beeswarm <- function(shap, x,
     message("Variables with mean(|SHAP|)=0: ",
             paste(colnames(shap[zeros]), collapse = ", "))
   }
-  df <- suppressMessages(melt(shap[, !zeros], value.name = "SHAP"))
-  df$val <- melt(scale2(x[, !zeros]))[, "value"]
+  keep <- !zeros
+  if (!is.null(top)) {
+    ord <- order(meanshap, decreasing = TRUE)
+    if (top < length(meanshap)) keep <- ord[1:top]
+  }
+  df <- suppressMessages(melt(shap[, keep], value.name = "SHAP"))
+  df$val <- melt(scale2(x[, keep]))[, "value"]
   if (sort) {
-    ord <- sort(meanshap[!zeros], decreasing = TRUE)
+    ord <- sort(meanshap[keep], decreasing = TRUE)
     df$variable <- factor(df$variable, levels = names(ord))
   }
   
@@ -148,18 +157,19 @@ plot_shap_beeswarm <- function(shap, x,
                               ...) +
     scale_color_gradient2(low=scheme[1], mid=scheme[2], high=scheme[3],
                           breaks = c(-1.5, 1.5),
-                          labels = c("Low", "High"), name="Feature\nvalue\n",
+                          labels = c("Low", "High"), name="Feature value",
                           guide = guide_colorbar(
                             barwidth = 0.5,
-                            barheight = 8)
-                          #   title.theme = element_text(angle = 90, hjust = 0.5, vjust = 0),
-                          #   title.position = "left")
+                            barheight = 8,
+                            title.position = "left")
                           ) +
     scale_y_discrete(limits = rev) +
     ylab("") +
     xlab("SHAP value") +
     theme_classic() +
-    theme(axis.text = element_text(colour = "black"))
+    theme(axis.text = element_text(colour = "black"),
+          legend.title = element_text(angle = 90, hjust = 0.5, vjust = 0,
+                                                       size = rel(0.9)))
 }
 
 
@@ -178,13 +188,17 @@ scale2 <- function(x) {
 #'   training data. The rows must match rows in `shap`.
 #' @param sort Logical whether to sort predictors by mean absolute SHAP value
 #' @param labels Character vector of labels for directionality
+#' @param top Sets a limit on the number of variables plotted or `NULL` to plot
+#'   all variables. If `top` is set then variables are sorted and `sort` is
+#'   overrode.
 #' @return A ggplot2 plot
 #' @importFrom ggplot2 geom_bar
 #' @export
 #' 
 plot_shap_bar <- function(shap, x,
                           sort = TRUE,
-                          labels = c("Negative", "Positive")) {
+                          labels = c("Negative", "Positive"),
+                          top = NULL) {
   if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
   meanshap <- colMeans(abs(as.matrix(shap)))
   cor1 <- diag(suppressWarnings(cor(shap, x)))
@@ -193,19 +207,20 @@ plot_shap_bar <- function(shap, x,
   sign1 <- factor(sign1, levels = c(-1, 1), labels = labels)
   df <- data.frame(var = names(meanshap), meanshap = meanshap,
                    Direction = sign1)
-  if (sort) {
+  if (!is.null(top) && top < ncol(x)) {
+    ord <- order(meanshap, decreasing = TRUE)[1:top]
+    df <- df[ord, ]
+  } else if (sort) {
     zeros <- meanshap == 0
     if (any(zeros)) {
       message("Variables with mean(|SHAP|)=0: ",
               paste(colnames(shap[zeros]), collapse = ", "))
-              
     }
     df <- df[!zeros, ]
-    ord <- sort(meanshap[!zeros])
-    df$var <- factor(df$var, levels = names(ord))
-  } else {
-    df$var <- factor(df$var, levels = rev(names(meanshap)))
+    ord <- order(df$meanshap, decreasing = TRUE)
+    df <- df[ord, ]
   }
+  df$var <- factor(df$var, levels = rev(df$var))
   
   ggplot(df, aes(y = .data$var, x = .data$meanshap, fill = .data$Direction)) +
     geom_bar(stat = "identity", width = 0.75) +
