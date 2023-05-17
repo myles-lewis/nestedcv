@@ -2,8 +2,9 @@ News
 =====
 
 # nestedcv 0.6.3
-###### 15/05/2023
+###### 17/05/2023
 * Improve `plot_var_stability()` to be more user friendly
+* Add `top` argument to shap plots
 
 # nestedcv 0.6.2
 ###### 15/05/2023
