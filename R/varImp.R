@@ -236,21 +236,25 @@ plot_var_stability <- function(x,
       fv <- fv[fv %in% rownames(df)]
     }
     df <- df[rownames(df) %in% fv, ]
-  } else {
-    top <- min(top, nrow(df))
-    df <- df[1:top, ]
   }
-  xtitle <- if (!percent & inherits(x, "nestcv.glmnet")) {
-    "Coefficient"
-  } else "Variable importance"
+  if (!is.null(top) && top < nrow(df)) df <- df[1:top, ]
+  if (!percent & inherits(x, "nestcv.glmnet")) {
+    if (direction == 1) {
+      df$mean <- abs(df$mean)
+      xtitle <- "|coefficient|"
+    } else xtitle <- "Coefficient"
+  } else xtitle <- "Variable importance"
   if (is.null(breaks)) {
     nof <- length(x$outer_folds)
     pr <- unique(round(pretty(c(1, nof), n = 4)))
     breaks <- setNames(c(pr, nof+1), c(as.character(pr), "all"))
   }
   
-  if ((!is.numeric(x$y) & nlevels(x$y) != 2) | !percent) direction <- 0
-  if (direction == 2 && "sign" %in% colnames(df)) {
+  if (direction != 0 && !"direction" %in% colnames(df)) {
+    message("Missing directionality information")
+    direction <- 0
+  }
+  if (direction == 2 && "sign" %in% colnames(df) && percent) {
     df$mean <- df$mean * df$sign
   }
   if (direction > 0 && !is.null(dir_labels)) {
@@ -264,7 +268,7 @@ plot_var_stability <- function(x,
                          xmax = .data$mean + .data$sem), height = 0.2) +
       geom_point(aes(size = .data$frequency,
                      fill = .data$direction), shape = 21) +
-      scale_fill_manual(values=c("royalblue", "red")) +
+      scale_fill_manual(values=c("royalblue", "red"), na.translate = FALSE) +
       scale_radius(breaks = breaks,
                    limits = c(1, NA)) +
       (if (min(df$mean) > 0) xlim(0, NA)) +
@@ -350,15 +354,19 @@ barplot_var_stability <- function(x,
       fv <- fv[fv %in% rownames(df)]
     }
     df <- df[rownames(df) %in% fv, ]
-  } else {
-    top <- min(top, nrow(df))
-    df <- df[1:top, ]
   }
-  xtitle <- if (!percent & inherits(x, "nestcv.glmnet")) {
-    "Coefficient"
-  } else "Variable importance"
+  if (!is.null(top) && top < nrow(df)) df <- df[1:top, ]
+  if (!percent & inherits(x, "nestcv.glmnet")) {
+    if (direction == 1) {
+      df$mean <- abs(df$mean)
+      xtitle <- "|coefficient|"
+    } else xtitle <- "Coefficient"
+  } else xtitle <- "Variable importance"
   
-  if ((!is.numeric(x$y) & nlevels(x$y) != 2)) direction <- 0
+  if (direction != 0 && !"direction" %in% colnames(df)) {
+    message("Missing directionality information")
+    direction <- 0
+  }
   if (direction == 2 && "sign" %in% colnames(df) && percent) {
     df$mean <- df$mean * df$sign
   }
@@ -382,7 +390,7 @@ barplot_var_stability <- function(x,
       geom_col(aes(fill = .data$direction), width = 0.75) +
       geom_errorbarh(aes(xmin = .data$mean - .data$sem,
                          xmax = .data$mean + .data$sem), height = 0.3) +
-      scale_fill_manual(values=c("royalblue", "red")) +
+      scale_fill_manual(values=c("royalblue", "red"), na.translate = FALSE) +
       scale_y_discrete(limits=rev) + ylab("") +
       xlab(xtitle) +
       theme_minimal() +
