@@ -4,6 +4,9 @@ News
 # nestedcv 0.6.4
 ###### 28/05/2023
 * Ensure `nfolds` for final CV equals `n_inner_folds` in `nestcv.glmnet()`
+* For both `nestcv.glmnet` and `nestcv.train` if `n_outer_folds` = 
+`n_inner_folds` and balancing is not applied so that `y` is a consistent length, 
+then fold indices as stored in `outer_folds` are passed to the final round of CV.
 
 # nestedcv 0.6.3
 ###### 17/05/2023

@@ -224,6 +224,14 @@ nestcv.train <- function(y, x,
     filtx <- dat$filt_xtrain
     if (finalCV) {
       # use CV on whole data to finalise parameters
+      trControlFinal <- trControl
+      if (n_outer_folds == trControl$number && trControl$method == "cv" &&
+          length(y) == length(yfinal)) {
+        train_folds <- lapply(outer_folds, function(i) setdiff(seq_along(y), i))
+        trControlFinal$index <- train_folds
+        trControlFinal$indexOut <- outer_folds
+      }
+      
       if (cv.cores >= 2) {
         if (Sys.info()["sysname"] == "Windows") {
           cl <- makeCluster(cv.cores)
@@ -238,7 +246,7 @@ nestcv.train <- function(y, x,
                                   method = method,
                                   weights = weights,
                                   metric = metric,
-                                  trControl = trControl,
+                                  trControl = trControlFinal,
                                   tuneGrid = tuneGrid, ...)
       })
       finalTune <- final_fit$bestTune
