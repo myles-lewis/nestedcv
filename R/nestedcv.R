@@ -248,8 +248,15 @@ nestcv.glmnet <- function(y, x,
     
     if (finalCV) {
       # use CV on whole data to finalise parameters
+      if (n_outer_folds == n_inner_folds && length(y) == length(yfinal)) {
+        foldid <- rep(0, length(y))
+        for (i in 1:length(outer_folds)) {
+          foldid[outer_folds[[i]]] <- i
+        }
+      } else foldid <- NULL
       cvafit <- cva.glmnet(filtx, yfinal, alphaSet = alphaSet, family = family,
-                           weights = weights, penalty.factor = filtpen.factor, ...)
+                           weights = weights, penalty.factor = filtpen.factor, 
+                           nfolds = n_inner_folds, foldid = foldid, ...)
       alphafit <- cvafit$fits[[cvafit$which_alpha]]
       s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
       fit <- cvafit$fits[[cvafit$which_alpha]]
@@ -376,6 +383,8 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
 #' @param y Response vector
 #' @param nfolds Number of folds (default 10)
 #' @param alphaSet Sequence of alpha values to cross-validate
+#' @param foldid Optional vector of values between 1 and `nfolds` identifying
+#'   what fold each observation is in.
 #' @param ... Other arguments passed to [cv.glmnet]
 #' @return Object of S3 class "cva.glmnet", which is a list of the cv.glmnet 
 #' objects for each value of alpha and `alphaSet`.
@@ -391,8 +400,11 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
 #' @importFrom utils tail
 #' @export
 #' 
-cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...) {
-  foldid <- sample(rep(seq_len(nfolds), length = length(y)))
+cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1),
+                       foldid = NULL, ...) {
+  if (is.null(foldid)) {
+    foldid <- sample(rep(seq_len(nfolds), length = length(y)))
+  }
   fit1 <- cv.glmnet(x = x, y = y, 
                     alpha = tail(alphaSet, 1), foldid = foldid, ...)
   if (length(alphaSet) > 1) {

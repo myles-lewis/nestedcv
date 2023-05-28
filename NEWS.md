@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.6.4
+###### 28/05/2023
+* Ensure `nfolds` for final CV equals `n_inner_folds` in `nestcv.glmnet()`
+
 # nestedcv 0.6.3
 ###### 17/05/2023
 * Improve `plot_var_stability()` to be more user friendly

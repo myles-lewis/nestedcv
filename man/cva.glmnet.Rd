@@ -4,7 +4,7 @@
 \alias{cva.glmnet}
 \title{Cross-validation of alpha for glmnet}
 \usage{
-cva.glmnet(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...)
+cva.glmnet(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), foldid = NULL, ...)
 }
 \arguments{
 \item{x}{Matrix of predictors}
@@ -14,6 +14,9 @@ cva.glmnet(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), ...)
 \item{nfolds}{Number of folds (default 10)}
 
 \item{alphaSet}{Sequence of alpha values to cross-validate}
+
+\item{foldid}{Optional vector of values between 1 and \code{nfolds} identifying
+what fold each observation is in.}
 
 \item{...}{Other arguments passed to \link{cv.glmnet}}
 }
