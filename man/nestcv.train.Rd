@@ -16,6 +16,7 @@ nestcv.train(
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   outer_folds = NULL,
+  pass_outer_folds = FALSE,
   cv.cores = 1,
   metric = ifelse(is.factor(y), "logLoss", "RMSE"),
   trControl = NULL,
@@ -60,6 +61,11 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
 \item{outer_folds}{Optional list containing indices of test folds for outer
 CV. If supplied, \code{n_outer_folds} is ignored.}
+
+\item{pass_outer_folds}{Logical indicating whether the same outer folds are
+used for fitting of the final model when final CV is applied. Note this can
+only be applied when \code{n_outer_folds} and the number of inner CV folds
+specified in \code{trControl} are the same and that no balancing is applied.}
 
 \item{cv.cores}{Number of cores for parallel processing of the outer loops.
 NOTE: this uses \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply}

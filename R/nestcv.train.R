@@ -30,6 +30,10 @@
 #' @param n_outer_folds Number of outer CV folds
 #' @param outer_folds Optional list containing indices of test folds for outer
 #'   CV. If supplied, `n_outer_folds` is ignored.
+#' @param pass_outer_folds Logical indicating whether the same outer folds are
+#'   used for fitting of the final model when final CV is applied. Note this can
+#'   only be applied when `n_outer_folds` and the number of inner CV folds
+#'   specified in `trControl` are the same and that no balancing is applied.
 #' @param metric A string that specifies what summary metric will be used to
 #'   select the optimal model. By default, "logLoss" is used for classification
 #'   and "RMSE" is used for regression. Note this differs from the default
@@ -173,6 +177,7 @@ nestcv.train <- function(y, x,
                          outer_method = c("cv", "LOOCV"),
                          n_outer_folds = 10,
                          outer_folds = NULL,
+                         pass_outer_folds = FALSE,
                          cv.cores = 1,
                          metric = ifelse(is.factor(y), "logLoss", "RMSE"),
                          trControl = NULL,
@@ -225,11 +230,13 @@ nestcv.train <- function(y, x,
     if (finalCV) {
       # use CV on whole data to finalise parameters
       trControlFinal <- trControl
-      if (n_outer_folds == trControl$number && trControl$method == "cv" &&
-          length(y) == length(yfinal)) {
-        train_folds <- lapply(outer_folds, function(i) setdiff(seq_along(y), i))
-        trControlFinal$index <- train_folds
-        trControlFinal$indexOut <- outer_folds
+      if (pass_outer_folds) {
+        if (n_outer_folds == trControl$number && trControl$method == "cv" &&
+            is.null(balance)) {
+          train_folds <- lapply(outer_folds, function(i) setdiff(seq_along(y), i))
+          trControlFinal$index <- train_folds
+          trControlFinal$indexOut <- outer_folds
+        } else message("Cannot pass `outer_folds` to final CV")
       }
       
       if (cv.cores >= 2) {

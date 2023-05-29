@@ -34,6 +34,10 @@
 #' @param n_inner_folds Number of inner CV folds
 #' @param outer_folds Optional list containing indices of test folds for outer
 #'   CV. If supplied, `n_outer_folds` is ignored.
+#' @param pass_outer_folds Logical indicating whether the same outer folds are
+#'   used for fitting of the final model when final CV is applied. Note this can
+#'   only be applied when `n_outer_folds` and `n_inner_folds` are the same and
+#'   no balancing is applied.
 #' @param alphaSet Vector of alphas to be tuned
 #' @param min_1se Value from 0 to 1 specifying choice of optimal lambda from
 #'   0=lambda.min to 1=lambda.1se
@@ -164,6 +168,7 @@ nestcv.glmnet <- function(y, x,
                           n_outer_folds = 10,
                           n_inner_folds = 10,
                           outer_folds = NULL,
+                          pass_outer_folds = FALSE,
                           alphaSet = seq(0, 1, 0.1),
                           min_1se = 0,
                           keep = TRUE,
@@ -248,12 +253,15 @@ nestcv.glmnet <- function(y, x,
     
     if (finalCV) {
       # use CV on whole data to finalise parameters
-      if (n_outer_folds == n_inner_folds && length(y) == length(yfinal)) {
-        foldid <- rep(0, length(y))
-        for (i in 1:length(outer_folds)) {
-          foldid[outer_folds[[i]]] <- i
-        }
-      } else foldid <- NULL
+      foldid <- NULL
+      if (pass_outer_folds) {
+        if (n_outer_folds == n_inner_folds && is.null(balance)) {
+          foldid <- rep(0, length(y))
+          for (i in 1:length(outer_folds)) {
+            foldid[outer_folds[[i]]] <- i
+          }
+        } else message("Cannot pass `outer_folds` to final CV")
+      }
       cvafit <- cva.glmnet(filtx, yfinal, alphaSet = alphaSet, family = family,
                            weights = weights, penalty.factor = filtpen.factor, 
                            nfolds = n_inner_folds, foldid = foldid, ...)

@@ -16,6 +16,7 @@ nestcv.glmnet(
   n_outer_folds = 10,
   n_inner_folds = 10,
   outer_folds = NULL,
+  pass_outer_folds = FALSE,
   alphaSet = seq(0, 1, 0.1),
   min_1se = 0,
   keep = TRUE,
@@ -61,6 +62,11 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
 \item{outer_folds}{Optional list containing indices of test folds for outer
 CV. If supplied, \code{n_outer_folds} is ignored.}
+
+\item{pass_outer_folds}{Logical indicating whether the same outer folds are
+used for fitting of the final model when final CV is applied. Note this can
+only be applied when \code{n_outer_folds} and \code{n_inner_folds} are the same and
+no balancing is applied.}
 
 \item{alphaSet}{Vector of alphas to be tuned}
 
