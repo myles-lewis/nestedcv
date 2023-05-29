@@ -2,6 +2,9 @@
 
 0 errors | 0 warnings | 0 note
 
+* Minor update with bugfixes and added a requested feature to enable passing of 
+outer_fold IDs to the final round of CV
+
 * Minor update to fix impending bug from forthcoming update to fastshap package
 
 * Fixed NOTE from example timing
