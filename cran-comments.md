@@ -2,6 +2,7 @@
 
 0 errors | 0 warnings | 0 note
 
+* Fix citation to use bibentry
 * Minor update with bugfixes and added a requested feature to enable passing of 
 outer_fold IDs to the final round of CV
 
