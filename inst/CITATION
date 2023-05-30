@@ -6,7 +6,7 @@ bibentry(
                person("Katriona", "Goldmann"),
                person("Constantino", "Pitzalis"),
                person("Paul", "McKeigue"),
-               person(c("Michael", "R."), Barnes)),
+               person(c("Michael", "R."), "Barnes")),
   journal  = "Bioinformatics Advances",
   year     = "2023",
   volume   = "3",
