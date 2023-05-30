@@ -1,5 +1,3 @@
-citation(auto = meta)
-
 bibentry(
   bibtype  = "Article",
   title    = "nestedcv: an R package for fast implementation of nested cross-validation with embedded feature selection designed for transcriptomics and high-dimensional data",
