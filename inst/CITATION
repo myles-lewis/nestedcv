@@ -4,7 +4,7 @@ bibentry(
   author   = c(person(c("Myles", "J."), "Lewis"),
                person("Athina", "Spiliopoulou"),
                person("Katriona", "Goldmann"),
-               person("Constantino", "Pitzalis"),
+               person("Costantino", "Pitzalis"),
                person("Paul", "McKeigue"),
                person(c("Michael", "R."), "Barnes")),
   journal  = "Bioinformatics Advances",
