@@ -69,7 +69,8 @@ CV. If supplied, \code{n_outer_folds} is ignored.}
 \item{pass_outer_folds}{Logical indicating whether the same outer folds are
 used for fitting of the final model when final CV is applied. Note this can
 only be applied when \code{n_outer_folds} and the number of inner CV folds
-specified in \code{trControl} are the same and that no balancing is applied.}
+specified in \code{n_inner_folds} or \code{trControl} are the same and that no
+balancing is applied.}
 
 \item{cv.cores}{Number of cores for parallel processing of the outer loops.
 NOTE: this uses \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply}

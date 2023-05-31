@@ -35,7 +35,8 @@
 #' @param pass_outer_folds Logical indicating whether the same outer folds are
 #'   used for fitting of the final model when final CV is applied. Note this can
 #'   only be applied when `n_outer_folds` and the number of inner CV folds
-#'   specified in `trControl` are the same and that no balancing is applied.
+#'   specified in `n_inner_folds` or `trControl` are the same and that no
+#'   balancing is applied.
 #' @param metric A string that specifies what summary metric will be used to
 #'   select the optimal model. By default, "logLoss" is used for classification
 #'   and "RMSE" is used for regression. Note this differs from the default
