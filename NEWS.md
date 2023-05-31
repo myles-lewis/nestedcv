@@ -2,6 +2,11 @@ News
 =====
 
 # nestedcv 0.6.4
+###### 31/05/2023
+* Added `n_inner_folds` argument to `nestcv.train()` to make it easier to set 
+the number of inner CV folds.
+
+# nestedcv 0.6.4
 ###### 29/05/2023
 * Fix: ensure `nfolds` for final CV equals `n_inner_folds` in `nestcv.glmnet()`
 * Add argument `pass_outer_folds` to both `nestcv.glmnet` and `nestcv.train`: 

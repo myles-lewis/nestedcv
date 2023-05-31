@@ -15,6 +15,7 @@ nestcv.train(
   balance_options = NULL,
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
+  n_inner_folds = 10,
   outer_folds = NULL,
   pass_outer_folds = FALSE,
   cv.cores = 1,
@@ -58,6 +59,9 @@ function}
 to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
 \item{n_outer_folds}{Number of outer CV folds}
+
+\item{n_inner_folds}{Sets number of inner CV folds. Note if \code{trControl} is
+specified then this supersedes \code{n_inner_folds}.}
 
 \item{outer_folds}{Optional list containing indices of test folds for outer
 CV. If supplied, \code{n_outer_folds} is ignored.}
