@@ -217,6 +217,11 @@ nestcv.train <- function(y, x,
     outer_folds <- switch(outer_method,
                           cv = createFolds(y, k = n_outer_folds),
                           LOOCV = 1:length(y))
+  } else {
+    if ("n_outer_folds" %in% names(nestcv.call)) {
+      if (n_outer_folds != length(outer_folds)) stop("Mismatch between n_outer_folds and length(outer_folds)")
+    }
+    n_outer_folds <- length(outer_folds)
   }
   
   if (is.na(finalCV)) {
