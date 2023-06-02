@@ -17,6 +17,7 @@ nestcv.train(
   n_outer_folds = 10,
   n_inner_folds = 10,
   outer_folds = NULL,
+  inner_folds = NULL,
   pass_outer_folds = FALSE,
   cv.cores = 1,
   metric = ifelse(is.factor(y), "logLoss", "RMSE"),
@@ -65,6 +66,11 @@ specified then this supersedes \code{n_inner_folds}.}
 
 \item{outer_folds}{Optional list containing indices of test folds for outer
 CV. If supplied, \code{n_outer_folds} is ignored.}
+
+\item{inner_folds}{Optional list of test fold indices for inner CV. This must
+be structured as a list of the outer folds each containing a list of inner
+folds. Can only be supplied if balancing is not applied. If supplied,
+\code{n_inner_folds} is ignored.}
 
 \item{pass_outer_folds}{Logical indicating whether the same outer folds are
 used for fitting of the final model when final CV is applied. Note this can
