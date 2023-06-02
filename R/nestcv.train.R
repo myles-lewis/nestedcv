@@ -32,6 +32,10 @@
 #'   specified then this supersedes `n_inner_folds`.
 #' @param outer_folds Optional list containing indices of test folds for outer
 #'   CV. If supplied, `n_outer_folds` is ignored.
+#' @param inner_folds Optional list of test fold indices for inner CV. This must
+#'   be structured as a list of the outer folds each containing a list of inner
+#'   folds. Can only be supplied if balancing is not applied. If supplied,
+#'   `n_inner_folds` is ignored.
 #' @param pass_outer_folds Logical indicating whether the same outer folds are
 #'   used for fitting of the final model when final CV is applied. Note this can
 #'   only be applied when `n_outer_folds` and the number of inner CV folds
@@ -181,6 +185,7 @@ nestcv.train <- function(y, x,
                          n_outer_folds = 10,
                          n_inner_folds = 10,
                          outer_folds = NULL,
+                         inner_folds = NULL,
                          pass_outer_folds = FALSE,
                          cv.cores = 1,
                          metric = ifelse(is.factor(y), "logLoss", "RMSE"),
@@ -228,6 +233,20 @@ nestcv.train <- function(y, x,
     n_outer_folds <- length(outer_folds)
   }
   
+  if (!is.null(inner_folds)) {
+    if (length(inner_folds) != length(outer_folds)) stop("Mismatch in length(outer_folds) and length(inner_folds)")
+    if ("n_inner_folds" %in% names(nestcv.call)) {
+      if (n_inner_folds != length(inner_folds)) stop("Mismatch between n_inner_folds and length(inner_folds)")
+    }
+    n_inner_folds <- length(inner_folds)
+    outer_train_size <- sapply(swapFoldIndex(outer_folds), length)
+    chk <- lapply(seq_along(outer_train_size), function(i) {
+      max(unlist(inner_folds[[i]])) > outer_train_size[i]
+    })
+    if (any(chk)) stop("inner_folds contains index out of range")
+    inner_train_folds <- lapply(inner_folds, swapFoldIndex)
+  } else inner_train_folds <- NULL
+  
   if (is.na(finalCV)) {
     final_fit <- finalTune <- filtx <- yfinal <- xsub <- NA
   } else {
@@ -242,7 +261,7 @@ nestcv.train <- function(y, x,
       if (pass_outer_folds) {
         if (n_outer_folds == trControl$number && trControl$method == "cv" &&
             is.null(balance)) {
-          train_folds <- lapply(outer_folds, function(i) setdiff(seq_along(y), i))
+          train_folds <- swapFoldIndex(outer_folds, length(y))
           trControlFinal$index <- train_folds
           trControlFinal$indexOut <- outer_folds
         } else message("Cannot pass `outer_folds` to final CV")
@@ -276,13 +295,14 @@ nestcv.train <- function(y, x,
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
-    varlist <- c("outer_folds", "y", "x", "method", "filterFUN",
+    varlist <- c("outer_folds", "inner_train_folds", "y", "x", "method", "filterFUN",
                  "filter_options", "weights", "balance", "balance_options",
                  "metric", "trControl", "tuneGrid", "outer_train_predict",
                  "nestcv.trainCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
-    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
-      args <- c(list(test=test, y=y, x=x, method=method,
+    outer_res <- parLapply(cl = cl, seq_along(outer_folds), function(i) {
+      args <- c(list(i=i, y=y, x=x, outer_folds = outer_folds,
+                     inner_train_folds = inner_train_folds, method=method,
                      filterFUN=filterFUN, filter_options=filter_options,
                      weights=weights, balance=balance,
                      balance_options=balance_options, metric=metric,
@@ -292,9 +312,9 @@ nestcv.train <- function(y, x,
     })
     stopCluster(cl)
   } else {
-    outer_res <- mclapply(outer_folds, function(test) {
-      nestcv.trainCore(test, y, x, method,
-                       filterFUN, filter_options,
+    outer_res <- mclapply(seq_along(outer_folds), function(i) {
+      nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
+                       method, filterFUN, filter_options,
                        weights, balance, balance_options,
                        metric, trControl, tuneGrid, outer_train_predict, ...)
     }, mc.cores = cv.cores, mc.silent = TRUE, mc.allow.recursive = FALSE)
@@ -355,11 +375,12 @@ nestcv.train <- function(y, x,
 }
 
 
-nestcv.trainCore <- function(test, y, x, method,
-                             filterFUN, filter_options,
+nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
+                             method, filterFUN, filter_options,
                              weights, balance, balance_options,
                              metric, trControl, tuneGrid,
                              outer_train_predict, ...) {
+  test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options)
   ytrain <- dat$ytrain
@@ -367,6 +388,7 @@ nestcv.trainCore <- function(test, y, x, method,
   filt_xtrain <- dat$filt_xtrain
   filt_xtest <- dat$filt_xtest
   
+  trControl$index <- inner_train_folds[[i]]
   printlog <- capture.output({
     fit <- caret::train(x = filt_xtrain, y = ytrain,
                         method = method,
@@ -498,3 +520,7 @@ summary_vars <- function(x) {
   out
 }
 
+
+swapFoldIndex <- function(folds, len = max(unlist(folds))) {
+  lapply(folds, function(i) setdiff(seq_len(len), i))
+}
