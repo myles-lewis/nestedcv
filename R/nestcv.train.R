@@ -244,6 +244,7 @@ nestcv.train <- function(y, x,
       max(unlist(inner_folds[[i]])) > outer_train_size[i]
     })
     if (any(chk)) stop("inner_folds contains index out of range")
+    if (!is.null(balance)) stop("`balance` cannot be used if `inner_folds` is specified")
     inner_train_folds <- lapply(inner_folds, swapFoldIndex)
   } else inner_train_folds <- NULL
   
