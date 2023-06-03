@@ -225,7 +225,7 @@ nestcv.train <- function(y, x,
     if ("n_inner_folds" %in% names(nestcv.call)) {
       if (n_inner_folds != length(inner_folds)) stop("Mismatch between n_inner_folds and length(inner_folds)")
     }
-    n_inner_folds <- length(inner_folds)
+    n_inner_folds <- length(inner_folds[[1]])
     outer_train_size <- sapply(swapFoldIndex(outer_folds), length)
     chk <- vapply(seq_along(outer_train_size), function(i) {
       max(unlist(inner_folds[[i]])) > outer_train_size[i]
