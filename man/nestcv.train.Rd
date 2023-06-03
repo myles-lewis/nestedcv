@@ -217,6 +217,23 @@ plot(ncv$roc)
 ## plot ROC for left-out inner folds
 inroc <- innercv_roc(ncv)
 plot(inroc)
+
+## example to show use of custom fold indices for 5 x 5-fold nested CV
+library(caret)
+y <- iris$Species
+out_folds <- createFolds(y, k = 5)
+in_folds <- lapply(out_folds, function(i) {
+  ytrain <- y[-i]
+  createFolds(ytrain, k = 5)
+})
+
+res <- nestcv.train(y, x, method="rf", cv.cores = 2,
+                    pass_outer_folds = TRUE,
+                    inner_folds = in_folds,
+                    outer_folds = out_folds)
+summary(res)
+res$outer_folds
+res$final_fit$control$indexOut  # same as outer_folds
 }
 }
 \author{
