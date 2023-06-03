@@ -1,10 +1,11 @@
 News
 =====
 
-# nestedcv 0.6.4
-###### 31/05/2023
-* Added `n_inner_folds` argument to `nestcv.train()` to make it easier to set 
-the number of inner CV folds.
+# nestedcv 0.6.5
+###### 03/06/2023
+* Added `n_inner_folds` argument to `nestcv.train()` to make it easier to set
+the number of inner CV folds, and `inner_folds` argument which enables setting
+the inner CV fold indices directly.
 
 # nestedcv 0.6.4
 ###### 29/05/2023

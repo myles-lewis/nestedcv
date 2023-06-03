@@ -28,8 +28,8 @@
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
-#' @param n_inner_folds Sets number of inner CV folds. Note if `trControl` is
-#'   specified then this supersedes `n_inner_folds`.
+#' @param n_inner_folds Sets number of inner CV folds. Note if `trControl` or
+#'   `inner_folds` is specified then these supersede `n_inner_folds`.
 #' @param outer_folds Optional list containing indices of test folds for outer
 #'   CV. If supplied, `n_outer_folds` is ignored.
 #' @param inner_folds Optional list of test fold indices for inner CV. This must

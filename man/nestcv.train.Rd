@@ -61,8 +61,8 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 
 \item{n_outer_folds}{Number of outer CV folds}
 
-\item{n_inner_folds}{Sets number of inner CV folds. Note if \code{trControl} is
-specified then this supersedes \code{n_inner_folds}.}
+\item{n_inner_folds}{Sets number of inner CV folds. Note if \code{trControl} or
+\code{inner_folds} is specified then these supersede \code{n_inner_folds}.}
 
 \item{outer_folds}{Optional list containing indices of test folds for outer
 CV. If supplied, \code{n_outer_folds} is ignored.}
