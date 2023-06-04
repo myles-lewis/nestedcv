@@ -22,15 +22,18 @@ devtools::install_github("myles-lewis/nestedcv")
 
 # Example
 
-Using iris dataset (multinomial, 3 classes).
+In this example using iris dataset (multinomial, 3 classes), we fit a glmnet
+model, tuning both lambda and alpha with 10x10-fold nested CV.
 
 ```
 library(nestedcv)
 data(iris)
 y <- iris$Species
 x <- as.matrix(iris[, -5])
-res <- nestcv.glmnet(y, x, family = "multinomial",
-                     alphaSet = (8:10)/10, cv.cores = 4)
+
+cores <- parallel::detectCores(logical = FALSE)  # detect physical cores
+
+res <- nestcv.glmnet(y, x, family = "multinomial", cv.cores = cores)
 summary(res)
 ```
 
@@ -47,19 +50,20 @@ plot_alphas(res)
 plot_lambdas(res)
 ```
 
-The tuning of lambda and alpha for each outer fold can be plotted.
+The tuning of lambda and alpha for each outer CV fold can be plotted.
 
 ```
 plot(res$outer_result[[1]]$cvafit)
 ```
 
-ROC curves from left-out folds from both outer and inner CV can be plotted for binary comparisons (see vignette).
+ROC curves from left-out folds from both outer and inner CV can be plotted for
+binary comparisons (see vignette).
 
 Nested CV can also be performed using the caret package framework. Here we use
-caret for tuning glmnet.
+caret for tuning random forest using the ranger package.
 
 ```
 # nested CV using caret
-res <- nestcv.train(y, x, method="rf", cv.cores = 8)
+res <- nestcv.train(y, x, method = "ranger", cv.cores = cores)
 summary(res)
 ```
