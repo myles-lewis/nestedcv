@@ -47,7 +47,7 @@ plot_alphas(res)
 plot_lambdas(res)
 ```
 
-The tuning of alpha for each outer fold can be plotted.
+The tuning of lambda and alpha for each outer fold can be plotted.
 
 ```
 plot(res$outer_result[[1]]$cvafit)
