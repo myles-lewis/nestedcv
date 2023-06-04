@@ -43,8 +43,8 @@ Output from the nested CV with glmnet can be plotted to show how deviance is
 affected by alpha and lambda.
 
 ```
-plot_alphas(res.rtx)
-plot_lambdas(res.rtx)
+plot_alphas(res)
+plot_lambdas(res)
 ```
 
 The tuning of alpha for each outer fold can be plotted.
