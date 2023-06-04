@@ -23,7 +23,7 @@ devtools::install_github("myles-lewis/nestedcv")
 # Example
 
 In this example using iris dataset (multinomial, 3 classes), we fit a glmnet
-model, tuning both lambda and alpha with 10x10-fold nested CV.
+model, tuning both lambda and alpha with 10 x 10-fold nested CV.
 
 ```
 library(nestedcv)
@@ -63,7 +63,6 @@ Nested CV can also be performed using the caret package framework. Here we use
 caret for tuning random forest using the ranger package.
 
 ```
-# nested CV using caret
 res <- nestcv.train(y, x, method = "ranger", cv.cores = cores)
 summary(res)
 ```
