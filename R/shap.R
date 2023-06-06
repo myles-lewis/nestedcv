@@ -147,7 +147,7 @@ plot_shap_beeswarm <- function(shap, x,
     if (top < length(meanshap)) keep <- ord[1:top]
   }
   shap_stack <- stack(shap[, keep])
-  x_stack <- stack(data.frame(clip_scale(x[, keep])))
+  x_stack <- stack(as.data.frame(clip_scale(x[, keep])))
   df <- data.frame(variable = shap_stack$ind, SHAP = shap_stack$values,
                    val = x_stack$values)
   
