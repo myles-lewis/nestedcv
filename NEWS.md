@@ -1,11 +1,12 @@
 News
 =====
 
-# nestedcv 0.6.5
-###### 03/06/2023
+# nestedcv 0.6.6
+###### 06/06/2023
 * Added `n_inner_folds` argument to `nestcv.train()` to make it easier to set
 the number of inner CV folds, and `inner_folds` argument which enables setting
 the inner CV fold indices directly.
+* Fix CMD check error in `plot_shap_beeswarm()` in r-devel-linux-x86_64-fedora
 
 # nestedcv 0.6.4
 ###### 29/05/2023

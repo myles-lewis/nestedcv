@@ -1,6 +1,6 @@
 Package: nestedcv
 Title: Nested Cross-Validation with 'glmnet' and 'caret'
-Version: 0.6.5
+Version: 0.6.6
 Authors@R: 
     c(person(given = "Myles",family = "Lewis",
     role = c("aut", "cre"),
@@ -31,7 +31,6 @@ Imports:
     methods,
     parallel,
     pROC,
-    reshape2,
     Rfast,
     rlang
 Roxygen: list(markdown = TRUE)

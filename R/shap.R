@@ -102,8 +102,10 @@ pred_train_class3 <- function(x, newdata) {
 #' SHAP importance beeswarm plot
 #'
 #' @param shap a matrix of SHAP values
-#' @param x a matrix of feature values containing only features values from the
-#'   training data. The rows must match rows in `shap`.
+#' @param x a matrix or dataframe of feature values containing only features
+#'   values from the training data. The rows must match rows in `shap`. If a
+#'   dataframe is supplied it is converted to a numeric matrix using
+#'   [data.matrix()].
 #' @param cex Scaling for adjusting point spacing. See
 #'   `ggbeeswarm::geom_beeswarm()`.
 #' @param corral String specifying method used to corral points. See
@@ -118,7 +120,7 @@ pred_train_class3 <- function(x, newdata) {
 #' @param ... Other arguments passed to `ggbeeswarm::geom_beeswarm()`
 #' @return A ggplot2 plot
 #' @importFrom ggplot2 scale_color_gradient2 guide_colorbar rel
-#' @importFrom reshape2 melt
+#' @importFrom utils stack
 #' @export
 #' 
 plot_shap_beeswarm <- function(shap, x,
@@ -132,6 +134,7 @@ plot_shap_beeswarm <- function(shap, x,
     stop("Package 'ggbeeswarm' must be installed", call. = FALSE)
   }
   if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
+  x <- data.matrix(x)
   meanshap <- colMeans(abs(as.matrix(shap)))
   zeros <- if (sort) meanshap == 0 else FALSE
   if (any(zeros)) {
@@ -143,8 +146,11 @@ plot_shap_beeswarm <- function(shap, x,
     ord <- order(meanshap, decreasing = TRUE)
     if (top < length(meanshap)) keep <- ord[1:top]
   }
-  df <- suppressMessages(melt(shap[, keep], value.name = "SHAP"))
-  df$val <- melt(scale2(x[, keep]))[, "value"]
+  shap_stack <- stack(shap[, keep])
+  x_stack <- stack(data.frame(clip_scale(x[, keep])))
+  df <- data.frame(variable = shap_stack$ind, SHAP = shap_stack$values,
+                   val = x_stack$values)
+  
   if (sort) {
     ord <- sort(meanshap[keep], decreasing = TRUE)
     df$variable <- factor(df$variable, levels = names(ord))
@@ -173,7 +179,7 @@ plot_shap_beeswarm <- function(shap, x,
 }
 
 
-scale2 <- function(x) {
+clip_scale <- function(x) {
   scx <- scale(x)
   scx[which(scx < -1.5, arr.ind = TRUE)] <- -1.5
   scx[which(scx > 1.5, arr.ind = TRUE)] <- 1.5
@@ -184,8 +190,10 @@ scale2 <- function(x) {
 #' SHAP importance bar plot
 #'
 #' @param shap a matrix of SHAP values
-#' @param x a matrix of feature values containing only features values from the
-#'   training data. The rows must match rows in `shap`.
+#' @param x a matrix or dataframe of feature values containing only features
+#'   values from the training data. The rows must match rows in `shap`. If a
+#'   dataframe is supplied it is converted to a numeric matrix using
+#'   [data.matrix()].
 #' @param sort Logical whether to sort predictors by mean absolute SHAP value
 #' @param labels Character vector of labels for directionality
 #' @param top Sets a limit on the number of variables plotted or `NULL` to plot
@@ -201,6 +209,7 @@ plot_shap_bar <- function(shap, x,
                           top = NULL) {
   if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
   meanshap <- colMeans(abs(as.matrix(shap)))
+  x <- data.matrix(x)
   cor1 <- diag(suppressWarnings(cor(shap, x)))
   sign1 <- sign(cor1)
   sign1[is.na(sign1)] <- 1
