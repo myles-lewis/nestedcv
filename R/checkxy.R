@@ -24,6 +24,7 @@ checkxy <- function(y, x, na.option = "pass", weights = NULL) {
     okr <- !nay
     okc <- !naxc
   }
+  x <- data.matrix(x)
   sc <- scale(x)
   sds <- attr(sc, "scaled:scale")  # Rfast & matrixStats have bugs if var=0
   var0 <- sds == 0

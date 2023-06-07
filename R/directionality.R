@@ -7,6 +7,7 @@ var_dir <- function(y, x) {
   }
   # classification
   if (nlevels(y) != 2) return(NULL)
+  x <- data.matrix(x)
   tt <- ttest_filter(y, x, p_cutoff = NULL, type = "full")
   -sign(tt[, "stat"])
 }
@@ -21,6 +22,11 @@ var_dir <- function(y, x) {
 #' @param object a `nestcv.glmnet` or `nestcv.train` fitted model
 #' @return named vector showing the directionality of final predictors. If the
 #'   response vector is multinomial `NULL` is returned.
+#' @details 
+#' Categorical features with >2 levels are assumed to have a meaningful order
+#' for the purposes of directionality. Factors are coerced to ordinal using
+#' `data.matrix()`. If factors are multiclass then directionality results should
+#' be ignored.
 #' @export
 
 var_direction <- function(object) {

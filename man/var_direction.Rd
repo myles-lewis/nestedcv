@@ -18,3 +18,9 @@ Determines directionality of final predictors for binary or regression
 models, using the sign of the t-statistic or correlation coefficient
 respectively for each variable compared to the outcomes.
 }
+\details{
+Categorical features with >2 levels are assumed to have a meaningful order
+for the purposes of directionality. Factors are coerced to ordinal using
+\code{data.matrix()}. If factors are multiclass then directionality results should
+be ignored.
+}
