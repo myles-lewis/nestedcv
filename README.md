@@ -50,7 +50,7 @@ plot_alphas(res)
 plot_lambdas(res)
 ```
 
-The tuning of lambda and alpha for each outer CV fold can be plotted.
+The tuning of lambda and alpha for each outer CV fold can be plotted. Here we inspect outer CV fold 1.
 
 ```
 plot(res$outer_result[[1]]$cvafit)
