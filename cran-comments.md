@@ -2,7 +2,7 @@
 
 0 errors | 0 warnings | 0 note
 
-* Fixed CRAN check ERROR due to update in fastshap package
+* Fixed CRAN check ERROR which arose due to update in fastshap package
 * Additional bugfixes
 
 * Fixed citation to use bibentry
