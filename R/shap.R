@@ -133,8 +133,9 @@ plot_shap_beeswarm <- function(shap, x,
   if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
     stop("Package 'ggbeeswarm' must be installed", call. = FALSE)
   }
-  if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
+  shap <- as.matrix(shap)
   x <- data.matrix(x)
+  if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
   meanshap <- colMeans(abs(as.matrix(shap)))
   zeros <- if (sort) meanshap == 0 else FALSE
   if (any(zeros)) {
@@ -146,7 +147,7 @@ plot_shap_beeswarm <- function(shap, x,
     ord <- order(meanshap, decreasing = TRUE)
     if (top < length(meanshap)) keep <- ord[1:top]
   }
-  shap_stack <- stack(shap[, keep])
+  shap_stack <- stack(as.data.frame(shap[, keep]))
   x_stack <- stack(as.data.frame(clip_scale(x[, keep])))
   df <- data.frame(variable = shap_stack$ind, SHAP = shap_stack$values,
                    val = x_stack$values)
