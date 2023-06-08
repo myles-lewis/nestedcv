@@ -371,10 +371,10 @@ nestcv.train <- function(y, x,
   
   if (!is.na(finalCV)) {
     all_vars <- unlist(lapply(outer_res, function(i) {
-      vars <- colnames(i$fit$trainingData)
-      vars[vars != ".outcome"]
+      colnames(i$fit$trainingData)
     }))
     all_vars <- unique(c(all_vars, colnames(filtx)))
+    all_vars <- all_vars[all_vars %in% colnames(x)]
     xsub <- x[, all_vars]
   }
   
