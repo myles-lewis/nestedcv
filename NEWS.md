@@ -16,7 +16,7 @@ suggestion)
 
 * Added `n_inner_folds` argument to `nestcv.train()` to make it easier to set
 the number of inner CV folds, and `inner_folds` argument which enables setting
-the inner CV fold indices directly (suggested by Alina Westerberg)
+the inner CV fold indices directly (suggestion Aline Wildberger)
 
 ## Bug fixes
 
