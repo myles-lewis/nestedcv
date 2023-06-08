@@ -1,22 +1,42 @@
 News
 =====
 
+# nestedcv 0.6.7
+###### 08/06/2023
+
+## Bug fixes
+
+* Fixed bug caused by use of weights with `nestcv.train()` (Matt Siggins 
+suggestion)
+
 # nestedcv 0.6.6
 ###### 07/06/2023
+
+## New features
+
 * Added `n_inner_folds` argument to `nestcv.train()` to make it easier to set
 the number of inner CV folds, and `inner_folds` argument which enables setting
-the inner CV fold indices directly.
+the inner CV fold indices directly (suggested by Alina Westerberg)
+
+## Bug fixes
+
 * Fixed error in `plot_shap_beeswarm()` caused by change in fastshap 0.1.0 output 
 from tibble to matrix
 * Fixed bug with categorical features and `nestcv.train()`
 
 # nestedcv 0.6.4
 ###### 29/05/2023
-* Fix: ensure `nfolds` for final CV equals `n_inner_folds` in `nestcv.glmnet()`
+
+## New features
+
 * Add argument `pass_outer_folds` to both `nestcv.glmnet` and `nestcv.train`: 
 this enables passing of passing of outer CV fold indices stored in `outer_folds` 
 to the final round of CV. Note this can only work if `n_outer_folds` = number of 
 inner CV folds and balancing is not applied so that `y` is a consistent length.
+
+## Bug fixes
+
+* Fix: ensure `nfolds` for final CV equals `n_inner_folds` in `nestcv.glmnet()`
 
 # nestedcv 0.6.3
 ###### 17/05/2023
