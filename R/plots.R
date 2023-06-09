@@ -358,7 +358,8 @@ plot_varImp <- function(x, abs = TRUE, size = TRUE) {
 #' 
 plot_caret <- function(x, error.col = "darkgrey", ...) {
   res <- x$results
-  nrepeat <- x$control$number * x$control$repeats
+  nrepeat <- x$control$number
+  if (!is.na(x$control$repeats)) nrepeat <- nrepeat * x$control$repeats
   w <- switch(x$method, glmnet = "lambda", 1)
   x1 <- res[, w]
   y <- res[, x$metric]
