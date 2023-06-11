@@ -12,6 +12,7 @@ correl_filter(
   p_cutoff = 0.05,
   method = "pearson",
   type = c("index", "names", "full"),
+  keep_factors = TRUE,
   ...
 )
 }
@@ -33,6 +34,13 @@ p values < \code{p_cutoff} are returned.}
 
 \item{type}{Type of vector returned. Default "index" returns indices,
 "names" returns predictor names, "full" returns a matrix of p-values.}
+
+\item{keep_factors}{Logical affecting factors with 3 or more levels.
+Dataframes are coerced to a matrix using \link{data.matrix}. Binary
+factors are converted to numeric values 0/1 and analysed as such. If
+\code{keep_factors} is \code{TRUE} (the default), factors with 3 or more levels are
+not filtered and are retained. If \code{keep_factors} is \code{FALSE}, they are
+removed.}
 
 \item{...}{Further arguments passed to \link{correls}}
 }

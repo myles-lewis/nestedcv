@@ -9,10 +9,11 @@ lm_filter(
   x,
   force_vars = NULL,
   nfilter = NULL,
-  p_cutoff = NULL,
+  p_cutoff = 0.05,
   rsq_cutoff = NULL,
   rsq_method = "pearson",
-  type = c("index", "names", "full")
+  type = c("index", "names", "full"),
+  keep_factors = TRUE
 )
 }
 \arguments{
@@ -44,6 +45,13 @@ See \code{\link[=collinear]{collinear()}}.}
 
 \item{type}{Type of vector returned. Default "index" returns indices, "names"
 returns predictor names, "full" returns a matrix of p values.}
+
+\item{keep_factors}{Logical affecting factors with 3 or more levels.
+Dataframes are coerced to a matrix using \link{data.matrix}. Binary
+factors are converted to numeric values 0/1 and analysed as such. If
+\code{keep_factors} is \code{TRUE} (the default), factors with 3 or more levels are
+not filtered and are retained. If \code{keep_factors} is \code{FALSE}, they are
+removed.}
 }
 \value{
 Integer vector of indices of filtered parameters (\code{type = "index"})

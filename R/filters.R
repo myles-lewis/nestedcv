@@ -20,6 +20,12 @@
 #'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a matrix of p values.
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #'
 #' @return Integer vector of indices of filtered parameters (type = "index") or
@@ -129,6 +135,12 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
 #'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a matrix of p values.
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
@@ -166,7 +178,8 @@ anova_filter <- function(y,
     } else return(res[-factor_ind, ])
   }
   filter_end(res[, "pval"],
-             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, ...)
+             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, keep_factors, 
+             factor_ind, ...)
 }
 
 
@@ -195,6 +208,12 @@ anova_filter <- function(y,
 #' "names" returns predictor names, "full" returns a matrix of p-values.
 #' @param exact Logical whether exact or approximate p-value is calculated. 
 #' Default is `FALSE` for speed.
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @param ... Further arguments passed to [matrixTests::row_wilcoxon_twosample]
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
@@ -294,9 +313,15 @@ correls2 <- function(y, x,
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with 
 #' p values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
+#' @param method Type of correlation, either "pearson" or "spearman".
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a matrix of p-values.
-#' @param method Type of correlation, either "pearson" or "spearman".
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @param ... Further arguments passed to [correls]
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
@@ -662,6 +687,12 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #'   See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a matrix of p values.
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
 #'   or character vector of names (`type = "names"`) of filtered parameters in
 #'   order of linear model AIC. Any variables in `force_vars` which are
