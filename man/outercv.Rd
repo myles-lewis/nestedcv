@@ -208,7 +208,7 @@ summary(cvfit)
 
 ## example with lm_filter() to reduce input predictors
 cvfit <- outercv(y, x, "randomForest", filterFUN = lm_filter,
-                 filter_options = list(nfilter = 2, p_cutoff = 1))
+                 filter_options = list(nfilter = 2, p_cutoff = NULL))
 summary(cvfit)
 
 }
