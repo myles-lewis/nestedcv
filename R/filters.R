@@ -20,6 +20,12 @@
 #'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a matrix of p values.
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #'
 #' @return Integer vector of indices of filtered parameters (type = "index") or
@@ -53,23 +59,42 @@ ttest_filter <- function(y,
                          p_cutoff = 0.05,
                          rsq_cutoff = NULL,
                          type = c("index", "names", "full"),
+                         keep_factors = TRUE,
                          ...) {
   type <- match.arg(type)
   y <- factor(y)
   indx1 <- as.numeric(y) == 1
   indx2 <- as.numeric(y) == 2
-  x <- as.matrix(x)
+  factor_ind <- which_factor(x)
+  if (is.data.frame(x)) x <- data.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
   res <- Rfast::ttests(x[indx1, ], x[indx2, ])
   rownames(res) <- colnames(x)
-  if (type == "full") return(res)
+  if (type == "full") {
+    if (length(factor_ind) == 0) {
+      return(res)
+    } else return(res[-factor_ind, ])
+  }
   filter_end(res[, "pvalue"],
-             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, ...)
+             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, keep_factors, 
+             factor_ind, ...)
+}
+
+
+which_factor <- function(x) {
+  if (is.matrix(x)) return(NULL)
+  num_ind <- unlist(lapply(x, function(i) {
+    is.numeric(i) || nlevels(factor(i)) <= 2
+  }))
+  which(!num_ind)
 }
 
 
 filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
-                          type, ...) {
+                          type, keep_factors, factor_ind, ...) {
+  if (keep_factors) {
+    force_vars <- unique(c(force_vars, colnames(x)[factor_ind]))
+  }
   check_vars <- which(!colnames(x) %in% force_vars)
   outp <- pval[check_vars]
   outorder <- order(outp)
@@ -80,9 +105,10 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
     co <- collinear(x[, out], rsq_cutoff = rsq_cutoff, ...)
     if (length(co) > 0) out <- out[-co]
   }
-  if (!is.null(nfilter)) out <- out[1:min(nfilter, length(out))]
+  if (!keep_factors) out <- out[!out %in% factor_ind]
+  if (!is.null(nfilter) && length(out) > nfilter) out <- out[1:nfilter]
   if (length(out) == 0) stop("No predictors left after filtering")
-  out <- c(which(colnames(x) %in% force_vars), out)
+  out <- c(out, which(colnames(x) %in% force_vars))
   out <- out[!is.na(out)]
   switch(type,
          index = out, names = colnames(x)[out])
@@ -109,6 +135,12 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
 #'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a matrix of p values.
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
@@ -132,15 +164,22 @@ anova_filter <- function(y,
                          p_cutoff = 0.05,
                          rsq_cutoff = NULL,
                          type = c("index", "names", "full"),
+                         keep_factors = TRUE,
                          ...) {
   type <- match.arg(type)
   y <- factor(y)
-  x <- as.matrix(x)
+  factor_ind <- which_factor(x)
+  if (is.data.frame(x)) x <- data.matrix(x)
   res <- Rfast::ftests(x, y)
   rownames(res) <- colnames(x)
-  if (type == "full") return(res)
+  if (type == "full") {
+    if (length(factor_ind) == 0) {
+      return(res)
+    } else return(res[-factor_ind, ])
+  }
   filter_end(res[, "pval"],
-             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, ...)
+             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, keep_factors, 
+             factor_ind, ...)
 }
 
 
@@ -169,6 +208,12 @@ anova_filter <- function(y,
 #' "names" returns predictor names, "full" returns a matrix of p-values.
 #' @param exact Logical whether exact or approximate p-value is calculated. 
 #' Default is `FALSE` for speed.
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @param ... Further arguments passed to [matrixTests::row_wilcoxon_twosample]
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
@@ -186,19 +231,26 @@ wilcoxon_filter <- function(y,
                             rsq_method = "pearson",
                             type = c("index", "names", "full"),
                             exact = FALSE,
+                            keep_factors = TRUE,
                             ...) {
   type <- match.arg(type)
   y <- factor(y)
   indx1 <- as.numeric(y) == 1
   indx2 <- as.numeric(y) == 2
+  factor_ind <- which_factor(x)
+  if (is.data.frame(x)) x <- data.matrix(x)
   res <- suppressWarnings(
     matrixTests::row_wilcoxon_twosample(t(x[indx1, ]), t(x[indx2, ]),
                                         exact = exact, ...)
   )
-  if (type == "full") return(res)
+  if (type == "full") {
+    if (length(factor_ind) == 0) {
+      return(res)
+    } else return(res[-factor_ind, ])
+  }
   filter_end(res[, "pvalue"],
              x, force_vars, nfilter, p_cutoff, rsq_cutoff, type,
-             rsq_method = rsq_method)
+             rsq_method = rsq_method, keep_factors, factor_ind)
 }
 
 
@@ -261,9 +313,15 @@ correls2 <- function(y, x,
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with 
 #' p values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
+#' @param method Type of correlation, either "pearson" or "spearman".
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a matrix of p-values.
-#' @param method Type of correlation, either "pearson" or "spearman".
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @param ... Further arguments passed to [correls]
 #' @return Integer vector of indices of filtered parameters (type = "index") or 
 #' character vector of names (type = "names") of filtered parameters. If 
@@ -277,12 +335,20 @@ correl_filter <- function(y,
                           p_cutoff = 0.05,
                           method = "pearson",
                           type = c("index", "names", "full"),
+                          keep_factors = TRUE,
                           ...) {
   type <- match.arg(type)
+  factor_ind <- which_factor(x)
+  if (is.data.frame(x)) x <- data.matrix(x)
   res <- correls2(y, x, method = method, ...)
-  if (type == "full") return(res)
+  if (type == "full") {
+    if (length(factor_ind) == 0) {
+      return(res)
+    } else return(res[-factor_ind, ])
+  }
   filter_end(res[, "p-value"],
-                x, force_vars, nfilter, p_cutoff, rsq_cutoff=NULL, type)
+             x, force_vars, nfilter, p_cutoff, rsq_cutoff=NULL, type,
+             keep_factors, factor_ind)
 }
 
 
@@ -621,6 +687,12 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #'   See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a matrix of p values.
+#' @param keep_factors Logical affecting factors with 3 or more levels.
+#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
+#'   factors are converted to numeric values 0/1 and analysed as such. If
+#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
+#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
+#'   removed.
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
 #'   or character vector of names (`type = "names"`) of filtered parameters in
 #'   order of linear model AIC. Any variables in `force_vars` which are
@@ -632,20 +704,18 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 lm_filter <- function(y, x,
                       force_vars = NULL,
                       nfilter = NULL,
-                      p_cutoff = NULL,
+                      p_cutoff = 0.05,
                       rsq_cutoff = NULL,
                       rsq_method = "pearson",
-                      type = c("index", "names", "full")) {
+                      type = c("index", "names", "full"),
+                      keep_factors = TRUE) {
   if (!requireNamespace("RcppEigen", quietly = TRUE)) {
     stop("Package 'RcppEigen' must be installed to use this filter",
          call. = FALSE)
   }
   type <- match.arg(type)
-  if (is.data.frame(x)) {
-    is_factor <- vapply(x, is.factor, logical(1))
-    x[is_factor] <- lapply(x[is_factor], as.numeric)
-    x <- as.matrix(x)
-  }
+  factor_ind <- which_factor(x)
+  if (is.data.frame(x)) x <- data.matrix(x)
   check_vars <- colnames(x)[!colnames(x) %in% force_vars]
   startx <- matrix(rep(1, nrow(x) *2), ncol = 2)
   colnames(startx) <- c("(Intercept)", ".test")
@@ -671,19 +741,13 @@ lm_filter <- function(y, x,
   resvar <- rss/rdf
   sigma <- sqrt(resvar)
   pval <- 2*pt(abs(tval), rdf, lower.tail = FALSE)  ## from stats::summary.lm
-  out <- cbind(aic, sigma, tval, pval)
-  if (type == "full") return(out)
-  out <- out[order(out[,1]), ]
-  if (!is.null(p_cutoff)) out <- out[out[, 'pval'] < p_cutoff, ]
-  if (!is.null(rsq_cutoff)) {
-    co <- collinear(x[, rownames(out)], rsq_cutoff = rsq_cutoff,
-                    rsq_method = rsq_method)
-    if (length(co) > 0) out <- out[-co, ]
+  result <- cbind(aic, sigma, tval, pval)
+  if (type == "full") {
+    if (length(factor_ind) == 0) {
+      return(result)
+    } else return(result[-factor_ind, ])
   }
-  if (!is.null(nfilter)) out <- out[1:min(nfilter, nrow(out)), ]
-  if (nrow(out) == 0) stop("No predictors selected")
-  out <- c(force_vars, rownames(out))
-  switch(type,
-         index = match(out, colnames(x)),
-         names = out)
+  filter_end(pval,
+             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, keep_factors, 
+             factor_ind)
 }
