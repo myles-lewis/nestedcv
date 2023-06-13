@@ -2,7 +2,12 @@ News
 =====
 
 # nestedcv 0.6.7
-###### 08/06/2023
+###### 13/06/2023
+
+## New features
+
+* Better handling of dataframes in filters. `keep_factors` option has been added 
+to filters to control filtering of factors with 3 or more levels.
 
 ## Bug fixes
 
