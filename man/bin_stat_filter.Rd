@@ -2,6 +2,7 @@
 % Please edit documentation in R/stat_filter.R
 \name{bin_stat_filter}
 \alias{bin_stat_filter}
+\alias{class_stat_filter}
 \title{Univariate filter for binary classification}
 \usage{
 bin_stat_filter(
@@ -11,7 +12,18 @@ bin_stat_filter(
   nfilter = NULL,
   p_cutoff = 0.05,
   rsq_cutoff = NULL,
-  type = c("index", "names", "full"),
+  type = c("index", "names", "full", "list"),
+  ...
+)
+
+class_stat_filter(
+  y,
+  x,
+  force_vars = NULL,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  rsq_cutoff = NULL,
+  type = c("index", "names", "full", "list"),
   ...
 )
 }
@@ -36,7 +48,9 @@ predictor by t-test is retained, while the other collinear predictors are
 removed. See \code{\link[=collinear]{collinear()}}.}
 
 \item{type}{Type of vector returned. Default "index" returns indices, "names"
-returns predictor names, "full" returns a list of p values.}
+returns predictor names, "full" returns a matrix of statistics, "list"
+returns a list of 2 matrices of statistics, one for t-test, one for
+chi-squared test.}
 
 \item{...}{optional arguments, e.g. \code{rsq_method}: see \code{\link[=collinear]{collinear()}}.}
 }
