@@ -105,7 +105,7 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
     co <- collinear(x[, out], rsq_cutoff = rsq_cutoff, ...)
     if (length(co) > 0) out <- out[-co]
   }
-  if (!keep_factors) out <- out[!out %in% factor_ind]
+  if (!keep_factors && !is.null(factor_ind)) out <- out[!out %in% factor_ind]
   if (!is.null(nfilter) && length(out) > nfilter) out <- out[1:nfilter]
   if (length(out) == 0) stop("No predictors left after filtering")
   out <- c(out, which(colnames(x) %in% force_vars))
