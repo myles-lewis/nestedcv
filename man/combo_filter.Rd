@@ -9,7 +9,7 @@ combo_filter(y, x, nfilter, type = c("index", "names", "full"), ...)
 \arguments{
 \item{y}{Response vector}
 
-\item{x}{Matrix of predictors}
+\item{x}{Matrix or dataframe of predictors}
 
 \item{nfilter}{Number of predictors to return, using 1/2 from \code{ttest_filter}
 or \code{anova_filter} and 1/2 from \code{relieff_filter}. Since \code{unique} is applied,

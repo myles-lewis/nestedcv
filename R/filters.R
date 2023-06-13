@@ -6,7 +6,7 @@
 #' Can be applied to all or a subset of predictors.
 #'
 #' @param y Response vector
-#' @param x Matrix of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param force_vars Vector of column names within `x` which are always retained
 #'   in the model (i.e. not filtered). Default `NULL` means all predictors will
 #'   be passed to `filterFUN`.
@@ -121,7 +121,7 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
 #' Rfast package for speed.
 #' 
 #' @param y Response vector
-#' @param x Matrix of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param force_vars Vector of column names within `x` which are always retained
 #'   in the model (i.e. not filtered). Default `NULL` means all predictors will
 #'   be passed to `filterFUN`.
@@ -189,7 +189,7 @@ anova_filter <- function(y,
 #' matrixTests package.
 #' 
 #' @param y Response vector
-#' @param x Matrix of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param force_vars Vector of column names within `x` which are always retained
 #'   in the model (i.e. not filtered). Default `NULL` means all predictors will
 #'   be passed to `filterFUN`.
@@ -306,7 +306,7 @@ correls2 <- function(y, x,
 #' Filter using correlation (Pearson or Spearman) for ranking variables.
 #' 
 #' @param y Response vector
-#' @param x Matrix of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param force_vars Vector of column names within `x` which are always retained
 #'   in the model (i.e. not filtered). Default `NULL` means all predictors will
 #'   be passed to `filterFUN`.
@@ -357,7 +357,7 @@ correl_filter <- function(y,
 #' Fits a random forest model and ranks variables by variable importance. 
 #' 
 #' @param y Response vector
-#' @param x Matrix of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param nfilter Number of predictors to return. If `NULL` all predictors are 
 #' returned.
 #' @param type Type of vector returned. Default "index" returns indices,
@@ -407,7 +407,7 @@ rf_filter <- function(y, x, nfilter = NULL,
 #' variable importance.
 #' 
 #' @param y Response vector
-#' @param x Matrix of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param nfilter Number of predictors to return. If `NULL` all predictors are 
 #' returned.
 #' @param type Type of vector returned. Default "index" returns indices,
@@ -458,7 +458,7 @@ ranger_filter <- function(y, x, nfilter = NULL,
 #' of importance.
 #' 
 #' @param y Response vector
-#' @param x Matrix of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param nfilter Number of predictors to return. If `NULL` all predictors are 
 #' returned.
 #' @param estimator Type of algorithm used, see [CORElearn::attrEval]
@@ -499,7 +499,7 @@ relieff_filter <- function(y, x, nfilter = NULL,
 #' in equal measure.
 #' 
 #' @param y Response vector
-#' @param x Matrix of predictors
+#' @param x Matrix or dataframe of predictors
 #' @param nfilter Number of predictors to return, using 1/2 from `ttest_filter` 
 #' or `anova_filter` and 1/2 from `relieff_filter`. Since `unique` is applied, 
 #' the final number returned may be less than `nfilter`.

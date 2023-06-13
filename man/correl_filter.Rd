@@ -19,7 +19,7 @@ correl_filter(
 \arguments{
 \item{y}{Response vector}
 
-\item{x}{Matrix of predictors}
+\item{x}{Matrix or dataframe of predictors}
 
 \item{force_vars}{Vector of column names within \code{x} which are always retained
 in the model (i.e. not filtered). Default \code{NULL} means all predictors will

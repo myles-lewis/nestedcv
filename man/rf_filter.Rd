@@ -17,7 +17,7 @@ rf_filter(
 \arguments{
 \item{y}{Response vector}
 
-\item{x}{Matrix of predictors}
+\item{x}{Matrix or dataframe of predictors}
 
 \item{nfilter}{Number of predictors to return. If \code{NULL} all predictors are
 returned.}
