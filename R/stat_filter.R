@@ -101,6 +101,7 @@ bin_stat_filter <- function(y,
 }
 
 #' @rdname stat_filter
+#' @importFrom stats oneway.test
 #' @export
 #'
 class_stat_filter <- function(y,
