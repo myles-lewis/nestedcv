@@ -27,14 +27,14 @@
 #'   predictor by t-test is retained, while the other collinear predictors are
 #'   removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
-#'   returns predictor names, "full" returns a matrix of statistics, "list"
-#'   returns a list of 2 matrices of statistics, one for t-test, one for
-#'   chi-squared test.
+#'   returns predictor names, "full" returns a dataframe of statistics, "list"
+#'   returns a list of 2 matrices of statistics, one for continuous predictors,
+#'   one for categorical predictors.
 #' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #'
 #' @return Integer vector of indices of filtered parameters (type = "index") or
 #'   character vector of names (type = "names") of filtered parameters in order
-#'   of t-test/chi-squared test p-value. If `type` is `"full"` full output is
+#'   of test p-value. If `type` is `"full"` full output is
 #'   returned containing a dataframe of statistical results. If `type` is
 #'   `"list"` the output is returned as a list of 2 matrices containing
 #'   statistical results separated by continuous and categorical predictors.

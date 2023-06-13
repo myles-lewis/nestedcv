@@ -65,14 +65,14 @@ predictor by t-test is retained, while the other collinear predictors are
 removed. See \code{\link[=collinear]{collinear()}}.}
 
 \item{type}{Type of vector returned. Default "index" returns indices, "names"
-returns predictor names, "full" returns a matrix of statistics, "list"
-returns a list of 2 matrices of statistics, one for t-test, one for
-chi-squared test.}
+returns predictor names, "full" returns a dataframe of statistics, "list"
+returns a list of 2 matrices of statistics, one for continuous predictors,
+one for categorical predictors.}
 }
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
 character vector of names (type = "names") of filtered parameters in order
-of t-test/chi-squared test p-value. If \code{type} is \code{"full"} full output is
+of test p-value. If \code{type} is \code{"full"} full output is
 returned containing a dataframe of statistical results. If \code{type} is
 \code{"list"} the output is returned as a list of 2 matrices containing
 statistical results separated by continuous and categorical predictors.
