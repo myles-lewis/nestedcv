@@ -2,12 +2,15 @@ News
 =====
 
 # nestedcv 0.6.7
-###### 13/06/2023
+###### 14/06/2023
 
 ## New features
 
 * Better handling of dataframes in filters. `keep_factors` option has been added 
 to filters to control filtering of factors with 3 or more levels.
+* Added `stat_filter()` which applies univariate filtering to dataframes with 
+mixed datatype (continuous/categorical).
+* Changed one-way ANOVA test in `anova_filter()` from `Rfast::ftests()` to `matrixTests::col_oneway_welch()` for much better accuracy
 
 ## Bug fixes
 
