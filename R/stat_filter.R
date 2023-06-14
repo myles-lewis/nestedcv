@@ -212,12 +212,36 @@ which_factor <- function(x) {
 
 
 # apply over g
-#' @importFrom stats oneway.test
 oneway.tests.g <- function(x, g) {
-  res <- t(apply(g, 2, function(gi) {
-    fit <- suppressWarnings(oneway.test(x ~ gi))
-    unlist(fit[1:3])
-  }))
-  colnames(res) <- c("stat", "num df", "denom df", "pvalue")
+  ok <- !is.na(x)
+  x <- x[ok]
+  g <- g[ok, , drop = FALSE]
+  res <- t(apply(g, 2, function(gi) oneway.test2(x, gi) ))
+  colnames(res) <- c("F", "num df", "denom df", "pvalue")
   res
 }
+
+# based on oneway.test base R source code
+oneway.test2 <- function(y, g) {
+  g <- factor(g)
+  n.i <- tapply(y, g, length)
+  ok <- n.i >= 2
+  n.i <- n.i[ok]
+  k <- length(n.i)
+  if (k < 2) {
+    return(rep(NA, 4))
+  }
+  m.i <- tapply(y, g, mean)[ok]
+  v.i <- tapply(y, g, var)[ok]
+  w.i <- n.i / v.i
+  sum.w.i <- sum(w.i)
+  tmp <- sum((1 - w.i / sum.w.i)^2 / (n.i - 1)) / (k^2 - 1)
+  m <- sum(w.i * m.i) / sum.w.i
+  STATISTIC <- sum(w.i * (m.i - m)^2) /
+    ((k - 1) * (1 + 2 * (k - 2) * tmp))
+  PARAMETER <- c(k - 1, 1 / (3 * tmp))
+  PVAL <- pf(STATISTIC, k - 1, 1 / (3 * tmp), lower.tail = FALSE)
+  ret <- c(STATISTIC, PARAMETER, PVAL)
+  ret
+}
+
