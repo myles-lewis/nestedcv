@@ -10,7 +10,8 @@ News
 to filters to control filtering of factors with 3 or more levels.
 * Added `stat_filter()` which applies univariate filtering to dataframes with 
 mixed datatype (continuous/categorical).
-* Changed one-way ANOVA test in `anova_filter()` from `Rfast::ftests()` to `matrixTests::col_oneway_welch()` for much better accuracy
+* Changed one-way ANOVA test in `anova_filter()` from `Rfast::ftests()` to 
+`matrixTests::col_oneway_welch()` for much better accuracy
 
 ## Bug fixes
 
