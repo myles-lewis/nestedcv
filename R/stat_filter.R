@@ -222,9 +222,10 @@ oneway.tests.g <- function(x, g) {
 }
 
 # based on oneway.test base R source code
+#' @importFrom stats var pf
 oneway.test2 <- function(y, g) {
   g <- factor(g)
-  n.i <- tapply(y, g, length)
+  n.i <- tabulate(g)
   ok <- n.i >= 2
   n.i <- n.i[ok]
   k <- length(n.i)
