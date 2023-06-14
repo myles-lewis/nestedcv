@@ -81,15 +81,6 @@ ttest_filter <- function(y,
 }
 
 
-which_factor <- function(x) {
-  if (is.matrix(x)) return(NULL)
-  num_ind <- unlist(lapply(x, function(i) {
-    is.numeric(i) || nlevels(factor(i)) <= 2
-  }))
-  which(!num_ind)
-}
-
-
 filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
                           type, keep_factors, factor_ind, ...) {
   if (keep_factors) {
@@ -117,8 +108,8 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
 
 #' ANOVA filter
 #' 
-#' Simple univariate filter using anova (Welch's F-test) using the 
-#' Rfast package for speed.
+#' Simple univariate filter using anova (Welch's F-test) using the `matrixTests`
+#' package for speed.
 #' 
 #' @param y Response vector
 #' @param x Matrix or dataframe of predictors
@@ -142,9 +133,10 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
 #'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
 #'   removed.
 #' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
-#' @return Integer vector of indices of filtered parameters (type = "index") or 
-#' character vector of names (type = "names") of filtered parameters. If 
-#' `type` is `"full"` full output from [Rfast::ftests] is returned.
+#' @return Integer vector of indices of filtered parameters (type = "index") or
+#'   character vector of names (type = "names") of filtered parameters. If
+#'   `type` is `"full"` full output from [matrixTests::col_oneway_welch()] is
+#'   returned.
 #' 
 #' @examples
 #' data(iris)
@@ -154,7 +146,7 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
 #' anova_filter(y3, dt, type = "full")  # shows names of predictors
 #' anova_filter(y3, dt, type = "name")  # full results table
 #' 
-#' @importFrom Rfast ftests
+#' @importFrom matrixTests col_oneway_welch
 #' @export
 #' 
 anova_filter <- function(y,
@@ -170,14 +162,14 @@ anova_filter <- function(y,
   y <- factor(y)
   factor_ind <- which_factor(x)
   if (is.data.frame(x)) x <- data.matrix(x)
-  res <- Rfast::ftests(x, y)
+  res <- matrixTests::col_oneway_welch(x, y)
   rownames(res) <- colnames(x)
   if (type == "full") {
     if (length(factor_ind) == 0) {
       return(res)
     } else return(res[-factor_ind, ])
   }
-  filter_end(res[, "pval"],
+  filter_end(res[, "pvalue"],
              x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, keep_factors, 
              factor_ind, ...)
 }

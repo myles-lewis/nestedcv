@@ -157,10 +157,10 @@ lm_stat_filter <- function(y,
                            ...) {
   type <- match.arg(type)
   factor_ind <- index_factor(x, convert_bin = TRUE)
-  if (sum(factor_ind) == 0) {
+  if (sum(factor_ind) == 0)
     return(lm_filter(y, x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, ...))
-  }
-  if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
+  if (is.null(colnames(x)))
+    colnames(x) <- seq_len(ncol(x))
   x1 <- data.matrix(x[, !factor_ind])
   x2 <- x[, factor_ind, drop = FALSE]
   res1 <- NULL
@@ -207,14 +207,9 @@ index_factor <- function(x, convert_bin = FALSE) {
 }
 
 
-# apply x
-oneway.tests <- function(x, y) {
-  res <- t(apply(x, 2, function(xi) {
-    fit <- suppressWarnings(oneway.test(y ~ xi))
-    unlist(fit[1:3])
-  }))
-  colnames(res) <- c("stat", "num df", "denom df", "pvalue")
-  res
+which_factor <- function(x) {
+  if (is.matrix(x)) return(NULL)
+  which(index_factor(x, convert_bin = TRUE))
 }
 
 

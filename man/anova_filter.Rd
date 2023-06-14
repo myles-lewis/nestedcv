@@ -51,11 +51,12 @@ removed.}
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
 character vector of names (type = "names") of filtered parameters. If
-\code{type} is \code{"full"} full output from \link[Rfast:ftests]{Rfast::ftests} is returned.
+\code{type} is \code{"full"} full output from \code{\link[matrixTests:oneway]{matrixTests::col_oneway_welch()}} is
+returned.
 }
 \description{
-Simple univariate filter using anova (Welch's F-test) using the
-Rfast package for speed.
+Simple univariate filter using anova (Welch's F-test) using the \code{matrixTests}
+package for speed.
 }
 \examples{
 data(iris)
