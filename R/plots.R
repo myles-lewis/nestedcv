@@ -137,7 +137,6 @@ plot_lambdas <- function(x,
 #' @author Myles Lewis
 #' @importFrom graphics lines legend par
 #' @importFrom grDevices hcl.colors
-#' @importFrom Rfast rowMaxs rowMins
 #' @export
 #' 
 plot.cva.glmnet <- function(x,

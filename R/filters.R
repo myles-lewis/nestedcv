@@ -261,7 +261,6 @@ wilcoxon_filter <- function(y,
 #' @return Matrix with columns containing the correlation statistic, either
 #'   Pearson r or Spearman rho, and p-values for each column of `x` correlated
 #'   against vector `y`
-#' @importFrom Rfast Rank colRanks
 #' @importFrom stats complete.cases cor pt
 #' @export
 #' 

@@ -103,7 +103,6 @@
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom parallel mclapply makeCluster clusterExport stopCluster parLapply
 #' @importFrom pROC roc
-#' @importFrom Rfast colmeans
 #' @importFrom stats predict setNames
 #' @examples
 #' \donttest{
@@ -287,7 +286,7 @@ nestcv.glmnet <- function(y, x,
     if (is.list(fin_coef) | length(fin_coef) == 1) {
       final_coef <- fin_coef  # multinomial
     } else {
-      cfmean <- colmeans(x[, names(fin_coef)[-1], drop = FALSE])
+      cfmean <- colMeans(x[, names(fin_coef)[-1], drop = FALSE], na.rm = TRUE)
       final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
     }
     final_vars <- colnames(filtx)
