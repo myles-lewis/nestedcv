@@ -101,7 +101,6 @@ bin_stat_filter <- function(y,
 }
 
 #' @rdname stat_filter
-#' @importFrom stats oneway.test
 #' @export
 #'
 class_stat_filter <- function(y,
@@ -123,9 +122,8 @@ class_stat_filter <- function(y,
   y <- factor(y)
   res1 <- NULL
   if (ncol(x1) > 0) {
-      res1 <- oneway.tests.y(y, x1)
-      # res1 <- Rfast::ftests(x1, y)  # inaccurate
-      # rownames(res1) <- colnames(x1)
+      res1 <- matrixTests::col_oneway_welch(x1, y)
+      rownames(res1) <- colnames(x1)
   }
   res2 <- chisq.tests(x2, y)[, 1:2]
   if (type == "list") return(list("F-test" = res1, "chisq.test" = res2))
@@ -167,7 +165,7 @@ lm_stat_filter <- function(y,
   if (ncol(x1) > 0) {
     res1 <- lm_filter(y, x1, type = "full")
   }
-  res2 <- oneway.tests(x2, y)
+  res2 <- oneway.tests.g(y, x2)
   if (type == "list") return(list("lm" = res1, "oneway.test" = res2))
   rescomb <- matrix(nrow = ncol(x), ncol = 2,
                     dimnames = list(colnames(x), c("stat", "pvalue")))
@@ -213,11 +211,11 @@ which_factor <- function(x) {
 }
 
 
-# apply y
-# Rfast::ftests inaccurate
-oneway.tests.y <- function(x, y) {
-  res <- t(apply(y, 2, function(yi) {
-    fit <- suppressWarnings(oneway.test(yi ~ x))
+# apply over g
+#' @importFrom stats oneway.test
+oneway.tests.g <- function(x, g) {
+  res <- t(apply(g, 2, function(gi) {
+    fit <- suppressWarnings(oneway.test(x ~ gi))
     unlist(fit[1:3])
   }))
   colnames(res) <- c("stat", "num df", "denom df", "pvalue")
