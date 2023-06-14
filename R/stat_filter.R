@@ -26,6 +26,9 @@
 #'   on t-test. If 2 or more predictors are collinear, the first ranked
 #'   predictor by t-test is retained, while the other collinear predictors are
 #'   removed. See [collinear()].
+#' @param rsq_method character string indicating which correlation coefficient
+#'   is to be computed. One of "pearson" (default), "kendall", or "spearman".
+#'   See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns a dataframe of statistics, "list"
 #'   returns a list of 2 matrices of statistics, one for continuous predictors,
@@ -42,6 +45,22 @@
 #' `stat_filter()` is a wrapper which calls `bin_stat_filter()`,
 #' `class_stat_filter()` or `lm_stat_filter()` depending on whether `y` is
 #' binary, multiclass or continuous respectively.
+#' 
+#' @examples
+#' library(mlbench)
+#' data(BostonHousing2)
+#' dat <- BostonHousing2
+#' y <- dat$cmedv  ## continuous outcome
+#' x <- subset(dat, select = -c(cmedv, medv, town))
+#' 
+#' stat_filter(y, x, type = "full")
+#' stat_filter(y, x, nfilter = 5, type = "names")
+#' stat_filter(y, x)
+#' 
+#' data(iris)
+#' y <- iris$Species  ## 3 class outcome
+#' x <- subset(iris, select = -c(Species))
+#' stat_filter(y, x, type = "full")
 #' 
 #' @export
 #' 
@@ -72,6 +91,7 @@ bin_stat_filter <- function(y,
   if (length(unique(y)) != 2) stop("y is not binary")
   factor_ind <- index_factor(x)
   if (sum(factor_ind) == 0) {
+    if (type == "list") type <- "full"
     return(ttest_filter(y, x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, ...))
   }
   if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
@@ -114,6 +134,7 @@ class_stat_filter <- function(y,
   type <- match.arg(type)
   factor_ind <- index_factor(x)
   if (sum(factor_ind) == 0) {
+    if (type == "list") type <- "full"
     return(anova_filter(y, x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, ...))
   }
   if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
@@ -151,14 +172,17 @@ lm_stat_filter <- function(y,
                            nfilter = NULL,
                            p_cutoff = 0.05,
                            rsq_cutoff = NULL,
+                           rsq_method = "pearson",
                            type = c("index", "names", "full", "list"),
                            ...) {
   type <- match.arg(type)
   factor_ind <- index_factor(x, convert_bin = TRUE)
-  if (sum(factor_ind) == 0)
-    return(lm_filter(y, x, force_vars, nfilter, p_cutoff, rsq_cutoff, type, ...))
-  if (is.null(colnames(x)))
-    colnames(x) <- seq_len(ncol(x))
+  if (sum(factor_ind) == 0) {
+    if (type == "list") type <- "full"
+    return(lm_filter(y, x, force_vars, nfilter, p_cutoff, rsq_cutoff, 
+                     rsq_method, type, ...))
+  }
+  if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
   x1 <- data.matrix(x[, !factor_ind])
   x2 <- x[, factor_ind, drop = FALSE]
   res1 <- NULL

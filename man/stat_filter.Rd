@@ -38,6 +38,7 @@ lm_stat_filter(
   nfilter = NULL,
   p_cutoff = 0.05,
   rsq_cutoff = NULL,
+  rsq_method = "pearson",
   type = c("index", "names", "full", "list"),
   ...
 )
@@ -68,6 +69,10 @@ removed. See \code{\link[=collinear]{collinear()}}.}
 returns predictor names, "full" returns a dataframe of statistics, "list"
 returns a list of 2 matrices of statistics, one for continuous predictors,
 one for categorical predictors.}
+
+\item{rsq_method}{character string indicating which correlation coefficient
+is to be computed. One of "pearson" (default), "kendall", or "spearman".
+See \code{\link[=collinear]{collinear()}}.}
 }
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
@@ -94,4 +99,21 @@ continuous data and binary data, one-way ANOVA for categorical data}
 \code{stat_filter()} is a wrapper which calls \code{bin_stat_filter()},
 \code{class_stat_filter()} or \code{lm_stat_filter()} depending on whether \code{y} is
 binary, multiclass or continuous respectively.
+}
+\examples{
+library(mlbench)
+data(BostonHousing2)
+dat <- BostonHousing2
+y <- dat$cmedv  ## continuous outcome
+x <- subset(dat, select = -c(cmedv, medv, town))
+
+stat_filter(y, x, type = "full")
+stat_filter(y, x, nfilter = 5, type = "names")
+stat_filter(y, x)
+
+data(iris)
+y <- iris$Species  ## 3 class outcome
+x <- subset(iris, select = -c(Species))
+stat_filter(y, x, type = "full")
+
 }
