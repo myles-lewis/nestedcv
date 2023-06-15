@@ -199,15 +199,23 @@ cor_stat_filter <- function(y,
   x2 <- x[, factor_ind, drop = FALSE]
   res1 <- NULL
   if (ncol(x1) > 0) {
-    res1 <- if (cor_method == "lm") {
-      lm_filter(y, x1, force_vars, type = "full")
-    } else correl_filter(y, x1, method = cor_method, type = "full")
+    if (cor_method == "lm") {
+      res1 <- lm_filter(y, x1, force_vars, type = "full")
+      res1 <- res1[, 3:4]
+    } else {
+      res1 <- correl_filter(y, x1, method = cor_method, type = "full")
+      colnames(res1) <- c("stat", "pvalue")
+    }
   }
   res2 <- oneway.tests.g(y, x2)
-  if (type == "list") return(list("lm" = res1, "oneway.test" = res2))
+  if (type == "list") {
+    out <- list(res1, "oneway.test" = res2)
+    names(out)[1] <- cor_method
+    return(out)
+  }
   rescomb <- matrix(nrow = ncol(x), ncol = 2,
                     dimnames = list(colnames(x), c("stat", "pvalue")))
-  rescomb[!factor_ind, ] <- res1[, 3:4]
+  rescomb[!factor_ind, ] <- res1
   rescomb[factor_ind, ] <- res2[, c(1, 4)]
   if (type == "full") {
     test <- ifelse(factor_ind, "F-test", cor_method)

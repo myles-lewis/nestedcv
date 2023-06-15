@@ -286,7 +286,7 @@ correls2 <- function(y, x,
     rname <- 'r'
   }
   res <- cbind(r, pval)
-  colnames(res) <- c(rname, 'p-value')
+  colnames(res) <- c(rname, 'pvalue')
   rownames(res) <- colnames(x)
   res
 }
@@ -337,7 +337,7 @@ correl_filter <- function(y,
       return(res)
     } else return(res[-factor_ind, ])
   }
-  filter_end(res[, "p-value"],
+  filter_end(res[, "pvalue"],
              x, force_vars, nfilter, p_cutoff, rsq_cutoff=NULL, type,
              keep_factors, factor_ind)
 }
