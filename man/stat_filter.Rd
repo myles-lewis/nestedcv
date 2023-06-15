@@ -121,7 +121,7 @@ stat_filter(y, x)
 
 data(iris)
 y <- iris$Species  ## 3 class outcome
-x <- subset(iris, select = -c(Species))
+x <- subset(iris, select = -Species)
 stat_filter(y, x, type = "full")
 
 }
