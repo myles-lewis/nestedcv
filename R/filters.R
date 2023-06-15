@@ -690,6 +690,10 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #'   incorporated into all models are listed first. If `type = "full"` a matrix
 #'   of AIC values, sigma, the residual standard error (see [summary.lm]),
 #'   t-statistic and p-values for the tested predictor is returned.
+#' @details
+#' This filter uses [RcppEigen::fastLmPure()] for speed. `NA` in `x` are not
+#' tolerated.
+#' 
 #' @export
 #'
 lm_filter <- function(y, x,
@@ -705,6 +709,9 @@ lm_filter <- function(y, x,
          call. = FALSE)
   }
   type <- match.arg(type)
+  ok <- !is.na(y)
+  y <- y[ok]
+  x <- x[ok, ]
   factor_ind <- which_factor(x)
   if (is.data.frame(x)) x <- data.matrix(x)
   check_vars <- colnames(x)[!colnames(x) %in% force_vars]

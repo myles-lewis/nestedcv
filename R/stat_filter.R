@@ -9,8 +9,9 @@
 #'   data, chi-squared test for categorical data}
 #'   \item{Multiclass response: `class_stat_filter()`}{one-way ANOVA for 
 #'   continuous data, chi-squared test for categorical data}
-#'   \item{Continuous response: `lm_stat_filter()`}{linear regression for 
-#'   continuous data and binary data, one-way ANOVA for categorical data}
+#'   \item{Continuous response: `cor_stat_filter()`}{correlation (or linear 
+#'   regression) for continuous data and binary data, one-way ANOVA for 
+#'   categorical data}
 #' }
 #'
 #' @param y Response vector
@@ -33,6 +34,9 @@
 #'   returns predictor names, "full" returns a dataframe of statistics, "list"
 #'   returns a list of 2 matrices of statistics, one for continuous predictors,
 #'   one for categorical predictors.
+#' @param cor_method For `cor_stat_filter()` only, either "pearson", "spearman"
+#'   or "lm_filter" controlling whether continuous predictors are filtered by
+#'   correlation or regression.
 #' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #'
 #' @return Integer vector of indices of filtered parameters (type = "index") or
@@ -43,7 +47,7 @@
 #'   statistical results separated by continuous and categorical predictors.
 #' @details
 #' `stat_filter()` is a wrapper which calls `bin_stat_filter()`,
-#' `class_stat_filter()` or `lm_stat_filter()` depending on whether `y` is
+#' `class_stat_filter()` or `cor_stat_filter()` depending on whether `y` is
 #' binary, multiclass or continuous respectively.
 #' 
 #' @examples
@@ -70,7 +74,7 @@ stat_filter <- function(y, x, ...) {
       bin_stat_filter(y, x, ...)
     } else class_stat_filter(y, x, ...)
   } else {
-    lm_stat_filter(y, x, ...)
+    cor_stat_filter(y, x, ...)
   }
 }
 
@@ -166,28 +170,36 @@ class_stat_filter <- function(y,
 #' @rdname stat_filter
 #' @export
 #'
-lm_stat_filter <- function(y,
-                           x,
-                           force_vars = NULL,
-                           nfilter = NULL,
-                           p_cutoff = 0.05,
-                           rsq_cutoff = NULL,
-                           rsq_method = "pearson",
-                           type = c("index", "names", "full", "list"),
-                           ...) {
+cor_stat_filter <- function(y,
+                            x,
+                            cor_method = c("pearson", "spearman", "lm_filter"),
+                            force_vars = NULL,
+                            nfilter = NULL,
+                            p_cutoff = 0.05,
+                            rsq_cutoff = NULL,
+                            rsq_method = "pearson",
+                            type = c("index", "names", "full", "list"),
+                            ...) {
   type <- match.arg(type)
+  cor_method <- match.arg(cor_method)
   factor_ind <- index_factor(x, convert_bin = TRUE)
   if (sum(factor_ind) == 0) {
     if (type == "list") type <- "full"
-    return(lm_filter(y, x, force_vars, nfilter, p_cutoff, rsq_cutoff, 
-                     rsq_method, type, ...))
+    out <- if (cor_method == "lm_filter") {
+      lm_filter(y, x, force_vars, nfilter, p_cutoff, rsq_cutoff, rsq_method,
+                type, ...)
+    } else correl_filter(y, x, force_vars, nfilter, p_cutoff,
+                         method = cor_method, type, ...)
+    return(out)
   }
   if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
   x1 <- data.matrix(x[, !factor_ind])
   x2 <- x[, factor_ind, drop = FALSE]
   res1 <- NULL
   if (ncol(x1) > 0) {
-    res1 <- lm_filter(y, x1, type = "full")
+    res1 <- if (cor_method == "lm_filter") {
+      lm_filter(y, x1, force_vars, type = "full")
+    } else correl_filter(y, x1, method = cor_method, type = "full")
   }
   res2 <- oneway.tests.g(y, x2)
   if (type == "list") return(list("lm" = res1, "oneway.test" = res2))

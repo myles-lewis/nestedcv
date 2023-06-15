@@ -4,7 +4,7 @@
 \alias{stat_filter}
 \alias{bin_stat_filter}
 \alias{class_stat_filter}
-\alias{lm_stat_filter}
+\alias{cor_stat_filter}
 \title{Univariate filter for binary classification with mixed predictor datatypes}
 \usage{
 stat_filter(y, x, ...)
@@ -31,9 +31,10 @@ class_stat_filter(
   ...
 )
 
-lm_stat_filter(
+cor_stat_filter(
   y,
   x,
+  cor_method = c("pearson", "spearman", "lm_filter"),
   force_vars = NULL,
   nfilter = NULL,
   p_cutoff = 0.05,
@@ -70,6 +71,10 @@ returns predictor names, "full" returns a dataframe of statistics, "list"
 returns a list of 2 matrices of statistics, one for continuous predictors,
 one for categorical predictors.}
 
+\item{cor_method}{For \code{cor_stat_filter()} only, either "pearson", "spearman"
+or "lm_filter" controlling whether continuous predictors are filtered by
+correlation or regression.}
+
 \item{rsq_method}{character string indicating which correlation coefficient
 is to be computed. One of "pearson" (default), "kendall", or "spearman".
 See \code{\link[=collinear]{collinear()}}.}
@@ -91,13 +96,14 @@ the data type of response vector and predictors:
 data, chi-squared test for categorical data}
 \item{Multiclass response: \code{class_stat_filter()}}{one-way ANOVA for
 continuous data, chi-squared test for categorical data}
-\item{Continuous response: \code{lm_stat_filter()}}{linear regression for
-continuous data and binary data, one-way ANOVA for categorical data}
+\item{Continuous response: \code{cor_stat_filter()}}{correlation (or linear
+regression) for continuous data and binary data, one-way ANOVA for
+categorical data}
 }
 }
 \details{
 \code{stat_filter()} is a wrapper which calls \code{bin_stat_filter()},
-\code{class_stat_filter()} or \code{lm_stat_filter()} depending on whether \code{y} is
+\code{class_stat_filter()} or \code{cor_stat_filter()} depending on whether \code{y} is
 binary, multiclass or continuous respectively.
 }
 \examples{

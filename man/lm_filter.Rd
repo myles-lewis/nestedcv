@@ -67,3 +67,7 @@ listed in \code{force_vars} in the model. Predictors are ranked by Akaike
 information criteria (AIC) value, or can be filtered by the p-value on the
 estimate of the coefficient for that predictor in its model.
 }
+\details{
+This filter uses \code{\link[RcppEigen:fastLm]{RcppEigen::fastLmPure()}} for speed. \code{NA} in \code{x} are not
+tolerated.
+}
