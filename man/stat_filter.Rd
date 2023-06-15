@@ -34,7 +34,7 @@ class_stat_filter(
 cor_stat_filter(
   y,
   x,
-  cor_method = c("pearson", "spearman", "lm_filter"),
+  cor_method = c("pearson", "spearman", "lm"),
   force_vars = NULL,
   nfilter = NULL,
   p_cutoff = 0.05,
@@ -71,9 +71,10 @@ returns predictor names, "full" returns a dataframe of statistics, "list"
 returns a list of 2 matrices of statistics, one for continuous predictors,
 one for categorical predictors.}
 
-\item{cor_method}{For \code{cor_stat_filter()} only, either "pearson", "spearman"
-or "lm_filter" controlling whether continuous predictors are filtered by
-correlation or regression.}
+\item{cor_method}{For \code{cor_stat_filter()} only, either \code{"pearson"},
+\code{"spearman"} or \code{"lm"} controlling whether continuous predictors are
+filtered by correlation (faster) or regression (slower but allows inclusion
+of covariates via \code{force_vars}).}
 
 \item{rsq_method}{character string indicating which correlation coefficient
 is to be computed. One of "pearson" (default), "kendall", or "spearman".

@@ -34,9 +34,10 @@
 #'   returns predictor names, "full" returns a dataframe of statistics, "list"
 #'   returns a list of 2 matrices of statistics, one for continuous predictors,
 #'   one for categorical predictors.
-#' @param cor_method For `cor_stat_filter()` only, either "pearson", "spearman"
-#'   or "lm_filter" controlling whether continuous predictors are filtered by
-#'   correlation or regression.
+#' @param cor_method For `cor_stat_filter()` only, either `"pearson"`,
+#'   `"spearman"` or `"lm"` controlling whether continuous predictors are
+#'   filtered by correlation (faster) or regression (slower but allows inclusion
+#'   of covariates via `force_vars`).
 #' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #'
 #' @return Integer vector of indices of filtered parameters (type = "index") or
@@ -172,7 +173,7 @@ class_stat_filter <- function(y,
 #'
 cor_stat_filter <- function(y,
                             x,
-                            cor_method = c("pearson", "spearman", "lm_filter"),
+                            cor_method = c("pearson", "spearman", "lm"),
                             force_vars = NULL,
                             nfilter = NULL,
                             p_cutoff = 0.05,
@@ -185,7 +186,7 @@ cor_stat_filter <- function(y,
   factor_ind <- index_factor(x, convert_bin = TRUE)
   if (sum(factor_ind) == 0) {
     if (type == "list") type <- "full"
-    out <- if (cor_method == "lm_filter") {
+    out <- if (cor_method == "lm") {
       lm_filter(y, x, force_vars, nfilter, p_cutoff, rsq_cutoff, rsq_method,
                 type, ...)
     } else correl_filter(y, x, force_vars, nfilter, p_cutoff,
@@ -197,7 +198,7 @@ cor_stat_filter <- function(y,
   x2 <- x[, factor_ind, drop = FALSE]
   res1 <- NULL
   if (ncol(x1) > 0) {
-    res1 <- if (cor_method == "lm_filter") {
+    res1 <- if (cor_method == "lm") {
       lm_filter(y, x1, force_vars, type = "full")
     } else correl_filter(y, x1, method = cor_method, type = "full")
   }
@@ -208,7 +209,7 @@ cor_stat_filter <- function(y,
   rescomb[!factor_ind, ] <- res1[, 3:4]
   rescomb[factor_ind, ] <- res2[, c(1, 4)]
   if (type == "full") {
-    test <- ifelse(factor_ind, "F-test", "lm.t-test")
+    test <- ifelse(factor_ind, "F-test", cor_method)
     test <- data.frame(test)
     return(cbind(test, rescomb))
   }
@@ -232,7 +233,7 @@ index_factor <- function(x, convert_bin = FALSE) {
   if (is.matrix(x)) return(NULL)
   if (convert_bin) {
     num_ind <- unlist(lapply(x, function(i) {
-      is.numeric(i) || nlevels(factor(i)) <= 2
+      is.numeric(i) || nlevels(factor(i)) <= 2 || is.ordered(i)
     }))
   } else {
     num_ind <- unlist(lapply(x, is.numeric))
