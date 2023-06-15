@@ -7,10 +7,11 @@
 correl_filter(
   y,
   x,
+  method = "pearson",
   force_vars = NULL,
   nfilter = NULL,
   p_cutoff = 0.05,
-  method = "pearson",
+  rsq_cutoff = NULL,
   type = c("index", "names", "full"),
   keep_factors = TRUE,
   ...
@@ -21,6 +22,8 @@ correl_filter(
 
 \item{x}{Matrix or dataframe of predictors}
 
+\item{method}{Type of correlation, either "pearson" or "spearman".}
+
 \item{force_vars}{Vector of column names within \code{x} which are always retained
 in the model (i.e. not filtered). Default \code{NULL} means all predictors will
 be passed to \code{filterFUN}.}
@@ -30,7 +33,11 @@ p values < \code{p_cutoff} are returned.}
 
 \item{p_cutoff}{p value cut-off}
 
-\item{method}{Type of correlation, either "pearson" or "spearman".}
+\item{rsq_cutoff}{r^2 cutoff for removing predictors due to collinearity.
+Default \code{NULL} means no collinearity filtering. Predictors are ranked based
+on correlation with the response vector \code{y}. If 2 or more predictors are
+collinear, the first ranked predictor is retained, while the other
+collinear predictors are removed. See \code{\link[=collinear]{collinear()}}.}
 
 \item{type}{Type of vector returned. Default "index" returns indices,
 "names" returns predictor names, "full" returns a matrix of p-values.}
