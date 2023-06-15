@@ -150,7 +150,8 @@ class_stat_filter <- function(y,
   res1 <- NULL
   if (ncol(x1) > 0) {
       res1 <- matrixTests::col_oneway_welch(x1, y)
-      rownames(res1) <- colnames(x1)
+      res1 <- as.matrix(res1[, c("statistic", "pvalue")])
+      dimnames(res1) <- list(colnames(x1), c("stat", "pvalue"))
   }
   res2 <- chisq.tests(x2, y)[, 1:2]
   if (type == "list") return(list("F-test" = res1, "chisq.test" = res2))
