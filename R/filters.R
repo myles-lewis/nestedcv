@@ -298,13 +298,18 @@ correls2 <- function(y, x,
 #' 
 #' @param y Response vector
 #' @param x Matrix or dataframe of predictors
+#' @param method Type of correlation, either "pearson" or "spearman".
 #' @param force_vars Vector of column names within `x` which are always retained
 #'   in the model (i.e. not filtered). Default `NULL` means all predictors will
 #'   be passed to `filterFUN`.
 #' @param nfilter Number of predictors to return. If `NULL` all predictors with 
 #' p values < `p_cutoff` are returned.
 #' @param p_cutoff p value cut-off
-#' @param method Type of correlation, either "pearson" or "spearman".
+#' @param rsq_cutoff r^2 cutoff for removing predictors due to collinearity.
+#'   Default `NULL` means no collinearity filtering. Predictors are ranked based
+#'   on correlation with the response vector `y`. If 2 or more predictors are
+#'   collinear, the first ranked predictor is retained, while the other
+#'   collinear predictors are removed. See [collinear()].
 #' @param type Type of vector returned. Default "index" returns indices,
 #' "names" returns predictor names, "full" returns a matrix of p-values.
 #' @param keep_factors Logical affecting factors with 3 or more levels.
@@ -321,10 +326,11 @@ correls2 <- function(y, x,
 #' 
 correl_filter <- function(y,
                           x,
+                          method = "pearson",
                           force_vars = NULL,
                           nfilter = NULL,
                           p_cutoff = 0.05,
-                          method = "pearson",
+                          rsq_cutoff = NULL,
                           type = c("index", "names", "full"),
                           keep_factors = TRUE,
                           ...) {
@@ -338,7 +344,7 @@ correl_filter <- function(y,
     } else return(res[-factor_ind, ])
   }
   filter_end(res[, "pvalue"],
-             x, force_vars, nfilter, p_cutoff, rsq_cutoff=NULL, type,
+             x, force_vars, nfilter, p_cutoff, rsq_cutoff, type,
              keep_factors, factor_ind)
 }
 
