@@ -105,7 +105,8 @@ categorical data}
 \details{
 \code{stat_filter()} is a wrapper which calls \code{bin_stat_filter()},
 \code{class_stat_filter()} or \code{cor_stat_filter()} depending on whether \code{y} is
-binary, multiclass or continuous respectively.
+binary, multiclass or continuous respectively. Ordered factors are converted
+to numeric (integer) levels and analysed as if continuous.
 }
 \examples{
 library(mlbench)
