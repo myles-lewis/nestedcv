@@ -350,11 +350,19 @@ Multiple filters for variable reduction are available including:
 
 `lm_filter`       linear model with covariates
 
-`rf_filter`       random forest variable importance
+`rf_filter`       random forest variable importance using randomForest package
+
+`ranger_filter`   random forest variable importance using ranger package
 
 `relieff_filter`  ReliefF and other methods available via CORElearn
 
+`glmnet_filter`   uses sparsity of elastic net regression using glmnet to
+                  restrict variables
+
 `boruta_filter`   Boruta
+
+`stat_filter`     A swiss army knife univariate statistical filter for mixed 
+                  data with combined continuous & categorical data 
 ----------------- ---------------------------------------------------------
 
 ```{r eval = FALSE}
