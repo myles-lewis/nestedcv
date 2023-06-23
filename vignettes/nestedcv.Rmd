@@ -385,6 +385,24 @@ Bootstrapped versions of the univariate filters are available [see
 `boot_ttest()`]. These use repeated random sampling to try to improve stability
 of ranking of predictors based on univariate statistics.
 
+`stat_filter()` is a swiss army knife filter which can handle dataframes with
+mixed data with combined continuous & categorical predictors. It uses different
+univariate statistics dependent on data type. For example, t-test is used for
+binary outcome with continuous predictors; correlation or linear regression for
+continuous outcome with continuous predictors etc. It can also be used to
+quickly generate summary statistics relating predictors to the response
+variable.
+
+```{r}
+library(mlbench)
+data(BostonHousing2)
+dat <- BostonHousing2
+y <- dat$cmedv  ## continuous outcome
+x <- subset(dat, select = -c(cmedv, medv, town))
+
+stat_filter(y, x, type = "full")
+```
+
 ### Custom filter
 
 It is fairly straightforward to create your own custom filter, which can be
