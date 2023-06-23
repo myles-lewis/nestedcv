@@ -703,7 +703,7 @@ both outer and inner CV for 8 x 8 nested CV. But it could easily be replaced
 with a variable from the predictor dataframe if stratification by an imbalanced
 group is desired. For grouped data where members of a group must be kept
 together try using caret's `groupKFold()` function. For stratification with
-multiple columns (e.g. response + one or more grouping variable), try
+multiple columns (e.g. response + one or more grouping variables), try
 `multi_strata()` from the `splitTools` package.
 
 ### Making predictions
