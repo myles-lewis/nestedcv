@@ -191,8 +191,8 @@ cor_stat_filter <- function(y,
     out <- if (cor_method == "lm") {
       lm_filter(y, x, force_vars, nfilter, p_cutoff, rsq_cutoff, rsq_method,
                 type, ...)
-    } else correl_filter(y, x, force_vars, nfilter, p_cutoff,
-                         method = cor_method, type, ...)
+    } else correl_filter(y, x, method = cor_method, force_vars, nfilter,
+                         p_cutoff, rsq_cutoff, type, ...)
     return(out)
   }
   if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
