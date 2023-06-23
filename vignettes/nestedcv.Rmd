@@ -54,7 +54,7 @@ machine learning models. In addition, `nestedcv` adds functionality to enable
 cross-validation of the elastic net alpha parameter when fitting `glmnet`
 models.
 
-`nestedcv` partitions the dataset into outer and inner folds (default 10x10
+`nestedcv` partitions the dataset into outer and inner folds (default 10 x 10
 folds). The inner fold CV, (default is 10-fold), is used to tune optimal
 hyperparameters for models. Then the model is fitted on the whole inner fold and
 tested on the left-out data from the outer fold. This is repeated across all
@@ -638,6 +638,44 @@ plot(ncv$outer_result[[1]]$fit, xTrans = log)
 ggplot(ncv$outer_result[[1]]$fit) +
   scale_x_log10() 
 ```
+
+### Stratifying CV folds
+
+By default `nestedcv` stratifies folds based on the outcome variable using
+caret's `createFolds()` function. Users can control CV folds directly by
+providing their own lists of fold indices. Outer CV fold indices can simply be
+provided via the argument `outer_folds` to `nestcv.glmnet()` or
+`nestcv.train()`. This is a list of vectors with one vector of indices used for
+each test CV fold.
+
+The inner CV fold indices can also be controlled via the `inner_folds` argument.
+This is a list of a list of vectors. This can be useful if control of
+stratification is desired. The toy example below demonstrates how the
+`outer_folds` and `inner_folds` objects have to be structured.
+
+```{r eval = FALSE}
+data(iris)
+y <- iris$Species
+x <- iris[, -5]
+
+out_folds <- caret::createFolds(y, k = 8)
+in_folds <- lapply(out_folds, function(i) {
+  train_y <- y[-i]
+  caret::createFolds(train_y, k = 8)
+})
+
+res <- nestcv.train(y, x, method = "rf",
+                    cv.cores = 8,
+                    inner_folds = in_folds,
+                    outer_folds = out_folds)
+summary(res)
+res$outer_folds  # show which outer fold indices were used
+```
+
+In this example the outcome variable `y` has been used to stratify the folds for
+both outer and inner CV for 8 x 8 nested CV. But it could easily be replaced
+with a variable from the predictor dataframe if stratification by an imbalanced
+group is desired.
 
 ### Making predictions
 
