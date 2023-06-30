@@ -64,12 +64,12 @@ one_hot <- function(x, all_levels = TRUE, rename_binary = TRUE, sep = ".") {
       lev <- levels(factor(x[, i]))
       title <- colnames(x)[i]
       cn <- paste(title, lev, sep = sep)
-      m <- matrix(0L, nrow = nrow(x), ncol = length(lev))
+      m <- matrix(0L, nrow = nrow(x), ncol = length(lev),
+                  dimnames = list(NULL, cn))
       m[is.na(x[, i]), ] <- NA
       for (j in seq_along(lev)) {
         m[x[, i] == lev[j], j] <- 1L
       }
-      colnames(m) <- cn
       m
     })
   } else {
@@ -77,12 +77,12 @@ one_hot <- function(x, all_levels = TRUE, rename_binary = TRUE, sep = ".") {
       lev <- levels(factor(x[, i]))[-1]
       title <- colnames(x)[i]
       cn <- paste(title, lev, sep = sep)
-      m <- matrix(0L, nrow = nrow(x), ncol = length(lev))
+      m <- matrix(0L, nrow = nrow(x), ncol = length(lev),
+                  dimnames = list(NULL, cn))
       m[is.na(x[, i]), ] <- NA
       for (j in seq_along(lev)) {
         m[x[, i] == lev[j], j] <- 1L
       }
-      colnames(m) <- cn
       m
     })
   }
