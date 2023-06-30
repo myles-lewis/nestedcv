@@ -223,6 +223,15 @@ s3 <- plot_shap_beeswarm(sh3, x, sort = FALSE, cex = 0.7) +
 ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "right", common.legend = TRUE)
 ```
 
+### One-hot encoding for categorical predictors
+
+Binary factors generally should not have any handling problems as most functions
+in `nestedcv` convert them to 0 and 1, and directionality can be interpreted.
+However, multi-level factors with 3 or more levels are not clearly interpretable
+with SHAP values. We recommend these are one-hot encoded with dummy variables
+using the function `one_hot()`. This function accepts dataframes and can encode
+multiple factors, producing a matrix as a result.
+
 ### Citation
 
 If you use this package, please cite as:
