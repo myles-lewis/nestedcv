@@ -335,6 +335,12 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_
 summary(res.rtx)
 ```
 
+`glmnet` can only accept a numeric matrix of predictors. Dataframes of
+predictors with factors or character variables can be converted to a matrix
+using one-hot encoding to create dummy variables using the function `one_hot()`.
+For `nestcv.glmnet` models, `one_hot()` should be used with the argument
+`all_levels = FALSE` to avoid the predictor matrix not being full rank.
+
 ### Filters
 
 Multiple filters for variable reduction are available including:
