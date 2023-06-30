@@ -18,8 +18,8 @@ encoded extra columns with 0 and 1. Binary factors are converted to single
 columns of 0 and 1. Ordered factors are converted to integer levels.
 }
 \description{
-One-hot encoding of factors in dataframes. Binary factors are converted to a
-single column of 0 and 1. Multi-level unordered factors are converted to
+One-hot encoding of factors in dataframes. Binary factors are each converted
+to a single column of 0 and 1. Multi-level unordered factors are converted to
 multiple columns, one for each level. Unused levels are dropped. Numeric or
 integer columns are left untouched.
 }
