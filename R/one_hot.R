@@ -7,11 +7,14 @@
 #' integer columns are left untouched.
 #' 
 #' @param x A dataframe or matrix. Matrices are returned untouched.
-#' @param sep Character for separating factor variable names and levels when new
-#'   columns are generated.
+#' @param sep Character for separating factor variable names and levels for 
+#'   encoded columns.
+#' @param rename_binary Logical, whether to rename binary factors by appending
+#'   the 2nd level of the factor to aid interpretation of encoded factor levels
+#'   and to allow consistency with naming.
 #' @return A numeric matrix with multi-level factors converted to one-hot
-#'   encoded extra columns with 0 and 1. Binary factors are converted to single
-#'   columns of 0 and 1. Ordered factors are converted to integer levels.
+#'   encoded extra columns with 0 and 1. Binary factors are each converted to
+#'   single columns of 0 and 1. Ordered factors are converted to integer levels.
 #' @seealso [caret::dummyVars()]
 #' @examples
 #' data(iris)
@@ -21,7 +24,7 @@
 #' 
 #' @export
 #' 
-one_hot <- function(x, sep = ".") {
+one_hot <- function(x, sep = ".", rename_binary = TRUE) {
   if (is.matrix(x)) return(x)
   x <- droplevels(x)
   factor_ind <- index_factor(x, convert_bin = TRUE)
@@ -29,12 +32,10 @@ one_hot <- function(x, sep = ".") {
     !is.numeric(i) && nlevels(factor(i)) == 2
   }))
   if (sum(factor_ind) == 0) {
-    out <- data.matrix(x)
-    out[, bin_ind] <- out[, bin_ind] - 1
+    out <- fix_binary(x, bin_ind, sep, rename_binary)
     return(out)
   }
-  x0 <- data.matrix(x)
-  x0[, bin_ind] <- x0[, bin_ind] - 1
+  x0 <- fix_binary(x, bin_ind, sep, rename_binary)
   x1 <- x0[, !factor_ind, drop = FALSE]
   f <- which(factor_ind)
   expand_x2 <- lapply(f, function(i) {
@@ -52,4 +53,16 @@ one_hot <- function(x, sep = ".") {
   expand_x2 <- do.call(cbind, expand_x2)
   out <- cbind(x1, expand_x2)
   out
+}
+
+fix_binary <- function(x, bin_ind, sep, rename_binary) {
+  if (rename_binary) {
+    which_bin <- which(bin_ind)
+    lev2 <- unlist(lapply(which_bin, function(i) levels(factor(x[, i]))[2]))
+    cn <- paste(colnames(x)[which_bin], lev2, sep = sep)
+    colnames(x)[which_bin] <- cn
+  }
+  x <- data.matrix(x)
+  x[, bin_ind] <- x[, bin_ind] - 1
+  x
 }

@@ -4,18 +4,22 @@
 \alias{one_hot}
 \title{One-hot encode}
 \usage{
-one_hot(x, sep = ".")
+one_hot(x, sep = ".", rename_binary = TRUE)
 }
 \arguments{
 \item{x}{A dataframe or matrix. Matrices are returned untouched.}
 
-\item{sep}{Character for separating factor variable names and levels when new
-columns are generated.}
+\item{sep}{Character for separating factor variable names and levels for
+encoded columns.}
+
+\item{rename_binary}{Logical, whether to rename binary factors by appending
+the 2nd level of the factor to aid interpretation of encoded factor levels
+and to allow consistency with naming.}
 }
 \value{
 A numeric matrix with multi-level factors converted to one-hot
-encoded extra columns with 0 and 1. Binary factors are converted to single
-columns of 0 and 1. Ordered factors are converted to integer levels.
+encoded extra columns with 0 and 1. Binary factors are each converted to
+single columns of 0 and 1. Ordered factors are converted to integer levels.
 }
 \description{
 One-hot encoding of factors in dataframes. Binary factors are each converted
