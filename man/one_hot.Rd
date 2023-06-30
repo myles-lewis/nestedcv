@@ -48,6 +48,9 @@ x <- iris
 x2 <- one_hot(x)
 head(x2)
 
+x2 <- one_hot(x, all_levels = FALSE)
+head(x2)
+
 }
 \seealso{
 \code{\link[caret:dummyVars]{caret::dummyVars()}}, \code{\link[=model.matrix]{model.matrix()}}

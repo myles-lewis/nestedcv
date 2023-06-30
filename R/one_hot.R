@@ -35,6 +35,9 @@
 #' x2 <- one_hot(x)
 #' head(x2)
 #' 
+#' x2 <- one_hot(x, all_levels = FALSE)
+#' head(x2)
+#' 
 #' @export
 #' 
 one_hot <- function(x, all_levels = TRUE, rename_binary = TRUE, sep = ".") {
