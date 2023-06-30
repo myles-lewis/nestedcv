@@ -3,19 +3,32 @@
 #' 
 #' One-hot encoding of factors in dataframes. Binary factors are each converted
 #' to a single column of 0 and 1. Multi-level unordered factors are converted to
-#' multiple columns, one for each level. Unused levels are dropped. Numeric or
-#' integer columns are left untouched.
+#' multiple columns, one for each level (dummy variables). Unused levels are
+#' dropped. Numeric or integer columns are left untouched.
 #' 
 #' @param x A dataframe or matrix. Matrices are returned untouched.
-#' @param sep Character for separating factor variable names and levels for 
-#'   encoded columns.
+#' @param all_levels Logical, whether to create dummy variables for all levels
+#'   of each factor.
 #' @param rename_binary Logical, whether to rename binary factors by appending
 #'   the 2nd level of the factor to aid interpretation of encoded factor levels
 #'   and to allow consistency with naming.
+#' @param sep Character for separating factor variable names and levels for 
+#'   encoded columns.
+#' @details
+#'  `all_levels` is set to `TRUE` by default to aid with interpretability e.g.
+#'  with SHAP values, and since filtering might result in some dummy variables
+#'  being excluded. However, having dummy variables for all levels of a factor
+#'  can cause problems with multicollinearity in regression (the dummy variable
+#'  trap), so for regression models `all_levels` should be set to `FALSE`
+#'  (equivalent to full rank parameterisation). Note this function is not
+#'  designed for use with standard linear models or GLMs in R; it is designed
+#'  to quickly generate dummy variables for more general machine learning
+#'  purposes. To create a proper design matrix object for regression models,
+#'  [model.matrix()] should be used instead.
 #' @return A numeric matrix with multi-level factors converted to one-hot
 #'   encoded extra columns with 0 and 1. Binary factors are each converted to
 #'   single columns of 0 and 1. Ordered factors are converted to integer levels.
-#' @seealso [caret::dummyVars()]
+#' @seealso [caret::dummyVars()], [model.matrix()]
 #' @examples
 #' data(iris)
 #' x <- iris
@@ -24,7 +37,7 @@
 #' 
 #' @export
 #' 
-one_hot <- function(x, sep = ".", rename_binary = TRUE) {
+one_hot <- function(x, all_levels = TRUE, rename_binary = TRUE, sep = ".") {
   if (is.matrix(x)) return(x)
   x <- droplevels(x)
   factor_ind <- index_factor(x, convert_bin = TRUE)
@@ -38,18 +51,33 @@ one_hot <- function(x, sep = ".", rename_binary = TRUE) {
   x0 <- fix_binary(x, bin_ind, sep, rename_binary)
   x1 <- x0[, !factor_ind, drop = FALSE]
   f <- which(factor_ind)
-  expand_x2 <- lapply(f, function(i) {
-    lev <- levels(factor(x[, i]))
-    title <- colnames(x)[i]
-    cn <- paste(title, lev, sep = sep)
-    m <- matrix(0, nrow = nrow(x), ncol = length(lev))
-    m[is.na(x[, i]), ] <- NA
-    for (j in seq_along(lev)) {
-      m[x[, i] == lev[j], j] <- 1
-    }
-    colnames(m) <- cn
-    m
-  })
+  if (all_levels) {
+    expand_x2 <- lapply(f, function(i) {
+      lev <- levels(factor(x[, i]))
+      title <- colnames(x)[i]
+      cn <- paste(title, lev, sep = sep)
+      m <- matrix(0, nrow = nrow(x), ncol = length(lev))
+      m[is.na(x[, i]), ] <- NA
+      for (j in seq_along(lev)) {
+        m[x[, i] == lev[j], j] <- 1
+      }
+      colnames(m) <- cn
+      m
+    })
+  } else {
+    expand_x2 <- lapply(f, function(i) {
+      lev <- levels(factor(x[, i]))[-1]
+      title <- colnames(x)[i]
+      cn <- paste(title, lev, sep = sep)
+      m <- matrix(0, nrow = nrow(x), ncol = length(lev))
+      m[is.na(x[, i]), ] <- NA
+      for (j in seq_along(lev)) {
+        m[x[, i] == lev[j], j] <- 1
+      }
+      colnames(m) <- cn
+      m
+    })
+  }
   expand_x2 <- do.call(cbind, expand_x2)
   out <- cbind(x1, expand_x2)
   out

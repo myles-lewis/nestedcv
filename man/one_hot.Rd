@@ -4,17 +4,20 @@
 \alias{one_hot}
 \title{One-hot encode}
 \usage{
-one_hot(x, sep = ".", rename_binary = TRUE)
+one_hot(x, all_levels = TRUE, rename_binary = TRUE, sep = ".")
 }
 \arguments{
 \item{x}{A dataframe or matrix. Matrices are returned untouched.}
 
-\item{sep}{Character for separating factor variable names and levels for
-encoded columns.}
+\item{all_levels}{Logical, whether to create dummy variables for all levels
+of each factor.}
 
 \item{rename_binary}{Logical, whether to rename binary factors by appending
 the 2nd level of the factor to aid interpretation of encoded factor levels
 and to allow consistency with naming.}
+
+\item{sep}{Character for separating factor variable names and levels for
+encoded columns.}
 }
 \value{
 A numeric matrix with multi-level factors converted to one-hot
@@ -24,8 +27,20 @@ single columns of 0 and 1. Ordered factors are converted to integer levels.
 \description{
 One-hot encoding of factors in dataframes. Binary factors are each converted
 to a single column of 0 and 1. Multi-level unordered factors are converted to
-multiple columns, one for each level. Unused levels are dropped. Numeric or
-integer columns are left untouched.
+multiple columns, one for each level (dummy variables). Unused levels are
+dropped. Numeric or integer columns are left untouched.
+}
+\details{
+\code{all_levels} is set to \code{TRUE} by default to aid with interpretability e.g.
+with SHAP values, and since filtering might result in some dummy variables
+being excluded. However, having dummy variables for all levels of a factor
+can cause problems with multicollinearity in regression (the dummy variable
+trap), so for regression models \code{all_levels} should be set to \code{FALSE}
+(equivalent to full rank parameterisation). Note this function is not
+designed for use with standard linear models or GLMs in R; it is designed
+to quickly generate dummy variables for more general machine learning
+purposes. To create a proper design matrix object for regression models,
+\code{\link[=model.matrix]{model.matrix()}} should be used instead.
 }
 \examples{
 data(iris)
@@ -35,5 +50,5 @@ head(x2)
 
 }
 \seealso{
-\code{\link[caret:dummyVars]{caret::dummyVars()}}
+\code{\link[caret:dummyVars]{caret::dummyVars()}}, \code{\link[=model.matrix]{model.matrix()}}
 }
