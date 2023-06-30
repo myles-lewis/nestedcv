@@ -21,26 +21,31 @@ encoded columns.}
 }
 \value{
 A numeric matrix with multi-level factors converted to one-hot
-encoded extra columns with 0 and 1. Binary factors are each converted to
-single columns of 0 and 1. Ordered factors are converted to integer levels.
+encoded extra columns encoded as integers 0 or 1. Binary factors are each
+converted to single columns of integers (0 or 1). Ordered factors are
+converted to integer levels.
 }
 \description{
-One-hot encoding of factors in dataframes. Binary factors are each converted
-to a single column of 0 and 1. Multi-level unordered factors are converted to
-multiple columns, one for each level (dummy variables). Unused levels are
-dropped. Numeric or integer columns are left untouched.
+One-hot encoding of all factor and character columns in a dataframe to
+convert it into a numeric matrix.
 }
 \details{
-\code{all_levels} is set to \code{TRUE} by default to aid with interpretability e.g.
-with SHAP values, and since filtering might result in some dummy variables
+Binary factor columns and logical columns are converted to integers (0 or
+1). Multi-level unordered factors are converted to multiple columns, one
+column for each level (dummy variables). Unused levels are dropped.
+Character columns are first converted to factors and then encoded. Ordered
+factors are replaced by their internal codes. Numeric or integer columns are
+left untouched.
+
+\code{all_levels} is set to \code{TRUE} by default to aid with interpretability (e.g.
+with SHAP values), and since filtering might result in some dummy variables
 being excluded. However, having dummy variables for all levels of a factor
 can cause problems with multicollinearity in regression (the dummy variable
 trap), so for regression models such as \code{glmnet}, \code{all_levels} should be set
 to \code{FALSE} (equivalent to full rank parameterisation). Note this function is
 designed to quickly generate dummy variables for more general machine
-learning purposes; it is not designed for use with a standard linear model
-or GLM in R. To create a proper design matrix object for regression models,
-\code{\link[=model.matrix]{model.matrix()}} should be used instead.
+learning purposes. To create a proper design matrix object for regression
+models, use \code{\link[=model.matrix]{model.matrix()}}.
 }
 \examples{
 data(iris)

@@ -1,10 +1,8 @@
 
 #' One-hot encode
 #' 
-#' One-hot encoding of factors in dataframes. Binary factors are each converted
-#' to a single column of 0 and 1. Multi-level unordered factors are converted to
-#' multiple columns, one for each level (dummy variables). Unused levels are
-#' dropped. Numeric or integer columns are left untouched.
+#' One-hot encoding of all factor and character columns in a dataframe to
+#' convert it into a numeric matrix.
 #' 
 #' @param x A dataframe or matrix. Matrices are returned untouched.
 #' @param all_levels Logical, whether to create dummy variables for all levels
@@ -15,19 +13,26 @@
 #' @param sep Character for separating factor variable names and levels for 
 #'   encoded columns.
 #' @details
-#'  `all_levels` is set to `TRUE` by default to aid with interpretability e.g.
-#'  with SHAP values, and since filtering might result in some dummy variables
+#'  Binary factor columns and logical columns are converted to integers (0 or
+#'  1). Multi-level unordered factors are converted to multiple columns, one
+#'  column for each level (dummy variables). Unused levels are dropped.
+#'  Character columns are first converted to factors and then encoded. Ordered
+#'  factors are replaced by their internal codes. Numeric or integer columns are
+#'  left untouched.
+#'  
+#'  `all_levels` is set to `TRUE` by default to aid with interpretability (e.g.
+#'  with SHAP values), and since filtering might result in some dummy variables
 #'  being excluded. However, having dummy variables for all levels of a factor
 #'  can cause problems with multicollinearity in regression (the dummy variable
 #'  trap), so for regression models such as `glmnet`, `all_levels` should be set
 #'  to `FALSE` (equivalent to full rank parameterisation). Note this function is
 #'  designed to quickly generate dummy variables for more general machine
-#'  learning purposes; it is not designed for use with a standard linear model
-#'  or GLM in R. To create a proper design matrix object for regression models,
-#'  [model.matrix()] should be used instead.
+#'  learning purposes. To create a proper design matrix object for regression
+#'  models, use [model.matrix()].
 #' @return A numeric matrix with multi-level factors converted to one-hot
-#'   encoded extra columns with 0 and 1. Binary factors are each converted to
-#'   single columns of 0 and 1. Ordered factors are converted to integer levels.
+#'   encoded extra columns encoded as integers 0 or 1. Binary factors are each
+#'   converted to single columns of integers (0 or 1). Ordered factors are
+#'   converted to integer levels.
 #' @seealso [caret::dummyVars()], [model.matrix()]
 #' @examples
 #' data(iris)
@@ -59,10 +64,10 @@ one_hot <- function(x, all_levels = TRUE, rename_binary = TRUE, sep = ".") {
       lev <- levels(factor(x[, i]))
       title <- colnames(x)[i]
       cn <- paste(title, lev, sep = sep)
-      m <- matrix(0, nrow = nrow(x), ncol = length(lev))
+      m <- matrix(0L, nrow = nrow(x), ncol = length(lev))
       m[is.na(x[, i]), ] <- NA
       for (j in seq_along(lev)) {
-        m[x[, i] == lev[j], j] <- 1
+        m[x[, i] == lev[j], j] <- 1L
       }
       colnames(m) <- cn
       m
@@ -72,10 +77,10 @@ one_hot <- function(x, all_levels = TRUE, rename_binary = TRUE, sep = ".") {
       lev <- levels(factor(x[, i]))[-1]
       title <- colnames(x)[i]
       cn <- paste(title, lev, sep = sep)
-      m <- matrix(0, nrow = nrow(x), ncol = length(lev))
+      m <- matrix(0L, nrow = nrow(x), ncol = length(lev))
       m[is.na(x[, i]), ] <- NA
       for (j in seq_along(lev)) {
-        m[x[, i] == lev[j], j] <- 1
+        m[x[, i] == lev[j], j] <- 1L
       }
       colnames(m) <- cn
       m
