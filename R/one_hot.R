@@ -19,11 +19,11 @@
 #'  with SHAP values, and since filtering might result in some dummy variables
 #'  being excluded. However, having dummy variables for all levels of a factor
 #'  can cause problems with multicollinearity in regression (the dummy variable
-#'  trap), so for regression models `all_levels` should be set to `FALSE`
-#'  (equivalent to full rank parameterisation). Note this function is not
-#'  designed for use with standard linear models or GLMs in R; it is designed
-#'  to quickly generate dummy variables for more general machine learning
-#'  purposes. To create a proper design matrix object for regression models,
+#'  trap), so for regression models such as `glmnet`, `all_levels` should be set
+#'  to `FALSE` (equivalent to full rank parameterisation). Note this function is
+#'  designed to quickly generate dummy variables for more general machine
+#'  learning purposes; it is not designed for use with a standard linear model
+#'  or GLM in R. To create a proper design matrix object for regression models,
 #'  [model.matrix()] should be used instead.
 #' @return A numeric matrix with multi-level factors converted to one-hot
 #'   encoded extra columns with 0 and 1. Binary factors are each converted to
