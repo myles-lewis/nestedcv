@@ -23,6 +23,13 @@ single column of 0 and 1. Multi-level unordered factors are converted to
 multiple columns, one for each level. Unused levels are dropped. Numeric or
 integer columns are left untouched.
 }
+\examples{
+data(iris)
+x <- iris
+x2 <- one_hot(x)
+head(x2)
+
+}
 \seealso{
 \code{\link[caret:dummyVars]{caret::dummyVars()}}
 }

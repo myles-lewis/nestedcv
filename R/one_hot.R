@@ -16,7 +16,8 @@
 #' @examples
 #' data(iris)
 #' x <- iris
-#' one_hot(x)
+#' x2 <- one_hot(x)
+#' head(x2)
 #' 
 #' @export
 #' 
