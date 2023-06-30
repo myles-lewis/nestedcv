@@ -29,7 +29,7 @@ one_hot <- function(x, sep = ".", rename_binary = TRUE) {
   x <- droplevels(x)
   factor_ind <- index_factor(x, convert_bin = TRUE)
   bin_ind <- unlist(lapply(x, function(i) {
-    !is.numeric(i) && nlevels(factor(i)) == 2
+    !is.numeric(i) && !is.logical(i) && nlevels(factor(i)) == 2
   }))
   if (sum(factor_ind) == 0) {
     out <- fix_binary(x, bin_ind, sep, rename_binary)
