@@ -18,7 +18,7 @@ one_hot <- function(x, sep = ".") {
   x0[, bin_ind] <- x0[, bin_ind] - 1
   x1 <- x0[, !factor_ind]
   f <- which(factor_ind)
-  res_x2 <- lapply(f, function(i) {
+  expand_x2 <- lapply(f, function(i) {
     lev <- levels(factor(x[, i]))
     title <- colnames(x)[i]
     cn <- paste(title, lev, sep = sep)
@@ -30,7 +30,7 @@ one_hot <- function(x, sep = ".") {
     colnames(m) <- cn
     m
   })
-  res_x2 <- do.call(cbind, res_x2)
-  out <- cbind(x1, res_x2)
+  expand_x2 <- do.call(cbind, expand_x2)
+  out <- cbind(x1, expand_x2)
   out
 }
