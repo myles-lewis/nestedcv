@@ -46,10 +46,10 @@ or GLM in R. To create a proper design matrix object for regression models,
 data(iris)
 x <- iris
 x2 <- one_hot(x)
-head(x2)
+head(x2)  # 3 columns for Species
 
 x2 <- one_hot(x, all_levels = FALSE)
-head(x2)
+head(x2)  # 2 columns for Species
 
 }
 \seealso{
