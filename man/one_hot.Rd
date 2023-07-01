@@ -7,7 +7,7 @@
 one_hot(x, all_levels = TRUE, rename_binary = TRUE, sep = ".")
 }
 \arguments{
-\item{x}{A dataframe or matrix. Matrices are returned untouched.}
+\item{x}{A dataframe, matrix or tibble. Matrices are returned untouched.}
 
 \item{all_levels}{Logical, whether to create dummy variables for all levels
 of each factor.}
@@ -20,14 +20,13 @@ and to allow consistency with naming.}
 encoded columns.}
 }
 \value{
-A numeric matrix with multi-level factors converted to one-hot
-encoded extra columns encoded as integers 0 or 1. Binary factors are each
-converted to single columns of integers (0 or 1). Ordered factors are
-converted to integer levels.
+A numeric matrix with the same number of rows as the input data.
+Dummy variable columns replace the input factor or character columns.
+Numeric columns are left intact.
 }
 \description{
-One-hot encoding of all factor and character columns in a dataframe to
-convert it into a numeric matrix.
+Fast one-hot encoding of all factor and character columns in a dataframe to
+convert it into a numeric matrix by creating dummy (binary) columns.
 }
 \details{
 Binary factor columns and logical columns are converted to integers (0 or

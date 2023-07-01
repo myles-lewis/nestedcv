@@ -1,10 +1,10 @@
 
 #' One-hot encode
 #' 
-#' One-hot encoding of all factor and character columns in a dataframe to
-#' convert it into a numeric matrix.
+#' Fast one-hot encoding of all factor and character columns in a dataframe to
+#' convert it into a numeric matrix by creating dummy (binary) columns.
 #' 
-#' @param x A dataframe or matrix. Matrices are returned untouched.
+#' @param x A dataframe, matrix or tibble. Matrices are returned untouched.
 #' @param all_levels Logical, whether to create dummy variables for all levels
 #'   of each factor.
 #' @param rename_binary Logical, whether to rename binary factors by appending
@@ -29,10 +29,9 @@
 #'  designed to quickly generate dummy variables for more general machine
 #'  learning purposes. To create a proper design matrix object for regression
 #'  models, use [model.matrix()].
-#' @return A numeric matrix with multi-level factors converted to one-hot
-#'   encoded extra columns encoded as integers 0 or 1. Binary factors are each
-#'   converted to single columns of integers (0 or 1). Ordered factors are
-#'   converted to integer levels.
+#' @return A numeric matrix with the same number of rows as the input data.
+#'   Dummy variable columns replace the input factor or character columns.
+#'   Numeric columns are left intact.
 #' @seealso [caret::dummyVars()], [model.matrix()]
 #' @examples
 #' data(iris)
@@ -47,6 +46,7 @@
 #' 
 one_hot <- function(x, all_levels = TRUE, rename_binary = TRUE, sep = ".") {
   if (is.matrix(x)) return(x)
+  x <- as.data.frame(x)
   x <- droplevels(x)
   factor_ind <- index_factor(x, convert_bin = TRUE)
   bin_ind <- unlist(lapply(x, function(i) {
