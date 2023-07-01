@@ -335,6 +335,8 @@ res.rtx <- nestcv.glmnet(y = yrtx, x = data.rtx, min_1se = 0, filterFUN = ttest_
 summary(res.rtx)
 ```
 
+### One-hot encoding (creating dummy variables)
+
 `glmnet` can only accept a numeric matrix of predictors. Dataframes of
 predictors with factors or character variables can be converted to a matrix
 using one-hot encoding to create dummy variables using the function `one_hot()`.

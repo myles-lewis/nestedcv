@@ -230,7 +230,7 @@ in `nestedcv` convert them to 0 and 1, and directionality can be interpreted.
 However, multi-level factors with 3 or more levels are not clearly interpretable
 with SHAP values. We recommend these are one-hot encoded with dummy variables
 using the function `one_hot()`. This function accepts dataframes and can encode
-multiple factors, producing a matrix as a result.
+multiple factors and character columns, producing a matrix as a result.
 
 ### Citation
 
