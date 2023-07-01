@@ -8,7 +8,8 @@ News
 
 * Better handling of dataframes in filters. `keep_factors` option has been added 
 to filters to control filtering of factors with 3 or more levels.
-* Added `one_hot()` for fast one-hot encoding of factors and character columns.
+* Added `one_hot()` for fast one-hot encoding of factors and character columns 
+by creating dummy variables.
 * Added `stat_filter()` which applies univariate filtering to dataframes with 
 mixed datatype (continuous & categorical combined).
 * Changed one-way ANOVA test in `anova_filter()` from `Rfast::ftests()` to 
