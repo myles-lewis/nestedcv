@@ -1,7 +1,7 @@
 # nestedcv
 
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/nestedcv)](http://cran.r-project.org/web/packages/nestedcv/)
-[![Downloads](http://cranlogs.r-pkg.org/badges/nestedcv)](http://CRAN.R-project.org/package=nestedcv)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/nestedcv)](https://cran.r-project.org/web/packages/nestedcv/)
+[![Downloads](http://cranlogs.r-pkg.org/badges/nestedcv)](https://CRAN.R-project.org/package=nestedcv)
 
 Nested cross-validation (CV) for the glmnet and caret packages. With glmnet this
 includes cross-validation of elastic net alpha parameter. A number of feature
