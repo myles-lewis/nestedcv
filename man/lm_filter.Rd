@@ -13,7 +13,8 @@ lm_filter(
   rsq_cutoff = NULL,
   rsq_method = "pearson",
   type = c("index", "names", "full"),
-  keep_factors = TRUE
+  keep_factors = TRUE,
+  mc.cores = 1
 )
 }
 \arguments{
@@ -52,14 +53,17 @@ factors are converted to numeric values 0/1 and analysed as such. If
 \code{keep_factors} is \code{TRUE} (the default), factors with 3 or more levels are
 not filtered and are retained. If \code{keep_factors} is \code{FALSE}, they are
 removed.}
+
+\item{mc.cores}{Number of cores for parallelisation using
+\code{\link[parallel:mclapply]{parallel::mclapply()}}.}
 }
 \value{
 Integer vector of indices of filtered parameters (\code{type = "index"})
 or character vector of names (\code{type = "names"}) of filtered parameters in
 order of linear model AIC. Any variables in \code{force_vars} which are
 incorporated into all models are listed first. If \code{type = "full"} a matrix
-of AIC values, sigma, the residual standard error (see \link{summary.lm}),
-t-statistic and p-values for the tested predictor is returned.
+of AIC value, sigma (residual standard error, see \link{summary.lm}),
+coefficient, t-statistic and p-value for each tested predictor is returned.
 }
 \description{
 Linear models are fitted on each predictor, with inclusion of variable names
@@ -68,6 +72,9 @@ information criteria (AIC) value, or can be filtered by the p-value on the
 estimate of the coefficient for that predictor in its model.
 }
 \details{
-This filter uses \code{\link[RcppEigen:fastLm]{RcppEigen::fastLmPure()}} for speed. \code{NA} in \code{x} are not
+This filter is based on the model \code{y ~ xvar + force_vars} where \code{y} is the
+response vector, \code{xvar} are variables in columns taken sequentially from \code{x}
+and \code{force_vars} are optional covariates extracted from \code{x}. It uses
+\code{\link[RcppEigen:fastLm]{RcppEigen::fastLmPure()}} with \code{method = 3} for speed. \code{NA} in \code{x} are not
 tolerated.
 }

@@ -690,14 +690,19 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
 #'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
 #'   removed.
+#' @param mc.cores Number of cores for parallelisation using
+#'   [parallel::mclapply()].
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
 #'   or character vector of names (`type = "names"`) of filtered parameters in
 #'   order of linear model AIC. Any variables in `force_vars` which are
 #'   incorporated into all models are listed first. If `type = "full"` a matrix
-#'   of AIC values, sigma, the residual standard error (see [summary.lm]),
-#'   t-statistic and p-values for the tested predictor is returned.
+#'   of AIC value, sigma (residual standard error, see [summary.lm]),
+#'   coefficient, t-statistic and p-value for each tested predictor is returned.
 #' @details
-#' This filter uses [RcppEigen::fastLmPure()] for speed. `NA` in `x` are not
+#' This filter is based on the model `y ~ xvar + force_vars` where `y` is the
+#' response vector, `xvar` are variables in columns taken sequentially from `x`
+#' and `force_vars` are optional covariates extracted from `x`. It uses
+#' [RcppEigen::fastLmPure()] with `method = 3` for speed. `NA` in `x` are not
 #' tolerated.
 #' 
 #' @export
@@ -709,7 +714,8 @@ lm_filter <- function(y, x,
                       rsq_cutoff = NULL,
                       rsq_method = "pearson",
                       type = c("index", "names", "full"),
-                      keep_factors = TRUE) {
+                      keep_factors = TRUE,
+                      mc.cores = 1) {
   if (!requireNamespace("RcppEigen", quietly = TRUE)) {
     stop("Package 'RcppEigen' must be installed to use this filter",
          call. = FALSE)
@@ -727,15 +733,17 @@ lm_filter <- function(y, x,
     xset0 <- x[, force_vars, drop = FALSE]
     xset <- cbind(startx, xset0)
   } else xset <- startx
-  res <- sapply(check_vars, function(i) {
+  res <- mclapply(check_vars, function(i) {
     xset[, 2] <- x[, i]
     fit <- RcppEigen::fastLmPure(xset, y, method = 3L)
     rss <- sum(fit$residuals^2)
-    tval <- fit$coefficients[2] / fit$se[2]
-    c(rss, tval)
-  })
+    c(rss, fit$coefficients[2], fit$se[2])
+  }, mc.cores = mc.cores)
+  res <- simplify2array(res)
+  colnames(res) <- check_vars
   rss <- res[1,]
-  tval <- res[2,]
+  cf <- res[2,]
+  tval <- res[2,] / res[3,]
   n <- length(y)
   P <- ncol(xset)
   ## from stats::logLik.lm
@@ -745,7 +753,7 @@ lm_filter <- function(y, x,
   resvar <- rss/rdf
   sigma <- sqrt(resvar)
   pval <- 2*pt(abs(tval), rdf, lower.tail = FALSE)  ## from stats::summary.lm
-  result <- cbind(aic, sigma, tval, pval)
+  result <- cbind(aic, sigma, coef = cf, tval, pval)
   if (type == "full") {
     if (length(factor_ind) == 0) {
       return(result)
