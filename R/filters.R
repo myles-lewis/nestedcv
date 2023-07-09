@@ -690,6 +690,8 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
 #'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
 #'   removed.
+#' @param method Integer determining linear model method. See
+#'   [RcppEigen::fastLmPure()]
 #' @param mc.cores Number of cores for parallelisation using
 #'   [parallel::mclapply()].
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
@@ -702,8 +704,8 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #' This filter is based on the model `y ~ xvar + force_vars` where `y` is the
 #' response vector, `xvar` are variables in columns taken sequentially from `x`
 #' and `force_vars` are optional covariates extracted from `x`. It uses
-#' [RcppEigen::fastLmPure()] with `method = 3` for speed. `NA` in `x` are not
-#' tolerated.
+#' [RcppEigen::fastLmPure()] with `method = 3L` as default for speed. `NA` in
+#' `x` are not tolerated.
 #' 
 #' @export
 #'
@@ -715,6 +717,7 @@ lm_filter <- function(y, x,
                       rsq_method = "pearson",
                       type = c("index", "names", "full"),
                       keep_factors = TRUE,
+                      method = 3L,
                       mc.cores = 1) {
   if (!requireNamespace("RcppEigen", quietly = TRUE)) {
     stop("Package 'RcppEigen' must be installed to use this filter",
@@ -735,7 +738,7 @@ lm_filter <- function(y, x,
   } else xset <- startx
   res <- mclapply(check_vars, function(i) {
     xset[, 2] <- x[, i]
-    fit <- RcppEigen::fastLmPure(xset, y, method = 3L)
+    fit <- RcppEigen::fastLmPure(xset, y, method = method)
     rss <- sum(fit$residuals^2)
     c(rss, fit$coefficients[2], fit$se[2])
   }, mc.cores = mc.cores)

@@ -14,6 +14,7 @@ lm_filter(
   rsq_method = "pearson",
   type = c("index", "names", "full"),
   keep_factors = TRUE,
+  method = 3L,
   mc.cores = 1
 )
 }
@@ -54,6 +55,9 @@ factors are converted to numeric values 0/1 and analysed as such. If
 not filtered and are retained. If \code{keep_factors} is \code{FALSE}, they are
 removed.}
 
+\item{method}{Integer determining linear model method. See
+\code{\link[RcppEigen:fastLm]{RcppEigen::fastLmPure()}}}
+
 \item{mc.cores}{Number of cores for parallelisation using
 \code{\link[parallel:mclapply]{parallel::mclapply()}}.}
 }
@@ -75,6 +79,6 @@ estimate of the coefficient for that predictor in its model.
 This filter is based on the model \code{y ~ xvar + force_vars} where \code{y} is the
 response vector, \code{xvar} are variables in columns taken sequentially from \code{x}
 and \code{force_vars} are optional covariates extracted from \code{x}. It uses
-\code{\link[RcppEigen:fastLm]{RcppEigen::fastLmPure()}} with \code{method = 3} for speed. \code{NA} in \code{x} are not
-tolerated.
+\code{\link[RcppEigen:fastLm]{RcppEigen::fastLmPure()}} with \code{method = 3L} as default for speed. \code{NA} in
+\code{x} are not tolerated.
 }
