@@ -1,6 +1,15 @@
 News
 =====
 
+# nestedcv 0.6.8
+###### 11/07/2023
+
+## Bug fixes
+
+* Fixed significant bug in `lm_filter()` where variables with zero variance were 
+incorrectly reporting very low p-values in linear models instead of returning 
+`NA`. This appears to be due to an issue in `RcppEigen::fastLmPure`.
+
 # nestedcv 0.6.7
 ###### 01/07/2023
 
