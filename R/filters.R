@@ -730,6 +730,8 @@ lm_filter <- function(y, x,
   factor_ind <- which_factor(x)
   if (is.data.frame(x)) x <- data.matrix(x)
   check_vars <- colnames(x)[!colnames(x) %in% force_vars]
+  colvars <- matrixStats::colVars(x[, check_vars])
+  var0 <- colvars == 0  # fastLmPure incorrect if var(x) = 0
   startx <- matrix(rep(1, nrow(x) *2), ncol = 2)
   colnames(startx) <- c("(Intercept)", ".test")
   if (length(force_vars) > 0) {
@@ -757,6 +759,7 @@ lm_filter <- function(y, x,
   sigma <- sqrt(resvar)
   pval <- 2*pt(abs(tval), rdf, lower.tail = FALSE)  ## from stats::summary.lm
   result <- cbind(aic, sigma, coef = cf, tval, pval)
+  result[var0, ] <- NA
   if (type == "full") {
     if (length(factor_ind) == 0) {
       return(result)
