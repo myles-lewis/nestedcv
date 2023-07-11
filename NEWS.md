@@ -4,6 +4,10 @@ News
 # nestedcv 0.6.8
 ###### 11/07/2023
 
+## New features
+
+* Add coefficient column to `lm_filter()` full results table
+
 ## Bug fixes
 
 * Fixed significant bug in `lm_filter()` where variables with zero variance were 
