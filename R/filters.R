@@ -704,8 +704,15 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #' This filter is based on the model `y ~ xvar + force_vars` where `y` is the
 #' response vector, `xvar` are variables in columns taken sequentially from `x`
 #' and `force_vars` are optional covariates extracted from `x`. It uses
-#' [RcppEigen::fastLmPure()] with `method = 3L` as default for speed. `NA` in
-#' `x` are not tolerated.
+#' [RcppEigen::fastLmPure()] with `method = 0` as default since it is
+#' rank-revealing. `method = 3` is significantly faster but can give errors in
+#' estimation of p-value with variables of zero variance. The algorithm attempts
+#' to detect these and set their stats to `NA`. `NA` in `x` are not tolerated.
+#' 
+#' Parallelisation is available via [mclapply()]. This is provided mainly for
+#' the use case of the filter being used as standalone. Nesting parallelisation
+#' inside of parallelised [nestcv.glmnet()] or [nestcv.train()] loops is not
+#' recommended.
 #' 
 #' @export
 #'
@@ -717,7 +724,7 @@ lm_filter <- function(y, x,
                       rsq_method = "pearson",
                       type = c("index", "names", "full"),
                       keep_factors = TRUE,
-                      method = 3L,
+                      method = 0L,
                       mc.cores = 1) {
   if (!requireNamespace("RcppEigen", quietly = TRUE)) {
     stop("Package 'RcppEigen' must be installed to use this filter",
@@ -741,6 +748,7 @@ lm_filter <- function(y, x,
   res <- mclapply(check_vars, function(i) {
     xset[, 2] <- x[, i]
     fit <- RcppEigen::fastLmPure(xset, y, method = method)
+    if (any(is.na(fit$coefficients))) return(rep(NA, 3))  # check for rank deficient
     rss <- sum(fit$residuals^2)
     c(rss, fit$coefficients[2], fit$se[2])
   }, mc.cores = mc.cores)

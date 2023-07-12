@@ -10,9 +10,11 @@ News
 
 ## Bug fixes
 
-* Fixed significant bug in `lm_filter()` where variables with zero variance were 
-incorrectly reporting very low p-values in linear models instead of returning 
-`NA`. This appears to be due to an issue in `RcppEigen::fastLmPure`.
+* Fixed significant bug in `lm_filter()` where variables with zero variance were
+incorrectly reporting very low p-values in linear models instead of returning
+`NA`. This is due to how rank deficient models are handled by
+`RcppEigen::fastLmPure`. Default method for `fastLmPure` has been changed to `0`
+to allow detection of rank deficient models.
 
 # nestedcv 0.6.7
 ###### 01/07/2023

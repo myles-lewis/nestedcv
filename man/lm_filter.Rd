@@ -14,7 +14,7 @@ lm_filter(
   rsq_method = "pearson",
   type = c("index", "names", "full"),
   keep_factors = TRUE,
-  method = 3L,
+  method = 0L,
   mc.cores = 1
 )
 }
@@ -79,6 +79,13 @@ estimate of the coefficient for that predictor in its model.
 This filter is based on the model \code{y ~ xvar + force_vars} where \code{y} is the
 response vector, \code{xvar} are variables in columns taken sequentially from \code{x}
 and \code{force_vars} are optional covariates extracted from \code{x}. It uses
-\code{\link[RcppEigen:fastLm]{RcppEigen::fastLmPure()}} with \code{method = 3L} as default for speed. \code{NA} in
-\code{x} are not tolerated.
+\code{\link[RcppEigen:fastLm]{RcppEigen::fastLmPure()}} with \code{method = 0} as default since it is
+rank-revealing. \code{method = 3} is significantly faster but can give errors in
+estimation of p-value with variables of zero variance. The algorithm attempts
+to detect these and set their stats to \code{NA}. \code{NA} in \code{x} are not tolerated.
+
+Parallelisation is available via \code{\link[=mclapply]{mclapply()}}. This is provided mainly for
+the use case of the filter being used as standalone. Nesting parallelisation
+inside of parallelised \code{\link[=nestcv.glmnet]{nestcv.glmnet()}} or \code{\link[=nestcv.train]{nestcv.train()}} loops is not
+recommended.
 }
