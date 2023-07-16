@@ -2,7 +2,7 @@ News
 =====
 
 # nestedcv 0.6.8
-###### 11/07/2023
+###### 16/07/2023
 
 ## New features
 
@@ -15,6 +15,8 @@ incorrectly reporting very low p-values in linear models instead of returning
 `NA`. This is due to how rank deficient models are handled by
 `RcppEigen::fastLmPure`. Default method for `fastLmPure` has been changed to `0`
 to allow detection of rank deficient models.
+* Fixed bug in `weight()` caused by `NA`. Allow `weight()` to tolerate character 
+vectors.
 
 # nestedcv 0.6.7
 ###### 01/07/2023

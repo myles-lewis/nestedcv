@@ -54,7 +54,8 @@ nest_filt_bal <- function(test, y, x,
 
 #' Calculate weights for class imbalance
 #' 
-#' @param y Response vector
+#' @param y Factor or character response vector. If a character vector is
+#'   supplied it is coerced into a factor. Unused levels are dropped.
 #' @return Vector of weights
 #' @export
 #' 
@@ -62,10 +63,11 @@ weight <- function(y) {
   if (is.numeric(y)) {
     message("y is numeric: this function is designed for classification")
   }
+  y <- factor(y)
   tab <- c(table(y))
   props <- 1/tab
   weights <- props[as.numeric(y)]
-  weights <- weights / sum(weights)
+  weights <- weights / sum(weights, na.rm = TRUE)
   weights
 }
 

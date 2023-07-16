@@ -7,7 +7,8 @@
 weight(y)
 }
 \arguments{
-\item{y}{Response vector}
+\item{y}{Factor or character response vector. If a character vector is
+supplied it is coerced into a factor. Unused levels are dropped.}
 }
 \value{
 Vector of weights
