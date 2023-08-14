@@ -104,8 +104,12 @@
 #' `caret` using `registerDoParallel`. `caret` itself uses `foreach`.
 #' 
 #' Parallelisation is performed on the outer CV folds using `parallel::mclapply`
-#' on unix/mac and `parallel::parLapply` on windows.
-#'   
+#' on unix/mac and `parallel::parLapply` on windows. If `verbose` is set to
+#' `TRUE`, a progress bar is shown using `pbmcapply::pbmclappy` is used on
+#' linux/mac and `pbapply::pblapply` on windows. Progress bar may add a
+#' significant time overhead. `pbmclapply` also gives different results for a
+#' specific seed compared to `mclapply`.
+#' 
 #' If the outer folds are run using parallelisation, then parallelisation in
 #' caret must be off, otherwise an error will be generated. Alternatively if you
 #' wish to use parallelisation in caret, then parallelisation in `nestcv.train`
