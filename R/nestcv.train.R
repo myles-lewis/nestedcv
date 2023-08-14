@@ -475,7 +475,7 @@ nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
       train_preds <- cbind(train_preds, predyp)
     }
   } else train_preds <- NULL
-  if (verbose) message_parallel("Fold", i, "done")
+  if (verbose) message_parallel("... Fold", i, "done")
   ret <- list(preds = preds,
               train_preds = train_preds,
               fit = fit,
