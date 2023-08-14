@@ -51,11 +51,3 @@ supervisedPCA <- function(y, x,
     theme_classic()
 }
 
-
-# check package installed
-checkpkg <- function(x) {
-  if (!requireNamespace(x, quietly = TRUE)) {
-    stop("Package '", x, "' must be installed", call. = FALSE)
-  }
-}
-

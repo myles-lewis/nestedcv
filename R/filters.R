@@ -379,7 +379,10 @@ rf_filter <- function(y, x, nfilter = NULL,
                       ntree = 1000,
                       mtry = ncol(x) * 0.2,
                       ...) {
-  checkpkg("randomForest")
+  if (!requireNamespace("randomForest", quietly = TRUE)) {
+    stop("Package 'randomForest' must be installed to use this filter",
+         call. = FALSE)
+  }
   type <- match.arg(type)
   fit <- randomForest::randomForest(x, y, importance = TRUE,
                                     ntree = ntree, mtry = mtry, ...)
@@ -424,7 +427,10 @@ ranger_filter <- function(y, x, nfilter = NULL,
                           num.trees = 1000,
                           mtry = ncol(x) * 0.2,
                           ...) {
-  checkpkg("ranger")
+  if (!requireNamespace("ranger", quietly = TRUE)) {
+    stop("Package 'ranger' must be installed to use this filter",
+         call. = FALSE)
+  }
   type <- match.arg(type)
   fit <- ranger::ranger(x = x, y = y, importance = "impurity",
                         num.trees = num.trees, mtry = mtry,
@@ -466,7 +472,10 @@ ranger_filter <- function(y, x, nfilter = NULL,
 relieff_filter <- function(y, x, nfilter = NULL, 
                            estimator = "ReliefFequalK",
                            type = c("index", "names", "full"), ...) {
-  checkpkg("CORElearn")
+  if (!requireNamespace("CORElearn", quietly = TRUE)) {
+    stop("Package 'CORElearn' must be installed to use this filter",
+         call. = FALSE)
+  }
   type <- match.arg(type)
   df <- as.data.frame(x)
   df$y <- y
@@ -717,7 +726,10 @@ lm_filter <- function(y, x,
                       keep_factors = TRUE,
                       method = 0L,
                       mc.cores = 1) {
-  checkpkg("RcppEigen")
+  if (!requireNamespace("RcppEigen", quietly = TRUE)) {
+    stop("Package 'RcppEigen' must be installed to use this filter",
+         call. = FALSE)
+  }
   type <- match.arg(type)
   ok <- !is.na(y)
   y <- y[ok]

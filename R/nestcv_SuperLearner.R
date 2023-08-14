@@ -81,7 +81,9 @@ nestcv.SuperLearner <- function(y, x,
                                 cv.cores = 1,
                                 na.option = "pass",
                                 ...) {
-  checkpkg("SuperLearner")
+  if (!requireNamespace("SuperLearner", quietly = TRUE)) {
+    stop("Package 'SuperLearner' must be installed", call. = FALSE)
+  }
   ncv.call <- match.call(expand.dots = TRUE)
   ok <- checkxy(y, x, na.option, weights)
   y <- y[ok$r]
