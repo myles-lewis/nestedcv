@@ -216,6 +216,7 @@ nestcv.train <- function(y, x,
                          na.option = "pass",
                          verbose = FALSE,
                          ...) {
+  start <- Sys.time()
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
   if (is.character(y)) y <- factor(y)
@@ -409,6 +410,8 @@ nestcv.train <- function(y, x,
     xsub <- x[, all_vars]
   }
   
+  end <- Sys.time()
+  if (verbose) message("Duration: ", format(end - start))
   out <- list(call = nestcv.call,
               output = output,
               outer_result = outer_res,
