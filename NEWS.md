@@ -4,8 +4,11 @@ News
 # nestedcv 0.6.9
 ###### 14/08/2023
 
-* Changed `all_levels` argument default in `one_hot()` to be compatible with
-regression models by default.
+## New features
+
+* Added argument `verbose` in `nestcv.train()` to show progress
+* In `one_hot()` changed `all_levels` argument default to `FALSE` to be 
+compatible with regression models by default.
 
 # nestedcv 0.6.8
 ###### 16/07/2023
