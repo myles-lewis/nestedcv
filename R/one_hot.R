@@ -6,7 +6,7 @@
 #' 
 #' @param x A dataframe, matrix or tibble. Matrices are returned untouched.
 #' @param all_levels Logical, whether to create dummy variables for all levels
-#'   of each factor.
+#'   of each factor. Default is `FALSE` to avoid issues with regression models.
 #' @param rename_binary Logical, whether to rename binary factors by appending
 #'   the 2nd level of the factor to aid interpretation of encoded factor levels
 #'   and to allow consistency with naming.
@@ -14,21 +14,24 @@
 #'   encoded columns.
 #' @details
 #'  Binary factor columns and logical columns are converted to integers (0 or
-#'  1). Multi-level unordered factors are converted to multiple columns, one
-#'  column for each level (dummy variables). Unused levels are dropped.
-#'  Character columns are first converted to factors and then encoded. Ordered
-#'  factors are replaced by their internal codes. Numeric or integer columns are
-#'  left untouched.
+#'  1). Multi-level unordered factors are converted to multiple columns of 0/1
+#'  (dummy variables): if `all_levels` is set to `FALSE` (the default), then the
+#'  first level is assumed to be a reference level and additional columns are
+#'  created for each additional level; if `all_levels` is set to `TRUE` one
+#'  column is used for each level. Unused levels are dropped. Character columns
+#'  are first converted to factors and then encoded. Ordered factors are
+#'  replaced by their internal codes. Numeric or integer columns are left
+#'  untouched.
 #'  
-#'  `all_levels` is set to `TRUE` by default to aid with interpretability (e.g.
-#'  with SHAP values), and since filtering might result in some dummy variables
-#'  being excluded. However, having dummy variables for all levels of a factor
-#'  can cause problems with multicollinearity in regression (the dummy variable
-#'  trap), so for regression models such as `glmnet`, `all_levels` should be set
-#'  to `FALSE` (equivalent to full rank parameterisation). Note this function is
-#'  designed to quickly generate dummy variables for more general machine
-#'  learning purposes. To create a proper design matrix object for regression
-#'  models, use [model.matrix()].
+#'  Having dummy variables for all levels of a factor can cause problems with
+#'  multicollinearity in regression (the dummy variable trap), so `all_levels`
+#'  is set to `FALSE` by default which is necessary for regression models such
+#'  as `glmnet` (equivalent to full rank parameterisation). However, setting
+#'  `all_levels` to `TRUE` can aid with interpretability (e.g. with SHAP
+#'  values), and in some cases filtering might result in some dummy variables
+#'  being excluded. Note this function is designed to quickly generate dummy
+#'  variables for more general machine learning purposes. To create a proper
+#'  design matrix object for regression models, use [model.matrix()].
 #' @return A numeric matrix with the same number of rows as the input data.
 #'   Dummy variable columns replace the input factor or character columns.
 #'   Numeric columns are left intact.
@@ -44,7 +47,7 @@
 #' 
 #' @export
 #' 
-one_hot <- function(x, all_levels = TRUE, rename_binary = TRUE, sep = ".") {
+one_hot <- function(x, all_levels = FALSE, rename_binary = TRUE, sep = ".") {
   if (is.matrix(x)) return(x)
   x <- as.data.frame(x)
   x <- droplevels(x)
