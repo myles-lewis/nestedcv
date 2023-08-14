@@ -333,6 +333,8 @@ nestcv.train <- function(y, x,
                  "nestcv.trainCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
     if (verbose) {
+      if (!requireNamespace("pbapply", quietly = TRUE)) {
+        stop("Package 'pbapply' must be installed", call. = FALSE)}
       outer_res <- pbapply::pblapply(seq_along(outer_folds), function(i) {
         args <- c(list(i=i, y=y, x=x, outer_folds = outer_folds,
                        inner_train_folds = inner_train_folds, method=method,
@@ -359,12 +361,13 @@ nestcv.train <- function(y, x,
   } else {
     # linux/mac
     if (verbose) {
-      outer_res <- pbmcapply::pbmclapply(seq_along(outer_folds), function(i) {
+      outer_res <- mclapply(seq_along(outer_folds), function(i) {
         nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
                          method, filterFUN, filter_options,
                          weights, balance, balance_options,
-                         metric, trControl, tuneGrid, outer_train_predict, ...)
-      }, mc.cores = cv.cores, mc.silent = TRUE, mc.allow.recursive = FALSE)
+                         metric, trControl, tuneGrid, outer_train_predict,
+                         verbose = TRUE, ...)
+      }, mc.cores = cv.cores, mc.allow.recursive = FALSE)
     } else {
       outer_res <- mclapply(seq_along(outer_folds), function(i) {
         nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
@@ -435,7 +438,8 @@ nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
                              method, filterFUN, filter_options,
                              weights, balance, balance_options,
                              metric, trControl, tuneGrid,
-                             outer_train_predict, ...) {
+                             outer_train_predict, verbose = FALSE, ...) {
+  if (verbose) message_parallel("Fold", i, "starting...")
   test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options)
@@ -471,6 +475,7 @@ nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
       train_preds <- cbind(train_preds, predyp)
     }
   } else train_preds <- NULL
+  if (verbose) message_parallel("Fold", i, "done")
   ret <- list(preds = preds,
               train_preds = train_preds,
               fit = fit,
@@ -579,4 +584,12 @@ summary_vars <- function(x) {
 
 swapFoldIndex <- function(folds, len = max(unlist(folds))) {
   lapply(folds, function(i) setdiff(seq_len(len), i))
+}
+
+
+# Function which prints a message using shell echo; useful for printing 
+# messages from inside mclapply when running in Rstudio
+message_parallel <- function(...) {
+  if (Sys.getenv("RSTUDIO") != "1") return()
+  system(sprintf('echo "%s"', paste(..., collapse = "")))
 }
