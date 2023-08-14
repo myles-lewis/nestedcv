@@ -27,6 +27,7 @@ nestcv.train(
   outer_train_predict = FALSE,
   finalCV = TRUE,
   na.option = "pass",
+  verbose = FALSE,
   ...
 )
 }
@@ -117,6 +118,8 @@ needed.}
 if there are \code{NA} in 'y', but columns (predictors) containing \code{NA} are
 removed from 'x' to preserve cases. Any other value means that \code{NA} are
 ignored (a message is given).}
+
+\item{verbose}{Logical whether to print messages and show progress}
 
 \item{...}{Arguments passed to \code{\link[caret:train]{caret::train()}}}
 }
