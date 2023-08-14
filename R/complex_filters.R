@@ -23,9 +23,7 @@
 
 boruta_filter <- function(y, x, select = c('Confirmed', 'Tentative'),
                            type = c("index", "names", "full"), ...) {
-  if (!requireNamespace("Boruta", quietly = TRUE)) {
-    stop("Package 'Boruta' must be installed", call. = FALSE)
-  }
+  checkpkg("Boruta")
   type <- match.arg(type)
   ref <- Boruta::Boruta(x, y, ...)$finalDecision
   out <- which(ref %in% select)
