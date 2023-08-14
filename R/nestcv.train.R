@@ -329,6 +329,7 @@ nestcv.train <- function(y, x,
                  "nestcv.trainCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
     if (verbose) {
+      checkpkg("pbapply")
       outer_res <- pbapply::pblapply(seq_along(outer_folds), function(i) {
         args <- c(list(i=i, y=y, x=x, outer_folds = outer_folds,
                        inner_train_folds = inner_train_folds, method=method,
@@ -355,6 +356,7 @@ nestcv.train <- function(y, x,
   } else {
     # linux/mac
     if (verbose) {
+      checkpkg("pbmcapply")
       outer_res <- pbmcapply::pbmclapply(seq_along(outer_folds), function(i) {
         nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
                          method, filterFUN, filter_options,
