@@ -27,6 +27,7 @@ nestcv.train(
   outer_train_predict = FALSE,
   finalCV = TRUE,
   na.option = "pass",
+  verbose = FALSE,
   ...
 )
 }
@@ -118,6 +119,8 @@ if there are \code{NA} in 'y', but columns (predictors) containing \code{NA} are
 removed from 'x' to preserve cases. Any other value means that \code{NA} are
 ignored (a message is given).}
 
+\item{verbose}{Logical whether to print messages and show progress bar.}
+
 \item{...}{Arguments passed to \code{\link[caret:train]{caret::train()}}}
 }
 \value{
@@ -158,7 +161,11 @@ Parallelisation of the final fit when \code{finalCV = TRUE} is performed in
 \code{caret} using \code{registerDoParallel}. \code{caret} itself uses \code{foreach}.
 
 Parallelisation is performed on the outer CV folds using \code{parallel::mclapply}
-on unix/mac and \code{parallel::parLapply} on windows.
+on unix/mac and \code{parallel::parLapply} on windows. If \code{verbose} is set to
+\code{TRUE}, a progress bar is shown using \code{pbmcapply::pbmclappy} is used on
+linux/mac and \code{pbapply::pblapply} on windows. Progress bar may add a
+significant time overhead. \code{pbmclapply} also gives different results for a
+specific seed compared to \code{mclapply}.
 
 If the outer folds are run using parallelisation, then parallelisation in
 caret must be off, otherwise an error will be generated. Alternatively if you

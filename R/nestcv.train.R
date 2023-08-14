@@ -73,6 +73,7 @@
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
 #'   removed from 'x' to preserve cases. Any other value means that `NA` are
 #'   ignored (a message is given).
+#' @param verbose Logical whether to print messages and show progress bar.
 #' @param ... Arguments passed to [caret::train()]
 #' @return An object with S3 class "nestcv.train"
 #'   \item{call}{the matched call}
@@ -103,8 +104,12 @@
 #' `caret` using `registerDoParallel`. `caret` itself uses `foreach`.
 #' 
 #' Parallelisation is performed on the outer CV folds using `parallel::mclapply`
-#' on unix/mac and `parallel::parLapply` on windows.
-#'   
+#' on unix/mac and `parallel::parLapply` on windows. If `verbose` is set to
+#' `TRUE`, a progress bar is shown using `pbmcapply::pbmclappy` is used on
+#' linux/mac and `pbapply::pblapply` on windows. Progress bar may add a
+#' significant time overhead. `pbmclapply` also gives different results for a
+#' specific seed compared to `mclapply`.
+#' 
 #' If the outer folds are run using parallelisation, then parallelisation in
 #' caret must be off, otherwise an error will be generated. Alternatively if you
 #' wish to use parallelisation in caret, then parallelisation in `nestcv.train`
@@ -213,6 +218,7 @@ nestcv.train <- function(y, x,
                          outer_train_predict = FALSE,
                          finalCV = TRUE,
                          na.option = "pass",
+                         verbose = FALSE,
                          ...) {
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
@@ -275,6 +281,7 @@ nestcv.train <- function(y, x,
     final_fit <- finalTune <- filtx <- yfinal <- xsub <- NA
   } else {
     # fit final model with CV on whole dataset first
+    if (verbose) message("Fitting final model")
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                          balance, balance_options)
     yfinal <- dat$ytrain
@@ -316,6 +323,7 @@ nestcv.train <- function(y, x,
     }
   }
   
+  if (verbose) message("Performing outer CV")
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
@@ -324,24 +332,49 @@ nestcv.train <- function(y, x,
                  "metric", "trControl", "tuneGrid", "outer_train_predict",
                  "nestcv.trainCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
-    outer_res <- parLapply(cl = cl, seq_along(outer_folds), function(i) {
-      args <- c(list(i=i, y=y, x=x, outer_folds = outer_folds,
-                     inner_train_folds = inner_train_folds, method=method,
-                     filterFUN=filterFUN, filter_options=filter_options,
-                     weights=weights, balance=balance,
-                     balance_options=balance_options, metric=metric,
-                     trControl=trControl, tuneGrid=tuneGrid,
-                     outer_train_predict=outer_train_predict), dots)
-      do.call(nestcv.trainCore, args)
-    })
+    if (verbose) {
+      checkpkg("pbapply")
+      outer_res <- pbapply::pblapply(seq_along(outer_folds), function(i) {
+        args <- c(list(i=i, y=y, x=x, outer_folds = outer_folds,
+                       inner_train_folds = inner_train_folds, method=method,
+                       filterFUN=filterFUN, filter_options=filter_options,
+                       weights=weights, balance=balance,
+                       balance_options=balance_options, metric=metric,
+                       trControl=trControl, tuneGrid=tuneGrid,
+                       outer_train_predict=outer_train_predict), dots)
+        do.call(nestcv.trainCore, args)
+      }, cl = cl)
+    } else {
+      outer_res <- parLapply(cl = cl, seq_along(outer_folds), function(i) {
+        args <- c(list(i=i, y=y, x=x, outer_folds = outer_folds,
+                       inner_train_folds = inner_train_folds, method=method,
+                       filterFUN=filterFUN, filter_options=filter_options,
+                       weights=weights, balance=balance,
+                       balance_options=balance_options, metric=metric,
+                       trControl=trControl, tuneGrid=tuneGrid,
+                       outer_train_predict=outer_train_predict), dots)
+        do.call(nestcv.trainCore, args)
+      })
+    }
     stopCluster(cl)
   } else {
-    outer_res <- mclapply(seq_along(outer_folds), function(i) {
-      nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
-                       method, filterFUN, filter_options,
-                       weights, balance, balance_options,
-                       metric, trControl, tuneGrid, outer_train_predict, ...)
-    }, mc.cores = cv.cores, mc.silent = TRUE, mc.allow.recursive = FALSE)
+    # linux/mac
+    if (verbose) {
+      checkpkg("pbmcapply")
+      outer_res <- pbmcapply::pbmclapply(seq_along(outer_folds), function(i) {
+        nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
+                         method, filterFUN, filter_options,
+                         weights, balance, balance_options,
+                         metric, trControl, tuneGrid, outer_train_predict, ...)
+      }, mc.cores = cv.cores, mc.silent = TRUE, mc.allow.recursive = FALSE)
+    } else {
+      outer_res <- mclapply(seq_along(outer_folds), function(i) {
+        nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
+                         method, filterFUN, filter_options,
+                         weights, balance, balance_options,
+                         metric, trControl, tuneGrid, outer_train_predict, ...)
+      }, mc.cores = cv.cores, mc.silent = TRUE, mc.allow.recursive = FALSE)
+    }
   }
   
   predslist <- lapply(outer_res, '[[', 'preds')
@@ -361,6 +394,7 @@ nestcv.train <- function(y, x,
   
   if (!is.na(finalCV) && !finalCV) {
     # use outer folds for final parameters, fit single final model
+    if (verbose) message("Fitting single final model")
     finalTune <- finaliseTune(bestTunes)
     fitControl <- trainControl(method = "none", classProbs = is.factor(y))
     final_fit <- caret::train(x = filtx, y = yfinal, method = method,
