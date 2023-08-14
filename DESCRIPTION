@@ -45,6 +45,8 @@ Suggests:
     hsstan,
     mda,
     mlbench,
+    pbapply,
+    pbmcapply,
     randomForest,
     ranger,
     RcppEigen,
