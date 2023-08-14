@@ -439,7 +439,7 @@ nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
                              weights, balance, balance_options,
                              metric, trControl, tuneGrid,
                              outer_train_predict, verbose = FALSE, ...) {
-  if (verbose) message_parallel("Fold", i, "starting...")
+  if (verbose) message_parallel("Starting Fold", i, "...")
   test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options)
