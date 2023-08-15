@@ -52,7 +52,18 @@ supervisedPCA <- function(y, x,
 }
 
 
-checkGrid <- function(method, y = NA, x = NA, tuneLength = 3) {
+inspectGrid <- function(method, tuneLength = 3, y = NA, x = NA) {
   tgrid <- caret::getModelInfo(method)[[1]]$grid(x, y, tuneLength)
+  cat("Tuning grid with", ncol(tgrid), "parameter(s) and", nrow(tgrid), "rows\n")
   choices <- lapply(tgrid, unique)
+  maxchar <- max(unlist(lapply(names(choices), nchar)))
+  lapply(names(choices), function(param) {
+    cat(param, spaces(maxchar - nchar(param) +2))
+    cat(paste(choices[[param]], collapse=", "), "\n")
+  })
+  invisible(choices)
+}
+
+spaces <- function(n) {
+  paste0(rep(" ", n), collapse = "")
 }
