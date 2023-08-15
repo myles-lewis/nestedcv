@@ -278,7 +278,7 @@ nestcv.train <- function(y, x,
     final_fit <- finalTune <- filtx <- yfinal <- xsub <- NA
   } else {
     # fit final model with CV on whole dataset first
-    if (verbose) message("Fitting final model")
+    if (verbose) message("Fitting final model using CV on whole data")
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                          balance, balance_options)
     yfinal <- dat$ytrain
@@ -320,7 +320,7 @@ nestcv.train <- function(y, x,
     }
   }
   
-  if (verbose) message("Performing outer CV")
+  if (verbose) message("Performing ", n_outer_folds, "-fold outer CV")
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
@@ -474,7 +474,7 @@ nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
       train_preds <- cbind(train_preds, predyp)
     }
   } else train_preds <- NULL
-  if (verbose) message_parallel("... Fold", i, "done")
+  if (verbose) message_parallel("                     Fold", i, "done")
   ret <- list(preds = preds,
               train_preds = train_preds,
               fit = fit,
