@@ -109,7 +109,7 @@
 #' 
 #' Parallelisation is performed on the outer CV folds using `parallel::mclapply`
 #' by default on unix/mac and `parallel::parLapply` on windows. `mclapply` uses
-#' forking which is faster. But some models (eg. xgboost) use multi-threading
+#' forking which is faster. But some models (eg. xgbTree) use multi-threading
 #' which may cause issues in some circumstances with forked multicore
 #' processing. Setting `multicore_fork` to `FALSE` is slower but can alleviate
 #' some caret errors.

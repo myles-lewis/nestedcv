@@ -51,3 +51,8 @@ supervisedPCA <- function(y, x,
     theme_classic()
 }
 
+
+checkGrid <- function(method, y = NA, x = NA, tuneLength = 3) {
+  tgrid <- caret::getModelInfo(method)[[1]]$grid(x, y, tuneLength)
+  choices <- lapply(tgrid, unique)
+}

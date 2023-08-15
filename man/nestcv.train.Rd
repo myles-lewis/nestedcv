@@ -168,7 +168,7 @@ Parallelisation of the final fit when \code{finalCV = TRUE} is performed in
 
 Parallelisation is performed on the outer CV folds using \code{parallel::mclapply}
 by default on unix/mac and \code{parallel::parLapply} on windows. \code{mclapply} uses
-forking which is faster. But some models (eg. xgboost) use multi-threading
+forking which is faster. But some models (eg. xgbTree) use multi-threading
 which may cause issues in some circumstances with forked multicore
 processing. Setting \code{multicore_fork} to \code{FALSE} is slower but can alleviate
 some caret errors.
