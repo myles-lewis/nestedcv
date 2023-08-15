@@ -320,7 +320,8 @@ nestcv.train <- function(y, x,
     }
   }
   
-  if (verbose) message("Performing ", n_outer_folds, "-fold outer CV")
+  if (verbose) message("Performing ", n_outer_folds, "-fold outer CV, using ",
+                       plural(cv.cores, "core(s)"))
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
@@ -429,7 +430,8 @@ nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
                              weights, balance, balance_options,
                              metric, trControl, tuneGrid,
                              outer_train_predict, verbose = FALSE, ...) {
-  if (verbose) message_parallel("Starting Fold", i, "...")
+  start <- Sys.time()
+  if (verbose) message_parallel("Starting Fold ", i, " ...")
   test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options)
@@ -465,7 +467,11 @@ nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
       train_preds <- cbind(train_preds, predyp)
     }
   } else train_preds <- NULL
-  if (verbose) message_parallel("                     Fold", i, "done")
+  if (verbose) {
+    end <- Sys.time()
+    message_parallel("                     Fold ", i, " done (",
+                     format(end - start, digits = 3), ")")
+  }
   ret <- list(preds = preds,
               train_preds = train_preds,
               fit = fit,
@@ -581,5 +587,12 @@ swapFoldIndex <- function(folds, len = max(unlist(folds))) {
 # messages from inside mclapply when running in Rstudio
 message_parallel <- function(...) {
   if (Sys.getenv("RSTUDIO") != "1") return()
-  system(sprintf('echo "%s"', paste(..., collapse = "")))
+  system(sprintf('echo "%s"', paste0(..., collapse = "")))
 }
+
+
+plural <- function(n, text) {
+  text <- if (n == 1) gsub("\\(s\\)", "", text) else gsub("\\(|\\)", "", text)
+  paste(n, text)
+}
+

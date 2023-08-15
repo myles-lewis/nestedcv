@@ -26,6 +26,7 @@ nestcv.glmnet(
   cv.cores = 1,
   finalCV = TRUE,
   na.option = "omit",
+  verbose = FALSE,
   ...
 )
 }
@@ -105,6 +106,8 @@ if performance metrics are all that is needed.}
 removes cases if there are \code{NA} in 'y', but columns (predictors) containing
 \code{NA} are removed from 'x' to preserve cases. Any other value means that
 \code{NA} are ignored (a message is given).}
+
+\item{verbose}{Logical whether to print messages and show progress}
 
 \item{...}{Optional arguments passed to \link{cv.glmnet}}
 }

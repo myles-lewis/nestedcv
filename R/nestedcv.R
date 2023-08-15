@@ -207,7 +207,8 @@ nestcv.glmnet <- function(y, x,
     n_outer_folds <- length(outer_folds)
   }
   
-  if (verbose) message("Performing ", n_outer_folds, "-fold outer CV")
+  if (verbose) message("Performing ", n_outer_folds, "-fold outer CV, using ",
+                       plural(cv.cores, "core(s)"))
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
@@ -243,6 +244,7 @@ nestcv.glmnet <- function(y, x,
       })
     }
   } else {
+    # linux/mac
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
       nestcv.glmnetCore(i, y, x, outer_folds, filterFUN, filter_options,
                         balance, balance_options,
@@ -354,6 +356,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
                               alphaSet, min_1se, n_inner_folds, keep, family,
                               weights, penalty.factor,
                               outer_train_predict, verbose = FALSE, ...) {
+  start <- Sys.time()
   test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options, penalty.factor)
@@ -410,7 +413,10 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     } else alphafit$fit.preval[, ind]
     ret <- append(ret, list(innerCV_preds = innerCV_preds))
   }
-  if (verbose) message_parallel("Fitted fold", i)
+  if (verbose) {
+    end <- Sys.time()
+    message_parallel("Fitted fold ", i, " (", format(end - start, digits = 3), ")")
+  }
   ret
 }
 
