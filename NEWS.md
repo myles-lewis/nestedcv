@@ -10,7 +10,7 @@ News
 progress.
 * Added argument `multicore_fork` in `nestcv.train()` to allow choice of 
 parallelisation between forked multicore processing using `mclapply` or 
-non-forked using `parLapply`. This can help prevent errors with some 
+non-forked using `parLapply`. This can help prevent errors with certain 
 multithreaded caret models e.g. `model = "xgbTree"` when `tuneLength` is set to 
 a high number.
 * In `one_hot()` changed `all_levels` argument default to `FALSE` to be 
