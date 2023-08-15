@@ -58,8 +58,12 @@
 #' @param outer_train_predict Logical whether to save predictions on outer
 #'   training folds to calculate performance on outer training folds.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
-#'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
-#'   on windows.
+#' @param multicore_fork Logical whether to use forked multicore parallel
+#'   processing. Forked multicore processing uses `parallel::mclapply`. It is
+#'   only available on unix/mac as windows does not allow forking. It is set to
+#'   `FALSE` by default in windows and `TRUE` in unix/mac. Non-forked parallel
+#'   processing is executed using `parallel::parLapply` or `pbapply::pblapply`
+#'   if `verbose` is `TRUE`.
 #' @param finalCV Logical whether to perform one last round of CV on the whole
 #'   dataset to determine the final model parameters. If set to `FALSE`, the
 #'   median of the best hyperparameters from outer CV folds for continuous/
@@ -104,7 +108,11 @@
 #' `caret` using `registerDoParallel`. `caret` itself uses `foreach`.
 #' 
 #' Parallelisation is performed on the outer CV folds using `parallel::mclapply`
-#' on unix/mac and `parallel::parLapply` on windows.
+#' by default on unix/mac and `parallel::parLapply` on windows. `mclapply` uses
+#' forking which is faster. But some models (eg. xgboost) use multi-threading
+#' which may cause issues in some circumstances with forked multicore
+#' processing. Setting `multicore_fork` to `FALSE` is slower but can alleviate
+#' some caret errors.
 #'   
 #' If the outer folds are run using parallelisation, then parallelisation in
 #' caret must be off, otherwise an error will be generated. Alternatively if you
@@ -207,6 +215,7 @@ nestcv.train <- function(y, x,
                          inner_folds = NULL,
                          pass_outer_folds = FALSE,
                          cv.cores = 1,
+                         multicore_fork = (Sys.info()["sysname"] != "Windows"),
                          metric = ifelse(is.factor(y), "logLoss", "RMSE"),
                          trControl = NULL,
                          tuneGrid = NULL,
@@ -320,9 +329,9 @@ nestcv.train <- function(y, x,
     }
   }
   
-  if (verbose) message("Performing ", n_outer_folds, "-fold outer CV, using ",
-                       plural(cv.cores, "core(s)"))
-  if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+  if (verbose) {message("Performing ", n_outer_folds, "-fold outer CV, using ",
+                       plural(cv.cores, "core(s)"))}
+  if (!multicore_fork && cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
     varlist <- c("outer_folds", "inner_train_folds", "y", "x", "method", "filterFUN",
@@ -357,7 +366,7 @@ nestcv.train <- function(y, x,
     }
     stopCluster(cl)
   } else {
-    # linux/mac
+    # linux/mac, using forked parallel processing
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
       nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
                        method, filterFUN, filter_options,
