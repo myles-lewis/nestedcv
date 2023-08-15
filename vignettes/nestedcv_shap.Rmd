@@ -109,7 +109,7 @@ p1 + scale_fill_manual(values=c("orange", "green3"))
 
 ### Explainable AI with Shapley values
 
-The original implementation of [shap](https://github.com/slundberg/shap) by
+The original implementation of [shap](https://github.com/shap/shap) by
 Scott Lundberg is a python package. We suggest using the R package
 [fastshap](https://cran.r-project.org/package=fastshap) for examining `nestedcv`
 models since it works with classification or regression as well as any model
