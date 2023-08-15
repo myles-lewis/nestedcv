@@ -357,22 +357,13 @@ nestcv.train <- function(y, x,
     stopCluster(cl)
   } else {
     # linux/mac
-    if (verbose) {
-      outer_res <- mclapply(seq_along(outer_folds), function(i) {
-        nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
-                         method, filterFUN, filter_options,
-                         weights, balance, balance_options,
-                         metric, trControl, tuneGrid, outer_train_predict,
-                         verbose = TRUE, ...)
-      }, mc.cores = cv.cores, mc.allow.recursive = FALSE)
-    } else {
-      outer_res <- mclapply(seq_along(outer_folds), function(i) {
-        nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
-                         method, filterFUN, filter_options,
-                         weights, balance, balance_options,
-                         metric, trControl, tuneGrid, outer_train_predict, ...)
-      }, mc.cores = cv.cores, mc.silent = TRUE, mc.allow.recursive = FALSE)
-    }
+    outer_res <- mclapply(seq_along(outer_folds), function(i) {
+      nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
+                       method, filterFUN, filter_options,
+                       weights, balance, balance_options,
+                       metric, trControl, tuneGrid, outer_train_predict,
+                       verbose, ...)
+    }, mc.cores = cv.cores, mc.allow.recursive = FALSE)
   }
   
   predslist <- lapply(outer_res, '[[', 'preds')

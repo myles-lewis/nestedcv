@@ -67,6 +67,7 @@
 #'   removes cases if there are `NA` in 'y', but columns (predictors) containing
 #'   `NA` are removed from 'x' to preserve cases. Any other value means that
 #'   `NA` are ignored (a message is given).
+#' @param verbose Logical whether to print messages and show progress
 #' @param ... Optional arguments passed to [cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet"
 #'   \item{call}{the matched call}
@@ -177,7 +178,9 @@ nestcv.glmnet <- function(y, x,
                           cv.cores = 1,
                           finalCV = TRUE,
                           na.option = "omit",
+                          verbose = FALSE,
                           ...) {
+  start <- Sys.time()
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
@@ -204,6 +207,7 @@ nestcv.glmnet <- function(y, x,
     n_outer_folds <- length(outer_folds)
   }
   
+  if (verbose) message("Performing ", n_outer_folds, "-fold outer CV")
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
@@ -213,22 +217,38 @@ nestcv.glmnet <- function(y, x,
                 "outer_train_predict", "nestcv.glmnetCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
     on.exit(stopCluster(cl))
-    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
-      args <- c(list(test=test, y=y, x=x, filterFUN=filterFUN,
-                     filter_options=filter_options,
-                     balance=balance, balance_options=balance_options,
-                     alphaSet=alphaSet, min_1se=min_1se,
-                     n_inner_folds=n_inner_folds, keep=keep, family=family,
-                     weights=weights, penalty.factor=penalty.factor,
-                     outer_train_predict=outer_train_predict), dots)
-      do.call(nestcv.glmnetCore, args)
-    })
+    if (verbose) {
+      if (!requireNamespace("pbapply", quietly = TRUE)) {
+        stop("Package 'pbapply' must be installed", call. = FALSE)}
+      outer_res <- pbapply::pblapply(seq_along(outer_folds), function(i) {
+        args <- c(list(i=i, y=y, x=x, outer_folds=outer_folds,
+                       filterFUN=filterFUN, filter_options=filter_options,
+                       balance=balance, balance_options=balance_options,
+                       alphaSet=alphaSet, min_1se=min_1se,
+                       n_inner_folds=n_inner_folds, keep=keep, family=family,
+                       weights=weights, penalty.factor=penalty.factor,
+                       outer_train_predict=outer_train_predict), dots)
+        do.call(nestcv.glmnetCore, args)
+      }, cl = cl)
+    } else {
+      outer_res <- parLapply(cl = cl, seq_along(outer_folds), function(i) {
+        args <- c(list(i=i, y=y, x=x, outer_folds=outer_folds,
+                       filterFUN=filterFUN, filter_options=filter_options,
+                       balance=balance, balance_options=balance_options,
+                       alphaSet=alphaSet, min_1se=min_1se,
+                       n_inner_folds=n_inner_folds, keep=keep, family=family,
+                       weights=weights, penalty.factor=penalty.factor,
+                       outer_train_predict=outer_train_predict), dots)
+        do.call(nestcv.glmnetCore, args)
+      })
+    }
   } else {
-    outer_res <- mclapply(outer_folds, function(test) {
-      nestcv.glmnetCore(test, y, x, filterFUN, filter_options,
+    outer_res <- mclapply(seq_along(outer_folds), function(i) {
+      nestcv.glmnetCore(i, y, x, outer_folds, filterFUN, filter_options,
                         balance, balance_options,
                         alphaSet, min_1se, n_inner_folds, keep, family,
-                        weights, penalty.factor, outer_train_predict, ...)
+                        weights, penalty.factor, outer_train_predict,
+                        verbose, ...)
     }, mc.cores = cv.cores)
   }
   
@@ -257,6 +277,7 @@ nestcv.glmnet <- function(y, x,
     
     if (finalCV) {
       # use CV on whole data to finalise parameters
+      if (verbose) message("Fitting final model using ", n_inner_folds, "-fold CV on whole data")
       foldid <- NULL
       if (pass_outer_folds) {
         if (n_outer_folds == n_inner_folds && is.null(balance)) {
@@ -275,6 +296,7 @@ nestcv.glmnet <- function(y, x,
       final_param <- setNames(c(s, cvafit$best_alpha), c("lambda", "alpha"))
     } else {
       # use outer folds for final parameters
+      if (verbose) message("Fitting final model based on outer CV parameters")
       lam <- exp(median(log(unlist(lapply(outer_res, '[[', 'lambda')))))
       alph <- median(unlist(lapply(outer_res, '[[', 'alpha')))
       final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
@@ -302,6 +324,10 @@ nestcv.glmnet <- function(y, x,
     all_vars <- unique(c(all_vars, final_vars))
     xsub <- x[, all_vars]
   }
+  
+  end <- Sys.time()
+  if (verbose) message("Duration: ", format(end - start))
+  
   out <- list(call = nestcv.call,
               output = output,
               outer_result = outer_res,
@@ -323,11 +349,12 @@ nestcv.glmnet <- function(y, x,
 }
 
 
-nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
+nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
                               balance, balance_options,
                               alphaSet, min_1se, n_inner_folds, keep, family,
                               weights, penalty.factor,
-                              outer_train_predict, ...) {
+                              outer_train_predict, verbose = FALSE, ...) {
+  test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options, penalty.factor)
   ytrain <- dat$ytrain
@@ -383,6 +410,7 @@ nestcv.glmnetCore <- function(test, y, x, filterFUN, filter_options,
     } else alphafit$fit.preval[, ind]
     ret <- append(ret, list(innerCV_preds = innerCV_preds))
   }
+  if (verbose) message_parallel("Fitted fold", i)
   ret
 }
 
