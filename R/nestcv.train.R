@@ -329,8 +329,9 @@ nestcv.train <- function(y, x,
     }
   }
   
-  if (verbose) {message("Performing ", n_outer_folds, "-fold outer CV, using ",
-                       plural(cv.cores, "core(s)"))}
+  if (verbose && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
+    message("Performing ", n_outer_folds, "-fold outer CV, using ",
+            plural(cv.cores, "core(s)"))}
   if (!multicore_fork && cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
