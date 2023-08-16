@@ -21,10 +21,13 @@ outercv(y, ...)
   n_outer_folds = 10,
   outer_folds = NULL,
   cv.cores = 1,
+  multicore_fork = (Sys.info()["sysname"] != "Windows"),
   predict_type = "prob",
   outer_train_predict = FALSE,
   na.option = "pass",
   returnList = FALSE,
+  verbose = FALSE,
+  suppressMsg = verbose,
   ...
 )
 
@@ -36,8 +39,11 @@ outercv(y, ...)
   n_outer_folds = 10,
   outer_folds = NULL,
   cv.cores = 1,
+  multicore_fork = (Sys.info()["sysname"] != "Windows"),
   predict_type = "prob",
   outer_train_predict = FALSE,
+  verbose = FALSE,
+  suppressMsg = verbose,
   ...,
   na.action = na.fail
 )
@@ -78,9 +84,14 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 \item{outer_folds}{Optional list containing indices of test folds for outer
 CV. If supplied, \code{n_outer_folds} is ignored.}
 
-\item{cv.cores}{Number of cores for parallel processing of the outer loops.
-NOTE: this uses \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply}
-on windows.}
+\item{cv.cores}{Number of cores for parallel processing of the outer loops.}
+
+\item{multicore_fork}{Logical whether to use forked multicore parallel
+processing. Forked multicore processing uses \code{parallel::mclapply}. It is
+only available on unix/mac as windows does not allow forking. It is set to
+\code{FALSE} by default in windows and \code{TRUE} in unix/mac. Non-forked parallel
+processing is executed using \code{parallel::parLapply} or \code{pbapply::pblapply}
+if \code{verbose} is \code{TRUE}.}
 
 \item{predict_type}{Only used with binary classification. Calculation of ROC
 AUC requires predicted class probabilities from fitted models. Most model
@@ -99,6 +110,8 @@ ignored (a message is given).}
 
 \item{returnList}{Logical whether to return list of results after main outer
 CV loop without concatenating results. Useful for debugging.}
+
+\item{verbose}{Logical whether to print messages and show progress}
 
 \item{formula}{A formula describing the model to be fitted}
 
