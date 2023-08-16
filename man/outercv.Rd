@@ -113,6 +113,10 @@ CV loop without concatenating results. Useful for debugging.}
 
 \item{verbose}{Logical whether to print messages and show progress}
 
+\item{suppressMsg}{Logical whether to suppress messages and printed output
+from model functions. This is necessary when using forked multicore
+parallelisation.}
+
 \item{formula}{A formula describing the model to be fitted}
 
 \item{data}{A matrix or data frame containing variables in the model.}

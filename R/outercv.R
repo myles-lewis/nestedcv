@@ -60,6 +60,9 @@
 #'   values on any required variable. (NOTE: If given, this argument must be
 #'   named.)
 #' @param verbose Logical whether to print messages and show progress
+#' @param suppressMsg Logical whether to suppress messages and printed output
+#'   from model functions. This is necessary when using forked multicore 
+#'   parallelisation.
 #' @param ... Optional arguments passed to the function specified by `model`.
 #' @return An object with S3 class "outercv"
 #'   \item{call}{the matched call}
