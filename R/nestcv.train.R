@@ -223,7 +223,7 @@ nestcv.train <- function(y, x,
                          outer_train_predict = FALSE,
                          finalCV = TRUE,
                          na.option = "pass",
-                         verbose = FALSE,
+                         verbose = TRUE,
                          ...) {
   start <- Sys.time()
   nestcv.call <- match.call(expand.dots = TRUE)
