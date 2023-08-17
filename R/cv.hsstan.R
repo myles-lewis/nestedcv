@@ -57,6 +57,7 @@
 #' # only one CV split is needed (outercv) as the Bayesian model does not
 #' # require learning of meta-parameters.
 #'
+#' # control number of cores used for parallelisation over chains
 #' oldopt <- options(mc.cores = 2)
 #'
 #' # load iris dataset and simulate a continuous outcome
@@ -95,8 +96,8 @@
 #'
 #' # use hsstan package to examine the Bayesian model
 #' sampler.stats(res.cv.hsstan$final_fit)
-#' print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
-#' options(oldopt)
+#' print(projsel(res.cv.hsstan$final_fit), digits = 4)  # adding marker2
+#' options(oldopt)  # reset configuation
 #'
 #' # Here adding `marker2` improves the model fit: substantial decrease of
 #' # KL-divergence from the full model to the submodel. Adding `marker3` does
