@@ -14,12 +14,6 @@ or non-forked using `parLapply`. This can help prevent errors with certain
 multithreaded caret models e.g. `model = "xgbTree"`.
 * In `one_hot()` changed `all_levels` argument default to `FALSE` to be 
 compatible with regression models by default.
-
-# nestedcv 0.6.8
-###### 16/07/2023
-
-## New features
-
 * Add coefficient column to `lm_filter()` full results table
 
 ## Bug fixes
