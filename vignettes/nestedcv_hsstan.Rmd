@@ -44,16 +44,24 @@ from the data points used to quantify model performance. The `outercv()`
 function is used to perform univariate pre-filtering and cross-validate model
 performance in this setting.
 
-CAUTION should be used when setting the number of cores available for
-parallelisation. The code will use the product of `cv.cores` and `mc.cores`.
-The former controls parallelisation over folds, while the latter controls
-parallelisation in the Bayesian inference procedure. The default setting for
-`hsstan` is to use 4 Markov chains for sampling. We recommend setting
-`options(mc.cores = 4)` which will parallelise computation over the chains.
-If we are also using a 10-fold cross-validation procedure, and set
-`cv.cores = 10` to parallelise computation over folds, then 40 cores will be
-used in total.
+#### Parallelisation
 
+CAUTION should be used when setting the number of cores available for
+parallelisation. The default setting in `hsstan` is to use 4 cores to
+parallelise Markov chains in the Bayesian inference procedure. This can be
+switched off either by setting `options(mc.cores = 1)`.
+
+Argument `cv.cores` in `outercv()` controls parallelisation over the outer CV
+folds. On unix/mac setting `cv.cores` to >1 will induce nested parallelisation
+which will generate an error, unless parallelisation of the chains is disabled
+by setting `options(mc.cores = 1)`.
+
+Nested parallelisation is feasible if `cv.cores` is >1 and 
+`multicore_fork = FALSE` is set as this uses cluster based parallelisation
+instead of `mclapply`. Beware that large numbers of processes may be spawned:
+the code will use the product of `cv.cores` and `mc.cores`. If we are performing
+10-fold cross-validation with 4 chains and set `cv.cores = 10` then 40 processes
+will be invoked simultaneously.
 
 #### Linear regression with a Bayesian shrinkage model (continuous outcomes)
 
@@ -61,7 +69,7 @@ We use cross-validation and apply univariate filtering of predictors and
 model fitting in one part of the data (training fold), followed by evaluation
 of model performance on the left-out data (testing fold), repeated in each fold.
 
-Only one cross-validation split is needed (function `outercv`) as the Bayesian
+Only one cross-validation split is needed (function `outercv()`) as the Bayesian
 model does not require cross-validation for meta-parameters.
 
 Note, in the examples below length of sampling and number of chains is curtailed
@@ -70,16 +78,9 @@ for speed. We recommend 4 chains, `warmup` 1000 and `iter` 2000 in practice.
 ```{r eval = FALSE}
 library(hsstan)
 
-# specify options for running the code
-nfolds <- 3
-
-# specify number of cores for parallelising computation
-# the product of cv.cores and mc.cores will be used in total
-# number of cores for parallelising over CV folds
-cv.cores <- 1
 # number of cores for parallelising hsstan sampling
-# to pass CRAN package checks we need to create object oldopt
-# in the end we reset options to the old configuration
+# store original options in oldopt
+# at the end reset options to old configuration
 oldopt <- options(mc.cores = 2)
 
 # load iris dataset and simulate a continuous outcome
@@ -101,8 +102,8 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = nfolds, chains = 2,
-                         cv.cores = cv.cores,
+                         chains = 2,  # chains parallelised via options(mc.cores)
+                         n_outer_folds = 3, cv.cores = 1,  # CV folds not parallelised
                          unpenalized = uvars, warmup = 100, iter = 200)
 ```
 
@@ -149,7 +150,6 @@ print(projsel(res.cv.hsstan$final_fit), digits = 4)  # adding marker2
 #> 2 Initial submodel 0.320306     0.01468 0.0000 -374.7  -48.83591
 #> 3          marker2 0.001506     0.99537 0.9953 -325.8    0.06535
 #> 4          marker3 0.000000     1.00000 1.0000 -325.9    0.00000
-options(oldopt)  # reset options
 ```
 
 Here adding `marker2` improves the model fit: substantial decrease of
@@ -170,11 +170,6 @@ model does not require cross-validation for meta-parameters.
 ```{r eval = FALSE}
 # sigmoid function
 sigmoid <- function(x) {1 / (1 + exp(-x))}
-
-# specify options for running the code
-nfolds <- 3
-cv.cores <- 1
-oldopt <- options(mc.cores = 2)
 
 # load iris dataset and create a binary outcome
 set.seed(267)
@@ -199,8 +194,8 @@ res.cv.hsstan <- outercv(y = dt$outcome.bin,
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = nfolds, chains = 2,
-                         cv.cores = cv.cores,
+                         chains = 2,  # parallelise over chains
+                         n_outer_folds = 3, cv.cores = 1,
                          unpenalized = uvars, warmup = 100, iter = 200)
 ```
 
@@ -262,19 +257,18 @@ KL-divergence from the full model to the submodel. Adding `marker3` does not
 improve the model fit: no decrease of KL-divergence from the full model to the
 submodel.
 
-# Parallelisation
-
-Note at time of writing, there appears to be a bug in `rstan` (used by `hsstan`)
-leading to it ignoring the argument `cores` and instead spawning multiple
-processes as specified by the `chain` argument. This behaviour can be limited by
-setting `options(mc.cores = ..)`.
+# Note
+At time of writing, there appears to be a bug in `rstan` (used by `hsstan`)
+leading to it ignoring the pass-thru argument `cores` and instead spawning
+multiple processes as specified by the `chain` argument. This behaviour can be
+limited by setting `options(mc.cores = ..)`.
 
 # Troubleshooting
 
 A key problem with parallelisation in R is that errors, warnings and user input
 have to be suppressed during multicore processing. If a `nestedcv` call is not
-working, we recommend that you try it with `cv.cores=1` first to check it starts
-up without error messages.
+working, we recommend that you try it with `cv.cores = 1` first to check it
+starts up without error messages.
 
 # Citation
 

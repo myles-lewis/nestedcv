@@ -28,7 +28,7 @@ nestcv.train(
   outer_train_predict = FALSE,
   finalCV = TRUE,
   na.option = "pass",
-  verbose = FALSE,
+  verbose = TRUE,
   ...
 )
 }

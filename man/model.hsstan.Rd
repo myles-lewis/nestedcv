@@ -39,11 +39,31 @@ to evaluate performance. This is implemented using the \code{outer} CV procedure
 in the \code{nestedcv} package. Supports binary outcome (logistic regression) or
 continuous outcome. Multinomial models are currently not supported.
 }
+\details{
+Caution should be used when setting the number of cores available for
+parallelisation. The default setting in \code{hsstan} is to use 4 cores to
+parallelise the Markov chains of the Bayesian inference procedure. This can
+be switched off either by adding argument \code{cores = 1} (passed on to \code{rstan})
+or setting \code{options(mc.cores = 1)}.
+
+Argument \code{cv.cores} in \code{outercv()} controls parallelisation over the outer CV
+folds. On unix/mac setting \code{cv.cores} to >1 will induce nested
+parallelisation which will generate an error, unless parallelisation of the
+chains is disabled using \code{cores = 1} or setting \code{options(mc.cores = 1)}.
+
+Nested parallelisation is feasible if \code{cv.cores} is >1 and
+\code{multicore_fork = FALSE} is set as this uses cluster based parallelisation
+instead. Beware that large numbers of processes will be spawned. If we are
+performing 10-fold cross-validation with 4 chains and set \code{cv.cores = 10}
+then 40 processes will be invoked simultaneously.
+}
 \examples{
 \donttest{
 # Cross-validation is used to apply univariate filtering of predictors.
-# only one CV split is needed (outercv) as the Bayesian model does not 
+# only one CV split is needed (outercv) as the Bayesian model does not
 # require learning of meta-parameters.
+
+oldopt <- options(mc.cores = 2)
 
 # load iris dataset and simulate a continuous outcome
 data(iris)
@@ -61,7 +81,6 @@ pvars <- c("marker2", "marker3", "marker4") # penalised covariates
 # run cross-validation with univariate filter and hsstan
 # dummy sampling for fast execution of example
 # recommend 4 chains, warmup 1000, iter 2000 in practice
-oldopt <- options(mc.cores = 2)
 res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                          model = "model.hsstan",
                          filterFUN = lm_filter,
@@ -69,7 +88,9 @@ res.cv.hsstan <- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
                                                nfilter = 2,
                                                p_cutoff = NULL,
                                                rsq_cutoff = 0.9),
-                         n_outer_folds = 3, chains = 2,
+                         n_outer_folds = 3,
+                         chains = 2, cores = 2,
+                         cv.cores = 1,
                          unpenalized = uvars, warmup = 100, iter = 200)
 # view prediction performance based on testing folds
 res.cv.hsstan$summary
@@ -84,10 +105,13 @@ print(projsel(res.cv.hsstan$final_fit), digits = 4) # adding marker2
 options(oldopt)
 
 # Here adding `marker2` improves the model fit: substantial decrease of
-# KL-divergence from the full model to the submodel. Adding `marker3` does 
-# not improve the model fit: no decrease of KL-divergence from the full model 
+# KL-divergence from the full model to the submodel. Adding `marker3` does
+# not improve the model fit: no decrease of KL-divergence from the full model
 # to the submodel.
 }
+}
+\seealso{
+\code{\link[=outercv]{outercv()}} \code{\link[hsstan:hsstan]{hsstan::hsstan()}}
 }
 \author{
 Athina Spiliopoulou
