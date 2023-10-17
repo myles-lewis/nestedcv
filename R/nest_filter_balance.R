@@ -11,10 +11,15 @@ nest_filt_bal <- function(test, y, x,
     ytest <- NULL
     xtest <- NULL
   } else {
-    ytrain <- y[-test]
     xtrain <- x[-test, , drop = FALSE]
-    ytest <- y[test]
     xtest <- x[test, , drop = FALSE]
+    if (is.vector(y)) {
+      ytrain <- y[-test]
+      ytest <- y[test]
+    } else {
+      ytrain <- y[-test, , drop = FALSE]
+      ytest <- y[test, , drop = FALSE]
+    }
   }
   
   # if (!is.null(balance)) {
