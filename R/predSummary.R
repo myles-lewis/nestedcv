@@ -76,3 +76,11 @@ print.predSummary <- function(x,
     print(x$metrics, digits = digits, print.gap = 3L)
   } else print(unclass(x), digits = digits, print.gap = 3L)
 }
+
+
+#' @export
+print.predSummaryMulti <- function(x, 
+                                   digits = max(3L, getOption("digits") - 3L),
+                                   ...) {
+  print(unclass(x), digits = digits, print.gap = 3L)
+}
