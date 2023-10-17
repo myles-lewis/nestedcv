@@ -22,14 +22,6 @@ nest_filt_bal <- function(test, y, x,
     }
   }
   
-  # if (!is.null(balance)) {
-  #   args <- list(y = ytrain, x = xtrain)
-  #   args <- append(args, balance_options)
-  #   bal_dat <- do.call(balance, args)
-  #   ytrain <- bal_dat$y
-  #   xtrain <- bal_dat$x
-  # }
-  
   if (is.null(filterFUN)) {
     filt_xtrain <- xtrain
     filt_xtest <- xtest
