@@ -374,8 +374,14 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
   s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
   cf <- glmnet_coefs(alphafit, s = s)
   # test on outer CV
-  predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
-  preds <- data.frame(testy=ytest, predy=predy)
+  if (is.vector(y)) {
+    predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
+    preds <- data.frame(testy=ytest, predy=predy)
+  } else {
+    predy <- predict(alphafit, newx = filt_xtest, s = s)
+    preds <- cbind(ytest, predy)
+    colnames(preds)[1:ncol(y)] <- paste0("ytest.", colnames(ytest))
+  }
   if (family == "binomial") {
     predyp <- as.vector(predict(alphafit, newx = filt_xtest, s = s))
     preds <- cbind(preds, predyp)
@@ -385,8 +391,14 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     preds <- cbind(preds, predyp)
   }
   if (outer_train_predict) {
-    train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
-    train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
+    if (is.vector(y)) {
+      train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
+      train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
+    } else {
+      train_predy <- predict(alphafit, newx = filt_xtrain, s = s)
+      train_preds <- cbind(ytrain, train_predy)
+      colnames(train_preds)[1:ncol(y)] <- paste0("ytrain.", colnames(ytrain))
+    }
     if (family == "binomial") {
       predyp <- as.vector(predict(alphafit, newx = filt_xtrain, s = s))
       train_preds <- cbind(train_preds, predyp)
