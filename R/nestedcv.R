@@ -188,7 +188,7 @@ nestcv.glmnet <- function(y, x,
   x <- as.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
   ok <- checkxy(y, x, na.option, weights)
-  y <- y[ok$r]
+  y <- if (is.vector(y)) y[ok$r] else y[ok$r, ]
   x <- x[ok$r, ok$c]
   weights <- weights[ok$r]
   if (!is.null(balance) & !is.null(weights)) {

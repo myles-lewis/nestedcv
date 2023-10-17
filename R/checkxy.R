@@ -1,16 +1,16 @@
 
 checkxy <- function(y, x, na.option = "pass", weights = NULL) {
-  if (length(y) != nrow(x))
+  if (NROW(y) != nrow(x))
     stop("Mismatch in length of 'y' and number of rows in 'x'", call. = FALSE)
   if (!is.null(weights)) {
-    if (length(y) != length(weights)) stop("Mismatch in 'y' and 'weights'")
+    if (NROW(y) != length(weights)) stop("Mismatch in 'y' and 'weights'")
     if (any(weights < 0)) stop("Weights must be positive")
   }
-  nay <- is.na(y)
+  nay <- !complete.cases(y)
   if (any(nay)) message("'y' contains ", sum(nay), " NA")
   naxr <- !complete.cases(x)
   naxc <- !complete.cases(t(x))
-  okr <- rep.int(TRUE, length(y))
+  okr <- rep.int(TRUE, NROW(y))
   okc <- rep.int(TRUE, ncol(x))
   if (na.option == "omit") {
     if (sum(naxr) == 1) {message("1 row in 'x' contains NA")
