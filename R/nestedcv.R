@@ -188,7 +188,7 @@ nestcv.glmnet <- function(y, x,
   x <- as.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
   ok <- checkxy(y, x, na.option, weights)
-  y <- if (is.vector(y)) y[ok$r] else y[ok$r, ]
+  y <- if (is.matrix(y)) y[ok$r, ] else y[ok$r]
   x <- x[ok$r, ok$c]
   weights <- weights[ok$r]
   if (!is.null(balance) & !is.null(weights)) {
@@ -197,7 +197,7 @@ nestcv.glmnet <- function(y, x,
     stop("`balance` can only be used for classification")}
   
   if (is.null(outer_folds)) {
-    y1 <- if (is.vector(y)) y else y[,1]
+    y1 <- if (is.matrix(y)) y[,1] else y
     outer_folds <- switch(outer_method,
                           cv = createFolds(y1, k = n_outer_folds),
                           LOOCV = 1:NROW(y))
@@ -375,7 +375,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
   s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
   cf <- glmnet_coefs(alphafit, s = s)
   # test on outer CV
-  if (is.vector(y)) {
+  if (!is.matrix(y)) {
     predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
     preds <- data.frame(testy=ytest, predy=predy)
   } else {
@@ -393,7 +393,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     preds <- cbind(preds, predyp)
   }
   if (outer_train_predict) {
-    if (is.vector(y)) {
+    if (!is.matrix(y)) {
       train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
       train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
     } else {

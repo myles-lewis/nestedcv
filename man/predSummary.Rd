@@ -4,12 +4,15 @@
 \alias{predSummary}
 \title{Summarise prediction performance metrics}
 \usage{
-predSummary(output)
+predSummary(output, mv = FALSE)
 }
 \arguments{
 \item{output}{data.frame with columns \code{testy} containing observed response
 from test folds; \code{predy} predicted response; \code{predyp} (optional) predicted
 probabilities for classification to calculate ROC AUC}
+
+\item{mv}{Logical whether output is multivariate, i.e. \code{y} is a matrix, e.g.
+for glmnet family "mgaussian".}
 }
 \value{
 An object of class 'predSummary'. For classification a list is
