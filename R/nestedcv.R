@@ -380,8 +380,8 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     preds <- data.frame(testy=ytest, predy=predy)
   } else {
     # mgaussian
-    predy <- predict(alphafit, newx = filt_xtest, s = s)
-    preds <- cbind(ytest, predy)
+    predy <- predict(alphafit, newx = filt_xtest, s = s)[,, 1]
+    preds <- as.data.frame(cbind(ytest, predy))
     colnames(preds)[1:ncol(y)] <- paste0("ytest.", colnames(ytest))
   }
   if (family == "binomial") {
@@ -399,7 +399,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     } else {
       # mgaussian
       train_predy <- predict(alphafit, newx = filt_xtrain, s = s)
-      train_preds <- cbind(ytrain, train_predy)
+      train_preds <- as.data.frame(cbind(ytrain, train_predy))
       colnames(train_preds)[1:ncol(y)] <- paste0("ytrain.", colnames(ytrain))
     }
     if (family == "binomial") {
@@ -423,7 +423,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
   # inner CV predictions
   if (keep) {
     ind <- alphafit$index["min", ]
-    innerCV_preds <- if (family == "multinomial") {
+    innerCV_preds <- if (family %in% c("multinomial", "mgaussian")) {
       alphafit$fit.preval[, , ind]
     } else alphafit$fit.preval[, ind]
     ret <- append(ret, list(innerCV_preds = innerCV_preds))
