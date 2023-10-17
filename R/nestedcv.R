@@ -197,9 +197,10 @@ nestcv.glmnet <- function(y, x,
     stop("`balance` can only be used for classification")}
   
   if (is.null(outer_folds)) {
+    y1 <- if (is.vector(y)) y else y[,1]
     outer_folds <- switch(outer_method,
-                          cv = createFolds(y, k = n_outer_folds),
-                          LOOCV = 1:length(y))
+                          cv = createFolds(y1, k = n_outer_folds),
+                          LOOCV = 1:NROW(y))
   } else {
     if ("n_outer_folds" %in% names(nestcv.call)) {
       if (n_outer_folds != length(outer_folds)) stop("Mismatch between n_outer_folds and length(outer_folds)")
@@ -283,7 +284,7 @@ nestcv.glmnet <- function(y, x,
       foldid <- NULL
       if (pass_outer_folds) {
         if (n_outer_folds == n_inner_folds && is.null(balance)) {
-          foldid <- rep(0, length(y))
+          foldid <- rep(0, NROW(y))
           for (i in 1:length(outer_folds)) {
             foldid[outer_folds[[i]]] <- i
           }
@@ -378,6 +379,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
     preds <- data.frame(testy=ytest, predy=predy)
   } else {
+    # mgaussian
     predy <- predict(alphafit, newx = filt_xtest, s = s)
     preds <- cbind(ytest, predy)
     colnames(preds)[1:ncol(y)] <- paste0("ytest.", colnames(ytest))
@@ -395,6 +397,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
       train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
       train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
     } else {
+      # mgaussian
       train_predy <- predict(alphafit, newx = filt_xtrain, s = s)
       train_preds <- cbind(ytrain, train_predy)
       colnames(train_preds)[1:ncol(y)] <- paste0("ytrain.", colnames(ytrain))
@@ -461,7 +464,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
 cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1),
                        foldid = NULL, ...) {
   if (is.null(foldid)) {
-    foldid <- sample(rep(seq_len(nfolds), length = length(y)))
+    foldid <- sample(rep(seq_len(nfolds), length = NROW(y)))
   }
   fit1 <- cv.glmnet(x = x, y = y, 
                     alpha = tail(alphaSet, 1), foldid = foldid, ...)
