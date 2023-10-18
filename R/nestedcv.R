@@ -261,7 +261,7 @@ nestcv.glmnet <- function(y, x,
   if (!is.null(rownames(x))) {
     rownames(output) <- unlist(lapply(predslist, rownames))}
   
-  summary <- predSummary(output, mv = (family == "mgaussian"))
+  summary <- predSummary(output, family = family)
   glmnet.roc <- NULL
   if (family == "binomial") {
     glmnet.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
