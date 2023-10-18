@@ -375,14 +375,19 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
   s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
   cf <- glmnet_coefs(alphafit, s = s)
   # test on outer CV
-  if (!is.matrix(y)) {
-    predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
-    preds <- data.frame(testy=ytest, predy=predy)
-  } else {
+  if (family == "mgaussian") {
     # mgaussian
     predy <- predict(alphafit, newx = filt_xtest, s = s)[,, 1]
     preds <- as.data.frame(cbind(ytest, predy))
     colnames(preds)[1:ncol(y)] <- paste0("ytest.", colnames(ytest))
+  } else if (family == "cox") {
+    # cox
+    predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s))
+    preds <- as.data.frame(cbind(ytest, predy))
+  } else {
+    # default
+    predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
+    preds <- data.frame(testy=ytest, predy=predy)
   }
   if (family == "binomial") {
     predyp <- as.vector(predict(alphafit, newx = filt_xtest, s = s))
@@ -397,10 +402,12 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
       train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
       train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
     } else {
-      # mgaussian
+      # mgaussian, cox
       train_predy <- predict(alphafit, newx = filt_xtrain, s = s)
       train_preds <- as.data.frame(cbind(ytrain, train_predy))
-      colnames(train_preds)[1:ncol(y)] <- paste0("ytrain.", colnames(ytrain))
+      if (family == "mgaussian") {
+        colnames(train_preds)[1:ncol(y)] <- paste0("ytrain.", colnames(ytrain))
+      }
     }
     if (family == "binomial") {
       predyp <- as.vector(predict(alphafit, newx = filt_xtrain, s = s))
@@ -423,7 +430,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
   # inner CV predictions
   if (keep) {
     ind <- alphafit$index["min", ]
-    innerCV_preds <- if (family %in% c("multinomial", "mgaussian")) {
+    innerCV_preds <- if (length(dim(alphafit$fit.preval)) == 3) {
       alphafit$fit.preval[, , ind]
     } else alphafit$fit.preval[, ind]
     ret <- append(ret, list(innerCV_preds = innerCV_preds))

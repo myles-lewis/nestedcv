@@ -31,6 +31,11 @@ predSummary <- function(output, family = NULL) {
     names(summary) <- colnames(output)[nc+ 1:nc]
     class(summary) <- "predSummaryMulti"
     return(summary)
+  } else if (family == "cox") {
+    C_ind <- glmnet::Cindex(output[, 3], output[, 1:2])
+    summary <- setNames(C_ind, "C-index")
+    class(summary) <- "predSummary"
+    return(summary)
   }
   
   if (is.character(output$testy)) {
