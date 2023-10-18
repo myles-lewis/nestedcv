@@ -12,7 +12,8 @@
 #' together and error estimation/ accuracy determined. The default is 10x10
 #' nested CV.
 #'
-#' @param y Response vector
+#' @param y Response vector or matrix. Matrix is only used for 
+#' `family = 'mgaussian'` or `'cox'`.
 #' @param x Matrix of predictors. Dataframes will be coerced to a matrix as
 #'   is necessary for glmnet.
 #' @param family Either a character string representing one of the built-in

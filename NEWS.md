@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.7.0
+###### 18/10/2023
+
+* Added support for multivariate gaussian and cox models in `nestcv.glmnet()`
+
 # nestedcv 0.6.9
 ###### 15/08/2023
 

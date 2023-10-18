@@ -31,7 +31,8 @@ nestcv.glmnet(
 )
 }
 \arguments{
-\item{y}{Response vector}
+\item{y}{Response vector or matrix. Matrix is only used for
+\code{family = 'mgaussian'} or \code{'cox'}.}
 
 \item{x}{Matrix of predictors. Dataframes will be coerced to a matrix as
 is necessary for glmnet.}
