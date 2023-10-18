@@ -10,7 +10,7 @@
 #'   from test folds; `predy` predicted response; `predyp` (optional) predicted
 #'   probabilities for classification to calculate ROC AUC
 #' @param family Optional character value to support specific glmnet models e.g.
-#'   'mgaussian'.
+#'   'mgaussian', 'cox'.
 #' @return An object of class 'predSummary'. For classification a list is
 #'   returned containing the confusion matrix table and a vector containing
 #'   accuracy and balanced accuracy for classification, ROC AUC for 

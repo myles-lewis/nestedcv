@@ -12,7 +12,7 @@ from test folds; \code{predy} predicted response; \code{predyp} (optional) predi
 probabilities for classification to calculate ROC AUC}
 
 \item{family}{Optional character value to support specific glmnet models e.g.
-'mgaussian'.}
+'mgaussian', 'cox'.}
 }
 \value{
 An object of class 'predSummary'. For classification a list is
