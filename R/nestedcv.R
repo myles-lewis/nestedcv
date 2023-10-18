@@ -12,7 +12,8 @@
 #' together and error estimation/ accuracy determined. The default is 10x10
 #' nested CV.
 #'
-#' @param y Response vector
+#' @param y Response vector or matrix. Matrix is only used for 
+#' `family = 'mgaussian'` or `'cox'`.
 #' @param x Matrix of predictors. Dataframes will be coerced to a matrix as
 #'   is necessary for glmnet.
 #' @param family Either a character string representing one of the built-in
@@ -188,7 +189,7 @@ nestcv.glmnet <- function(y, x,
   x <- as.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
   ok <- checkxy(y, x, na.option, weights)
-  y <- y[ok$r]
+  y <- if (is.matrix(y)) y[ok$r, ] else y[ok$r]
   x <- x[ok$r, ok$c]
   weights <- weights[ok$r]
   if (!is.null(balance) & !is.null(weights)) {
@@ -197,9 +198,10 @@ nestcv.glmnet <- function(y, x,
     stop("`balance` can only be used for classification")}
   
   if (is.null(outer_folds)) {
+    y1 <- if (is.matrix(y)) y[,1] else y
     outer_folds <- switch(outer_method,
-                          cv = createFolds(y, k = n_outer_folds),
-                          LOOCV = 1:length(y))
+                          cv = createFolds(y1, k = n_outer_folds),
+                          LOOCV = 1:NROW(y))
   } else {
     if ("n_outer_folds" %in% names(nestcv.call)) {
       if (n_outer_folds != length(outer_folds)) stop("Mismatch between n_outer_folds and length(outer_folds)")
@@ -260,7 +262,7 @@ nestcv.glmnet <- function(y, x,
   if (!is.null(rownames(x))) {
     rownames(output) <- unlist(lapply(predslist, rownames))}
   
-  summary <- predSummary(output)
+  summary <- predSummary(output, family = family)
   glmnet.roc <- NULL
   if (family == "binomial") {
     glmnet.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
@@ -283,7 +285,7 @@ nestcv.glmnet <- function(y, x,
       foldid <- NULL
       if (pass_outer_folds) {
         if (n_outer_folds == n_inner_folds && is.null(balance)) {
-          foldid <- rep(0, length(y))
+          foldid <- rep(0, NROW(y))
           for (i in 1:length(outer_folds)) {
             foldid[outer_folds[[i]]] <- i
           }
@@ -374,8 +376,20 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
   s <- exp((log(alphafit$lambda.min) * (1-min_1se) + log(alphafit$lambda.1se) * min_1se))
   cf <- glmnet_coefs(alphafit, s = s)
   # test on outer CV
-  predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
-  preds <- data.frame(testy=ytest, predy=predy)
+  if (family == "mgaussian") {
+    # mgaussian
+    predy <- predict(alphafit, newx = filt_xtest, s = s)[,, 1]
+    preds <- as.data.frame(cbind(ytest, predy))
+    colnames(preds)[1:ncol(y)] <- paste0("ytest.", colnames(ytest))
+  } else if (family == "cox") {
+    # cox
+    predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s))
+    preds <- as.data.frame(cbind(ytest, predy))
+  } else {
+    # default
+    predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
+    preds <- data.frame(testy=ytest, predy=predy)
+  }
   if (family == "binomial") {
     predyp <- as.vector(predict(alphafit, newx = filt_xtest, s = s))
     preds <- cbind(preds, predyp)
@@ -385,8 +399,17 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     preds <- cbind(preds, predyp)
   }
   if (outer_train_predict) {
-    train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
-    train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
+    if (!is.matrix(y)) {
+      train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
+      train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
+    } else {
+      # mgaussian, cox
+      train_predy <- predict(alphafit, newx = filt_xtrain, s = s)
+      train_preds <- as.data.frame(cbind(ytrain, train_predy))
+      if (family == "mgaussian") {
+        colnames(train_preds)[1:ncol(y)] <- paste0("ytrain.", colnames(ytrain))
+      }
+    }
     if (family == "binomial") {
       predyp <- as.vector(predict(alphafit, newx = filt_xtrain, s = s))
       train_preds <- cbind(train_preds, predyp)
@@ -408,7 +431,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
   # inner CV predictions
   if (keep) {
     ind <- alphafit$index["min", ]
-    innerCV_preds <- if (family == "multinomial") {
+    innerCV_preds <- if (length(dim(alphafit$fit.preval)) == 3) {
       alphafit$fit.preval[, , ind]
     } else alphafit$fit.preval[, ind]
     ret <- append(ret, list(innerCV_preds = innerCV_preds))
@@ -449,7 +472,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
 cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1),
                        foldid = NULL, ...) {
   if (is.null(foldid)) {
-    foldid <- sample(rep(seq_len(nfolds), length = length(y)))
+    foldid <- sample(rep(seq_len(nfolds), length = NROW(y)))
   }
   fit1 <- cv.glmnet(x = x, y = y, 
                     alpha = tail(alphaSet, 1), foldid = foldid, ...)

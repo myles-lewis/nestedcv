@@ -11,19 +11,16 @@ nest_filt_bal <- function(test, y, x,
     ytest <- NULL
     xtest <- NULL
   } else {
-    ytrain <- y[-test]
     xtrain <- x[-test, , drop = FALSE]
-    ytest <- y[test]
     xtest <- x[test, , drop = FALSE]
+    if (is.matrix(y)) {
+      ytrain <- y[-test, , drop = FALSE]
+      ytest <- y[test, , drop = FALSE]
+    } else {
+      ytrain <- y[-test]
+      ytest <- y[test]
+    }
   }
-  
-  # if (!is.null(balance)) {
-  #   args <- list(y = ytrain, x = xtrain)
-  #   args <- append(args, balance_options)
-  #   bal_dat <- do.call(balance, args)
-  #   ytrain <- bal_dat$y
-  #   xtrain <- bal_dat$x
-  # }
   
   if (is.null(filterFUN)) {
     filt_xtrain <- xtrain

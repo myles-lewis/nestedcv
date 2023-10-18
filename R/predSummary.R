@@ -9,6 +9,8 @@
 #' @param output data.frame with columns `testy` containing observed response
 #'   from test folds; `predy` predicted response; `predyp` (optional) predicted
 #'   probabilities for classification to calculate ROC AUC
+#' @param family Optional character value to support specific glmnet models e.g.
+#'   'mgaussian', 'cox'.
 #' @return An object of class 'predSummary'. For classification a list is
 #'   returned containing the confusion matrix table and a vector containing
 #'   accuracy and balanced accuracy for classification, ROC AUC for 
@@ -19,7 +21,23 @@
 #' is calculated using [pROC::multiclass.roc()].
 #' 
 #' @export
-predSummary <- function(output) {
+predSummary <- function(output, family = "") {
+  if (family == "mgaussian") {
+    nc <- ncol(output) /2
+    summary <- lapply(1:nc, function(i) {
+      df <- data.frame(obs = output[, i], pred = output[, i+nc])
+      caret::defaultSummary(df)
+    })
+    names(summary) <- colnames(output)[nc+ 1:nc]
+    class(summary) <- "predSummaryMulti"
+    return(summary)
+  } else if (family == "cox") {
+    C_ind <- glmnet::Cindex(output[, 3], output[, 1:2])
+    summary <- setNames(C_ind, "C-index")
+    class(summary) <- "predSummary"
+    return(summary)
+  }
+  
   if (is.character(output$testy)) {
     output$testy <- factor(output$testy)
   }
@@ -62,4 +80,12 @@ print.predSummary <- function(x,
     cat("\n")
     print(x$metrics, digits = digits, print.gap = 3L)
   } else print(unclass(x), digits = digits, print.gap = 3L)
+}
+
+
+#' @export
+print.predSummaryMulti <- function(x, 
+                                   digits = max(3L, getOption("digits") - 3L),
+                                   ...) {
+  print(unclass(x), digits = digits, print.gap = 3L)
 }
