@@ -21,7 +21,7 @@
 #' is calculated using [pROC::multiclass.roc()].
 #' 
 #' @export
-predSummary <- function(output, family = NULL) {
+predSummary <- function(output, family = "") {
   if (family == "mgaussian") {
     nc <- ncol(output) /2
     summary <- lapply(1:nc, function(i) {

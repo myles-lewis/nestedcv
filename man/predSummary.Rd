@@ -4,7 +4,7 @@
 \alias{predSummary}
 \title{Summarise prediction performance metrics}
 \usage{
-predSummary(output, family = NULL)
+predSummary(output, family = "")
 }
 \arguments{
 \item{output}{data.frame with columns \code{testy} containing observed response
