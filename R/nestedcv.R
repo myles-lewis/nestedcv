@@ -399,7 +399,7 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     preds <- cbind(preds, predyp)
   }
   if (outer_train_predict) {
-    if (!is.matrix(y)) {
+    if (is.atomic(y)) {
       train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
       train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
     } else {
