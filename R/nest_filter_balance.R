@@ -13,12 +13,12 @@ nest_filt_bal <- function(test, y, x,
   } else {
     xtrain <- x[-test, , drop = FALSE]
     xtest <- x[test, , drop = FALSE]
-    if (is.matrix(y)) {
-      ytrain <- y[-test, , drop = FALSE]
-      ytest <- y[test, , drop = FALSE]
-    } else {
+    if (is.atomic(y)) {
       ytrain <- y[-test]
       ytest <- y[test]
+    } else {
+      ytrain <- y[-test, , drop = FALSE]
+      ytest <- y[test, , drop = FALSE]
     }
   }
   
