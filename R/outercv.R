@@ -607,6 +607,8 @@ summary.outercv <- function(object,
                              cv = paste0(length(object$outer_folds), "-fold CV"),
                              LOOCV = "leave-one-out CV"))
   cat("\nNo inner loop\n")
+  if (!is.null(object$call$modifyX))
+    cat("Modifier: ", object$call$modifyX, "\n")
   balance <- object$call$balance
   if (!is.null(balance)) {
     cat("Balancing: ", balance, "\n")

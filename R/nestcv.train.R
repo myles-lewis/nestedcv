@@ -539,6 +539,8 @@ summary.nestcv.train <- function(object,
   if (!is.null(object$call$filterFUN)) {
     cat("Filter: ", object$call$filterFUN, "\n")
   } else cat("No filter\n")
+  if (!is.null(object$call$modifyX))
+    cat("Modifier: ", object$call$modifyX, "\n")
   cat("Outer loop: ", switch(object$outer_method,
                              cv = paste0(length(object$outer_folds), "-fold cv\n"),
                              LOOCV = "leave-one-out CV\n"))

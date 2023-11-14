@@ -239,6 +239,8 @@ summary.nestcv.SuperLearner <- function(object,
                              LOOCV = "leave-one-out CV"))
   cat(paste0("\nInner loop:  ", object$final_fit$cvControl$V,
              "-fold CV (SuperLearner)\n"))
+  if (!is.null(object$call$modifyX))
+    cat("Modifier: ", object$call$modifyX, "\n")
   balance <- object$call$balance
   if (!is.null(balance)) {
     cat("Balancing: ", balance, "\n")
