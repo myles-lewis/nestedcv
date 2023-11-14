@@ -4,6 +4,7 @@
 nest_filt_bal <- function(test, y, x,
                           filterFUN, filter_options,
                           balance = NULL, balance_options,
+                          modifyX = NULL, modifyX_useY, modifyX_options,
                           penalty.factor = NULL) {
   if (is.null(test)) {
     ytrain <- y
@@ -33,6 +34,25 @@ nest_filt_bal <- function(test, y, x,
     filt_xtrain <- xtrain[, fset]
     filt_xtest <- xtest[, fset, drop = FALSE]
     filt_pen.factor <- penalty.factor[fset]
+  }
+  
+  if (!is.null(modifyX)) {
+    if (!modifyX_useY) {
+      # only modify X
+      args <- list(x = filt_xtrain)
+      args <- append(args, modifyX_options)
+      filt_xtrain <- do.call(modifyX, args)
+      args <- list(x = filt_xtest)
+      args <- append(args, modifyX_options)
+      filt_xtest <- do.call(modifyX, args)
+    } else {
+      # modify X using information from ytrain
+      args <- list(y = ytrain, x = filt_xtrain)
+      args <- append(args, modifyX_options)
+      fit <- do.call(modifyX, args)
+      filt_xtrain <- predict(fit, newdata = filt_xtrain)
+      filt_xtest <- predict(fit, newdata = filt_xtest)
+    }
   }
   
   if (!is.null(balance)) {
