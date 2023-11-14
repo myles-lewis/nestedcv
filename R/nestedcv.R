@@ -300,7 +300,7 @@ nestcv.glmnet <- function(y, x,
                          modifyX, modifyX_useY, modifyX_options,
                          penalty.factor = penalty.factor)
     yfinal <- dat$ytrain
-    filtx <- dat$filt_xtrain
+    filtx <- as.matrix(dat$filt_xtrain)
     filtpen.factor <- dat$filt_pen.factor
     
     if (finalCV) {
@@ -391,8 +391,8 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
                        penalty.factor)
   ytrain <- dat$ytrain
   ytest <- dat$ytest
-  filt_xtrain <- dat$filt_xtrain
-  filt_xtest <- dat$filt_xtest
+  filt_xtrain <- as.matrix(dat$filt_xtrain)
+  filt_xtest <- as.matrix(dat$filt_xtest)
   filt_pen.factor <- dat$filt_pen.factor
   
   cvafit <- cva.glmnet(x = filt_xtrain, y = ytrain, 
