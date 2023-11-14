@@ -53,6 +53,8 @@ nest_filt_bal <- function(test, y, x,
       filt_xtrain <- predict(fit, newdata = filt_xtrain)
       filt_xtest <- predict(fit, newdata = filt_xtest)
     }
+    if (!identical(colnames(filt_xtrain), colnames(filt_xtest)))
+      message("Error in modifyX: different colnames in xtrain and xtest")
   }
   
   if (!is.null(balance)) {
