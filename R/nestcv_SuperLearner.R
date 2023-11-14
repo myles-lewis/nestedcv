@@ -21,6 +21,20 @@
 #'   `outercv` is called with a formula. See [randomsample()] and [smote()]
 #' @param balance_options List of additional arguments passed to the balancing
 #'   function
+#' @param modifyX Character string specifying the name of a function to modify
+#'   `x`. This can be an imputation function for replacing missing values, or a
+#'   more complex function which alters or even adds columns to `x`. The
+#'   required return value of this function depends on the `modifyX_useY`
+#'   setting.
+#' @param modifyX_useY Logical value whether the `x` modifying function makes
+#'   use of response training data from `y`. If `FALSE` then the `modifyX`
+#'   function simply needs to return a modified `x` object, which will be
+#'   coerced to a dataframe as required by `SuperLearner`. If `TRUE` then the
+#'   `modifyX` function must return a model type object on which `predict()` can
+#'   be called, so that train and test partitions of `x` can be modified
+#'   independently.
+#' @param modifyX_options List of additional arguments passed to the `x`
+#'   modifying function
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
@@ -75,6 +89,9 @@ nestcv.SuperLearner <- function(y, x,
                                 weights = NULL,
                                 balance = NULL,
                                 balance_options = NULL,
+                                modifyX = NULL,
+                                modifyX_useY = FALSE,
+                                modifyX_options = NULL,
                                 outer_method = c("cv", "LOOCV"),
                                 n_outer_folds = 10,
                                 outer_folds = NULL,
@@ -109,6 +126,7 @@ nestcv.SuperLearner <- function(y, x,
     clusterExport(cl, varlist = c("outer_folds", "y", "x", "superLearner",
                                   "filterFUN", "filter_options",
                                   "weights", "balance", "balance_options",
+                                  "modifyX", "modifyX_useY", "modifyX_options",
                                   "nestSLcore", "dots"),
                   envir = environment())
     on.exit(stopCluster(cl))
@@ -116,14 +134,17 @@ nestcv.SuperLearner <- function(y, x,
       args <- c(list(test=test, y=y, x=x,
                      filterFUN=filterFUN, filter_options=filter_options,
                      weights=weights, balance=balance,
-                     balance_options=balance_options), dots)
+                     balance_options=balance_options,
+                     modifyX=modifyX, modifyX_useY=modifyX_useY,
+                     modifyX_options=modifyX_options), dots)
       do.call(nestSLcore, args)
     })
   } else {
     outer_res <- mclapply(outer_folds, function(test) {
       nestSLcore(test, y, x,
                  filterFUN, filter_options, weights,
-                 balance, balance_options, ...)
+                 balance, balance_options,
+                 modifyX, modifyX_useY, modifyX_options, ...)
     }, mc.cores = cv.cores)
   }
   
@@ -141,7 +162,8 @@ nestcv.SuperLearner <- function(y, x,
   
   # fit final model
   dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                       balance, balance_options)
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options)
   yfinal <- dat$ytrain
   filtx <- dat$filt_xtrain
   Y <- if (reg) yfinal else as.numeric(yfinal) -1
@@ -168,9 +190,11 @@ nestcv.SuperLearner <- function(y, x,
 
 nestSLcore <- function(test, y, x,
                        filterFUN, filter_options, weights,
-                       balance, balance_options, ...) {
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options, ...) {
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
-                       balance, balance_options)
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options)
   ytrain <- dat$ytrain
   ytest <- dat$ytest
   filt_xtrain <- data.frame(dat$filt_xtrain)
