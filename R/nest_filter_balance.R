@@ -42,18 +42,22 @@ nest_filt_bal <- function(test, y, x,
       args <- list(x = filt_xtrain)
       args <- append(args, modifyX_options)
       filt_xtrain <- do.call(modifyX, args)
-      args <- list(x = filt_xtest)
-      args <- append(args, modifyX_options)
-      filt_xtest <- do.call(modifyX, args)
+      if (!is.null(test)) {
+        args <- list(x = filt_xtest)
+        args <- append(args, modifyX_options)
+        filt_xtest <- do.call(modifyX, args)
+      }
     } else {
       # modify X using information from ytrain
       args <- list(y = ytrain, x = filt_xtrain)
       args <- append(args, modifyX_options)
       fit <- do.call(modifyX, args)
       filt_xtrain <- predict(fit, newdata = filt_xtrain)
-      filt_xtest <- predict(fit, newdata = filt_xtest)
+      if (!is.null(test)) {
+        filt_xtest <- predict(fit, newdata = filt_xtest)
+      }
     }
-    if (!identical(colnames(filt_xtrain), colnames(filt_xtest)))
+    if (!is.null(test) && !identical(colnames(filt_xtrain), colnames(filt_xtest)))
       message("Error in modifyX: different colnames in xtrain and xtest")
   }
   
