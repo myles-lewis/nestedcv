@@ -35,11 +35,12 @@
 #'   required return value of this function depends on the `modifyX_useY`
 #'   setting.
 #' @param modifyX_useY Logical value whether the `x` modifying function makes
-#'   use of response training data from `y`. If `TRUE` then the `modifyX`
+#'   use of response training data from `y`. If `FALSE` then the `modifyX`
+#'   function simply needs to return a modified `x` object, which will be
+#'   coerced to a matrix as required by `glmnet`. If `TRUE` then the `modifyX`
 #'   function must return a model type object on which `predict()` can be
 #'   called, so that train and test partitions of `x` can be modified
-#'   independently. If `FALSE` then the `modifyX` function simply needs to
-#'   return a modified `x` object.
+#'   independently.
 #' @param modifyX_options List of additional arguments passed to the `x`
 #'   modifying function
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether

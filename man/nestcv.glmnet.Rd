@@ -65,11 +65,12 @@ required return value of this function depends on the \code{modifyX_useY}
 setting.}
 
 \item{modifyX_useY}{Logical value whether the \code{x} modifying function makes
-use of response training data from \code{y}. If \code{TRUE} then the \code{modifyX}
+use of response training data from \code{y}. If \code{FALSE} then the \code{modifyX}
+function simply needs to return a modified \code{x} object, which will be
+coerced to a matrix as required by \code{glmnet}. If \code{TRUE} then the \code{modifyX}
 function must return a model type object on which \code{predict()} can be
 called, so that train and test partitions of \code{x} can be modified
-independently. If \code{FALSE} then the \code{modifyX} function simply needs to
-return a modified \code{x} object.}
+independently.}
 
 \item{modifyX_options}{List of additional arguments passed to the \code{x}
 modifying function}
