@@ -337,7 +337,9 @@ nestcv.glmnet <- function(y, x,
     if (is.list(fin_coef) | length(fin_coef) == 1) {
       final_coef <- fin_coef  # multinomial
     } else {
-      cfmean <- colMeans(x[, names(fin_coef)[-1], drop = FALSE], na.rm = TRUE)
+      cfmean <- try(colMeans(x[, names(fin_coef)[-1], drop = FALSE], na.rm = TRUE),
+                    silent = TRUE)
+      if (inherits(cfmean, "try-error")) cfmean <- rep(NA, length(fin_coef) -1)
       final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
     }
     final_vars <- colnames(filtx)
@@ -351,6 +353,7 @@ nestcv.glmnet <- function(y, x,
       }))
     }))
     all_vars <- unique(c(all_vars, final_vars))
+    all_vars <- all_vars[all_vars %in% colnames(x)]
     xsub <- x[, all_vars]
   }
   
