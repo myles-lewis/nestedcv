@@ -59,6 +59,13 @@ nest_filt_bal <- function(test, y, x,
     }
     if (!is.null(test) && !identical(colnames(filt_xtrain), colnames(filt_xtest)))
       message("Error in modifyX: different colnames in xtrain and xtest")
+    if (!identical(colnames(x), colnames(filt_xtrain))) {
+      pf <- rep(1, ncol(filt_xtrain))
+      ind <- match(colnames(x), colnames(filt_xtrain))
+      ok <- !is.na(ind)
+      pf[ind[ok]] <- penalty.factor[ok]
+      filt_pen.factor <- pf
+    }
   }
   
   if (!is.null(balance)) {
