@@ -67,7 +67,9 @@
 #' @param penalty.factor Separate penalty factors can be applied to each
 #'   coefficient. Can be 0 for some variables, which implies no shrinkage, and
 #'   that variable is always included in the model. Default is 1 for all
-#'   variables. See [glmnet]
+#'   variables. See [glmnet]. Note this works separately from filtering. For
+#'   some `nestedcv` filter functions you might need to set `force_vars` to
+#'   avoid filtering out features.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
 #'   on windows.

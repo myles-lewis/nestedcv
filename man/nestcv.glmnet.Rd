@@ -109,7 +109,9 @@ in filters.}
 \item{penalty.factor}{Separate penalty factors can be applied to each
 coefficient. Can be 0 for some variables, which implies no shrinkage, and
 that variable is always included in the model. Default is 1 for all
-variables. See \link{glmnet}}
+variables. See \link{glmnet}. Note this works separately from filtering. For
+some \code{nestedcv} filter functions you might need to set \code{force_vars} to
+avoid filtering out features.}
 
 \item{cv.cores}{Number of cores for parallel processing of the outer loops.
 NOTE: this uses \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply}
