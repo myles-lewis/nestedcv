@@ -9,6 +9,7 @@
 \alias{pred_train_class1}
 \alias{pred_train_class2}
 \alias{pred_train_class3}
+\alias{pred_SuperLearner}
 \title{Prediction wrappers to use fastshap with nestedcv}
 \usage{
 pred_nestcv_glmnet(x, newdata)
@@ -26,6 +27,8 @@ pred_train_class1(x, newdata)
 pred_train_class2(x, newdata)
 
 pred_train_class3(x, newdata)
+
+pred_SuperLearner(x, newdata)
 }
 \arguments{
 \item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} object}

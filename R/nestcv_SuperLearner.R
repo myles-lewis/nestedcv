@@ -281,3 +281,12 @@ summary.nestcv.SuperLearner <- function(object,
   invisible(out)
 }
 
+
+#' @method predict nestcv.SuperLearner
+#' @export
+predict.nestcv.SuperLearner <- function(object, newdata, ...) {
+  newdata <- data.frame(newdata)
+  if (any(!object$final_vars %in% colnames(newdata))) 
+    stop("newdata is missing some predictors", call. = FALSE)
+  predict(object$final_fit, newdata = newdata[, object$final_vars], ...)
+}
