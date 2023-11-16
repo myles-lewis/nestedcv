@@ -263,7 +263,7 @@ selectCol <- function(x, colIndex) {
 }
 
 
-#' Boxplot model predictors
+#' Boxplot expression levels of model predictors
 #'
 #' Boxplots to show range of model predictors to identify exceptional predictors
 #' with excessively low or high values.
@@ -281,7 +281,7 @@ selectCol <- function(x, colIndex) {
 #' @importFrom stats formula
 #' @export
 #' 
-boxplot_model <- function(x,
+boxplot_expression <- function(x,
                           scheme = NULL, palette = "Dark 3", ...) {
   data <- x$xsub
   m <- names(coef(x))
