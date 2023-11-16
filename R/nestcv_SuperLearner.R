@@ -135,8 +135,8 @@ nestcv.SuperLearner <- function(y, x,
                                   "modifyX", "modifyX_useY", "modifyX_options",
                                   "nestSLcore", "dots"),
                   envir = environment())
-    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
-      args <- c(list(test=test, y=y, x=x,
+    outer_res <- parLapply(cl = cl, seq_along(outer_folds), function(i) {
+      args <- c(list(i=i, y=y, x=x, outer_folds = outer_folds,
                      filterFUN=filterFUN, filter_options=filter_options,
                      weights=weights, balance=balance,
                      balance_options=balance_options,
@@ -146,8 +146,8 @@ nestcv.SuperLearner <- function(y, x,
     })
     stopCluster(cl)
   } else {
-    outer_res <- mclapply(outer_folds, function(test) {
-      nestSLcore(test, y, x,
+    outer_res <- mclapply(seq_along(outer_folds), function(i) {
+      nestSLcore(i, y, x, outer_folds,
                  filterFUN, filter_options, weights,
                  balance, balance_options,
                  modifyX, modifyX_useY, modifyX_options, verbose, ...)
@@ -198,13 +198,14 @@ nestcv.SuperLearner <- function(y, x,
 }
 
 
-nestSLcore <- function(test, y, x,
+nestSLcore <- function(i, y, x, outer_folds,
                        filterFUN, filter_options, weights,
                        balance, balance_options,
                        modifyX, modifyX_useY, modifyX_options,
                        verbose = FALSE, ...) {
   start <- Sys.time()
-  if (verbose) message_parallel("Starting Fold ...")
+  if (verbose) message_parallel("Starting Fold ", i, " ...")
+  test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options,
                        modifyX, modifyX_useY, modifyX_options)
@@ -236,7 +237,7 @@ nestSLcore <- function(test, y, x,
   rownames(preds) <- rownames(filt_xtest)
   if (verbose) {
     end <- Sys.time()
-    message_parallel("                     Fold done (",
+    message_parallel("                     Fold ", i, " done (",
                      format(end - start, digits = 3), ")")
   }
   list(preds = preds,
