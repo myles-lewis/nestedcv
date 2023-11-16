@@ -81,7 +81,7 @@
 #'   regression.}
 #' 
 #' @seealso [SuperLearner::SuperLearner()]
-#' 
+#' @importFrom parallel clusterEvalQ
 #' @export
 
 nestcv.SuperLearner <- function(y, x,
@@ -125,17 +125,16 @@ nestcv.SuperLearner <- function(y, x,
   if (verbose && Sys.getenv("RSTUDIO") == "1") {
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
-  if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
-    message("Windows parallelisation not working, cause unknown")
+  if (T || Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
+    foo <- clusterEvalQ(cl, library(SuperLearner))
     clusterExport(cl, varlist = c("outer_folds", "y", "x", "SuperLearner",
                                   "filterFUN", "filter_options",
                                   "weights", "balance", "balance_options",
                                   "modifyX", "modifyX_useY", "modifyX_options",
                                   "nestSLcore", "verbose", "dots"),
                   envir = environment())
-    on.exit(stopCluster(cl))
     outer_res <- parLapply(cl = cl, seq_along(outer_folds), function(i) {
       args <- c(list(i=i, outer_folds=outer_folds, y=y, x=x,
                      filterFUN=filterFUN, filter_options=filter_options,
@@ -145,6 +144,7 @@ nestcv.SuperLearner <- function(y, x,
                      modifyX_options=modifyX_options, verbose=verbose), dots)
       do.call(nestSLcore, args)
     })
+    stopCluster(cl)
   } else {
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
       nestSLcore(i, outer_folds, y, x,

@@ -20,6 +20,7 @@ nestcv.SuperLearner(
   outer_folds = NULL,
   cv.cores = 1,
   na.option = "pass",
+  verbose = TRUE,
   ...
 )
 }
@@ -82,6 +83,8 @@ on windows.}
 if there are \code{NA} in 'y', but columns (predictors) containing \code{NA} are
 removed from 'x' to preserve cases. Any other value means that \code{NA} are
 ignored (a message is given).}
+
+\item{verbose}{Logical whether to print messages and show progress}
 
 \item{...}{Additional arguments passed to \code{\link[SuperLearner:SuperLearner]{SuperLearner::SuperLearner()}}}
 }
