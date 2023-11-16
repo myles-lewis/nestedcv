@@ -453,6 +453,7 @@ nestcv.train <- function(y, x,
               bestTunes = bestTunes,
               finalTune = finalTune,
               summary = summary)
+  if (!is.null(modifyX)) out$xfinal <- filtx
   class(out) <- "nestcv.train"
   out
 }

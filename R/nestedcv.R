@@ -296,7 +296,7 @@ nestcv.glmnet <- function(y, x,
   }
   
   if (is.na(finalCV)) {
-    fit <- final_coef <- final_param <- yfinal <- final_vars <- xsub <- NA
+    fit <- final_coef <- final_param <- yfinal <- final_vars <- xsub <- filtx <- NA
   } else {
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                          balance, balance_options,
@@ -378,6 +378,7 @@ nestcv.glmnet <- function(y, x,
               final_vars = final_vars,
               roc = glmnet.roc,
               summary = summary)
+  if (!is.null(modifyX)) out$xfinal <- filtx
   class(out) <- "nestcv.glmnet"
   out
 }

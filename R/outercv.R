@@ -349,6 +349,7 @@ outercv.default <- function(y, x,
               summary_vars = summary_vars(filtx),
               roc = fit.roc,
               summary = summary)
+  if (!is.null(modifyX)) out$xfinal <- filtx
   class(out) <- "outercv"
   out
 }
