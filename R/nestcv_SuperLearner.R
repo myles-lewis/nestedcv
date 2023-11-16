@@ -48,6 +48,7 @@
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
 #'   removed from 'x' to preserve cases. Any other value means that `NA` are
 #'   ignored (a message is given).
+#' @param verbose Logical whether to print messages and show progress
 #' @param ... Additional arguments passed to [SuperLearner::SuperLearner()]
 #' @details
 #' This performs an outer CV on SuperLearner package ensemble models to measure
@@ -97,10 +98,12 @@ nestcv.SuperLearner <- function(y, x,
                                 outer_folds = NULL,
                                 cv.cores = 1,
                                 na.option = "pass",
+                                verbose = TRUE,
                                 ...) {
   if (!requireNamespace("SuperLearner", quietly = TRUE)) {
     stop("Package 'SuperLearner' must be installed", call. = FALSE)
   }
+  start <- Sys.time()
   ncv.call <- match.call(expand.dots = TRUE)
   ok <- checkxy(y, x, na.option, weights)
   y <- y[ok$r]
@@ -119,32 +122,35 @@ nestcv.SuperLearner <- function(y, x,
                           cv = createFolds(y, k = n_outer_folds),
                           LOOCV = 1:length(y))
   }
-  
+  if (verbose && Sys.getenv("RSTUDIO") == "1") {
+    message("Performing ", n_outer_folds, "-fold outer CV, using ",
+            plural(cv.cores, "core(s)"))}
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+    message("Windows parallelisation not working, cause unknown")
     cl <- makeCluster(cv.cores)
     dots <- list(...)
-    clusterExport(cl, varlist = c("outer_folds", "y", "x", "superLearner",
+    clusterExport(cl, varlist = c("outer_folds", "y", "x", "SuperLearner",
                                   "filterFUN", "filter_options",
                                   "weights", "balance", "balance_options",
                                   "modifyX", "modifyX_useY", "modifyX_options",
-                                  "nestSLcore", "dots"),
+                                  "nestSLcore", "verbose", "dots"),
                   envir = environment())
     on.exit(stopCluster(cl))
-    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
-      args <- c(list(test=test, y=y, x=x,
+    outer_res <- parLapply(cl = cl, seq_along(outer_folds), function(i) {
+      args <- c(list(i=i, outer_folds=outer_folds, y=y, x=x,
                      filterFUN=filterFUN, filter_options=filter_options,
                      weights=weights, balance=balance,
                      balance_options=balance_options,
                      modifyX=modifyX, modifyX_useY=modifyX_useY,
-                     modifyX_options=modifyX_options), dots)
+                     modifyX_options=modifyX_options, verbose=verbose), dots)
       do.call(nestSLcore, args)
     })
   } else {
-    outer_res <- mclapply(outer_folds, function(test) {
-      nestSLcore(test, y, x,
+    outer_res <- mclapply(seq_along(outer_folds), function(i) {
+      nestSLcore(i, outer_folds, y, x,
                  filterFUN, filter_options, weights,
                  balance, balance_options,
-                 modifyX, modifyX_useY, modifyX_options, ...)
+                 modifyX, modifyX_useY, modifyX_options, verbose, ...)
     }, mc.cores = cv.cores)
   }
   
@@ -161,6 +167,7 @@ nestcv.SuperLearner <- function(y, x,
   } else fit.roc <- NULL
   
   # fit final model
+  if (verbose) message("Fitting final model on whole data")
   dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                        balance, balance_options,
                        modifyX, modifyX_useY, modifyX_options)
@@ -169,6 +176,9 @@ nestcv.SuperLearner <- function(y, x,
   Y <- if (reg) yfinal else as.numeric(yfinal) -1
   X <- data.frame(filtx)
   fit <- SuperLearner::SuperLearner(Y = Y, X = X, obsWeights = weights, ...)
+  
+  end <- Sys.time()
+  if (verbose) message("Duration: ", format(end - start))
   
   out <- list(call = ncv.call,
               output = output,
@@ -188,10 +198,14 @@ nestcv.SuperLearner <- function(y, x,
 }
 
 
-nestSLcore <- function(test, y, x,
+nestSLcore <- function(i, outer_folds, y, x,
                        filterFUN, filter_options, weights,
                        balance, balance_options,
-                       modifyX, modifyX_useY, modifyX_options, ...) {
+                       modifyX, modifyX_useY, modifyX_options,
+                       verbose, ...) {
+  start <- Sys.time()
+  if (verbose) message_parallel("Starting Fold ", i, " ...")
+  test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options,
                        modifyX, modifyX_useY, modifyX_options)
@@ -221,6 +235,11 @@ nestSLcore <- function(test, y, x,
     preds$predyp <- c(predSL$pred)
   }
   rownames(preds) <- rownames(filt_xtest)
+  if (verbose) {
+    end <- Sys.time()
+    message_parallel("                     Fold ", i, " done (",
+                     format(end - start, digits = 3), ")")
+  }
   list(preds = preds,
        fit = fit,
        nfilter = ncol(filt_xtest),
