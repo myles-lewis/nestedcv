@@ -476,6 +476,7 @@ all that is done is to scale the predictors based only on the training folds.
 
 ```{r eval=FALSE}
 # receives training data from `x` and `y` only
+# returns object with class 'modxy'
 modxy <- function(y, x) {
   sc <- scale(x)  
   cen <- attr(sc, "scaled:center")
@@ -485,6 +486,7 @@ modxy <- function(y, x) {
   out
 }
 
+# define predict function for class 'modxy'
 # applied independently to train and test folds of `x`
 predict.modxy <- function(object, newdata, ...) {
   scale(newdata, center = object[,1], scale = object[,2])
