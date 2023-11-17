@@ -97,6 +97,11 @@ pred_train_class3 <- function(x, newdata) {
   predict(x, newdata, type="prob")[,3]
 }
 
+#' @rdname pred_nestcv_glmnet
+#' @export
+pred_SuperLearner <- function(x, newdata) {
+  predict(x, newdata)$pred[,1]
+}
 
 
 #' SHAP importance beeswarm plot

@@ -28,6 +28,19 @@
 #'   `outercv` is called with a formula. See [randomsample()] and [smote()]
 #' @param balance_options List of additional arguments passed to the balancing
 #'   function
+#' @param modifyX Character string specifying the name of a function to modify
+#'   `x`. This can be an imputation function for replacing missing values, or a
+#'   more complex function which alters or even adds columns to `x`. The
+#'   required return value of this function depends on the `modifyX_useY`
+#'   setting.
+#' @param modifyX_useY Logical value whether the `x` modifying function makes
+#'   use of response training data from `y`. If `FALSE` then the `modifyX`
+#'   function simply needs to return a modified `x` object. If `TRUE` then the
+#'   `modifyX` function must return a model type object on which `predict()` can
+#'   be called, so that train and test partitions of `x` can be modified
+#'   independently.
+#' @param modifyX_options List of additional arguments passed to the `x`
+#'   modifying function
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
@@ -179,6 +192,9 @@ outercv.default <- function(y, x,
                             weights = NULL,
                             balance = NULL,
                             balance_options = NULL,
+                            modifyX = NULL,
+                            modifyX_useY = FALSE,
+                            modifyX_options = NULL,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
                             outer_folds = NULL,
@@ -226,6 +242,7 @@ outercv.default <- function(y, x,
     cl <- makeCluster(cv.cores)
     varlist <- c("outer_folds", "y", "x", "model", "reg","filterFUN", 
                  "filter_options", "weights", "balance", "balance_options",
+                 "modifyX", "modifyX_useY", "modifyX_options",
                  "predict_type", "outer_train_predict", "outercvCore", 
                  "suppressMsg", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
@@ -239,6 +256,8 @@ outercv.default <- function(y, x,
                        filterFUN=filterFUN, filter_options=filter_options,
                        weights=weights, balance=balance,
                        balance_options=balance_options,
+                       modifyX=modifyX, modifyX_useY=modifyX_useY,
+                       modifyX_options=modifyX_options,
                        predict_type=predict_type,
                        outer_train_predict=outer_train_predict,
                        suppressMsg=suppressMsg), dots)
@@ -251,6 +270,8 @@ outercv.default <- function(y, x,
                        filterFUN=filterFUN, filter_options=filter_options,
                        weights=weights, balance=balance,
                        balance_options=balance_options,
+                       modifyX=modifyX, modifyX_useY=modifyX_useY,
+                       modifyX_options=modifyX_options,
                        predict_type=predict_type,
                        outer_train_predict=outer_train_predict,
                        suppressMsg=suppressMsg), dots)
@@ -262,7 +283,9 @@ outercv.default <- function(y, x,
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
       outercvCore(i, y, x, outer_folds, model, reg,
                   filterFUN, filter_options, weights,
-                  balance, balance_options, predict_type,
+                  balance, balance_options,
+                  modifyX, modifyX_useY, modifyX_options,
+                  predict_type,
                   outer_train_predict, verbose, suppressMsg, ...)
     }, mc.cores = cv.cores)
   }
@@ -285,7 +308,8 @@ outercv.default <- function(y, x,
   # fit final model
   if (verbose) message("Fitting final model on whole data")
   dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                       balance, balance_options)
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options)
   yfinal <- dat$ytrain
   filtx <- dat$filt_xtrain
   
@@ -325,6 +349,7 @@ outercv.default <- function(y, x,
               summary_vars = summary_vars(filtx),
               roc = fit.roc,
               summary = summary)
+  if (!is.null(modifyX)) out$xfinal <- filtx
   class(out) <- "outercv"
   out
 }
@@ -332,14 +357,17 @@ outercv.default <- function(y, x,
 
 outercvCore <- function(i, y, x, outer_folds, model, reg,
                         filterFUN, filter_options, weights,
-                        balance, balance_options, predict_type,
+                        balance, balance_options,
+                        modifyX, modifyX_useY, modifyX_options,
+                        predict_type,
                         outer_train_predict, verbose = FALSE,
                         suppressMsg = FALSE,
                         ...) {
   start <- Sys.time()
   test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
-                       balance, balance_options)
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options)
   ytrain <- dat$ytrain
   ytest <- dat$ytest
   filt_xtrain <- dat$filt_xtrain
@@ -580,6 +608,8 @@ summary.outercv <- function(object,
                              cv = paste0(length(object$outer_folds), "-fold CV"),
                              LOOCV = "leave-one-out CV"))
   cat("\nNo inner loop\n")
+  if (!is.null(object$call$modifyX))
+    cat("Modifier: ", object$call$modifyX, "\n")
   balance <- object$call$balance
   if (!is.null(balance)) {
     cat("Balancing: ", balance, "\n")

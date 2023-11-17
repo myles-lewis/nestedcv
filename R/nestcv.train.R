@@ -25,6 +25,19 @@
 #'   [smote()]
 #' @param balance_options List of additional arguments passed to the balancing
 #'   function
+#' @param modifyX Character string specifying the name of a function to modify
+#'   `x`. This can be an imputation function for replacing missing values, or a
+#'   more complex function which alters or even adds columns to `x`. The
+#'   required return value of this function depends on the `modifyX_useY`
+#'   setting.
+#' @param modifyX_useY Logical value whether the `x` modifying function makes
+#'   use of response training data from `y`. If `FALSE` then the `modifyX`
+#'   function simply needs to return a modified `x` object. If `TRUE` then the
+#'   `modifyX` function must return a model type object on which `predict()` can
+#'   be called, so that train and test partitions of `x` can be modified
+#'   independently.
+#' @param modifyX_options List of additional arguments passed to the `x`
+#'   modifying function
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
@@ -208,6 +221,9 @@ nestcv.train <- function(y, x,
                          weights = NULL,
                          balance = NULL,
                          balance_options = NULL,
+                         modifyX = NULL,
+                         modifyX_useY = FALSE,
+                         modifyX_options = NULL,
                          outer_method = c("cv", "LOOCV"),
                          n_outer_folds = 10,
                          n_inner_folds = 10,
@@ -289,7 +305,8 @@ nestcv.train <- function(y, x,
     # fit final model with CV on whole dataset first
     if (verbose) message("Fitting final model using CV on whole data")
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                         balance, balance_options)
+                         balance, balance_options,
+                         modifyX, modifyX_useY, modifyX_options)
     yfinal <- dat$ytrain
     filtx <- dat$filt_xtrain
     if (finalCV) {
@@ -337,6 +354,7 @@ nestcv.train <- function(y, x,
     dots <- list(...)
     varlist <- c("outer_folds", "inner_train_folds", "y", "x", "method", "filterFUN",
                  "filter_options", "weights", "balance", "balance_options",
+                 "modifyX", "modifyX_useY", "modifyX_options",
                  "metric", "trControl", "tuneGrid", "outer_train_predict",
                  "nestcv.trainCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
@@ -348,8 +366,10 @@ nestcv.train <- function(y, x,
                        inner_train_folds = inner_train_folds, method=method,
                        filterFUN=filterFUN, filter_options=filter_options,
                        weights=weights, balance=balance,
-                       balance_options=balance_options, metric=metric,
-                       trControl=trControl, tuneGrid=tuneGrid,
+                       balance_options=balance_options,
+                       modifyX=modifyX, modifyX_useY=modifyX_useY,
+                       modifyX_options=modifyX_options,
+                       metric=metric, trControl=trControl, tuneGrid=tuneGrid,
                        outer_train_predict=outer_train_predict), dots)
         do.call(nestcv.trainCore, args)
       }, cl = cl)
@@ -359,8 +379,10 @@ nestcv.train <- function(y, x,
                        inner_train_folds = inner_train_folds, method=method,
                        filterFUN=filterFUN, filter_options=filter_options,
                        weights=weights, balance=balance,
-                       balance_options=balance_options, metric=metric,
-                       trControl=trControl, tuneGrid=tuneGrid,
+                       balance_options=balance_options,
+                       modifyX=modifyX, modifyX_useY=modifyX_useY,
+                       modifyX_options=modifyX_options,
+                       metric=metric, trControl=trControl, tuneGrid=tuneGrid,
                        outer_train_predict=outer_train_predict), dots)
         do.call(nestcv.trainCore, args)
       })
@@ -372,6 +394,7 @@ nestcv.train <- function(y, x,
       nestcv.trainCore(i, y, x, outer_folds, inner_train_folds,
                        method, filterFUN, filter_options,
                        weights, balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options,
                        metric, trControl, tuneGrid, outer_train_predict,
                        verbose, ...)
     }, mc.cores = cv.cores, mc.allow.recursive = FALSE)
@@ -430,6 +453,7 @@ nestcv.train <- function(y, x,
               bestTunes = bestTunes,
               finalTune = finalTune,
               summary = summary)
+  if (!is.null(modifyX)) out$xfinal <- filtx
   class(out) <- "nestcv.train"
   out
 }
@@ -438,13 +462,15 @@ nestcv.train <- function(y, x,
 nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
                              method, filterFUN, filter_options,
                              weights, balance, balance_options,
+                             modifyX, modifyX_useY, modifyX_options,
                              metric, trControl, tuneGrid,
                              outer_train_predict, verbose = FALSE, ...) {
   start <- Sys.time()
   if (verbose) message_parallel("Starting Fold ", i, " ...")
   test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
-                       balance, balance_options)
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options)
   ytrain <- dat$ytrain
   ytest <- dat$ytest
   filt_xtrain <- dat$filt_xtrain
@@ -514,6 +540,8 @@ summary.nestcv.train <- function(object,
   if (!is.null(object$call$filterFUN)) {
     cat("Filter: ", object$call$filterFUN, "\n")
   } else cat("No filter\n")
+  if (!is.null(object$call$modifyX))
+    cat("Modifier: ", object$call$modifyX, "\n")
   cat("Outer loop: ", switch(object$outer_method,
                              cv = paste0(length(object$outer_folds), "-fold cv\n"),
                              LOOCV = "leave-one-out CV\n"))

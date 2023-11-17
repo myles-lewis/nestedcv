@@ -4,6 +4,7 @@
 nest_filt_bal <- function(test, y, x,
                           filterFUN, filter_options,
                           balance = NULL, balance_options,
+                          modifyX = NULL, modifyX_useY, modifyX_options,
                           penalty.factor = NULL) {
   if (is.null(test)) {
     ytrain <- y
@@ -33,6 +34,38 @@ nest_filt_bal <- function(test, y, x,
     filt_xtrain <- xtrain[, fset]
     filt_xtest <- xtest[, fset, drop = FALSE]
     filt_pen.factor <- penalty.factor[fset]
+  }
+  
+  if (!is.null(modifyX)) {
+    if (!modifyX_useY) {
+      # only modify X
+      args <- list(x = filt_xtrain)
+      args <- append(args, modifyX_options)
+      filt_xtrain <- do.call(modifyX, args)
+      if (!is.null(test)) {
+        args <- list(x = filt_xtest)
+        args <- append(args, modifyX_options)
+        filt_xtest <- do.call(modifyX, args)
+      }
+    } else {
+      # modify X using information from ytrain
+      args <- list(y = ytrain, x = filt_xtrain)
+      args <- append(args, modifyX_options)
+      fit <- do.call(modifyX, args)
+      filt_xtrain <- predict(fit, newdata = filt_xtrain)
+      if (!is.null(test)) {
+        filt_xtest <- predict(fit, newdata = filt_xtest)
+      }
+    }
+    if (!is.null(test) && !identical(colnames(filt_xtrain), colnames(filt_xtest)))
+      message("Error in modifyX: different colnames in xtrain and xtest")
+    if (!is.null(penalty.factor) && !identical(colnames(x), colnames(filt_xtrain))) {
+      pf <- rep(1, ncol(filt_xtrain))
+      ind <- match(colnames(x), colnames(filt_xtrain))
+      ok <- !is.na(ind)
+      pf[ind[ok]] <- penalty.factor[ok]
+      filt_pen.factor <- pf
+    }
   }
   
   if (!is.null(balance)) {

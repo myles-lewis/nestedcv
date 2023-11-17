@@ -29,6 +29,20 @@
 #'   [smote()]
 #' @param balance_options List of additional arguments passed to the balancing
 #'   function
+#' @param modifyX Character string specifying the name of a function to modify
+#'   `x`. This can be an imputation function for replacing missing values, or a
+#'   more complex function which alters or even adds columns to `x`. The
+#'   required return value of this function depends on the `modifyX_useY`
+#'   setting.
+#' @param modifyX_useY Logical value whether the `x` modifying function makes
+#'   use of response training data from `y`. If `FALSE` then the `modifyX`
+#'   function simply needs to return a modified `x` object, which will be
+#'   coerced to a matrix as required by `glmnet`. If `TRUE` then the `modifyX`
+#'   function must return a model type object on which `predict()` can be
+#'   called, so that train and test partitions of `x` can be modified
+#'   independently.
+#' @param modifyX_options List of additional arguments passed to the `x`
+#'   modifying function
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
@@ -53,7 +67,9 @@
 #' @param penalty.factor Separate penalty factors can be applied to each
 #'   coefficient. Can be 0 for some variables, which implies no shrinkage, and
 #'   that variable is always included in the model. Default is 1 for all
-#'   variables. See [glmnet]
+#'   variables. See [glmnet]. Note this works separately from filtering. For
+#'   some `nestedcv` filter functions you might need to set `force_vars` to
+#'   avoid filtering out features.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
 #'   on windows.
@@ -165,6 +181,9 @@ nestcv.glmnet <- function(y, x,
                           filter_options = NULL,
                           balance = NULL,
                           balance_options = NULL,
+                          modifyX = NULL,
+                          modifyX_useY = FALSE,
+                          modifyX_options = NULL,
                           outer_method = c("cv", "LOOCV"),
                           n_outer_folds = 10,
                           n_inner_folds = 10,
@@ -204,7 +223,8 @@ nestcv.glmnet <- function(y, x,
                           LOOCV = 1:NROW(y))
   } else {
     if ("n_outer_folds" %in% names(nestcv.call)) {
-      if (n_outer_folds != length(outer_folds)) stop("Mismatch between n_outer_folds and length(outer_folds)")
+      if (n_outer_folds != length(outer_folds))
+        stop("Mismatch between n_outer_folds and length(outer_folds)")
     }
     n_outer_folds <- length(outer_folds)
   }
@@ -217,6 +237,7 @@ nestcv.glmnet <- function(y, x,
     varlist = c("outer_folds", "y", "x", "filterFUN", "filter_options",
                 "alphaSet", "min_1se",  "n_inner_folds", "keep", "family",
                 "weights", "balance", "balance_options", "penalty.factor",
+                "modifyX", "modifyX_useY", "modifyX_options",
                 "outer_train_predict", "nestcv.glmnetCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
     on.exit(stopCluster(cl))
@@ -227,6 +248,8 @@ nestcv.glmnet <- function(y, x,
         args <- c(list(i=i, y=y, x=x, outer_folds=outer_folds,
                        filterFUN=filterFUN, filter_options=filter_options,
                        balance=balance, balance_options=balance_options,
+                       modifyX=modifyX, modifyX_useY=modifyX_useY,
+                       modifyX_options=modifyX_options,
                        alphaSet=alphaSet, min_1se=min_1se,
                        n_inner_folds=n_inner_folds, keep=keep, family=family,
                        weights=weights, penalty.factor=penalty.factor,
@@ -238,6 +261,8 @@ nestcv.glmnet <- function(y, x,
         args <- c(list(i=i, y=y, x=x, outer_folds=outer_folds,
                        filterFUN=filterFUN, filter_options=filter_options,
                        balance=balance, balance_options=balance_options,
+                       modifyX=modifyX, modifyX_useY=modifyX_useY,
+                       modifyX_options=modifyX_options,
                        alphaSet=alphaSet, min_1se=min_1se,
                        n_inner_folds=n_inner_folds, keep=keep, family=family,
                        weights=weights, penalty.factor=penalty.factor,
@@ -250,6 +275,7 @@ nestcv.glmnet <- function(y, x,
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
       nestcv.glmnetCore(i, y, x, outer_folds, filterFUN, filter_options,
                         balance, balance_options,
+                        modifyX, modifyX_useY, modifyX_options,
                         alphaSet, min_1se, n_inner_folds, keep, family,
                         weights, penalty.factor, outer_train_predict,
                         verbose, ...)
@@ -270,13 +296,14 @@ nestcv.glmnet <- function(y, x,
   }
   
   if (is.na(finalCV)) {
-    fit <- final_coef <- final_param <- yfinal <- final_vars <- xsub <- NA
+    fit <- final_coef <- final_param <- yfinal <- final_vars <- xsub <- filtx <- NA
   } else {
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                          balance, balance_options,
+                         modifyX, modifyX_useY, modifyX_options,
                          penalty.factor = penalty.factor)
     yfinal <- dat$ytrain
-    filtx <- dat$filt_xtrain
+    filtx <- as.matrix(dat$filt_xtrain)
     filtpen.factor <- dat$filt_pen.factor
     
     if (finalCV) {
@@ -312,7 +339,9 @@ nestcv.glmnet <- function(y, x,
     if (is.list(fin_coef) | length(fin_coef) == 1) {
       final_coef <- fin_coef  # multinomial
     } else {
-      cfmean <- colMeans(x[, names(fin_coef)[-1], drop = FALSE], na.rm = TRUE)
+      cfmean <- try(colMeans(x[, names(fin_coef)[-1], drop = FALSE], na.rm = TRUE),
+                    silent = TRUE)
+      if (inherits(cfmean, "try-error")) cfmean <- rep(NA, length(fin_coef) -1)
       final_coef <- data.frame(coef = fin_coef, meanExp = c(NA, cfmean))
     }
     final_vars <- colnames(filtx)
@@ -326,6 +355,7 @@ nestcv.glmnet <- function(y, x,
       }))
     }))
     all_vars <- unique(c(all_vars, final_vars))
+    all_vars <- all_vars[all_vars %in% colnames(x)]
     xsub <- x[, all_vars]
   }
   
@@ -348,6 +378,7 @@ nestcv.glmnet <- function(y, x,
               final_vars = final_vars,
               roc = glmnet.roc,
               summary = summary)
+  if (!is.null(modifyX)) out$xfinal <- filtx
   class(out) <- "nestcv.glmnet"
   out
 }
@@ -355,17 +386,20 @@ nestcv.glmnet <- function(y, x,
 
 nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
                               balance, balance_options,
+                              modifyX, modifyX_useY, modifyX_options,
                               alphaSet, min_1se, n_inner_folds, keep, family,
                               weights, penalty.factor,
                               outer_train_predict, verbose = FALSE, ...) {
   start <- Sys.time()
   test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
-                       balance, balance_options, penalty.factor)
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options,
+                       penalty.factor)
   ytrain <- dat$ytrain
   ytest <- dat$ytest
-  filt_xtrain <- dat$filt_xtrain
-  filt_xtest <- dat$filt_xtest
+  filt_xtrain <- as.matrix(dat$filt_xtrain)
+  filt_xtest <- as.matrix(dat$filt_xtest)
   filt_pen.factor <- dat$filt_pen.factor
   
   cvafit <- cva.glmnet(x = filt_xtrain, y = ytrain, 

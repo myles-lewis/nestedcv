@@ -13,6 +13,9 @@ nestcv.train(
   weights = NULL,
   balance = NULL,
   balance_options = NULL,
+  modifyX = NULL,
+  modifyX_useY = FALSE,
+  modifyX_options = NULL,
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   n_inner_folds = 10,
@@ -57,6 +60,22 @@ Current options are \code{"randomsample"} or \code{"smote"}. See \code{\link[=ra
 
 \item{balance_options}{List of additional arguments passed to the balancing
 function}
+
+\item{modifyX}{Character string specifying the name of a function to modify
+\code{x}. This can be an imputation function for replacing missing values, or a
+more complex function which alters or even adds columns to \code{x}. The
+required return value of this function depends on the \code{modifyX_useY}
+setting.}
+
+\item{modifyX_useY}{Logical value whether the \code{x} modifying function makes
+use of response training data from \code{y}. If \code{FALSE} then the \code{modifyX}
+function simply needs to return a modified \code{x} object. If \code{TRUE} then the
+\code{modifyX} function must return a model type object on which \code{predict()} can
+be called, so that train and test partitions of \code{x} can be modified
+independently.}
+
+\item{modifyX_options}{List of additional arguments passed to the \code{x}
+modifying function}
 
 \item{outer_method}{String of either \code{"cv"} or \code{"LOOCV"} specifying whether
 to do k-fold CV or leave one out CV (LOOCV) for the outer folds}

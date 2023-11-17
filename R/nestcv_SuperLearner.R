@@ -21,6 +21,20 @@
 #'   `outercv` is called with a formula. See [randomsample()] and [smote()]
 #' @param balance_options List of additional arguments passed to the balancing
 #'   function
+#' @param modifyX Character string specifying the name of a function to modify
+#'   `x`. This can be an imputation function for replacing missing values, or a
+#'   more complex function which alters or even adds columns to `x`. The
+#'   required return value of this function depends on the `modifyX_useY`
+#'   setting.
+#' @param modifyX_useY Logical value whether the `x` modifying function makes
+#'   use of response training data from `y`. If `FALSE` then the `modifyX`
+#'   function simply needs to return a modified `x` object, which will be
+#'   coerced to a dataframe as required by `SuperLearner`. If `TRUE` then the
+#'   `modifyX` function must return a model type object on which `predict()` can
+#'   be called, so that train and test partitions of `x` can be modified
+#'   independently.
+#' @param modifyX_options List of additional arguments passed to the `x`
+#'   modifying function
 #' @param outer_method String of either `"cv"` or `"LOOCV"` specifying whether
 #'   to do k-fold CV or leave one out CV (LOOCV) for the outer folds
 #' @param n_outer_folds Number of outer CV folds
@@ -34,6 +48,7 @@
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
 #'   removed from 'x' to preserve cases. Any other value means that `NA` are
 #'   ignored (a message is given).
+#' @param verbose Logical whether to print messages and show progress
 #' @param ... Additional arguments passed to [SuperLearner::SuperLearner()]
 #' @details
 #' This performs an outer CV on SuperLearner package ensemble models to measure
@@ -41,6 +56,10 @@
 #' of predictors. SuperLearner prefers dataframes as inputs for the predictors.
 #' If `x` is a matrix it will be coerced to a dataframe and variable names
 #' adjusted by [make.names()].
+#' 
+#' Parallelisation of the outer CV folds is available on linux/mac, but not
+#' available on windows. On windows, `snowSuperLearner()` is called instead, so
+#' that parallelisation is performed across each call to SuperLearner.
 #' 
 #' @note
 #' Care should be taken with some `SuperLearner` models e.g. `SL.gbm` as some
@@ -66,7 +85,7 @@
 #'   regression.}
 #' 
 #' @seealso [SuperLearner::SuperLearner()]
-#' 
+#' @importFrom parallel clusterEvalQ
 #' @export
 
 nestcv.SuperLearner <- function(y, x,
@@ -75,15 +94,20 @@ nestcv.SuperLearner <- function(y, x,
                                 weights = NULL,
                                 balance = NULL,
                                 balance_options = NULL,
+                                modifyX = NULL,
+                                modifyX_useY = FALSE,
+                                modifyX_options = NULL,
                                 outer_method = c("cv", "LOOCV"),
                                 n_outer_folds = 10,
                                 outer_folds = NULL,
                                 cv.cores = 1,
                                 na.option = "pass",
+                                verbose = TRUE,
                                 ...) {
   if (!requireNamespace("SuperLearner", quietly = TRUE)) {
     stop("Package 'SuperLearner' must be installed", call. = FALSE)
   }
+  start <- Sys.time()
   ncv.call <- match.call(expand.dots = TRUE)
   ok <- checkxy(y, x, na.option, weights)
   y <- y[ok$r]
@@ -104,26 +128,31 @@ nestcv.SuperLearner <- function(y, x,
   }
   
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
-    cl <- makeCluster(cv.cores)
+    if (verbose && Sys.getenv("RSTUDIO") == "1") {
+      message("Performing ", n_outer_folds, "-fold outer CV (using snow)")}
     dots <- list(...)
-    clusterExport(cl, varlist = c("outer_folds", "y", "x", "superLearner",
-                                  "filterFUN", "filter_options",
-                                  "weights", "balance", "balance_options",
-                                  "nestSLcore", "dots"),
-                  envir = environment())
+    cl <- parallel::makeCluster(cv.cores)
     on.exit(stopCluster(cl))
-    outer_res <- parLapply(cl = cl, outer_folds, function(test) {
-      args <- c(list(test=test, y=y, x=x,
+    foo <- parallel::clusterEvalQ(cl, library(SuperLearner))
+    outer_res <- lapply(seq_along(outer_folds), function(i) {
+      args <- c(list(cl=cl, i=i, y=y, x=x, outer_folds=outer_folds,
                      filterFUN=filterFUN, filter_options=filter_options,
                      weights=weights, balance=balance,
-                     balance_options=balance_options), dots)
-      do.call(nestSLcore, args)
+                     balance_options=balance_options,
+                     modifyX=modifyX, modifyX_useY=modifyX_useY,
+                     modifyX_options=modifyX_options, verbose=verbose), dots)
+      do.call(cl_nestSLcore, args)
     })
+    
   } else {
-    outer_res <- mclapply(outer_folds, function(test) {
-      nestSLcore(test, y, x,
+    if (verbose && Sys.getenv("RSTUDIO") == "1") {
+      message("Performing ", n_outer_folds, "-fold outer CV, using ",
+              plural(cv.cores, "core(s)"))}
+    outer_res <- mclapply(seq_along(outer_folds), function(i) {
+      nestSLcore(i, y, x, outer_folds,
                  filterFUN, filter_options, weights,
-                 balance, balance_options, ...)
+                 balance, balance_options,
+                 modifyX, modifyX_useY, modifyX_options, verbose, ...)
     }, mc.cores = cv.cores)
   }
   
@@ -140,13 +169,18 @@ nestcv.SuperLearner <- function(y, x,
   } else fit.roc <- NULL
   
   # fit final model
+  if (verbose) message("Fitting final model on whole data")
   dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                       balance, balance_options)
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options)
   yfinal <- dat$ytrain
   filtx <- dat$filt_xtrain
   Y <- if (reg) yfinal else as.numeric(yfinal) -1
   X <- data.frame(filtx)
   fit <- SuperLearner::SuperLearner(Y = Y, X = X, obsWeights = weights, ...)
+  
+  end <- Sys.time()
+  if (verbose) message("Duration: ", format(end - start))
   
   out <- list(call = ncv.call,
               output = output,
@@ -166,11 +200,17 @@ nestcv.SuperLearner <- function(y, x,
 }
 
 
-nestSLcore <- function(test, y, x,
+nestSLcore <- function(i, y, x, outer_folds,
                        filterFUN, filter_options, weights,
-                       balance, balance_options, ...) {
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options,
+                       verbose = FALSE, ...) {
+  start <- Sys.time()
+  if (verbose) message_parallel("Starting Fold ", i, " ...")
+  test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
-                       balance, balance_options)
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options)
   ytrain <- dat$ytrain
   ytest <- dat$ytest
   filt_xtrain <- data.frame(dat$filt_xtrain)
@@ -197,6 +237,60 @@ nestSLcore <- function(test, y, x,
     preds$predyp <- c(predSL$pred)
   }
   rownames(preds) <- rownames(filt_xtest)
+  if (verbose) {
+    end <- Sys.time()
+    message_parallel("                     Fold ", i, " done (",
+                     format(end - start, digits = 3), ")")
+  }
+  list(preds = preds,
+       fit = fit,
+       nfilter = ncol(filt_xtest),
+       ytrain = ytrain)
+}
+
+
+# snowSuperLearner version
+cl_nestSLcore <- function(cl, i, y, x, outer_folds,
+                          filterFUN, filter_options, weights,
+                          balance, balance_options,
+                          modifyX, modifyX_useY, modifyX_options,
+                          verbose, ...) {
+  start <- Sys.time()
+  test <- outer_folds[[i]]
+  dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options)
+  ytrain <- dat$ytrain
+  ytest <- dat$ytest
+  filt_xtrain <- data.frame(dat$filt_xtrain)
+  filt_xtest <- data.frame(dat$filt_xtest)
+  
+  reg <- !is.factor(y)
+  Y <- if (reg) ytrain else as.numeric(ytrain) -1
+  fit <- SuperLearner::snowSuperLearner(cl = cl, Y = Y, X = filt_xtrain,
+                                    obsWeights = weights[-test], ...)
+  
+  # test on outer CV
+  predSL <- predict(fit, newdata = filt_xtest,
+                    X = filt_xtrain, Y = Y, onlySL = TRUE)
+  if (reg) {
+    predy <- c(predSL$pred)
+  } else {
+    # convert prob to class
+    predy <- levels(y)[as.numeric(predSL$pred > 0.5) +1]
+  }
+  
+  preds <- data.frame(predy=predy, testy=ytest)
+  # for AUC
+  if (!reg & nlevels(y) == 2) {
+    preds$predyp <- c(predSL$pred)
+  }
+  rownames(preds) <- rownames(filt_xtest)
+  
+  end <- Sys.time()
+  if (verbose)
+    message("Fold ", i, " done (", format(end - start, digits = 3), ")")
+  
   list(preds = preds,
        fit = fit,
        nfilter = ncol(filt_xtest),
@@ -215,6 +309,8 @@ summary.nestcv.SuperLearner <- function(object,
                              LOOCV = "leave-one-out CV"))
   cat(paste0("\nInner loop:  ", object$final_fit$cvControl$V,
              "-fold CV (SuperLearner)\n"))
+  if (!is.null(object$call$modifyX))
+    cat("Modifier: ", object$call$modifyX, "\n")
   balance <- object$call$balance
   if (!is.null(balance)) {
     cat("Balancing: ", balance, "\n")
@@ -255,3 +351,12 @@ summary.nestcv.SuperLearner <- function(object,
   invisible(out)
 }
 
+
+#' @method predict nestcv.SuperLearner
+#' @export
+predict.nestcv.SuperLearner <- function(object, newdata, ...) {
+  newdata <- data.frame(newdata)
+  if (any(!object$final_vars %in% colnames(newdata))) 
+    stop("newdata is missing some predictors", call. = FALSE)
+  predict(object$final_fit, newdata = newdata[, object$final_vars], ...)
+}
