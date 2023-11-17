@@ -2,7 +2,7 @@ News
 =====
 
 # nestedcv 0.7.2
-###### 15/11/2023
+###### 17/11/2023
 
 * Added new feature via `modifyX` argument to all `nestedcv` models. This allows 
 more powerful manipulation of the predictors such as scaling, imputing missing 
@@ -10,6 +10,7 @@ values, adding extra columns through variable manipulations. Importantly these
 are applied to train and test input data separately.
 * Added `predict()` function for `nestcv.SuperLearner()`
 * Added `pred_SuperLearner` wrapper for use with `fastshap::explain`
+* Fixed parallelisation of `nestcv.SuperLearner()` on windows.
 
 # nestedcv 0.7.0
 ###### 18/10/2023
