@@ -122,30 +122,28 @@ nestcv.SuperLearner <- function(y, x,
                           cv = createFolds(y, k = n_outer_folds),
                           LOOCV = 1:length(y))
   }
-  if (verbose && Sys.getenv("RSTUDIO") == "1") {
-    message("Performing ", n_outer_folds, "-fold outer CV, using ",
-            plural(cv.cores, "core(s)"))}
-  if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
-    cl <- makeCluster(cv.cores)
+  
+  if (T || Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+    if (verbose && Sys.getenv("RSTUDIO") == "1") {
+      message("Performing ", n_outer_folds, "-fold outer CV")}
     dots <- list(...)
-    foo <- clusterEvalQ(cl, library(SuperLearner))
-    clusterExport(cl, varlist = c("outer_folds", "y", "x",
-                                  "filterFUN", "filter_options",
-                                  "weights", "balance", "balance_options",
-                                  "modifyX", "modifyX_useY", "modifyX_options",
-                                  "nestSLcore", "dots"),
-                  envir = environment())
-    outer_res <- parLapply(cl = cl, seq_along(outer_folds), function(i) {
-      args <- c(list(i=i, y=y, x=x, outer_folds = outer_folds,
+    cl <- parallel::makeCluster(cv.cores)
+    on.exit(stopCluster(cl))
+    foo <- parallel::clusterEvalQ(cl, library(SuperLearner))
+    outer_res <- lapply(seq_along(outer_folds), function(i) {
+      args <- c(list(cl=cl, i=i, y=y, x=x, outer_folds=outer_folds,
                      filterFUN=filterFUN, filter_options=filter_options,
                      weights=weights, balance=balance,
                      balance_options=balance_options,
                      modifyX=modifyX, modifyX_useY=modifyX_useY,
-                     modifyX_options=modifyX_options), dots)
-      do.call(nestSLcore, args)
+                     modifyX_options=modifyX_options, verbose=verbose), dots)
+      do.call(cl_nestSLcore, args)
     })
-    stopCluster(cl)
+    
   } else {
+    if (verbose && Sys.getenv("RSTUDIO") == "1") {
+      message("Performing ", n_outer_folds, "-fold outer CV, using ",
+              plural(cv.cores, "core(s)"))}
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
       nestSLcore(i, y, x, outer_folds,
                  filterFUN, filter_options, weights,
@@ -240,6 +238,55 @@ nestSLcore <- function(i, y, x, outer_folds,
     message_parallel("                     Fold ", i, " done (",
                      format(end - start, digits = 3), ")")
   }
+  list(preds = preds,
+       fit = fit,
+       nfilter = ncol(filt_xtest),
+       ytrain = ytrain)
+}
+
+
+# snowSuperLearner version
+cl_nestSLcore <- function(cl, i, y, x, outer_folds,
+                          filterFUN, filter_options, weights,
+                          balance, balance_options,
+                          modifyX, modifyX_useY, modifyX_options,
+                          verbose, ...) {
+  start <- Sys.time()
+  test <- outer_folds[[i]]
+  dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
+                       balance, balance_options,
+                       modifyX, modifyX_useY, modifyX_options)
+  ytrain <- dat$ytrain
+  ytest <- dat$ytest
+  filt_xtrain <- data.frame(dat$filt_xtrain)
+  filt_xtest <- data.frame(dat$filt_xtest)
+  
+  reg <- !is.factor(y)
+  Y <- if (reg) ytrain else as.numeric(ytrain) -1
+  fit <- SuperLearner::snowSuperLearner(cl = cl, Y = Y, X = filt_xtrain,
+                                    obsWeights = weights[-test], ...)
+  
+  # test on outer CV
+  predSL <- predict(fit, newdata = filt_xtest,
+                    X = filt_xtrain, Y = Y, onlySL = TRUE)
+  if (reg) {
+    predy <- c(predSL$pred)
+  } else {
+    # convert prob to class
+    predy <- levels(y)[as.numeric(predSL$pred > 0.5) +1]
+  }
+  
+  preds <- data.frame(predy=predy, testy=ytest)
+  # for AUC
+  if (!reg & nlevels(y) == 2) {
+    preds$predyp <- c(predSL$pred)
+  }
+  rownames(preds) <- rownames(filt_xtest)
+  
+  end <- Sys.time()
+  if (verbose)
+    message("Fold ", i, " done (", format(end - start, digits = 3), ")")
+  
   list(preds = preds,
        fit = fit,
        nfilter = ncol(filt_xtest),
