@@ -117,6 +117,10 @@ performance, allowing balancing of imbalanced datasets as well as filtering
 of predictors. SuperLearner prefers dataframes as inputs for the predictors.
 If \code{x} is a matrix it will be coerced to a dataframe and variable names
 adjusted by \code{\link[=make.names]{make.names()}}.
+
+Parallelisation of the outer CV folds is available on linux/mac, but not
+available on windows. On windows, \code{snowSuperLearner()} is called instead, so
+that parallelisation is performed across each call to SuperLearner.
 }
 \note{
 Care should be taken with some \code{SuperLearner} models e.g. \code{SL.gbm} as some

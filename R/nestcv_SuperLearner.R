@@ -57,6 +57,10 @@
 #' If `x` is a matrix it will be coerced to a dataframe and variable names
 #' adjusted by [make.names()].
 #' 
+#' Parallelisation of the outer CV folds is available on linux/mac, but not
+#' available on windows. On windows, `snowSuperLearner()` is called instead, so
+#' that parallelisation is performed across each call to SuperLearner.
+#' 
 #' @note
 #' Care should be taken with some `SuperLearner` models e.g. `SL.gbm` as some
 #' models have multicore enabled by default, which can lead to huge numbers of
@@ -123,9 +127,9 @@ nestcv.SuperLearner <- function(y, x,
                           LOOCV = 1:length(y))
   }
   
-  if (T || Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+  if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     if (verbose && Sys.getenv("RSTUDIO") == "1") {
-      message("Performing ", n_outer_folds, "-fold outer CV")}
+      message("Performing ", n_outer_folds, "-fold outer CV (using snow)")}
     dots <- list(...)
     cl <- parallel::makeCluster(cv.cores)
     on.exit(stopCluster(cl))
