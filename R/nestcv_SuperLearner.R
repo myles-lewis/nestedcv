@@ -107,6 +107,8 @@ nestcv.SuperLearner <- function(y, x,
   if (!requireNamespace("SuperLearner", quietly = TRUE)) {
     stop("Package 'SuperLearner' must be installed", call. = FALSE)
   }
+  if (!"package:SuperLearner" %in% search())
+    stop("Package 'SuperLearner' is not loaded", call. = FALSE)
   start <- Sys.time()
   ncv.call <- match.call(expand.dots = TRUE)
   ok <- checkxy(y, x, na.option, weights)
