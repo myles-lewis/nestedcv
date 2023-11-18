@@ -43,6 +43,7 @@
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
 #'   on windows.
+#' @param final Logical whether to fit final model.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
@@ -101,6 +102,7 @@ nestcv.SuperLearner <- function(y, x,
                                 n_outer_folds = 10,
                                 outer_folds = NULL,
                                 cv.cores = 1,
+                                final = TRUE,
                                 na.option = "pass",
                                 verbose = TRUE,
                                 ...) {
@@ -170,16 +172,21 @@ nestcv.SuperLearner <- function(y, x,
                          quiet = TRUE)
   } else fit.roc <- NULL
   
-  # fit final model
-  if (verbose) message("Fitting final model on whole data")
-  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                       balance, balance_options,
-                       modifyX, modifyX_useY, modifyX_options)
-  yfinal <- dat$ytrain
-  filtx <- dat$filt_xtrain
-  Y <- if (reg) yfinal else as.numeric(yfinal) -1
-  X <- data.frame(filtx)
-  fit <- SuperLearner::SuperLearner(Y = Y, X = X, obsWeights = weights, ...)
+  if (!final | is.na(final)) {
+    fit <- yfinal <- final_vars <- filtx <- NA
+  } else {
+    # fit final model
+    if (verbose) message("Fitting final model on whole data")
+    dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
+                         balance, balance_options,
+                         modifyX, modifyX_useY, modifyX_options)
+    yfinal <- dat$ytrain
+    filtx <- dat$filt_xtrain
+    Y <- if (reg) yfinal else as.numeric(yfinal) -1
+    X <- data.frame(filtx)
+    fit <- SuperLearner::SuperLearner(Y = Y, X = X, obsWeights = weights, ...)
+    final_vars <- colnames(filtx)
+  }
   
   end <- Sys.time()
   if (verbose) message("Duration: ", format(end - start))
@@ -193,10 +200,10 @@ nestcv.SuperLearner <- function(y, x,
               y = y,
               yfinal = yfinal,
               final_fit = fit,
-              final_vars = colnames(filtx),
-              summary_vars = summary_vars(filtx),
+              final_vars = final_vars,
               roc = fit.roc,
               summary = summary)
+  if (!is.null(modifyX)) out$xfinal <- filtx
   class(out) <- "nestcv.SuperLearner"
   out
 }
