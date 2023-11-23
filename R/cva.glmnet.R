@@ -204,11 +204,11 @@ predict.nestcv.glmnet <- function(object, newdata,
                                   s = object$final_param["lambda"],
                                   .modify = FALSE,
                                   ...) {
-  newdata <- as.matrix(newdata)
   if (.modify) {
     if (is.null(object$modify_fit)) stop("`modify_fit` is missing")
     newdata <- predict(object$modify_fit, newdata)
   }
+  newdata <- as.matrix(newdata)
   newx <- fix_cols(object$final_fit, newdata, s = s)
   predict(object$final_fit, newx = newx, s = unname(s), ...)
 }

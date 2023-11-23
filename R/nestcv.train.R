@@ -453,7 +453,10 @@ nestcv.train <- function(y, x,
               bestTunes = bestTunes,
               finalTune = finalTune,
               summary = summary)
-  if (!is.null(modifyX)) out$xfinal <- filtx
+  if (!is.na(finalCV) & !is.null(modifyX)) {
+    out$xfinal <- filtx
+    if (modifyX_useY) out$modify_fit <- dat$modify_fit
+  }
   class(out) <- "nestcv.train"
   out
 }
@@ -574,7 +577,12 @@ summary.nestcv.train <- function(object,
 
 #' @method predict nestcv.train
 #' @export
-predict.nestcv.train <- function(object, newdata, ...) {
+predict.nestcv.train <- function(object, newdata,
+                                 .modify = FALSE, ...) {
+  if (.modify) {
+    if (is.null(object$modify_fit)) stop("`modify_fit` is missing")
+    newdata <- predict(object$modify_fit, newdata)
+  }
   if (any(!object$final_vars %in% colnames(newdata))) 
     stop("newdata is missing some predictors", call. = FALSE)
   predict(object$final_fit, newdata = newdata[, object$final_vars], ...)

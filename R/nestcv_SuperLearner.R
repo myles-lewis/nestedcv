@@ -203,7 +203,10 @@ nestcv.SuperLearner <- function(y, x,
               final_vars = final_vars,
               roc = fit.roc,
               summary = summary)
-  if (!is.null(modifyX)) out$xfinal <- filtx
+  if (!is.na(final) && final && !is.null(modifyX)) {
+    out$xfinal <- filtx
+    if (modifyX_useY) out$modify_fit <- dat$modify_fit
+  }
   class(out) <- "nestcv.SuperLearner"
   out
 }
@@ -363,7 +366,12 @@ summary.nestcv.SuperLearner <- function(object,
 
 #' @method predict nestcv.SuperLearner
 #' @export
-predict.nestcv.SuperLearner <- function(object, newdata, ...) {
+predict.nestcv.SuperLearner <- function(object, newdata,
+                                        .modify = FALSE, ...) {
+  if (.modify) {
+    if (is.null(object$modify_fit)) stop("`modify_fit` is missing")
+    newdata <- predict(object$modify_fit, newdata)
+  }
   newdata <- data.frame(newdata)
   if (any(!object$final_vars %in% colnames(newdata))) 
     stop("newdata is missing some predictors", call. = FALSE)

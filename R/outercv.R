@@ -349,7 +349,10 @@ outercv.default <- function(y, x,
               summary_vars = summary_vars(filtx),
               roc = fit.roc,
               summary = summary)
-  if (!is.null(modifyX)) out$xfinal <- filtx
+  if (!is.null(modifyX)) {
+    out$xfinal <- filtx
+    if (modifyX_useY) out$modify_fit <- dat$modify_fit
+  }
   class(out) <- "outercv"
   out
 }
