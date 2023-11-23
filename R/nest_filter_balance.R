@@ -51,10 +51,10 @@ nest_filt_bal <- function(test, y, x,
       # modify X using information from ytrain
       args <- list(y = ytrain, x = filt_xtrain)
       args <- append(args, modifyX_options)
-      fit <- do.call(modifyX, args)
-      filt_xtrain <- predict(fit, newdata = filt_xtrain)
+      modfit <- do.call(modifyX, args)
+      filt_xtrain <- predict(modfit, newdata = filt_xtrain)
       if (!is.null(test)) {
-        filt_xtest <- predict(fit, newdata = filt_xtest)
+        filt_xtest <- predict(modfit, newdata = filt_xtest)
       }
     }
     if (!is.null(test) && !identical(colnames(filt_xtrain), colnames(filt_xtest)))
@@ -76,9 +76,11 @@ nest_filt_bal <- function(test, y, x,
     filt_xtrain <- bal_dat$x
   }
   
-  list(ytrain = ytrain, ytest = ytest,
-       filt_xtrain = filt_xtrain, filt_xtest = filt_xtest,
-       filt_pen.factor = filt_pen.factor)
+  out <- list(ytrain = ytrain, ytest = ytest,
+              filt_xtrain = filt_xtrain, filt_xtest = filt_xtest,
+              filt_pen.factor = filt_pen.factor)
+  if (modifyX_useY) out$modify_fit <- modfit
+  out
 }
 
 

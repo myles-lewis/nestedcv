@@ -378,7 +378,10 @@ nestcv.glmnet <- function(y, x,
               final_vars = final_vars,
               roc = glmnet.roc,
               summary = summary)
-  if (!is.null(modifyX)) out$xfinal <- filtx
+  if (!is.null(modifyX)) {
+    out$xfinal <- filtx
+    if (!is.na(finalCV) & modifyX_useY) out$modify_fit <- dat$modify_fit
+  }
   class(out) <- "nestcv.glmnet"
   out
 }
