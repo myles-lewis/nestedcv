@@ -189,7 +189,7 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
 #' @param object Fitted `nestcv.glmnet` object
 #' @param newdata New data to predict outcome on
 #' @param s Value of lambda for glmnet prediction
-#' @param .modify Logical whether to modify `newdata` based on `modifyX`
+#' @param modify Logical whether to modify `newdata` based on `modifyX`
 #'   function. See `modifyX` and `modifyX_useY` arguments in [nestcv.glmnet()].
 #' @param ... Other arguments passed to `predict.glmnet`.
 #' @return Object returned depends on the `...` argument passed to predict
@@ -202,9 +202,9 @@ summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") -
 #' @export
 predict.nestcv.glmnet <- function(object, newdata,
                                   s = object$final_param["lambda"],
-                                  .modify = FALSE,
+                                  modify = FALSE,
                                   ...) {
-  if (.modify) {
+  if (modify) {
     if (is.null(object$modify_fit)) stop("`modify_fit` is missing")
     newdata <- predict(object$modify_fit, newdata)
   }

@@ -367,8 +367,8 @@ summary.nestcv.SuperLearner <- function(object,
 #' @method predict nestcv.SuperLearner
 #' @export
 predict.nestcv.SuperLearner <- function(object, newdata,
-                                        .modify = FALSE, ...) {
-  if (.modify) {
+                                        modify = FALSE, ...) {
+  if (modify) {
     if (is.null(object$modify_fit)) stop("`modify_fit` is missing")
     newdata <- predict(object$modify_fit, newdata)
   }

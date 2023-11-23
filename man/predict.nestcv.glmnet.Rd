@@ -4,13 +4,7 @@
 \alias{predict.nestcv.glmnet}
 \title{Predict method for nestcv.glmnet fits}
 \usage{
-\method{predict}{nestcv.glmnet}(
-  object,
-  newdata,
-  s = object$final_param["lambda"],
-  .modify = FALSE,
-  ...
-)
+\method{predict}{nestcv.glmnet}(object, newdata, s = object$final_param["lambda"], modify = FALSE, ...)
 }
 \arguments{
 \item{object}{Fitted \code{nestcv.glmnet} object}
@@ -19,7 +13,7 @@
 
 \item{s}{Value of lambda for glmnet prediction}
 
-\item{.modify}{Logical whether to modify \code{newdata} based on \code{modifyX}
+\item{modify}{Logical whether to modify \code{newdata} based on \code{modifyX}
 function. See \code{modifyX} and \code{modifyX_useY} arguments in \code{\link[=nestcv.glmnet]{nestcv.glmnet()}}.}
 
 \item{...}{Other arguments passed to \code{predict.glmnet}.}

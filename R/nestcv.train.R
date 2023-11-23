@@ -578,8 +578,8 @@ summary.nestcv.train <- function(object,
 #' @method predict nestcv.train
 #' @export
 predict.nestcv.train <- function(object, newdata,
-                                 .modify = FALSE, ...) {
-  if (.modify) {
+                                 modify = FALSE, ...) {
+  if (modify) {
     if (is.null(object$modify_fit)) stop("`modify_fit` is missing")
     newdata <- predict(object$modify_fit, newdata)
   }
