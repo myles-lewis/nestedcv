@@ -372,8 +372,8 @@ predict.nestcv.SuperLearner <- function(object, newdata,
     if (is.null(object$modify_fit)) stop("`modify_fit` is missing")
     newdata <- predict(object$modify_fit, newdata)
   }
-  newdata <- data.frame(newdata)
   if (any(!object$final_vars %in% colnames(newdata))) 
     stop("newdata is missing some predictors", call. = FALSE)
-  predict(object$final_fit, newdata = newdata[, object$final_vars], ...)
+  newdata <- data.frame(newdata[, object$final_vars])
+  predict(object$final_fit, newdata = newdata, ...)
 }
