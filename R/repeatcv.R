@@ -1,0 +1,83 @@
+
+#' Repeated nested CV
+#'
+#' Performs repeated calls to a `nestedcv` model call to determine performance
+#' across repeated runs of nested CV.
+#' 
+#' @param expr An expression containing a call to [nestcv.glmnet()],
+#'   [nestcv.train()], [nestcv.SuperLearner()] or [outercv()].
+#' @param n Number of repeats
+#' @param repeat_folds Optional list containing fold indices to be applied to
+#'   the outer CV folds.
+#' @param progress Logical whether to show progress.
+#' @returns Matrix of performance metrics
+#' @importFrom magrittr pipe_nested
+#' @importFrom utils setTxtProgressBar txtProgressBar
+#' @examples
+#' \donttest{
+#' library(mlbench)
+#' data(BostonHousing2)
+#' dat <- BostonHousing2
+#' y <- dat$cmedv
+#' x <- subset(dat, select = -c(cmedv, medv, town, chas))
+#'
+#' res <- repeatcv(n = 3, nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+#'                                      n_outer_folds = 4, cv.cores = 2))
+#' res
+#' 
+#' ## using magrittr nested pipe
+#' `%|>%` <- magrittr::pipe_nested
+#' res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+#'                      n_outer_folds = 4, cv.cores = 2) %|>%
+#'        repeatcv(3)
+#' res
+#' }
+#' @export
+
+repeatcv <- function(expr, n = 5, repeat_folds = NULL, progress = TRUE) {
+  cl <- match.call()
+  start <- Sys.time()
+  ex <- substitute(expr)
+  # modify args in expr call
+  ex$verbose <- FALSE
+  d <- deparse(ex[[1]])
+  if (d == "nestcv.glmnet" | d == "nestcv.train") ex$finalCV <- NA
+  if (d == "nestcv.SuperLearner") ex$final <- FALSE
+  if (progress) pb <- txtProgressBar(style = 3)
+  out <- lapply(seq_len(n), function(i) {
+    if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
+    fit <- try(eval.parent(ex), silent = TRUE)
+    if (progress) setTxtProgressBar(pb, i / n)
+    if (inherits(fit, "try-error")) {
+      if (progress) warning(fit[1])
+      return(NA)
+    }
+    s <- fit$summary
+    if (is.list(s)) return(s[[2]])
+    s
+  })
+  
+  if (progress) {
+    close(pb)
+    end <- Sys.time()
+    cat("Time", format(end - start, digits = 3), "\n")
+  }
+  out <- do.call(rbind, out)
+  rownames(out) <- seq_len(n)
+  out
+}
+
+
+#' Create folds for repeated nested CV
+#' 
+#' @param y Outcome vector
+#' @param repeats Number of repeats
+#' @param n_outer_folds Number of outer CV folds
+#' @returns List containing indices of outer CV folds
+#' @export
+#' 
+repeatfolds <- function(y, repeats = 5, n_outer_folds = 10) {
+  rfolds <- lapply(seq_len(repeats), function(i) createFolds(y, k = n_outer_folds))
+  names(rfolds) <- paste0("Rep", seq_len(repeats))
+  rfolds
+}
