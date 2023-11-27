@@ -1,8 +1,8 @@
 
 #' Repeated nested CV
 #'
-#' Performs repeated calls to a `nestedcv` model call to determine performance
-#' across repeated runs of nested CV.
+#' Performs repeated calls to a `nestedcv` model to determine performance across
+#' repeated runs of nested CV.
 #' 
 #' @param expr An expression containing a call to [nestcv.glmnet()],
 #'   [nestcv.train()], [nestcv.SuperLearner()] or [outercv()].

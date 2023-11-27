@@ -21,8 +21,8 @@ the outer CV folds.}
 Matrix of performance metrics
 }
 \description{
-Performs repeated calls to a \code{nestedcv} model call to determine performance
-across repeated runs of nested CV.
+Performs repeated calls to a \code{nestedcv} model to determine performance across
+repeated runs of nested CV.
 }
 \examples{
 \donttest{

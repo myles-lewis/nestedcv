@@ -177,7 +177,7 @@ performance compared to scheme C since the numbers for total testing are larger.
 knitr::include_graphics("fig2.svg")
 ```
 
-### Nested CV with glmnet
+# Nested CV with glmnet
 
 In the real life example below, RNA-Sequencing gene expression data from
 synovial biopsies from patients with rheumatoid arthritis in the R4RA randomised
@@ -343,7 +343,7 @@ using one-hot encoding to create dummy variables using the function `one_hot()`.
 For `nestcv.glmnet` models, `one_hot()` should be used with the argument
 `all_levels = FALSE` to avoid the predictor matrix not being full rank.
 
-### Filters
+# Filters
 
 Multiple filters for variable reduction are available including:
 
@@ -676,7 +676,7 @@ Other arguments can be passed in to the balance function as a named list via the
 expanded/altered response vector and `x` the matrix or dataframe of predictors
 with increased/decreased samples in rows and predictors in columns.
 
-### Nested CV with caret
+# Nested CV with caret
 
 Nested CV can also be performed using the `caret` package framework written by
 Max Kuhn (https://topepo.github.io/caret/index.html). This enables access to the
@@ -786,7 +786,11 @@ together try using caret's `groupKFold()` function. For stratification with
 multiple columns (e.g. response + one or more grouping variables), try
 `multi_strata()` from the `splitTools` package.
 
-### Making predictions
+# Bayesian shrinkage models
+
+See the accompanying vignette "Using *outercv* with Bayesian shrinkage models".
+
+# Making predictions
 
 For all of the `nestedcv` model training functions described above, predictions
 on new data can be made by referencing the final fitted object which is fitted
@@ -800,9 +804,47 @@ preds <- predict(res.rtx, newdata = data.rtx, type = 'response')
 preds <- predict(ncv, newdata = data.rtx)
 ```
 
-### Bayesian shrinkage models
+# Repeated nested CV
 
-See the accompanying vignette "Using *outercv* with Bayesian shrinkage models".
+The main commands `nestcv.glmnet()`, `nestcv.train()`, `nestcv.SuperLearner()`
+and `outercv()` perform nested CV once, giving an estimate of performance from
+the outer CV folds across the whole data. Repeating this process many
+times, which is called 'repeated nested CV', gives a more accurate overall
+estimate of performance. This can be performed by wrapping a call to one of the
+above `nestedcv` model functions in `repeatcv()`.
+
+```{r results='hide'}
+library(mlbench)
+data(BostonHousing2)
+dat <- BostonHousing2
+y <- dat$cmedv
+x <- subset(dat, select = -c(cmedv, medv, town, chas))
+
+# single fit
+fit <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1, cv.cores = 2)
+
+# repeated nested CV
+res <- repeatcv(n = 5, nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+                                     n_outer_folds = 4, cv.cores = 2))
+```
+```{r}
+res
+```
+
+Or for those that prefer using pipes to lay out code, the nested pipe from the
+`magrittr` package can be employed (the standard pipe `%>%` will _not_ work).
+
+```{r eval=FALSE}
+# using a pipe from the magrittr package
+`%|>%` <- magrittr::pipe_nested
+
+res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1, cv.cores = 2) %|>%
+  repeatcv(5)
+```
+
+Repeated nested CV is computationally intensive and can be very time consuming.
+We strongly recommend that these calls fully exploit parallelisation as
+explained below.
 
 # Parallelisation
 
