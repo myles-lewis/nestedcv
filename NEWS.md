@@ -4,7 +4,7 @@ News
 # nestedcv 0.7.3
 ###### 27/11/2023
 * Added new feature `repeatcv()` to apply repeated nested CV to the main 
-`nestedcv` model functions for improved measurement of model performance.
+`nestedcv` model functions for robust measurement of model performance.
 
 # nestedcv 0.7.2
 ###### 17/11/2023
