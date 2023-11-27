@@ -10,6 +10,11 @@
 #' @param repeat_folds Optional list containing fold indices to be applied to
 #'   the outer CV folds.
 #' @param progress Logical whether to show progress.
+#' @details
+#' When comparing models, it is recommended to fix the sets of outer CV folds
+#' used across each repeat for comparing performance between models. The
+#' function [repeatfolds()] can be used to create a fixed set of outer CV folds
+#' for each repeat.
 #' @returns Matrix of performance metrics
 #' @importFrom magrittr pipe_nested
 #' @importFrom utils setTxtProgressBar txtProgressBar
@@ -30,6 +35,13 @@
 #' res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
 #'                      n_outer_folds = 4, cv.cores = 2) %|>%
 #'        repeatcv(3)
+#' res
+#' 
+#' ## set up fixed fold indices
+#' folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
+#' res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+#'                      n_outer_folds = 4, cv.cores = 2) %|>%
+#'        repeatcv(3, repeat_folds = folds)
 #' res
 #' }
 #' @export

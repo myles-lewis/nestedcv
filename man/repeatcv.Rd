@@ -24,6 +24,12 @@ Matrix of performance metrics
 Performs repeated calls to a \code{nestedcv} model to determine performance across
 repeated runs of nested CV.
 }
+\details{
+When comparing models, it is recommended to fix the sets of outer CV folds
+used across each repeat for comparing performance between models. The
+function \code{\link[=repeatfolds]{repeatfolds()}} can be used to create a fixed set of outer CV folds
+for each repeat.
+}
 \examples{
 \donttest{
 library(mlbench)
@@ -41,6 +47,13 @@ res
 res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
                      n_outer_folds = 4, cv.cores = 2) \%|>\%
        repeatcv(3)
+res
+
+## set up fixed fold indices
+folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
+res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+                     n_outer_folds = 4, cv.cores = 2) \%|>\%
+       repeatcv(3, repeat_folds = folds)
 res
 }
 }
