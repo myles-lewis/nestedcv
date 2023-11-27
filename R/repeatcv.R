@@ -128,9 +128,15 @@ print.repeatcv <- function(x, ...) {
 
 
 #' @export
-summary.repeatcv <- function(object, ...) {
+summary.repeatcv <- function(object,
+                             digits = max(3L, getOption("digits") - 3L),
+                             ...) {
+  cat("Call:\n")
+  print(attr(object, "call"))
   m <- colMeans(object, na.rm = TRUE)
   sd <- apply(object, 2, sd, na.rm = TRUE)
   sem <- sd / sqrt(nrow(object))
-  data.frame(mean = m, sd = sd, sem = sem)
+  df <- data.frame(mean = m, sd = sd, sem = sem)
+  print(df, digits = digits)
+  invisible(df)
 }
