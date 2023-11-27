@@ -828,6 +828,7 @@ res <- repeatcv(n = 5, nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
 ```
 ```{r}
 res
+summary(res)
 ```
 
 Or for those that prefer using pipes to lay out code, the nested pipe from the
