@@ -835,7 +835,7 @@ Or for those that prefer using pipes to lay out code, the nested pipe from the
 `magrittr` package can be employed (the standard pipe `%>%` will _not_ work).
 
 ```{r eval=FALSE}
-# using a pipe from the magrittr package
+# using nested pipe from magrittr
 `%|>%` <- magrittr::pipe_nested
 
 res <- nestcv.glmnet(y, x,
@@ -851,6 +851,7 @@ each repeat.
 ```{r eval=FALSE}
 set.seed(123, "L'Ecuyer-CMRG")
 folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
+
 res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
                      n_outer_folds = 4, cv.cores = 2) %|>%
        repeatcv(3, repeat_folds = folds)
