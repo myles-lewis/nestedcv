@@ -814,17 +814,16 @@ estimate of performance. This can be performed by wrapping a call to one of the
 above `nestedcv` model functions in `repeatcv()`.
 
 ```{r results='hide'}
-library(mlbench)
-data(BostonHousing2)
-dat <- BostonHousing2
-y <- dat$cmedv
-x <- subset(dat, select = -c(cmedv, medv, town, chas))
+data("iris")
+dat <- iris
+y <- dat$Species
+x <- dat[, 1:4]
 
 # single fit
-fit <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1, cv.cores = 2)
+fit <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1, cv.cores = 2)
 
 # repeated nested CV
-res <- repeatcv(n = 5, nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+res <- repeatcv(n = 5, nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
                                      n_outer_folds = 4, cv.cores = 2))
 ```
 ```{r}
@@ -838,8 +837,9 @@ Or for those that prefer using pipes to lay out code, the nested pipe from the
 # using a pipe from the magrittr package
 `%|>%` <- magrittr::pipe_nested
 
-res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1, cv.cores = 2) %|>%
-  repeatcv(5)
+res <- nestcv.glmnet(y, x,
+                     family = "multinomial", alphaSet = 1, cv.cores = 2) %|>%
+       repeatcv(5)
 ```
 
 If you are using repeated nested CV to compare performance between models, it is
@@ -848,8 +848,9 @@ function `repeatfolds()` can be used to create a fixed set of outer CV folds for
 each repeat.
 
 ```{r eval=FALSE}
+set.seed(123, "L'Ecuyer-CMRG")
 folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
-res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
                      n_outer_folds = 4, cv.cores = 2) %|>%
        repeatcv(3, repeat_folds = folds)
 res

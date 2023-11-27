@@ -15,31 +15,32 @@
 #' used across each repeat for comparing performance between models. The
 #' function [repeatfolds()] can be used to create a fixed set of outer CV folds
 #' for each repeat.
-#' @returns Matrix of performance metrics
+#' @returns Matrix of performance metrics of S3 class 'repeatcv'.
 #' @importFrom magrittr pipe_nested
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @examples
 #' \donttest{
-#' library(mlbench)
-#' data(BostonHousing2)
-#' dat <- BostonHousing2
-#' y <- dat$cmedv
-#' x <- subset(dat, select = -c(cmedv, medv, town, chas))
+#' data("iris")
+#' dat <- iris
+#' y <- dat$Species
+#' x <- dat[, 1:4]
 #'
-#' res <- repeatcv(n = 3, nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+#' res <- repeatcv(n = 3, nestcv.glmnet(y, x,
+#'                                      family = "multinomial", alphaSet = 1,
 #'                                      n_outer_folds = 4, cv.cores = 2))
 #' res
 #' 
 #' ## using magrittr nested pipe
 #' `%|>%` <- magrittr::pipe_nested
-#' res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+#' res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
 #'                      n_outer_folds = 4, cv.cores = 2) %|>%
 #'        repeatcv(3)
 #' res
 #' 
 #' ## set up fixed fold indices
+#' set.seed(123, "L'Ecuyer-CMRG")
 #' folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
-#' res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+#' res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
 #'                      n_outer_folds = 4, cv.cores = 2) %|>%
 #'        repeatcv(3, repeat_folds = folds)
 #' res
@@ -76,6 +77,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, progress = TRUE) {
   }
   out <- do.call(rbind, out)
   rownames(out) <- seq_len(n)
+  class(out) <- c("repeatcv", class(out))
   out
 }
 
@@ -86,6 +88,21 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, progress = TRUE) {
 #' @param repeats Number of repeats
 #' @param n_outer_folds Number of outer CV folds
 #' @returns List containing indices of outer CV folds
+#' @examples
+#' \donttest{
+#' data("iris")
+#' dat <- iris
+#' y <- dat$Species
+#' x <- dat[, 1:4]
+#' 
+#' ## set up fixed fold indices
+#' set.seed(123, "L'Ecuyer-CMRG")
+#' folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
+#' res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
+#'                      n_outer_folds = 4, cv.cores = 2) %|>%
+#'        repeatcv(3, repeat_folds = folds)
+#' res
+#' }
 #' @export
 #' 
 repeatfolds <- function(y, repeats = 5, n_outer_folds = 10) {

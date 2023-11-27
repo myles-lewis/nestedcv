@@ -19,3 +19,19 @@ List containing indices of outer CV folds
 \description{
 Create folds for repeated nested CV
 }
+\examples{
+\donttest{
+data("iris")
+dat <- iris
+y <- dat$Species
+x <- dat[, 1:4]
+
+## set up fixed fold indices
+set.seed(123, "L'Ecuyer-CMRG")
+folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
+res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
+                     n_outer_folds = 4, cv.cores = 2) \%|>\%
+       repeatcv(3, repeat_folds = folds)
+res
+}
+}

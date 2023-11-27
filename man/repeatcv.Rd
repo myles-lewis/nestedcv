@@ -32,26 +32,27 @@ for each repeat.
 }
 \examples{
 \donttest{
-library(mlbench)
-data(BostonHousing2)
-dat <- BostonHousing2
-y <- dat$cmedv
-x <- subset(dat, select = -c(cmedv, medv, town, chas))
+data("iris")
+dat <- iris
+y <- dat$Species
+x <- dat[, 1:4]
 
-res <- repeatcv(n = 3, nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+res <- repeatcv(n = 3, nestcv.glmnet(y, x,
+                                     family = "multinomial", alphaSet = 1,
                                      n_outer_folds = 4, cv.cores = 2))
 res
 
 ## using magrittr nested pipe
 `\%|>\%` <- magrittr::pipe_nested
-res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
                      n_outer_folds = 4, cv.cores = 2) \%|>\%
        repeatcv(3)
 res
 
 ## set up fixed fold indices
+set.seed(123, "L'Ecuyer-CMRG")
 folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
-res <- nestcv.glmnet(y, x, family = "gaussian", alphaSet = 1,
+res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
                      n_outer_folds = 4, cv.cores = 2) \%|>\%
        repeatcv(3, repeat_folds = folds)
 res
