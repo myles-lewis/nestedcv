@@ -133,6 +133,7 @@ summary.repeatcv <- function(object,
                              ...) {
   cat("Call:\n")
   print(attr(object, "call"))
+  cat(nrow(object), "repeats\n")
   m <- colMeans(object, na.rm = TRUE)
   sd <- apply(object, 2, sd, na.rm = TRUE)
   sem <- sd / sqrt(nrow(object))
