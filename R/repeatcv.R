@@ -29,6 +29,7 @@
 #'                                      family = "multinomial", alphaSet = 1,
 #'                                      n_outer_folds = 4, cv.cores = 2))
 #' res
+#' summary(res)
 #' 
 #' ## using magrittr nested pipe
 #' `%|>%` <- magrittr::pipe_nested
