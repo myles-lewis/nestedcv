@@ -18,7 +18,7 @@ the outer CV folds.}
 \item{progress}{Logical whether to show progress.}
 }
 \value{
-Matrix of performance metrics
+Matrix of performance metrics of S3 class 'repeatcv'.
 }
 \description{
 Performs repeated calls to a \code{nestedcv} model to determine performance across

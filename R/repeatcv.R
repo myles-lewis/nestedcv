@@ -110,3 +110,19 @@ repeatfolds <- function(y, repeats = 5, n_outer_folds = 10) {
   names(rfolds) <- paste0("Rep", seq_len(repeats))
   rfolds
 }
+
+
+#' @export
+print.repeatcv <- function(x, ...) {
+  class(x) <- class(x)[class(x) != "repeatcv"]
+  print(x)
+}
+
+
+#' @export
+summary.repeatcv <- function(object, ...) {
+  m <- colMeans(object, na.rm = TRUE)
+  sd <- apply(object, 2, sd, na.rm = TRUE)
+  sem <- sd / sqrt(nrow(object))
+  data.frame(mean = m, sd = sd, sem = sem)
+}
