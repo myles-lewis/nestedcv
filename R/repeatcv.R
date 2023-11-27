@@ -49,6 +49,8 @@
 
 repeatcv <- function(expr, n = 5, repeat_folds = NULL, progress = TRUE) {
   cl <- match.call()
+  if (!is.null(repeat_folds) && length(repeat_folds) != n)
+    stop("mismatch between n and repeat_folds")
   start <- Sys.time()
   ex <- substitute(expr)
   # modify args in expr call
