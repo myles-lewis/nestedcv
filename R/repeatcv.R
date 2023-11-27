@@ -52,7 +52,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, progress = TRUE) {
   if (!is.null(repeat_folds) && length(repeat_folds) != n)
     stop("mismatch between n and repeat_folds")
   start <- Sys.time()
-  ex <- substitute(expr)
+  ex0 <- ex <- substitute(expr)
   # modify args in expr call
   ex$verbose <- FALSE
   d <- deparse(ex[[1]])
@@ -79,6 +79,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, progress = TRUE) {
   }
   out <- do.call(rbind, out)
   rownames(out) <- seq_len(n)
+  attr(out, "call") <- ex0
   class(out) <- c("repeatcv", class(out))
   out
 }
@@ -121,6 +122,7 @@ repeatfolds <- function(y, repeats = 5, n_outer_folds = 10) {
 #' @export
 print.repeatcv <- function(x, ...) {
   class(x) <- class(x)[class(x) != "repeatcv"]
+  attr(x, "call") <- NULL
   print(x)
 }
 
