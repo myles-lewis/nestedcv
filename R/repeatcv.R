@@ -52,14 +52,15 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, progress = TRUE) {
   cl <- match.call()
   if (!is.null(repeat_folds) && length(repeat_folds) != n)
     stop("mismatch between n and repeat_folds")
-  start <- Sys.time()
   ex0 <- ex <- substitute(expr)
   # modify args in expr call
   ex$verbose <- FALSE
   d <- deparse(ex[[1]])
   if (d == "nestcv.glmnet" | d == "nestcv.train") ex$finalCV <- NA
   if (d == "nestcv.SuperLearner") ex$final <- FALSE
-  if (progress) pb <- txtProgressBar(style = 3)
+  if (d == "nestcv.train") d <- ex$method
+  d <- gsub("nestcv.", "", d)
+  if (progress) pb <- txtProgressBar2(title = d)
   out <- lapply(seq_len(n), function(i) {
     if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
     fit <- try(eval.parent(ex), silent = TRUE)
@@ -73,11 +74,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, progress = TRUE) {
     s
   })
   
-  if (progress) {
-    close(pb)
-    end <- Sys.time()
-    cat("Time", format(end - start, digits = 3), "\n")
-  }
+  if (progress) close(pb)
   out <- do.call(rbind, out)
   rownames(out) <- seq_len(n)
   attr(out, "call") <- ex0
