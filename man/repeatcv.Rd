@@ -4,7 +4,7 @@
 \alias{repeatcv}
 \title{Repeated nested CV}
 \usage{
-repeatcv(expr, n = 5, repeat_folds = NULL, progress = TRUE)
+repeatcv(expr, n = 5, repeat_folds = NULL, keep = FALSE, progress = TRUE)
 }
 \arguments{
 \item{expr}{An expression containing a call to \code{\link[=nestcv.glmnet]{nestcv.glmnet()}},
@@ -15,10 +15,15 @@ repeatcv(expr, n = 5, repeat_folds = NULL, progress = TRUE)
 \item{repeat_folds}{Optional list containing fold indices to be applied to
 the outer CV folds.}
 
+\item{keep}{Logical whether to save repeated outer CV predictions for ROC
+curves etc.}
+
 \item{progress}{Logical whether to show progress.}
 }
 \value{
-Matrix of performance metrics of S3 class 'repeatcv'.
+List of S3 class 'repeatcv' containing the model call, matrix of
+performance metrics, and if \code{keep = TRUE} a matrix or dataframe containing
+the outer CV predictions from each repeat.
 }
 \description{
 Performs repeated calls to a \code{nestedcv} model to determine performance across
