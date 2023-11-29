@@ -133,16 +133,22 @@ repeatfolds <- function(y, repeats = 5, n_outer_folds = 10) {
 
 
 #' @export
-summary.repeatcv <- function(object,
-                             digits = max(3L, getOption("digits") - 3L),
-                             ...) {
-  cat("Call:\n")
-  print(object$call)
-  cat(nrow(object$result), "repeats\n")
+summary.repeatcv <- function(object, ...) {
   m <- colMeans(object$result, na.rm = TRUE)
   sd <- apply(object$result, 2, sd, na.rm = TRUE)
   sem <- sd / sqrt(nrow(object$result))
   df <- data.frame(mean = m, sd = sd, sem = sem)
-  print(df, digits = digits)
-  invisible(df)
+  structure(list(call = object$call, n = nrow(object$result), summary = df),
+            class = "summary.repeatcv")
+}
+
+
+#' @export
+print.summary.repeatcv <- function(object,
+                                   digits = max(3L, getOption("digits") - 3L),
+                                   ...) {
+  cat("Call:\n")
+  print(object$call)
+  cat(object$n, "repeats\n")
+  print(object$summary, digits = digits)
 }
