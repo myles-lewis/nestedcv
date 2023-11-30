@@ -133,6 +133,16 @@ repeatfolds <- function(y, repeats = 5, n_outer_folds = 10) {
 
 
 #' @export
+print.repeatcv <- function(x, digits = max(3L, getOption("digits") - 3L),
+                           ...) {
+  cat("Call:\n")
+  print(x$call)
+  cat("\n")
+  print(x$result, digits = digits)
+}
+
+
+#' @export
 summary.repeatcv <- function(object, ...) {
   m <- colMeans(object$result, na.rm = TRUE)
   sd <- apply(object$result, 2, sd, na.rm = TRUE)
