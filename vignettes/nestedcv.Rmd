@@ -864,13 +864,13 @@ explained below.
 
 # Parallelisation
 
-Currently `nestcv.glmnet`, `nestcv.train` and `outercv` all allow
-parallelisation of the outer CV loop using `mclapply` from the `parallel`
-package on unix/mac and `parLapply` on windows. This is enabled by specifying
-the number of cores using the argument `cv.cores`. Since in some cases the
-filtering process can be time consuming (e.g. `rf_filter`, `relieff_filter`), we
-tend to recommend parallelisation of the outer CV loop over parallelisation of
-the inner CV loop.
+Currently `nestcv.glmnet`, `nestcv.train`, `nestcv.SuperLearner` and `outercv`
+all allow parallelisation of the outer CV loop using `mclapply` from the
+`parallel` package on unix/mac and `parLapply` on windows. This is enabled by
+specifying the number of cores using the argument `cv.cores`. Since in some
+cases the filtering process can be time consuming (e.g. `rf_filter`,
+`relieff_filter`), we tend to recommend parallelisation of the outer CV loop
+over parallelisation of the inner CV loop.
 
 To check the number of physical cores, use:
 
@@ -898,7 +898,8 @@ duplicating data and packages for each process.
 # Troubleshooting
 
 A key problem with parallelisation in R is that errors, warnings and user input
-have to be suppressed during multicore processing. If a `nestedcv` call is not
+have to be suppressed during multicore processing, except in Rstudio which
+allows some special printing to the console. If a `nestedcv` call is not
 working, we recommend that you try it with `cv.cores=1` first to check it starts
 up without error messages.
 
