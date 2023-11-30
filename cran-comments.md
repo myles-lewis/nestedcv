@@ -2,6 +2,9 @@
 
 0 errors | 0 warnings | 0 note
 
+* Added new feature for repeated nested CV
+* Bugfixes to parallelisation code
+
 * Fixed CRAN check ERROR which arose due to update in fastshap package
 * Additional bugfixes
 
