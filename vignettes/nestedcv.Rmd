@@ -503,7 +503,7 @@ removing unnecessary columns. `nestedcv` does check that the column names are
 identical in both train and test folds after this process. Throughout the
 process train and test outer CV folds are kept separate.
 
-### Class imbalance
+# Class imbalance
 
 Class imbalance is known to impact on model fitting for certain model types,
 e.g. random forest, SVM. Models may tend to aim to predict the majority class
