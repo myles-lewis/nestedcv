@@ -1,6 +1,6 @@
 Package: nestedcv
 Title: Nested Cross-Validation with 'glmnet' and 'caret'
-Version: 0.7.2
+Version: 0.7.3
 Authors@R: 
     c(person(given = "Myles",family = "Lewis",
     role = c("aut", "cre"),
@@ -26,6 +26,7 @@ Imports:
     foreach,
     ggplot2,
     glmnet,
+    magrittr,
     matrixStats,
     matrixTests,
     methods,
