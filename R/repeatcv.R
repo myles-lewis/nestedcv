@@ -144,11 +144,11 @@ summary.repeatcv <- function(object, ...) {
 
 
 #' @export
-print.summary.repeatcv <- function(object,
+print.summary.repeatcv <- function(x,
                                    digits = max(3L, getOption("digits") - 3L),
                                    ...) {
   cat("Call:\n")
-  print(object$call)
-  cat(object$n, "repeats\n")
-  print(object$summary, digits = digits)
+  print(x$call)
+  cat(x$n, "repeats\n")
+  print(x$summary, digits = digits)
 }
