@@ -30,7 +30,9 @@ txtProgressBar2 <- function(min = 0, max = 1, initial = 0, char = "=",
     stop("'char' must have a non-zero width")
   if (is.na(width)) {
     width <- getOption("width")
-    width <- width - 22L - nchar(title)
+    nt <- nchar(title)
+    if (length(nt) == 0) nt <- 0
+    width <- width - 22L - nt
     if (nw > 1) 
       width <- trunc(width/nw)
   }
