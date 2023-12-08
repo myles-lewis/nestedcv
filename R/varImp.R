@@ -197,6 +197,7 @@ var_stability.nestcv.train <- function(x,
 #'   caret models.
 #' @param dir_labels Character vector for controlling the legend when
 #'   `direction = 1`
+#' @param scheme Vector of 2 colours for directionality when `direction = 1`
 #' @param breaks Vector of continuous breaks for legend colour/size
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model. If set
@@ -216,6 +217,7 @@ plot_var_stability <- function(x,
                                top = NULL,
                                direction = 0,
                                dir_labels = NULL,
+                               scheme = c("royalblue", "red"),
                                breaks = NULL,
                                percent = TRUE,
                                level = 1,
@@ -270,7 +272,7 @@ plot_var_stability <- function(x,
                          xmax = .data$mean + .data$sem), height = 0.2) +
       geom_point(aes(size = .data$frequency,
                      fill = .data$direction), shape = 21) +
-      scale_fill_manual(values=c("royalblue", "red"), na.translate = FALSE) +
+      scale_fill_manual(values = scheme, na.translate = FALSE) +
       scale_radius(breaks = breaks,
                    limits = c(1, NA)) +
       (if (min(df$mean) > 0) xlim(0, NA)) +
@@ -317,6 +319,7 @@ plot_var_stability <- function(x,
 #'   caret models.
 #' @param dir_labels Character vector for controlling the legend when
 #'   `direction = 1`
+#' @param scheme Vector of 2 colours for directionality when `direction = 1`
 #' @param breaks Vector of continuous breaks for legend colour/size
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model. If set
@@ -336,6 +339,7 @@ barplot_var_stability <- function(x,
                                   top = NULL,
                                   direction = 0,
                                   dir_labels = NULL,
+                                  scheme = c("royalblue", "red"),
                                   breaks = NULL,
                                   percent = TRUE,
                                   level = 1,
@@ -394,8 +398,8 @@ barplot_var_stability <- function(x,
       geom_col(aes(fill = .data$direction), width = 0.75) +
       geom_errorbarh(aes(xmin = .data$mean - .data$sem,
                          xmax = .data$mean + .data$sem), height = 0.3) +
-      scale_fill_manual(values=c("royalblue", "red"), na.translate = FALSE) +
-      scale_y_discrete(limits=rev) + ylab("") +
+      scale_fill_manual(values = scheme, na.translate = FALSE) +
+      scale_y_discrete(limits = rev) + ylab("") +
       xlab(xtitle) +
       theme_minimal() +
       theme(axis.text = element_text(colour = "black"))

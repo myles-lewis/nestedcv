@@ -10,6 +10,7 @@ barplot_var_stability(
   top = NULL,
   direction = 0,
   dir_labels = NULL,
+  scheme = c("royalblue", "red"),
   breaks = NULL,
   percent = TRUE,
   level = 1,
@@ -34,6 +35,8 @@ caret models.}
 
 \item{dir_labels}{Character vector for controlling the legend when
 \code{direction = 1}}
+
+\item{scheme}{Vector of 2 colours for directionality when \code{direction = 1}}
 
 \item{breaks}{Vector of continuous breaks for legend colour/size}
 
