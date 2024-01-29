@@ -5,8 +5,8 @@ News
 ###### 29/01/2024
 * Fixed issue with xgboost on linux/windows with parallel processing in 
 `nestcv.train()`. If argument `cv.cores` >1, openMP multithreading is now 
-disabled, which stops caret models `xgbTree` and `xgbLinear` from crashing, and 
-allows them to be parallelised efficiently over the outer CV loops.
+disabled, which prevents caret models `xgbTree` and `xgbLinear` from crashing, 
+and allows them to be parallelised efficiently over the outer CV loops.
 * Improvements to `var_stability()` and its plots.
 
 # nestedcv 0.7.3
