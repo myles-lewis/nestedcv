@@ -299,6 +299,15 @@ nestcv.train <- function(y, x,
     }
   }
   
+  # disable openMP multithreading (fix for xgboost)
+  if (cv.cores >= 2) {
+    threads <- RhpcBLASctl::omp_get_max_threads()
+    if (!is.na(threads) && threads > 1) {
+      RhpcBLASctl::omp_set_num_threads(1L)
+      on.exit(RhpcBLASctl::omp_set_num_threads(threads))
+    }
+  }
+  
   if (is.na(finalCV)) {
     final_fit <- finalTune <- filtx <- yfinal <- xsub <- NA
   } else {
