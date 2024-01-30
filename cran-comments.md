@@ -2,6 +2,9 @@
 
 0 errors | 0 warnings | 0 note
 
+* Important bugfixes for xgboost models and multivariate gaussian/cox glmnet 
+models
+
 * Added new feature for repeated nested CV
 * Bugfixes to parallelisation code
 
