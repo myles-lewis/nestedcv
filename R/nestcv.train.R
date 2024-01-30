@@ -131,7 +131,13 @@
 #' caret must be off, otherwise an error will be generated. Alternatively if you
 #' wish to use parallelisation in caret, then parallelisation in `nestcv.train`
 #' can be fully disabled by leaving `cv.cores = 1`.
-#'   
+#'
+#' xgboost models fitted via caret using `method = "xgbTree"` or `"xgbLinear"`
+#' invoke openMP multithreading on linux/windows by default which causes
+#' `nestcv.train` to fail when `cv.cores` >1 (nested parallelisation). Mac OS is
+#' unaffected. In order to prevent this, `nestcv.train()` sets openMP threads to
+#' 1 if `cv.cores` >1.
+#'
 #' For classification, `metric` defaults to using 'logLoss' with the `trControl`
 #' arguments `classProbs = TRUE, summaryFunction = mnLogLoss`, rather than
 #' 'Accuracy' which is the default classification metric in `caret`. See
