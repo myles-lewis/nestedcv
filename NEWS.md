@@ -2,12 +2,13 @@ News
 =====
 
 # nestedcv 0.7.4
-###### 29/01/2024
+###### 30/01/2024
 * Fixed issue with xgboost on linux/windows with parallel processing in 
 `nestcv.train()`. If argument `cv.cores` >1, openMP multithreading is now 
 disabled, which prevents caret models `xgbTree` and `xgbLinear` from crashing, 
 and allows them to be parallelised efficiently over the outer CV loops.
 * Improvements to `var_stability()` and its plots.
+* Fix major bug in multivariate Gaussian and Cox models in `nestcv.glmnet()`
 
 # nestedcv 0.7.3
 ###### 30/11/2023
