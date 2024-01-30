@@ -436,16 +436,16 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     preds <- cbind(preds, predyp)
   }
   if (outer_train_predict) {
-    if (is.atomic(y)) {
-      train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
-      train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
-    } else {
+    if (is.matrix(y)) {
       # mgaussian, cox
       train_predy <- predict(alphafit, newx = filt_xtrain, s = s)
       train_preds <- as.data.frame(cbind(ytrain, train_predy))
       if (family == "mgaussian") {
         colnames(train_preds)[1:ncol(y)] <- paste0("ytrain.", colnames(ytrain))
       }
+    } else {
+      train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
+      train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
     }
     if (family == "binomial") {
       predyp <- as.vector(predict(alphafit, newx = filt_xtrain, s = s))
