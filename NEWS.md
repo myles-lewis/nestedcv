@@ -8,7 +8,7 @@ News
 disabled, which prevents caret models `xgbTree` and `xgbLinear` from crashing, 
 and allows them to be parallelised efficiently over the outer CV loops.
 * Improvements to `var_stability()` and its plots.
-* Fix major bug in multivariate Gaussian and Cox models in `nestcv.glmnet()`
+* Fixed major bug in multivariate Gaussian and Cox models in `nestcv.glmnet()`
 
 # nestedcv 0.7.3
 ###### 30/11/2023
