@@ -54,6 +54,7 @@
 
 repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
                      progress = TRUE, rep.cores = 1L) {
+  start <- Sys.time()
   cl <- match.call()
   if (!is.null(repeat_folds) && length(repeat_folds) != n)
     stop("mismatch between n and repeat_folds")
@@ -65,13 +66,23 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
   if (d == "nestcv.SuperLearner") ex$final <- FALSE
   if (d == "nestcv.train") d <- ex$method
   d <- gsub("nestcv.", "", d)
-  if (progress & rep.cores == 1) pb <- txtProgressBar2(title = d)
+  cv.cores <- ex$cv.cores
+  if (is.null(cv.cores)) cv.cores <- 1
+  if (progress) {
+    if (rep.cores == 1) {pb <- txtProgressBar2(title = d)
+    } else {
+      message_parallel("Nested cv with ", n, " repeats")
+      message_parallel(rep.cores, " cores for repeats x ",
+                       cv.cores, " cores for nested CV = ",
+                       rep.cores * cv.cores, " cores total")
+      cat_parallel(d, "  |")
+    }
+  }
   res <- mclapply(seq_len(n), function(i) {
-    if (progress & rep.cores > 1) cat_parallel(".")
     if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
     fit <- try(eval.parent(ex), silent = TRUE)
     if (progress & rep.cores == 1) setTxtProgressBar(pb, i / n)
-    if (progress & rep.cores > 1) cat_parallel("+")
+    if (progress & rep.cores > 1) cat_parallel("=")
     if (inherits(fit, "try-error")) {
       if (progress) warning(fit[1])
       if (keep) return(list(NA, NA))
@@ -82,8 +93,13 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     if (keep) return(list(s, fit$output))
     s
   }, mc.cores = rep.cores)
-  if (progress & rep.cores == 1) close(pb)
-  
+  if (progress) {
+    if (rep.cores == 1) {close(pb)
+    } else {
+      end <- Sys.time()
+      cat_parallel("| (", format(end - start, digits = 3), ")")
+    }
+  }
   if (keep) {
     res1 <- lapply(res, "[[", 1)
     result <- do.call(rbind, res1)
