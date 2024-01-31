@@ -12,11 +12,20 @@
 #' @param keep Logical whether to save repeated outer CV predictions for ROC
 #'   curves etc.
 #' @param progress Logical whether to show progress.
+#' @param rep.cores Integer specifying number of cores/threads to invoke.
 #' @details
 #' When comparing models, it is recommended to fix the sets of outer CV folds
 #' used across each repeat for comparing performance between models. The
 #' function [repeatfolds()] can be used to create a fixed set of outer CV folds
 #' for each repeat.
+#' 
+#' Parallelisation of repeats is performed using `parallel::mclapply` (not
+#' available on windows). Beware that `cv.cores` can still be set within calls
+#' to `nestedcv` models (= nested parallelisation). This means that `rep.cores`
+#' x `cv.cores` number of processes/forks will be spawned, so be careful not to
+#' overload your CPU. In general parallelisation of repeats using `rep.cores` is
+#' faster than parallelisation using `cv.cores`.
+#' 
 #' @returns List of S3 class 'repeatcv' containing the model call, matrix of
 #'   performance metrics, and if `keep = TRUE` a matrix or dataframe containing
 #'   the outer CV predictions from each repeat.
@@ -74,7 +83,8 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       message_parallel("Nested cv with ", n, " repeats")
       message_parallel(rep.cores, " cores for repeats x ",
                        cv.cores, " cores for nested CV = ",
-                       rep.cores * cv.cores, " cores total")
+                       rep.cores * cv.cores, " cores total (",
+                       parallel::detectCores(logical = FALSE), "-core CPU)")
       cat_parallel(d, "  |")
     }
   }
@@ -97,7 +107,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     if (rep.cores == 1) {close(pb)
     } else {
       end <- Sys.time()
-      cat_parallel("| (", format(end - start, digits = 3), ")")
+      cat_parallel("|  (", format(end - start, digits = 3), ")")
     }
   }
   if (keep) {
