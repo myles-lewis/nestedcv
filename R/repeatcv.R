@@ -81,10 +81,15 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     if (rep.cores == 1) {pb <- txtProgressBar2(title = d)
     } else {
       message_parallel("Nested cv with ", n, " repeats")
-      message_parallel(rep.cores, " cores for repeats x ",
-                       cv.cores, " cores for nested CV = ",
-                       rep.cores * cv.cores, " cores total (",
-                       parallel::detectCores(logical = FALSE), "-core CPU)")
+      if (cv.cores > 1) {
+        message_parallel(rep.cores, " cores for repeats x ",
+                         cv.cores, " cores for nested CV = ",
+                         rep.cores * cv.cores, " cores total (",
+                         parallel::detectCores(logical = FALSE), "-core CPU)")
+      } else {
+        message_parallel(rep.cores, " cores for repeats (",
+                         parallel::detectCores(logical = FALSE), "-core CPU)")
+      }
       cat_parallel(d, "  |")
     }
   }
