@@ -88,6 +88,16 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       cat_parallel(d, "  |")
     }
   }
+  
+  # disable openMP multithreading (fix for xgboost)
+  if (rep.cores >= 2) {
+    threads <- RhpcBLASctl::omp_get_max_threads()
+    if (!is.na(threads) && threads > 1) {
+      RhpcBLASctl::omp_set_num_threads(1L)
+      on.exit(RhpcBLASctl::omp_set_num_threads(threads))
+    }
+  }
+  
   res <- mclapply(seq_len(n), function(i) {
     if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
     fit <- try(eval.parent(ex), silent = TRUE)
