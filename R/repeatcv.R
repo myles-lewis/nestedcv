@@ -19,7 +19,7 @@
 #' function [repeatfolds()] can be used to create a fixed set of outer CV folds
 #' for each repeat.
 #' 
-#' Parallelisation of repeats is performed using `parallel::mclapply` (not
+#' Parallelisation over repeats is performed using `parallel::mclapply` (not
 #' available on windows). Beware that `cv.cores` can still be set within calls
 #' to `nestedcv` models (= nested parallelisation). This means that `rep.cores`
 #' x `cv.cores` number of processes/forks will be spawned, so be careful not to
@@ -80,14 +80,14 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
   if (progress) {
     if (rep.cores == 1) {pb <- txtProgressBar2(title = d)
     } else {
-      message_parallel("Nested cv with ", n, " repeats")
+      cat_parallel("Nested cv with ", n, " repeats")
       if (cv.cores > 1) {
-        message_parallel(rep.cores, " cores for repeats x ",
-                         cv.cores, " cores for nested CV = ",
+        message_parallel(":\n", rep.cores, " cores for repeats x ",
+                         cv.cores, " cores for CV = ",
                          rep.cores * cv.cores, " cores total (",
                          parallel::detectCores(logical = FALSE), "-core CPU)")
       } else {
-        message_parallel(rep.cores, " cores for repeats (",
+        message_parallel(" over ", rep.cores, " cores (",
                          parallel::detectCores(logical = FALSE), "-core CPU)")
       }
       cat_parallel(d, "  |")
