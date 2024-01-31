@@ -52,7 +52,8 @@
 #' }
 #' @export
 
-repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE, progress = TRUE) {
+repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
+                     progress = TRUE, rep.cores = 1L) {
   cl <- match.call()
   if (!is.null(repeat_folds) && length(repeat_folds) != n)
     stop("mismatch between n and repeat_folds")
@@ -64,11 +65,13 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE, progress = 
   if (d == "nestcv.SuperLearner") ex$final <- FALSE
   if (d == "nestcv.train") d <- ex$method
   d <- gsub("nestcv.", "", d)
-  if (progress) pb <- txtProgressBar2(title = d)
-  res <- lapply(seq_len(n), function(i) {
+  if (progress & rep.cores == 1) pb <- txtProgressBar2(title = d)
+  res <- mclapply(seq_len(n), function(i) {
+    if (progress & rep.cores > 1) cat_parallel(".")
     if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
     fit <- try(eval.parent(ex), silent = TRUE)
-    if (progress) setTxtProgressBar(pb, i / n)
+    if (progress & rep.cores == 1) setTxtProgressBar(pb, i / n)
+    if (progress & rep.cores > 1) cat_parallel("+")
     if (inherits(fit, "try-error")) {
       if (progress) warning(fit[1])
       if (keep) return(list(NA, NA))
@@ -78,8 +81,8 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE, progress = 
     if (is.list(s)) s <- s[[2]]
     if (keep) return(list(s, fit$output))
     s
-  })
-  if (progress) close(pb)
+  }, mc.cores = rep.cores)
+  if (progress & rep.cores == 1) close(pb)
   
   if (keep) {
     res1 <- lapply(res, "[[", 1)
@@ -161,4 +164,11 @@ print.summary.repeatcv <- function(x,
   print(x$call)
   cat(x$n, "repeats\n")
   print(x$summary, digits = digits)
+}
+
+
+# Prints using shell echo from inside mclapply when run in Rstudio
+cat_parallel <- function(...) {
+  if (Sys.getenv("RSTUDIO") != "1") return()
+  system(sprintf('echo "%s', paste0(..., '\\c"', collapse = "")))
 }
