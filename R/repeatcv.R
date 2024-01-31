@@ -12,11 +12,20 @@
 #' @param keep Logical whether to save repeated outer CV predictions for ROC
 #'   curves etc.
 #' @param progress Logical whether to show progress.
+#' @param rep.cores Integer specifying number of cores/threads to invoke.
 #' @details
 #' When comparing models, it is recommended to fix the sets of outer CV folds
 #' used across each repeat for comparing performance between models. The
 #' function [repeatfolds()] can be used to create a fixed set of outer CV folds
 #' for each repeat.
+#' 
+#' Parallelisation over repeats is performed using `parallel::mclapply` (not
+#' available on windows). Beware that `cv.cores` can still be set within calls
+#' to `nestedcv` models (= nested parallelisation). This means that `rep.cores`
+#' x `cv.cores` number of processes/forks will be spawned, so be careful not to
+#' overload your CPU. In general parallelisation of repeats using `rep.cores` is
+#' faster than parallelisation using `cv.cores`.
+#' 
 #' @returns List of S3 class 'repeatcv' containing the model call, matrix of
 #'   performance metrics, and if `keep = TRUE` a matrix or dataframe containing
 #'   the outer CV predictions from each repeat.
@@ -52,7 +61,9 @@
 #' }
 #' @export
 
-repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE, progress = TRUE) {
+repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
+                     progress = TRUE, rep.cores = 1L) {
+  start <- Sys.time()
   cl <- match.call()
   if (!is.null(repeat_folds) && length(repeat_folds) != n)
     stop("mismatch between n and repeat_folds")
@@ -64,11 +75,39 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE, progress = 
   if (d == "nestcv.SuperLearner") ex$final <- FALSE
   if (d == "nestcv.train") d <- ex$method
   d <- gsub("nestcv.", "", d)
-  if (progress) pb <- txtProgressBar2(title = d)
-  res <- lapply(seq_len(n), function(i) {
+  cv.cores <- ex$cv.cores
+  if (is.null(cv.cores)) cv.cores <- 1
+  if (progress) {
+    if (rep.cores == 1) {pb <- txtProgressBar2(title = d)
+    } else {
+      cat_parallel("Nested cv with ", n, " repeats")
+      if (cv.cores > 1) {
+        message_parallel(":\n", rep.cores, " cores for repeats x ",
+                         cv.cores, " cores for CV = ",
+                         rep.cores * cv.cores, " cores total (",
+                         parallel::detectCores(logical = FALSE), "-core CPU)")
+      } else {
+        message_parallel(" over ", rep.cores, " cores (",
+                         parallel::detectCores(logical = FALSE), "-core CPU)")
+      }
+      cat_parallel(d, "  |")
+    }
+  }
+  
+  # disable openMP multithreading (fix for xgboost)
+  if (rep.cores >= 2) {
+    threads <- RhpcBLASctl::omp_get_max_threads()
+    if (!is.na(threads) && threads > 1) {
+      RhpcBLASctl::omp_set_num_threads(1L)
+      on.exit(RhpcBLASctl::omp_set_num_threads(threads))
+    }
+  }
+  
+  res <- mclapply(seq_len(n), function(i) {
     if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
     fit <- try(eval.parent(ex), silent = TRUE)
-    if (progress) setTxtProgressBar(pb, i / n)
+    if (progress & rep.cores == 1) setTxtProgressBar(pb, i / n)
+    if (progress & rep.cores > 1) cat_parallel("=")
     if (inherits(fit, "try-error")) {
       if (progress) warning(fit[1])
       if (keep) return(list(NA, NA))
@@ -78,9 +117,14 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE, progress = 
     if (is.list(s)) s <- s[[2]]
     if (keep) return(list(s, fit$output))
     s
-  })
-  if (progress) close(pb)
-  
+  }, mc.cores = rep.cores)
+  if (progress) {
+    if (rep.cores == 1) {close(pb)
+    } else {
+      end <- Sys.time()
+      cat_parallel("|  (", format(end - start, digits = 3), ")")
+    }
+  }
   if (keep) {
     res1 <- lapply(res, "[[", 1)
     result <- do.call(rbind, res1)
@@ -161,4 +205,11 @@ print.summary.repeatcv <- function(x,
   print(x$call)
   cat(x$n, "repeats\n")
   print(x$summary, digits = digits)
+}
+
+
+# Prints using shell echo from inside mclapply when run in Rstudio
+cat_parallel <- function(...) {
+  if (Sys.getenv("RSTUDIO") != "1") return()
+  system(sprintf('echo "%s', paste0(..., '\\c"', collapse = "")))
 }

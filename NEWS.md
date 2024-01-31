@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.7.5
+###### 31/01/2024
+* Enabled parallelisation over repeats in `repeatedcv()` to improve speed.
+
 # nestedcv 0.7.4
 ###### 30/01/2024
 * Fixed issue with xgboost on linux/windows with parallel processing in 

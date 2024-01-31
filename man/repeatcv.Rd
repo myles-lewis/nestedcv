@@ -4,7 +4,14 @@
 \alias{repeatcv}
 \title{Repeated nested CV}
 \usage{
-repeatcv(expr, n = 5, repeat_folds = NULL, keep = FALSE, progress = TRUE)
+repeatcv(
+  expr,
+  n = 5,
+  repeat_folds = NULL,
+  keep = FALSE,
+  progress = TRUE,
+  rep.cores = 1L
+)
 }
 \arguments{
 \item{expr}{An expression containing a call to \code{\link[=nestcv.glmnet]{nestcv.glmnet()}},
@@ -19,6 +26,8 @@ the outer CV folds.}
 curves etc.}
 
 \item{progress}{Logical whether to show progress.}
+
+\item{rep.cores}{Integer specifying number of cores/threads to invoke.}
 }
 \value{
 List of S3 class 'repeatcv' containing the model call, matrix of
@@ -34,6 +43,13 @@ When comparing models, it is recommended to fix the sets of outer CV folds
 used across each repeat for comparing performance between models. The
 function \code{\link[=repeatfolds]{repeatfolds()}} can be used to create a fixed set of outer CV folds
 for each repeat.
+
+Parallelisation over repeats is performed using \code{parallel::mclapply} (not
+available on windows). Beware that \code{cv.cores} can still be set within calls
+to \code{nestedcv} models (= nested parallelisation). This means that \code{rep.cores}
+x \code{cv.cores} number of processes/forks will be spawned, so be careful not to
+overload your CPU. In general parallelisation of repeats using \code{rep.cores} is
+faster than parallelisation using \code{cv.cores}.
 }
 \examples{
 \donttest{
