@@ -44,7 +44,7 @@ used across each repeat for comparing performance between models. The
 function \code{\link[=repeatfolds]{repeatfolds()}} can be used to create a fixed set of outer CV folds
 for each repeat.
 
-Parallelisation of repeats is performed using \code{parallel::mclapply} (not
+Parallelisation over repeats is performed using \code{parallel::mclapply} (not
 available on windows). Beware that \code{cv.cores} can still be set within calls
 to \code{nestedcv} models (= nested parallelisation). This means that \code{rep.cores}
 x \code{cv.cores} number of processes/forks will be spawned, so be careful not to
