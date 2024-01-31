@@ -820,11 +820,11 @@ y <- dat$Species
 x <- dat[, 1:4]
 
 # single fit
-fit <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1, cv.cores = 2)
+fit <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1)
 
 # repeated nested CV
 res <- repeatcv(n = 5, nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
-                                     n_outer_folds = 4, cv.cores = 2))
+                                     n_outer_folds = 4), rep.cores = 2)
 ```
 ```{r}
 res
@@ -839,8 +839,8 @@ Or for those that prefer using pipes to lay out code, the nested pipe from the
 `%|>%` <- magrittr::pipe_nested
 
 res <- nestcv.glmnet(y, x,
-                     family = "multinomial", alphaSet = 1, cv.cores = 2) %|>%
-       repeatcv(5)
+                     family = "multinomial", alphaSet = 1) %|>%
+       repeatcv(5, rep.cores = 2)
 ```
 
 If you are using repeated nested CV to compare performance between models, it is
@@ -853,8 +853,8 @@ set.seed(123, "L'Ecuyer-CMRG")
 folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
 
 res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
-                     n_outer_folds = 4, cv.cores = 2) %|>%
-       repeatcv(3, repeat_folds = folds)
+                     n_outer_folds = 4) %|>%
+       repeatcv(3, repeat_folds = folds, rep.cores = 2)
 res
 ```
 
@@ -894,6 +894,11 @@ processes being generated. We generally find this does not lead to much speed up
 once the number of processes reaches the number of physical cores, as all
 processors are saturated and there is both time and memory overheads for
 duplicating data and packages for each process.
+
+Repeated nested CV is best parallelised over the repeats by setting `rep.cores`,
+since there is less overhead due to fewer processes being spawned. You can set
+`cv.cores` as well, but this will lead to a large number of threads (`rep.cores`
+x `cv.cores`).
 
 # Troubleshooting
 
