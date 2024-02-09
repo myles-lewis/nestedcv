@@ -132,6 +132,10 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     res2 <- lapply(res, "[[", 2)
     output <- do.call(rbind, res2)
     out <- list(call = ex0, result = result, output = output)
+    if ("AUC" %in% colnames(result)) {
+      out$roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
+                           quiet = TRUE)
+    }
   } else {
     result <- do.call(rbind, res)
     rownames(result) <- seq_len(n)
