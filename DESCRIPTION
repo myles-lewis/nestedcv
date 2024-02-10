@@ -40,7 +40,7 @@ RoxygenNote: 7.2.3
 Suggests:
     Boruta,
     CORElearn,
-    fastshap,
+    fastshap (>= 0.1.0),
     gbm,
     ggbeeswarm,
     ggpubr,
