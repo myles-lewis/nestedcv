@@ -206,7 +206,7 @@ nestcv.glmnet <- function(y, x,
   outer_method <- match.arg(outer_method)
   if (is.character(y)) y <- factor(y)
   if (is.factor(y) & !family %in% c("binomial", "multinomial"))
-    stop('`y` is not numeric: incorrect `family`')
+    stop("`y` is not numeric: incorrect `family`")
   x <- as.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
   ok <- checkxy(y, x, na.option, weights)
