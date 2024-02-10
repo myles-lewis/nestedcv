@@ -123,7 +123,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     if (rep.cores == 1) {close(pb)
     } else {
       end <- Sys.time()
-      cat_parallel("|  (", format(end - start, digits = 3), ")")
+      message_parallel("|  (", format(end - start, digits = 3), ")")
     }
   }
   if (keep) {
@@ -142,6 +142,8 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     rownames(result) <- seq_len(n)
     out <- list(call = ex0, result = result)
   }
+  if (all(is.na(result)) & rep.cores > 1)
+    message("All NA: try rerunning with `rep.cores` = 1 to see error messages")
   class(out) <- c("repeatcv")
   out
 }
