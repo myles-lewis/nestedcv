@@ -145,7 +145,7 @@ plot_shap_beeswarm <- function(shap, x,
   zeros <- if (sort) meanshap == 0 else FALSE
   if (any(zeros)) {
     message("Variables with mean(|SHAP|)=0: ",
-            paste(colnames(shap[zeros]), collapse = ", "))
+            paste(colnames(shap)[zeros], collapse = ", "))
   }
   keep <- !zeros
   if (!is.null(top)) {
@@ -229,7 +229,7 @@ plot_shap_bar <- function(shap, x,
     zeros <- meanshap == 0
     if (any(zeros)) {
       message("Variables with mean(|SHAP|)=0: ",
-              paste(colnames(shap[zeros]), collapse = ", "))
+              paste(colnames(shap)[zeros], collapse = ", "))
     }
     df <- df[!zeros, ]
     ord <- order(df$meanshap, decreasing = TRUE)

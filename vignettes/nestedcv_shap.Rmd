@@ -232,6 +232,18 @@ with SHAP values. We recommend these are one-hot encoded with dummy variables
 using the function `one_hot()`. This function accepts dataframes and can encode
 multiple factors and character columns, producing a matrix as a result.
 
+### Troubleshooting
+
+`explain()` runs progressively slowly with larger numbers of input predictors.
+So if you have a very large number of predictors in `x` it is much better to
+pass only the subset of predictors in the final model. These are stored in
+fitted `nestedcv` objects in list element `xsub`. For example:
+
+```{r eval=FALSE}
+sh <- explain(fit, X = fit$xsub, pred_wrapper = pred_nestcv_glmnet, nsim = 5)
+plot_shap_bar(sh, fit$xsub)
+```
+
 ### Citation
 
 If you use this package, please cite as:
