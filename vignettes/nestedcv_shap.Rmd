@@ -146,6 +146,9 @@ Note that these SHAP plots only show the final fitted model (on the whole data),
 whereas the variable stability plots examine models across the outer CV folds as
 well as the final model.
 
+Be careful if you have massive numbers of predictors in `x` (see
+[Troubleshooting](#troubleshooting)).
+
 `nestedcv` also provides a quick plotting function `plot_shap_beeswarm` for
 generating ggplot2 beeswarm plots similar to those made by the original python
 `shap` package.
