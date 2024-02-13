@@ -166,7 +166,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       out <- list(call = ex0, result = result)
     }
   } else {
-    # normal method
+    # usual results
     if (keep) {
       res1 <- lapply(res, "[[", 1)
       result <- do.call(rbind, res1)
