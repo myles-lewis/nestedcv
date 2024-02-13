@@ -75,6 +75,12 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
   if (d == "nestcv.SuperLearner") ex$final <- FALSE
   if (d == "nestcv.train") d <- ex$method
   d <- gsub("nestcv.", "", d)
+  
+  if (Sys.info()["sysname"] == "Windows" & rep.cores > 1) {
+    message("'rep.cores' > 1 is not supported on Windows. Set to 1.")
+    rep.cores <- 1L
+  }
+  
   cv.cores <- ex$cv.cores
   if (is.null(cv.cores)) cv.cores <- 1
   if (progress) {
