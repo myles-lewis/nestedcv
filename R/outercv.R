@@ -233,7 +233,8 @@ outercv.default <- function(y, x,
   if (outercv.call$model == "glm") predict_type <- "response"
   if (outercv.call$model == "mda") predict_type <- "posterior"
   
-  if (verbose && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
+  verbose <- as.numeric(verbose)
+  if (verbose == 1 && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
   
@@ -306,7 +307,7 @@ outercv.default <- function(y, x,
   }
   
   # fit final model
-  if (verbose) message("Fitting final model on whole data")
+  if (verbose == 1) message("Fitting final model on whole data")
   dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                        balance, balance_options,
                        modifyX, modifyX_useY, modifyX_options)
@@ -335,7 +336,7 @@ outercv.default <- function(y, x,
   } else fit <- do.call(model, args)
   
   end <- Sys.time()
-  if (verbose) message("Duration: ", format(end - start))
+  if (verbose == 1) message("Duration: ", format(end - start))
   out <- list(call = outercv.call,
               output = output,
               outer_result = outer_res,
@@ -424,10 +425,10 @@ outercvCore <- function(i, y, x, outer_folds, model, reg,
     }
   } else train_preds <- NULL
   
-  if (verbose) {
+  if (verbose == 1) {
     end <- Sys.time()
     message_parallel("Fitted fold ", i, " (", format(end - start, digits = 3), ")")
-  }
+  } else if (verbose == 2) cat_parallel("=")
   
   list(preds = preds,
        train_preds = train_preds,
@@ -480,7 +481,8 @@ outercv.formula <- function(formula, data,
     return(out)
   }
   # for models designed for formula method
-  if (verbose && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
+  verbose <- as.numeric(verbose)
+  if (verbose == 1 && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
   
@@ -533,14 +535,14 @@ outercv.formula <- function(formula, data,
   }
   
   # fit final model
-  if (verbose) message("Fitting final model on whole data")
+  if (verbose == 1) message("Fitting final model on whole data")
   args <- c(list(formula = formula, data = quote(data)), dots)
   if (suppressMsg) {
     printlog <- capture.output({ fit <- do.call(model, args) })
   } else fit <- do.call(model, args)
   
   end <- Sys.time()
-  if (verbose) message("Duration: ", format(end - start))
+  if (verbose == 1) message("Duration: ", format(end - start))
   
   out <- list(call = outercv.call,
               output = output,
@@ -591,10 +593,10 @@ outercvFormulaCore <- function(i, outer_folds, formula, data, y, model,
     rownames(train_preds) <- rownames(data)[-test]
   } else train_preds <- NULL
   
-  if (verbose) {
+  if (verbose == 1) {
     end <- Sys.time()
     message_parallel("Fitted fold ", i, " (", format(end - start, digits = 3), ")")
-  }
+  } else if (verbose == 2) cat_parallel("=")
   
   list(preds = preds,
        train_preds = train_preds,

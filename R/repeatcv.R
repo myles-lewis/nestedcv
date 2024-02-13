@@ -70,7 +70,6 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     stop("mismatch between n and repeat_folds")
   ex0 <- ex <- substitute(expr)
   # modify args in expr call
-  ex$verbose <- FALSE
   d <- deparse(ex[[1]])
   if (d == "nestcv.glmnet" | d == "nestcv.train") ex$finalCV <- NA
   if (d == "nestcv.SuperLearner") ex$final <- FALSE
@@ -105,12 +104,19 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
   }
   
   res <- mclapply(seq_len(n), function(i) {
+    if (progress & rep.cores > 1 & i %% rep.cores == 1) {
+      pc <- round(((i-1) / rep.cores) / ceiling(n / rep.cores) * 100)
+      if (pc > 0 & pc < 100) cat_parallel(pc, "%")
+      ex$verbose <- 2
+    } else ex$verbose <- 0
     if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
     fit <- try(eval.parent(ex), silent = TRUE)
     if (progress & rep.cores == 1) setTxtProgressBar(pb, i / n)
-    if (progress & rep.cores > 1) cat_parallel("=")
     if (inherits(fit, "try-error")) {
-      if (progress) warning(fit[1])
+      if (progress) {
+        cat_parallel("x")
+        warning(fit[1])
+      }
       if (keep) return(list(NA, NA))
       return(NA)
     }

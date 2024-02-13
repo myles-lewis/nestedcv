@@ -231,7 +231,8 @@ nestcv.glmnet <- function(y, x,
     n_outer_folds <- length(outer_folds)
   }
   
-  if (verbose) message("Performing ", n_outer_folds, "-fold outer CV, using ",
+  verbose <- as.numeric(verbose)
+  if (verbose == 1) message("Performing ", n_outer_folds, "-fold outer CV, using ",
                        plural(cv.cores, "core(s)"))
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
@@ -243,7 +244,7 @@ nestcv.glmnet <- function(y, x,
                 "outer_train_predict", "nestcv.glmnetCore", "dots")
     clusterExport(cl, varlist = varlist, envir = environment())
     on.exit(stopCluster(cl))
-    if (verbose) {
+    if (verbose == 1) {
       if (!requireNamespace("pbapply", quietly = TRUE)) {
         stop("Package 'pbapply' must be installed", call. = FALSE)}
       outer_res <- pbapply::pblapply(seq_along(outer_folds), function(i) {
@@ -310,7 +311,8 @@ nestcv.glmnet <- function(y, x,
     
     if (finalCV) {
       # use CV on whole data to finalise parameters
-      if (verbose) message("Fitting final model using ", n_inner_folds, "-fold CV on whole data")
+      if (verbose == 1)
+        message("Fitting final model using ", n_inner_folds, "-fold CV on whole data")
       foldid <- NULL
       if (pass_outer_folds) {
         if (n_outer_folds == n_inner_folds && is.null(balance)) {
@@ -329,7 +331,7 @@ nestcv.glmnet <- function(y, x,
       final_param <- setNames(c(s, cvafit$best_alpha), c("lambda", "alpha"))
     } else {
       # use outer folds for final parameters
-      if (verbose) message("Fitting final model based on outer CV parameters")
+      if (verbose == 1) message("Fitting final model based on outer CV parameters")
       lam <- exp(median(log(unlist(lapply(outer_res, '[[', 'lambda')))))
       alph <- median(unlist(lapply(outer_res, '[[', 'alpha')))
       final_param <- setNames(c(lam, alph), c("lambda", "alpha"))
@@ -362,7 +364,7 @@ nestcv.glmnet <- function(y, x,
   }
   
   end <- Sys.time()
-  if (verbose) message("Duration: ", format(end - start))
+  if (verbose == 1) message("Duration: ", format(end - start))
   
   out <- list(call = nestcv.call,
               output = output,
@@ -475,9 +477,9 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     } else alphafit$fit.preval[, ind]
     ret <- append(ret, list(innerCV_preds = innerCV_preds))
   }
-  if (verbose) {
+  if (verbose == 1) {
     end <- Sys.time()
     message_parallel("Fitted fold ", i, " (", format(end - start, digits = 3), ")")
-  }
+  } else if (verbose == 2) cat_parallel("=")
   ret
 }
