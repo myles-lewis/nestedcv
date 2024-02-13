@@ -126,7 +126,8 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       return(NA)
     }
     s <- fit$summary
-    if (is.list(s)) s <- s[[2]]
+    # check for classification
+    if (is.list(s) && is.table(s[[1]])) s <- s[[2]]
     if (keep) return(list(s, fit$output))
     s
   }, mc.cores = rep.cores)
@@ -137,21 +138,51 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       message_parallel("|  (", format(end - start, digits = 3), ")")
     }
   }
-  if (keep) {
-    res1 <- lapply(res, "[[", 1)
-    result <- do.call(rbind, res1)
-    rownames(result) <- seq_len(n)
-    res2 <- lapply(res, "[[", 2)
-    output <- do.call(rbind, res2)
-    out <- list(call = ex0, result = result, output = output)
-    if ("AUC" %in% colnames(result)) {
-      out$roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
-                           quiet = TRUE)
+  
+  if (!is.null(ex$family) && ex$family == "mgaussian") {
+    # glmnet mgaussian
+    if (keep) {
+      res1 <- lapply(res, "[[", 1)
+      yn <- length(res1[[1]])
+      result <- lapply(seq_len(yn), function(i) {
+        res1b <- lapply(res1, "[[", i)
+        res1b <- do.call(rbind, res1b)
+        rownames(res1b) <- seq_len(n)
+        res1b
+      })
+      names(result) <- names(res1[[1]])
+      res2 <- lapply(res, "[[", 2)
+      output <- do.call(rbind, res2)
+      out <- list(call = ex0, result = result, output = output)
+    } else {
+      yn <- length(res[[1]])
+      result <- lapply(seq_len(yn), function(i) {
+        res1b <- lapply(res, "[[", i)
+        res1b <- do.call(rbind, res1b)
+        rownames(res1b) <- seq_len(n)
+        res1b
+      })
+      names(result) <- names(res[[1]])
+      out <- list(call = ex0, result = result)
     }
   } else {
-    result <- do.call(rbind, res)
-    rownames(result) <- seq_len(n)
-    out <- list(call = ex0, result = result)
+    # normal method
+    if (keep) {
+      res1 <- lapply(res, "[[", 1)
+      result <- do.call(rbind, res1)
+      rownames(result) <- seq_len(n)
+      res2 <- lapply(res, "[[", 2)
+      output <- do.call(rbind, res2)
+      out <- list(call = ex0, result = result, output = output)
+      if ("AUC" %in% colnames(result)) {
+        out$roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
+                             quiet = TRUE)
+      }
+    } else {
+      result <- do.call(rbind, res)
+      rownames(result) <- seq_len(n)
+      out <- list(call = ex0, result = result)
+    }
   }
   if (all(is.na(result)) & rep.cores > 1)
     message("All NA: try rerunning with `rep.cores` = 1 to see error messages")
@@ -206,11 +237,24 @@ print.repeatcv <- function(x, digits = max(3L, getOption("digits") - 3L),
 
 #' @export
 summary.repeatcv <- function(object, ...) {
-  m <- colMeans(object$result, na.rm = TRUE)
-  sd <- apply(object$result, 2, sd, na.rm = TRUE)
-  sem <- sd / sqrt(nrow(object$result))
-  df <- data.frame(mean = m, sd = sd, sem = sem)
-  structure(list(call = object$call, n = nrow(object$result), summary = df),
+  if (is.list(object$result)) {
+    # mgaussian
+    df <- lapply(object$result, function(i) {
+      m <- colMeans(i, na.rm = TRUE)
+      sd <- apply(i, 2, sd, na.rm = TRUE)
+      sem <- sd / sqrt(nrow(i))
+      data.frame(mean = m, sd = sd, sem = sem)
+    })
+    n <- nrow(object$result[[1]])
+  } else {
+    m <- colMeans(object$result, na.rm = TRUE)
+    sd <- apply(object$result, 2, sd, na.rm = TRUE)
+    sem <- sd / sqrt(nrow(object$result))
+    df <- data.frame(mean = m, sd = sd, sem = sem)
+    n <- nrow(object$result)
+  }
+  
+  structure(list(call = object$call, n = n, summary = df),
             class = "summary.repeatcv")
 }
 
