@@ -131,8 +131,9 @@ nestcv.SuperLearner <- function(y, x,
                           LOOCV = 1:length(y))
   }
   
+  verbose <- as.numeric(verbose)
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
-    if (verbose && Sys.getenv("RSTUDIO") == "1") {
+    if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {
       message("Performing ", n_outer_folds, "-fold outer CV (using snow)")}
     dots <- list(...)
     cl <- parallel::makeCluster(cv.cores)
@@ -149,7 +150,7 @@ nestcv.SuperLearner <- function(y, x,
     })
     
   } else {
-    if (verbose && Sys.getenv("RSTUDIO") == "1") {
+    if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {
       message("Performing ", n_outer_folds, "-fold outer CV, using ",
               plural(cv.cores, "core(s)"))}
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
@@ -176,7 +177,7 @@ nestcv.SuperLearner <- function(y, x,
     fit <- yfinal <- final_vars <- filtx <- NA
   } else {
     # fit final model
-    if (verbose) message("Fitting final model on whole data")
+    if (verbose == 1) message("Fitting final model on whole data")
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                          balance, balance_options,
                          modifyX, modifyX_useY, modifyX_options)
@@ -189,7 +190,7 @@ nestcv.SuperLearner <- function(y, x,
   }
   
   end <- Sys.time()
-  if (verbose) message("Duration: ", format(end - start))
+  if (verbose == 1) message("Duration: ", format(end - start))
   
   out <- list(call = ncv.call,
               output = output,
@@ -218,7 +219,7 @@ nestSLcore <- function(i, y, x, outer_folds,
                        modifyX, modifyX_useY, modifyX_options,
                        verbose = FALSE, ...) {
   start <- Sys.time()
-  if (verbose) message_parallel("Starting Fold ", i, " ...")
+  if (verbose == 1) message_parallel("Starting Fold ", i, " ...")
   test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options,
@@ -249,11 +250,11 @@ nestSLcore <- function(i, y, x, outer_folds,
     preds$predyp <- c(predSL$pred)
   }
   rownames(preds) <- rownames(filt_xtest)
-  if (verbose) {
+  if (verbose == 1) {
     end <- Sys.time()
     message_parallel("                     Fold ", i, " done (",
                      format(end - start, digits = 3), ")")
-  }
+  } else if (verbose == 2) cat_parallel("=")
   list(preds = preds,
        fit = fit,
        nfilter = ncol(filt_xtest),
@@ -300,8 +301,9 @@ cl_nestSLcore <- function(cl, i, y, x, outer_folds,
   rownames(preds) <- rownames(filt_xtest)
   
   end <- Sys.time()
-  if (verbose)
+  if (verbose == 1) {
     message("Fold ", i, " done (", format(end - start, digits = 3), ")")
+  } else if (verbose == 2) cat_parallel("=")
   
   list(preds = preds,
        fit = fit,

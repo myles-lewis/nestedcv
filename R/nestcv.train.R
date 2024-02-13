@@ -313,11 +313,12 @@ nestcv.train <- function(y, x,
     }
   }
   
+  verbose <- as.numeric(verbose)
   if (is.na(finalCV)) {
     final_fit <- finalTune <- filtx <- yfinal <- xsub <- NA
   } else {
     # fit final model with CV on whole dataset first
-    if (verbose) message("Fitting final model using CV on whole data")
+    if (verbose == 1) message("Fitting final model using CV on whole data")
     dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
                          balance, balance_options,
                          modifyX, modifyX_useY, modifyX_options)
@@ -360,7 +361,7 @@ nestcv.train <- function(y, x,
     }
   }
   
-  if (verbose && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
+  if (verbose == 1 && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
   if (!multicore_fork && cv.cores >= 2) {
@@ -431,7 +432,7 @@ nestcv.train <- function(y, x,
   
   if (!is.na(finalCV) && !finalCV) {
     # use outer folds for final parameters, fit single final model
-    if (verbose) message("Fitting single final model")
+    if (verbose == 1) message("Fitting single final model")
     finalTune <- finaliseTune(bestTunes)
     fitControl <- trainControl(method = "none", classProbs = is.factor(y))
     final_fit <- caret::train(x = filtx, y = yfinal, method = method,
@@ -450,7 +451,7 @@ nestcv.train <- function(y, x,
   }
   
   end <- Sys.time()
-  if (verbose) message("Duration: ", format(end - start))
+  if (verbose == 1) message("Duration: ", format(end - start))
   out <- list(call = nestcv.call,
               output = output,
               outer_result = outer_res,
@@ -483,7 +484,7 @@ nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
                              metric, trControl, tuneGrid,
                              outer_train_predict, verbose = FALSE, ...) {
   start <- Sys.time()
-  if (verbose) message_parallel("Starting Fold ", i, " ...")
+  if (verbose == 1) message_parallel("Starting Fold ", i, " ...")
   test <- outer_folds[[i]]
   dat <- nest_filt_bal(test, y, x, filterFUN, filter_options,
                        balance, balance_options,
@@ -520,11 +521,11 @@ nestcv.trainCore <- function(i, y, x, outer_folds, inner_train_folds,
       train_preds <- cbind(train_preds, predyp)
     }
   } else train_preds <- NULL
-  if (verbose) {
+  if (verbose == 1) {
     end <- Sys.time()
     message_parallel("                     Fold ", i, " done (",
                      format(end - start, digits = 3), ")")
-  }
+  } else if (verbose == 2) cat_parallel("=")
   ret <- list(preds = preds,
               train_preds = train_preds,
               fit = fit,

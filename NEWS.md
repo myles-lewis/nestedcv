@@ -1,8 +1,8 @@
 News
 =====
 
-# nestedcv 0.7.5
-###### 31/01/2024
+# nestedcv 0.7.6
+###### 13/02/2024
 * Enabled parallelisation over repeats in `repeatedcv()` leading to significant 
 improvement in speed.
 
