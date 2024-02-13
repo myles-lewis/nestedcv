@@ -114,8 +114,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     if (progress & rep.cores == 1) setTxtProgressBar(pb, i / n)
     if (inherits(fit, "try-error")) {
       if (progress) {
-        cat_parallel("x")
-        warning(fit[1])
+        if (rep.cores > 1) cat_parallel("x") else warning(fit[1])
       }
       if (keep) return(list(NA, NA))
       return(NA)
