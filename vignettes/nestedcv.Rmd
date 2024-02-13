@@ -872,12 +872,6 @@ cases the filtering process can be time consuming (e.g. `rf_filter`,
 `relieff_filter`), we tend to recommend parallelisation of the outer CV loop
 over parallelisation of the inner CV loop.
 
-To check the number of physical cores, use:
-
-```{r eval = FALSE}
-parallel::detectCores(logical = FALSE)
-```
-
 To maintain consistency with random numbers during parallelisation set the
 random number seed in the following way:
 
@@ -895,10 +889,29 @@ once the number of processes reaches the number of physical cores, as all
 processors are saturated and there is both time and memory overheads for
 duplicating data and packages for each process.
 
-Repeated nested CV is best parallelised over the repeats by setting `rep.cores`,
-since there is less overhead due to fewer processes being spawned. You can set
-`cv.cores` as well, but this will lead to a large number of threads (`rep.cores`
-x `cv.cores`).
+## How many cores?
+
+Repeated nested CV is usually best parallelised over the repeats by maxing out
+`rep.cores` first, since there is less overhead due to fewer processes being
+spawned. You can set `cv.cores` as well, but beware this can lead to a large
+number of threads (the product of `rep.cores` x `cv.cores`).
+
+`mclapply()` will not request more cores than the number of elements being
+parallelised. So if you set `n = 3` for 3 repeats, then there is no point
+setting `rep.cores` >= 4 as only 3 processes will be spawned across the repeats.
+Similarly if you do 10x10-fold nested CV, there is no point setting 
+`cv.cores` >= 11 as only 10 processes can be spawned across the outer CV folds.
+So if you are doing low numbers of repeats (e.g. 3-5), then it may be slightly
+faster to set `cv.cores` to its maximum instead.
+
+Parallelisation is generally fastest if the total number of cores requested is
+limited to the number of physical cores or just slightly above this, e.g.
+requesting a total of 8-10 cores on a CPU with 8 physical cores. To check the
+number of physical cores, use:
+
+```{r eval = FALSE}
+parallel::detectCores(logical = FALSE)
+```
 
 # Troubleshooting
 
