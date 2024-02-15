@@ -121,10 +121,8 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     if (inherits(fit, "try-error")) {
       ret <-  if (keep) list(NA, NA) else NA
       if (progress) {
-        if (rep.cores > 1) {
-          cat_parallel("x")
-          attr(ret, "error") <- fit[1]
-        } else warning(fit[1], call. = FALSE)
+        if (rep.cores > 1) cat_parallel("x")
+        attr(ret, "error") <- fit[1]
       }
       return(ret)
     }
@@ -139,11 +137,11 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     } else {
       end <- Sys.time()
       message_parallel("|  (", format(end - start, digits = 3), ")")
-      # error messages
-      for (i in seq_along(res)) {
-        err <- attr(res[[i]], "error")
-        if (!is.null(err)) warning(err, call. = FALSE)
-      }
+    }
+    # error messages
+    errs <- unique(unlist(lapply(res, function(i) attr(i, "error"))))
+    if (length(errs) > 0) {
+      for (i in errs) {warning(i, call. = FALSE)}
     }
   }
   
