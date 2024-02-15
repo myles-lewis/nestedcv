@@ -119,11 +119,14 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     fit <- try(eval.parent(ex), silent = TRUE)
     if (progress & rep.cores == 1) setTxtProgressBar(pb, i / n)
     if (inherits(fit, "try-error")) {
+      ret <-  if (keep) list(NA, NA) else NA
       if (progress) {
-        if (rep.cores > 1) cat_parallel("x") else warning(fit[1])
+        if (rep.cores > 1) {
+          cat_parallel("x")
+          attr(ret, "error") <- fit[1]
+        } else warning(fit[1], call. = FALSE)
       }
-      if (keep) return(list(NA, NA))
-      return(NA)
+      return(ret)
     }
     s <- fit$summary
     # check for classification
@@ -136,6 +139,11 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     } else {
       end <- Sys.time()
       message_parallel("|  (", format(end - start, digits = 3), ")")
+      # error messages
+      for (i in seq_along(res)) {
+        err <- attr(res[[i]], "error")
+        if (!is.null(err)) warning(err, call. = FALSE)
+      }
     }
   }
   
@@ -166,7 +174,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       out <- list(call = ex0, result = result)
     }
   } else {
-    # usual results
+    # all other models
     if (keep) {
       res1 <- lapply(res, "[[", 1)
       result <- do.call(rbind, res1)
@@ -184,8 +192,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       out <- list(call = ex0, result = result)
     }
   }
-  if (all(is.na(result)) & rep.cores > 1)
-    message("All NA: try rerunning with `rep.cores` = 1 to see error messages")
+  
   class(out) <- c("repeatcv")
   out
 }

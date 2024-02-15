@@ -205,7 +205,7 @@ nestcv.glmnet <- function(y, x,
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
   if (is.character(y)) y <- factor(y)
-  if (is.factor(y) & !family %in% c("binomial", "multinomial"))
+  if (is.factor(y) && !family %in% c("binomial", "multinomial"))
     stop("`y` is not numeric: incorrect `family`")
   x <- as.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
@@ -213,9 +213,9 @@ nestcv.glmnet <- function(y, x,
   y <- if (is.matrix(y)) y[ok$r, ] else y[ok$r]
   x <- x[ok$r, ok$c]
   weights <- weights[ok$r]
-  if (!is.null(balance) & !is.null(weights)) {
+  if (!is.null(balance) && !is.null(weights)) {
     stop("`balance` and `weights` cannot be used at the same time")}
-  if (!is.null(balance) & is.numeric(y)) {
+  if (!is.null(balance) && is.numeric(y)) {
     stop("`balance` can only be used for classification")}
   
   if (is.null(outer_folds)) {
