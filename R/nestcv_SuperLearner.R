@@ -321,7 +321,7 @@ summary.nestcv.SuperLearner <- function(object,
   cat("Outer loop: ", switch(object$outer_method,
                              cv = paste0(length(object$outer_folds), "-fold CV"),
                              LOOCV = "leave-one-out CV"))
-  cat(paste0("\nInner loop:  ", object$final_fit$cvControl$V,
+  cat(paste0("\nInner loop:  ", object$outer_result[[1]]$fit$cvControl$V,
              "-fold CV (SuperLearner)\n"))
   if (!is.null(object$call$modifyX))
     cat("Modifier: ", object$call$modifyX, "\n")
