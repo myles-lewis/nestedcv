@@ -108,12 +108,42 @@ layer_filter <- function(y, x,
 }
 
 
+#' Partial Least Squares filter
+#'
+#' Filter using coefficients from partial least squares (PLS) regression to
+#' select optimal predictors.
+#'
+#' @param y Response vector
+#' @param x Matrix of predictors
+#' @param nfilter Either a single value for the total number of predictors to
+#'   return. Or a vector of length `ncomp` to manually return predictors from
+#'   each PLS component.
+#' @param ncomp the number of components to include in the PLS model.
+#' @param scale_x Logical whether to scale predictors before fitting the PLS
+#'   model. This is recommended.
+#' @param type Type of vector returned. Default "index" returns indices,
+#' "names" returns predictor names, "full" returns a named vector of variable 
+#' importance.
+#' @param ... Other arguments passed to [pls::plsr()]
+#' @details
+#' The best predictors may overlap between components, so if `nfilter` is
+#' specified as a vector, the total number of unique predictors returned may be
+#' variable.
+#' @return Integer vector of indices of filtered parameters (type = "index") or
+#'   character vector of names (type = "names") of filtered parameters. If
+#'   `type` is `"full"` full output of coefficients from `plsr` is returned as a
+#'   list for each model component ordered by highest absolute coefficient.
+#' @export
+
 pls_filter <- function(y, x,
                        force_vars = NULL,
                        nfilter,
                        ncomp = 5,
                        scale_x = TRUE,
                        type = c("index", "names", "full"), ...) {
+  if (!requireNamespace("pls", quietly = TRUE)) {
+    stop("Package 'pls' must be installed", call. = FALSE)
+  }
   type <- match.arg(type)
   if (is.factor(y) && nlevels(y) > 2) stop("Classes > 2 not supported")
   y <- as.numeric(y)
