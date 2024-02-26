@@ -112,11 +112,12 @@ pls_filter <- function(y, x,
                        force_vars = NULL,
                        nfilter,
                        ncomp = 5,
+                       scale_x = TRUE,
                        type = c("index", "names", "full"), ...) {
   type <- match.arg(type)
   if (is.factor(y) && nlevels(y) > 2) stop("Classes > 2 not supported")
   y <- as.numeric(y)
-  x <- scale(x)
+  if (scale_x) x <- scale(x)
   fit <- pls::plsr(y ~ x, ncomp = ncomp, ...)
   cf <- fit$coefficients
   cf <- lapply(seq_len(ncomp), function(i) {
