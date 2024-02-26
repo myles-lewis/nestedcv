@@ -115,6 +115,9 @@ layer_filter <- function(y, x,
 #'
 #' @param y Response vector
 #' @param x Matrix of predictors
+#' @param force_vars Vector of column names within `x` which are always retained
+#'   in the model (i.e. not filtered). Default `NULL` means all predictors will
+#'   be filtered.
 #' @param nfilter Either a single value for the total number of predictors to
 #'   return. Or a vector of length `ncomp` to manually return predictors from
 #'   each PLS component.

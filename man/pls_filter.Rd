@@ -20,6 +20,10 @@ pls_filter(
 
 \item{x}{Matrix of predictors}
 
+\item{force_vars}{Vector of column names within \code{x} which are always retained
+in the model (i.e. not filtered). Default \code{NULL} means all predictors will
+be filtered.}
+
 \item{nfilter}{Either a single value for the total number of predictors to
 return. Or a vector of length \code{ncomp} to manually return predictors from
 each PLS component.}

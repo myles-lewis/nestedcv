@@ -48,6 +48,7 @@ Suggests:
     mda,
     mlbench,
     pbapply,
+    pls,
     randomForest,
     ranger,
     RcppEigen,
