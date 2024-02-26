@@ -162,7 +162,7 @@ pls_filter <- function(y, x,
   if (length(nfilter) == 1) {
     # find sufficient vars from each comp
     topvars <- ""
-    n <- floor(nfilter / ncomp)
+    n <- ceiling(nfilter / ncomp)
     while (length(topvars) < nfilter) {
       topvars <- unique(unlist(lapply(seq_len(ncomp), function(i) {
         names(cf[[i]][seq_len(n)])
