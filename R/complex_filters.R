@@ -106,3 +106,30 @@ layer_filter <- function(y, x,
   if (type == "names") return(unique(out))
   out
 }
+
+
+pls_filter <- function(y, x,
+                       force_vars = NULL,
+                       nfilter,
+                       ncomp = 5,
+                       type = c("index", "names", "full"), ...) {
+  type <- match.arg(type)
+  if (is.factor(y) && nlevels(y) > 2) stop("Classes > 2 not supported")
+  y <- as.numeric(y)
+  x <- scale(x)
+  fit <- pls::plsr(y ~ x, ncomp = ncomp, ...)
+  cf <- fit$coefficients
+  cf <- lapply(seq_len(ncomp), function(i) {
+    cfi <- cf[,, i]
+    cfi[order(abs(cfi), decreasing = TRUE)]
+  })
+  if (type == "full") return(cf)
+  nfilter <- rep_len(nfilter, ncomp)
+  topvars <- unique(unlist(lapply(seq_len(ncomp), function(i) {
+    names(cf[[i]][1:nfilter[i]])
+  })))
+  topvars <- unique(c(topvars, force_vars))
+  if (type == "names") return(topvars)
+  which(colnames(x) %in% topvars)
+}
+
