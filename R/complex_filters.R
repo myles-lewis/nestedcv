@@ -124,10 +124,26 @@ pls_filter <- function(y, x,
     cfi[order(abs(cfi), decreasing = TRUE)]
   })
   if (type == "full") return(cf)
-  nfilter <- rep_len(nfilter, ncomp)
-  topvars <- unique(unlist(lapply(seq_len(ncomp), function(i) {
-    names(cf[[i]][1:nfilter[i]])
-  })))
+  
+  if (length(nfilter) == 1) {
+    # find sufficient vars from each comp
+    topvars <- ""
+    n <- floor(nfilter / ncomp)
+    while (length(topvars) < nfilter) {
+      topvars <- unique(unlist(lapply(seq_len(ncomp), function(i) {
+        names(cf[[i]][seq_len(n)])
+      })))
+      n <- n +1
+    }
+    topvars <- topvars[seq_len(nfilter)]
+  } else {
+    # nfilter as vector
+    if (length(nfilter) != ncomp) stop("nfilter is not the same length as ncomp")
+    topvars <- unique(unlist(lapply(seq_len(ncomp), function(i) {
+      names(cf[[i]][1:nfilter[i]])
+    })))
+  }
+  
   topvars <- unique(c(topvars, force_vars))
   if (type == "names") return(topvars)
   which(colnames(x) %in% topvars)
