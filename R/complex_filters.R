@@ -80,6 +80,7 @@ pls_filter <- function(y, x,
   type <- match.arg(type)
   if (is.factor(y) && nlevels(y) > 2) stop("Classes > 2 not supported")
   y <- as.numeric(y)
+  x0 <- x
   if (scale_x) {
     x <- scale(x)
     sd0 <- which(attr(x, "scaled:scale") == 0)
@@ -115,6 +116,6 @@ pls_filter <- function(y, x,
   
   topvars <- unique(c(topvars, force_vars))
   if (type == "names") return(topvars)
-  which(colnames(x) %in% topvars)
+  which(colnames(x0) %in% topvars)
 }
 
