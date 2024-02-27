@@ -94,7 +94,7 @@ pls_filter <- function(y, x,
   })
   if (type == "full") return(cf)
   
-  nfilter <- min(c(nfilter, ncol(x)))
+  nfilter <- pmin(nfilter, ncol(x))
   if (length(nfilter) == 1) {
     # find sufficient vars from each comp
     topvars <- ""
