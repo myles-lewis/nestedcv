@@ -80,7 +80,11 @@ pls_filter <- function(y, x,
   type <- match.arg(type)
   if (is.factor(y) && nlevels(y) > 2) stop("Classes > 2 not supported")
   y <- as.numeric(y)
-  if (scale_x) x <- scale(x)
+  if (scale_x) {
+    x <- scale(x)
+    sd0 <- which(attr(x, "scaled:scale") == 0)
+    x <- x[, -sd0]
+  }
   fit <- pls::plsr(y ~ x, ncomp = ncomp, ...)
   cf <- fit$coefficients
   cf <- lapply(seq_len(ncomp), function(i) {
