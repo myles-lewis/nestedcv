@@ -84,7 +84,7 @@ pls_filter <- function(y, x,
   if (scale_x) {
     x <- scale(x)
     sd0 <- which(attr(x, "scaled:scale") == 0)
-    x <- x[, -sd0]
+    if (length(sd0) > 0) x <- x[, -sd0]
   }
   fit <- pls::plsr(y ~ x, ncomp = ncomp, ...)
   cf <- fit$coefficients
