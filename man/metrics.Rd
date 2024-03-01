@@ -12,14 +12,15 @@ metrics(object, extra = FALSE, innerCV = FALSE, positive = 2)
 
 \item{extra}{Logical whether additional performance metrics are gathered for
 binary classification models: area under precision recall curve (AUC.PR),
-F1 score, Matthew's correlation coefficient (MCC).}
+Cohen's kappa, F1 score, Matthew's correlation coefficient (MCC).}
 
 \item{innerCV}{Whether to calculate metrics for inner CV folds. Only
 available for 'nestcv.glmnet' and 'nestcv.train' objects.}
 
 \item{positive}{For binary classification, either an integer 1 or 2 for the
 level of response factor considered to be 'positive' or 'relevant', or a
-character value for that factor. See \code{\link[caret:confusionMatrix]{caret::confusionMatrix()}}.}
+character value for that factor. This affects the F1 score. See
+\code{\link[caret:confusionMatrix]{caret::confusionMatrix()}}.}
 }
 \value{
 A named numeric vector of performance metrics.

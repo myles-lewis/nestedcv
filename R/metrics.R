@@ -7,12 +7,13 @@
 #'   'outercv' object.
 #' @param extra Logical whether additional performance metrics are gathered for
 #'   binary classification models: area under precision recall curve (AUC.PR),
-#'   F1 score, Matthew's correlation coefficient (MCC).
+#'   Cohen's kappa, F1 score, Matthew's correlation coefficient (MCC).
 #' @param innerCV Whether to calculate metrics for inner CV folds. Only
 #'   available for 'nestcv.glmnet' and 'nestcv.train' objects.
 #' @param positive For binary classification, either an integer 1 or 2 for the
 #'   level of response factor considered to be 'positive' or 'relevant', or a
-#'   character value for that factor. See [caret::confusionMatrix()].
+#'   character value for that factor. This affects the F1 score. See
+#'   [caret::confusionMatrix()].
 #' @returns A named numeric vector of performance metrics.
 #' @export
 #'
@@ -38,8 +39,9 @@ metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
     mcc <- mcc(tab)
     if (is.numeric(positive)) positive <- colnames(tab)[positive]
     ccm <- caret::confusionMatrix(tab, mode = "everything", positive = positive)
-    extra <- setNames(c(aucpr, mcc, ccm$byClass["F1"]),
-                      c("AUC.PR", "MCC", paste("F1", positive, sep = ".")))
+    extra <- setNames(c(aucpr, ccm$overall["Kappa"], ccm$byClass["F1"], mcc), 
+                      c("AUC.PR", "Kappa", paste("F1", positive, sep = "."),
+                        "MCC"))
     met <- c(met, extra)
   }
   if (innerCV && inherits(object, c("nestcv.glmnet", "nestcv.train"))) {
