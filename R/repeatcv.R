@@ -11,6 +11,8 @@
 #'   the outer CV folds.
 #' @param keep Logical whether to save repeated outer CV predictions for ROC
 #'   curves etc.
+#' @param extra Logical whether additional performance metrics are gathered for
+#'   binary classification models. See [metrics()].
 #' @param progress Logical whether to show progress.
 #' @param rep.cores Integer specifying number of cores/threads to invoke.
 #' @details
@@ -63,6 +65,7 @@
 #' @export
 
 repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
+                     extra = FALSE,
                      progress = TRUE, rep.cores = 1L) {
   start <- Sys.time()
   cl <- match.call()
@@ -126,9 +129,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       }
       return(ret)
     }
-    s <- fit$summary
-    # check for classification
-    if (is.list(s) && is.table(s[[1]])) s <- s[[2]]
+    s <- metrics(fit, extra = extra)
     if (keep) return(list(s, fit$output))
     s
   }, mc.cores = rep.cores)

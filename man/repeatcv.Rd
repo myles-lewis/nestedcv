@@ -9,6 +9,7 @@ repeatcv(
   n = 5,
   repeat_folds = NULL,
   keep = FALSE,
+  extra = FALSE,
   progress = TRUE,
   rep.cores = 1L
 )
@@ -24,6 +25,9 @@ the outer CV folds.}
 
 \item{keep}{Logical whether to save repeated outer CV predictions for ROC
 curves etc.}
+
+\item{extra}{Logical whether additional performance metrics are gathered for
+binary classification models. See \code{\link[=metrics]{metrics()}}.}
 
 \item{progress}{Logical whether to show progress.}
 
