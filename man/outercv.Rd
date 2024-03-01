@@ -27,8 +27,9 @@ outercv(y, ...)
   multicore_fork = (Sys.info()["sysname"] != "Windows"),
   predict_type = "prob",
   outer_train_predict = FALSE,
-  na.option = "pass",
   returnList = FALSE,
+  final = TRUE,
+  na.option = "pass",
   verbose = FALSE,
   suppressMsg = verbose,
   ...
@@ -121,14 +122,16 @@ to \code{predict()} via \code{predict_type}.}
 \item{outer_train_predict}{Logical whether to save predictions on outer
 training folds to calculate performance on outer training folds.}
 
+\item{returnList}{Logical whether to return list of results after main outer
+CV loop without concatenating results. Useful for debugging.}
+
+\item{final}{Logical whether to fit final model.}
+
 \item{na.option}{Character value specifying how \code{NA}s are dealt with.
 \code{"omit"} is equivalent to \code{na.action = na.omit}. \code{"omitcol"} removes cases
 if there are \code{NA} in 'y', but columns (predictors) containing \code{NA} are
 removed from 'x' to preserve cases. Any other value means that \code{NA} are
 ignored (a message is given).}
-
-\item{returnList}{Logical whether to return list of results after main outer
-CV loop without concatenating results. Useful for debugging.}
 
 \item{verbose}{Logical whether to print messages and show progress}
 
@@ -157,7 +160,6 @@ predictors at each fold.}
 \item{outer_folds}{List of indices of outer test folds}
 \item{final_fit}{Final fitted model on whole data}
 \item{final_vars}{Column names of filtered predictors entering final model}
-\item{summary_vars}{Summary statistics of filtered predictors}
 \item{roc}{ROC AUC for binary classification where available.}
 \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 for classification. ROC AUC for binary classification. RMSE for

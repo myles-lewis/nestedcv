@@ -72,7 +72,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
   # modify args in expr call
   d <- deparse(ex[[1]])
   if (d == "nestcv.glmnet" | d == "nestcv.train") ex$finalCV <- NA
-  if (d == "nestcv.SuperLearner") ex$final <- FALSE
+  if (d == "nestcv.SuperLearner" | d == "outercv") ex$final <- FALSE
   if (d == "nestcv.train") d <- ex$method
   d <- gsub("nestcv.", "", d)
   
