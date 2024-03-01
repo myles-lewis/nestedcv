@@ -62,6 +62,7 @@
 #'   training folds to calculate performance on outer training folds.
 #' @param returnList Logical whether to return list of results after main outer
 #'   CV loop without concatenating results. Useful for debugging.
+#' @param final Logical whether to fit final model.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
 #'   if there are `NA` in 'y', but columns (predictors) containing `NA` are
@@ -87,7 +88,6 @@
 #'   \item{outer_folds}{List of indices of outer test folds}
 #'   \item{final_fit}{Final fitted model on whole data}
 #'   \item{final_vars}{Column names of filtered predictors entering final model}
-#'   \item{summary_vars}{Summary statistics of filtered predictors}
 #'   \item{roc}{ROC AUC for binary classification where available.}
 #'   \item{summary}{Overall performance summary. Accuracy and balanced accuracy
 #'   for classification. ROC AUC for binary classification. RMSE for
@@ -202,8 +202,9 @@ outercv.default <- function(y, x,
                             multicore_fork = (Sys.info()["sysname"] != "Windows"),
                             predict_type = "prob",
                             outer_train_predict = FALSE,
-                            na.option = "pass",
                             returnList = FALSE,
+                            final = TRUE,
+                            na.option = "pass",
                             verbose = FALSE,
                             suppressMsg = verbose,
                             ...) {
@@ -307,33 +308,35 @@ outercv.default <- function(y, x,
   }
   
   # fit final model
-  if (verbose == 1) message("Fitting final model on whole data")
-  dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
-                       balance, balance_options,
-                       modifyX, modifyX_useY, modifyX_options)
-  yfinal <- dat$ytrain
-  filtx <- dat$filt_xtrain
-  
-  if ("formula" %in% formalArgs(model)) {
-    dat <- if (is.data.frame(filtx)) {filtx
-    } else as.data.frame(filtx, stringsAsFactors = TRUE)
-    dat$.outcome <- yfinal
-    if (is.null(weights)) {
-      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat)), dots)
+  if (final) {
+    if (verbose == 1) message("Fitting final model on whole data")
+    dat <- nest_filt_bal(NULL, y, x, filterFUN, filter_options,
+                         balance, balance_options,
+                         modifyX, modifyX_useY, modifyX_options)
+    yfinal <- dat$ytrain
+    filtx <- dat$filt_xtrain
+    
+    if ("formula" %in% formalArgs(model)) {
+      dat <- if (is.data.frame(filtx)) {filtx
+      } else as.data.frame(filtx, stringsAsFactors = TRUE)
+      dat$.outcome <- yfinal
+      if (is.null(weights)) {
+        args <- c(list(as.formula(".outcome ~ ."), data = quote(dat)), dots)
+      } else {
+        args <- c(list(as.formula(".outcome ~ ."), data = quote(dat),
+                       weights = quote(weights)), dots)
+      }
     } else {
-      args <- c(list(as.formula(".outcome ~ ."), data = quote(dat),
-                   weights = quote(weights)), dots)
+      if (is.null(weights)) {
+        args <- c(alist(y = yfinal, x = filtx), dots)  # prevents evaluation
+      } else {
+        args <- c(alist(y = yfinal, x = filtx, weights = weights), dots)
+      }
     }
-  } else {
-    if (is.null(weights)) {
-      args <- c(alist(y = yfinal, x = filtx), dots)  # prevents evaluation
-    } else {
-      args <- c(alist(y = yfinal, x = filtx, weights = weights), dots)
-    }
-  }
-  if (suppressMsg) {
-    printlog <- capture.output({ fit <- do.call(model, args) })
-  } else fit <- do.call(model, args)
+    if (suppressMsg) {
+      printlog <- capture.output({ fit <- do.call(model, args) })
+    } else fit <- do.call(model, args)
+  } else yfinal <- fit <- filtx <- NULL
   
   end <- Sys.time()
   if (verbose == 1) message("Duration: ", format(end - start))
@@ -347,10 +350,9 @@ outercv.default <- function(y, x,
               yfinal = yfinal,
               final_fit = fit,
               final_vars = colnames(filtx),
-              summary_vars = summary_vars(filtx),
               roc = fit.roc,
               summary = summary)
-  if (!is.null(modifyX)) {
+  if (final && !is.null(modifyX)) {
     out$xfinal <- filtx
     if (modifyX_useY) out$modify_fit <- dat$modify_fit
   }
@@ -552,7 +554,6 @@ outercv.formula <- function(formula, data,
               dimx = c(nrow(data), length(labels(terms(fit)))),
               final_fit = fit,
               y = y,
-              summary_vars = summary_vars(data),
               roc = fit.roc,
               summary = summary)
   class(out) <- "outercv"
