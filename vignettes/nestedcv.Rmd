@@ -836,7 +836,7 @@ Or for those that prefer using pipes to lay out code, the nested pipe from the
 
 ```{r eval=FALSE}
 # using nested pipe from magrittr
-`%|>%` <- magrittr::pipe_nested
+`%|>%` <- pipe_nested
 
 res <- nestcv.glmnet(y, x,
                      family = "multinomial", alphaSet = 1) %|>%
