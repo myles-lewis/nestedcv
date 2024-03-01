@@ -47,6 +47,7 @@ Suggests:
     hsstan,
     mda,
     mlbench,
+    MLmetrics,
     pbapply,
     pls,
     randomForest,
