@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.7.7
+###### 01/03/2024
+* Added `pls_filter()` which uses partial least squares regression to filter 
+features.
+
 # nestedcv 0.7.6
 ###### 13/02/2024
 * Enabled parallelisation over repeats in `repeatedcv()` leading to significant 
