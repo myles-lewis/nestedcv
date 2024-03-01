@@ -3,6 +3,9 @@ News
 
 # nestedcv 0.7.7
 ###### 01/03/2024
+* Added `metrics()` which gives additional performance metrics for binary 
+classification models such as F1 score, Matthew's correlation coefficient and 
+precision recall AUC.
 * Added `pls_filter()` which uses partial least squares regression to filter 
 features.
 
