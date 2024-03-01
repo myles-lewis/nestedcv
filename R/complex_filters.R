@@ -37,72 +37,85 @@ boruta_filter <- function(y, x, select = c('Confirmed', 'Tentative'),
 }
 
 
-#' Multilayer filter
-#' 
-#' Experimental filter designed for use with imbalanced datasets. Each round a
-#' simple t-test is used to rank predictors and keep a certain number. After
-#' each round a set number of cases are culled determined as the most outlying
-#' cases - those which if used as a cutoff for classification have the smallest
-#' number of misclassified cases. The t-test is repeated on the culled dataset
-#' so that after successive rounds the most influential outlying samples have
-#' been removed and different samples drive the t-test filter.
-#' 
+
+#' Partial Least Squares filter
+#'
+#' Filter using coefficients from partial least squares (PLS) regression to
+#' select optimal predictors.
+#'
 #' @param y Response vector
 #' @param x Matrix of predictors
-#' @param nfilter Vector of number of target predictors to keep at each round.
-#'   The length of this vector determines the number of rounds of culling.
-#' @param imbalance Logical whether to assume the dataset is imbalanced, in
-#'   which case samples are only culled from the majority class.
-#' @param cull number of samples to cull at each round
-#' @param force_vars not implemented yet
-#' @param verbose whether to show sample IDs of culled individuals at each round
+#' @param force_vars Vector of column names within `x` which are always retained
+#'   in the model (i.e. not filtered). Default `NULL` means all predictors will
+#'   be filtered.
+#' @param nfilter Either a single value for the total number of predictors to
+#'   return. Or a vector of length `ncomp` to manually return predictors from
+#'   each PLS component.
+#' @param ncomp the number of components to include in the PLS model.
+#' @param scale_x Logical whether to scale predictors before fitting the PLS
+#'   model. This is recommended.
 #' @param type Type of vector returned. Default "index" returns indices,
-#' "names" returns predictor names.
-#' 
+#' "names" returns predictor names, "full" returns a named vector of variable 
+#' importance.
+#' @param ... Other arguments passed to [pls::plsr()]
+#' @details
+#' The best predictors may overlap between components, so if `nfilter` is
+#' specified as a vector, the total number of unique predictors returned may be
+#' variable.
 #' @return Integer vector of indices of filtered parameters (type = "index") or
-#'   character vector of names (type = "names") of filtered parameters.
+#'   character vector of names (type = "names") of filtered parameters. If
+#'   `type` is `"full"` full output of coefficients from `plsr` is returned as a
+#'   list for each model component ordered by highest absolute coefficient.
 #' @export
 
-layer_filter <- function(y, x,
-                         nfilter = NULL,
-                         imbalance = TRUE,
-                         cull = 5,
-                         force_vars = NULL,
-                         verbose = FALSE,
-                         type = c("index", "names", "full")) {
+pls_filter <- function(y, x,
+                       force_vars = NULL,
+                       nfilter,
+                       ncomp = 5,
+                       scale_x = TRUE,
+                       type = c("index", "names", "full"), ...) {
+  if (!requireNamespace("pls", quietly = TRUE)) {
+    stop("Package 'pls' must be installed", call. = FALSE)
+  }
   type <- match.arg(type)
-  if (imbalance) {
-    tab <- table(y)
-    maj_class <- names(tab)[which.max(tab)]
+  if (is.factor(y) && nlevels(y) > 2) stop("Classes > 2 not supported")
+  y <- as.numeric(y)
+  x0 <- x
+  if (scale_x) {
+    x <- scale(x)
+    sd0 <- which(attr(x, "scaled:scale") == 0)
+    if (length(sd0) > 0) x <- x[, -sd0]
   }
-  x <- as.matrix(x)
-  out <- NULL
+  fit <- pls::plsr(y ~ x, ncomp = ncomp, ...)
+  cf <- fit$coefficients
+  cf <- lapply(seq_len(ncomp), function(i) {
+    cfi <- cf[,, i]
+    cfi[order(abs(cfi), decreasing = TRUE)]
+  })
+  if (type == "full") return(cf)
   
-  for (nf in nfilter) {
-    tt <- ttest_filter(y = y, x = x, nfilter = nf, p_cutoff = NULL,
-                       type = "full")
-    tt <- tt[order(tt[, 'pvalue']), ]
-    tt <- tt[1:nf, ]
-    maj_index <- y == maj_class
-    min_index <- !maj_index
-    find_clean <- sapply(rownames(tt), function(i) {
-      xset <- x[maj_index, i]
-      if (tt[i, 'stat'] > 0) {
-        out <- sapply(xset, function(xcut) sum(x[min_index, i] > xcut))
-      } else {
-        out <- sapply(xset, function(xcut) sum(x[min_index, i] < xcut))
-      }
-      out
-    })
-    cleansum <- rowSums(find_clean)
-    cullset <- names(cleansum)[order(cleansum)[1:cull]]
-    if (verbose) print(cullset)
-    ok <- !rownames(x) %in% cullset
-    y <- y[ok]
-    x <- x[ok,]
-    out <- c(out, rownames(tt))
+  nfilter <- pmin(nfilter, ncol(x))
+  if (length(nfilter) == 1) {
+    # find sufficient vars from each comp
+    topvars <- ""
+    n <- ceiling(nfilter / ncomp)
+    while (length(topvars) < nfilter) {
+      topvars <- unique(unlist(lapply(seq_len(ncomp), function(i) {
+        names(cf[[i]][seq_len(n)])
+      })))
+      n <- n +1
+    }
+    topvars <- topvars[seq_len(nfilter)]
+  } else {
+    # nfilter as vector
+    if (length(nfilter) != ncomp) stop("nfilter is not the same length as ncomp")
+    topvars <- unique(unlist(lapply(seq_len(ncomp), function(i) {
+      names(cf[[i]][1:nfilter[i]])
+    })))
   }
-  if (type == "index") return(which(colnames(x) %in% unique(out)))
-  if (type == "names") return(unique(out))
-  out
+  
+  topvars <- unique(c(topvars, force_vars))
+  if (type == "names") return(topvars)
+  which(colnames(x0) %in% topvars)
 }
+
