@@ -6,7 +6,7 @@
 #' @param object A 'nestcv.glmnet', 'nestcv.train', 'nestcv.SuperLearner' or
 #'   'outercv' object.
 #' @param extra Logical whether additional performance metrics are gathered for
-#'   binary classification models: area under precision recall curve (AUC.PR),
+#'   binary classification models: area under precision recall curve (PR.AUC),
 #'   Cohen's kappa, F1 score, Matthew's correlation coefficient (MCC).
 #' @param innerCV Whether to calculate metrics for inner CV folds. Only
 #'   available for 'nestcv.glmnet' and 'nestcv.train' objects.
@@ -14,6 +14,9 @@
 #'   level of response factor considered to be 'positive' or 'relevant', or a
 #'   character value for that factor. This affects the F1 score. See
 #'   [caret::confusionMatrix()].
+#' @details
+#' Area under precision recall curve is estimated by trapezoidal estimation 
+#' using `MLmetrics::PRAUC()`.
 #' @returns A named numeric vector of performance metrics.
 #' @export
 #'
@@ -40,7 +43,7 @@ metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
     if (is.numeric(positive)) positive <- colnames(tab)[positive]
     ccm <- caret::confusionMatrix(tab, mode = "everything", positive = positive)
     extra <- setNames(c(aucpr, ccm$overall["Kappa"], ccm$byClass["F1"], mcc), 
-                      c("AUC.PR", "Kappa", paste("F1", positive, sep = "."),
+                      c("PR.AUC", "Kappa", paste("F1", positive, sep = "."),
                         "MCC"))
     met <- c(met, extra)
   }

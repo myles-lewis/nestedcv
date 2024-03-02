@@ -11,7 +11,7 @@ metrics(object, extra = FALSE, innerCV = FALSE, positive = 2)
 'outercv' object.}
 
 \item{extra}{Logical whether additional performance metrics are gathered for
-binary classification models: area under precision recall curve (AUC.PR),
+binary classification models: area under precision recall curve (PR.AUC),
 Cohen's kappa, F1 score, Matthew's correlation coefficient (MCC).}
 
 \item{innerCV}{Whether to calculate metrics for inner CV folds. Only
@@ -27,4 +27,8 @@ A named numeric vector of performance metrics.
 }
 \description{
 Returns model metrics from nestedcv models. Extended metrics including
+}
+\details{
+Area under precision recall curve is estimated by trapezoidal estimation
+using \code{MLmetrics::PRAUC()}.
 }
