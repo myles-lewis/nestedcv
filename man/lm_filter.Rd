@@ -59,7 +59,7 @@ removed.}
 \code{\link[RcppEigen:fastLm]{RcppEigen::fastLmPure()}}}
 
 \item{mc.cores}{Number of cores for parallelisation using
-\code{\link[parallel:mclapply]{parallel::mclapply()}}.}
+\code{\link[parallel:mcdummies]{parallel::mclapply()}}.}
 }
 \value{
 Integer vector of indices of filtered parameters (\code{type = "index"})

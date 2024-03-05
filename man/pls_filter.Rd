@@ -37,7 +37,7 @@ model. This is recommended.}
 "names" returns predictor names, "full" returns a named vector of variable
 importance.}
 
-\item{...}{Other arguments passed to \code{\link[pls:mvr]{pls::plsr()}}}
+\item{...}{Other arguments passed to \code{\link[pls:plsr]{pls::plsr()}}}
 }
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
