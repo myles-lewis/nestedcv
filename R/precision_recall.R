@@ -20,6 +20,7 @@
 #' \item{recall}{vector of recall values}
 #' \item{precision}{vector of precision values}
 #' \item{auc}{area under precision-recall curve value using trapezoid method}
+#' \item{baseline}{baseline precision}
 #' @export
 prc <- function(...) {
   UseMethod("prc")
@@ -33,10 +34,11 @@ prc.default <- function(response, predictor, positive = 2, ...) {
                                  label.ordering = rev(levels(response)))
   } else pred_obj <- ROCR::prediction(predictor, response)
   perf_obj <- ROCR::performance(pred_obj, measure = "prec", x.measure = "rec")
+  bl <- pred_obj@n.pos[[1]] / length(response)
   x <- perf_obj@x.values[[1]]
   y <- perf_obj@y.values[[1]]
   auc <- auc_calc(x, y)
-  out <- list(recall = x, precision = y, auc = auc)
+  out <- list(recall = x, precision = y, auc = auc, baseline = bl)
   class(out) <- "prc"
   out
 }
@@ -106,6 +108,7 @@ plot.prc <- function(x, ...) {
                     xlab = "Recall", ylab = "Precision")
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
+  abline(h = x$baseline, col = "grey", lty = 2)
 }
 
 
