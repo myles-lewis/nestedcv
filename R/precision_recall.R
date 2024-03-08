@@ -8,6 +8,9 @@
 #' @param response binary factor vector of response of default order controls,
 #'   cases.
 #' @param predictor numeric vector of probabilities
+#' @param positive Either an integer 1 or 2 for the level of response factor
+#'   considered to be 'positive' or 'relevant', or a character value for that
+#'   factor.
 #' @param output data.frame with columns `testy` containing observed response
 #'   from test folds, and `predyp` predicted probabilities for classification
 #' @param object a 'nestcv.glmnet', 'nestcv.train', 'nestcv.SuperLearn',
@@ -24,8 +27,11 @@ prc <- function(...) {
 
 #' @rdname prc
 #' @export
-prc.default <- function(response, predictor, ...) {
-  pred_obj <- ROCR::prediction(predictor, response)
+prc.default <- function(response, predictor, positive = 2, ...) {
+  if (positive == 1 | positive == levels(response)[1]) {
+    pred_obj <- ROCR::prediction(predictor, response,
+                                 label.ordering = rev(levels(response)))
+  } else pred_obj <- ROCR::prediction(predictor, response)
   perf_obj <- ROCR::performance(pred_obj, measure = "prec", x.measure = "rec")
   x <- perf_obj@x.values[[1]]
   y <- perf_obj@y.values[[1]]
@@ -40,37 +46,37 @@ prc.default <- function(response, predictor, ...) {
 prc.data.frame <- function(output, ...) {
   if (!all(c("testy", "predyp") %in% colnames(output)))
     stop("not a classification output dataframe")
-  prc.default(output$testy, output$predyp)
+  prc.default(output$testy, output$predyp, ...)
 }
 
 #' @rdname prc
 #' @export
 prc.nestcv.glmnet <- function(object, ...) {
-  prc.data.frame(object$output)
+  prc.data.frame(object$output, ...)
 }
 
 #' @rdname prc
 #' @export
 prc.nestcv.train <- function(object, ...) {
-  prc.data.frame(object$output)
+  prc.data.frame(object$output, ...)
 }
 
 #' @rdname prc
 #' @export
 prc.nestcv.SuperLearner <- function(object, ...) {
-  prc.data.frame(object$output)
+  prc.data.frame(object$output, ...)
 }
 
 #' @rdname prc
 #' @export
 prc.outercv <- function(object, ...) {
-  prc.data.frame(object$output)
+  prc.data.frame(object$output, ...)
 }
 
 #' @rdname prc
 #' @export
 prc.repeatcv <- function(object, ...) {
-  prc.data.frame(object$output)
+  prc.data.frame(object$output, ...)
 }
 
 auc_calc <- function(x, y) {
@@ -101,6 +107,7 @@ plot.prc <- function(x, ...) {
   if (length(new.args)) plot.args[names(new.args)] <- new.args
   do.call("plot", plot.args)
 }
+
 
 #' Add precision-recall curve to a plot
 #' 

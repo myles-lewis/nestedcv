@@ -13,7 +13,7 @@
 \usage{
 prc(...)
 
-\method{prc}{default}(response, predictor, ...)
+\method{prc}{default}(response, predictor, positive = 2, ...)
 
 \method{prc}{data.frame}(output, ...)
 
@@ -34,6 +34,10 @@ prc(...)
 cases.}
 
 \item{predictor}{numeric vector of probabilities}
+
+\item{positive}{Either an integer 1 or 2 for the level of response factor
+considered to be 'positive' or 'relevant', or a character value for that
+factor.}
 
 \item{output}{data.frame with columns \code{testy} containing observed response
 from test folds, and \code{predyp} predicted probabilities for classification}

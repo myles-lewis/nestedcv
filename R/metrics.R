@@ -40,8 +40,7 @@ metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
     if (is.numeric(positive)) positive <- colnames(tab)[positive]
     ccm <- caret::confusionMatrix(tab, mode = "everything", positive = positive)
     extra <- setNames(c(aucpr, ccm$overall["Kappa"], ccm$byClass["F1"], mcc), 
-                      c("PR.AUC", "Kappa", paste("F1", positive, sep = "."),
-                        "MCC"))
+                      c("PR.AUC", "Kappa", "F1", "MCC"))
     met <- c(met, extra)
   }
   if (innerCV && inherits(object, c("nestcv.glmnet", "nestcv.train"))) {
