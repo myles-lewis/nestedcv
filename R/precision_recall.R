@@ -94,9 +94,12 @@ auc_calc <- function(x, y) {
 #' @seealso [prc()]
 #' @export
 plot.prc <- function(x, ...) {
-  plot(x$recall, x$precision, type = "l",
-       las = 1, lwd = 2,
-       xlab = "Recall", ylab = "Precision", ...)
+  new.args <- list(...)
+  plot.args <- list(x = x$recall, y = x$precision, type = "l",
+                    las = 1, lwd = 2,
+                    xlab = "Recall", ylab = "Precision")
+  if (length(new.args)) plot.args[names(new.args)] <- new.args
+  do.call("plot", plot.args)
 }
 
 #' Add precision-recall curve to a plot
@@ -110,7 +113,9 @@ plot.prc <- function(x, ...) {
 #' @seealso [prc()] [plot.prc()]
 #' @export
 lines.prc <- function(x, ...) {
-  lines(x$recall, x$precision,
-        lwd = 2, ...)
+  new.args <- list(...)
+  plot.args <- list(x = x$recall, y = x$precision, lwd = 2)
+  if (length(new.args)) plot.args[names(new.args)] <- new.args
+  do.call("lines", plot.args)
 }
 
