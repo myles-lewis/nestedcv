@@ -34,10 +34,7 @@ metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
   met <- object$summary$metrics
   if (extra && nlevels(object$y) == 2) {
     # binary classification
-    if (!requireNamespace("MLmetrics", quietly = TRUE)) {
-      stop("Package 'MLmetrics' must be installed", call. = FALSE)
-    }
-    aucpr <- MLmetrics::PRAUC(object$output$predyp, object$output$testy)
+    aucpr <- prc(object)$auc
     tab <- object$summary$table
     mcc <- mcc(tab)
     if (is.numeric(positive)) positive <- colnames(tab)[positive]

@@ -8,7 +8,7 @@ repeatcv(
   expr,
   n = 5,
   repeat_folds = NULL,
-  keep = FALSE,
+  keep = TRUE,
   extra = FALSE,
   progress = TRUE,
   rep.cores = 1L

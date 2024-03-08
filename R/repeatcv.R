@@ -64,7 +64,7 @@
 #' }
 #' @export
 
-repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
+repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
                      extra = FALSE,
                      progress = TRUE, rep.cores = 1L) {
   start <- Sys.time()

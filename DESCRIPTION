@@ -1,6 +1,6 @@
 Package: nestedcv
 Title: Nested Cross-Validation with 'glmnet' and 'caret'
-Version: 0.7.7
+Version: 0.7.8
 Authors@R: 
     c(person(given = "Myles",family = "Lewis",
     role = c("aut", "cre"),
@@ -9,8 +9,12 @@ Authors@R:
     person(given = "Athina",family = "Spiliopoulou",
     role = c("aut"),
     comment = c(ORCID = "0000-0002-5929-6585")),
+    person(given = "Cankut",family = "Cubuk",
+    role = c("ctb"),
+    email = "c.cubuk@qmul.ac.uk",
+    comment = c(ORCID = "0000-0003-4646-0849")),
     person(given = "Katriona",family = "Goldmann",
-    role = c("aut"),
+    role = c("ctb"),
     comment = c(ORCID = "0000-0002-9073-6323")))
 Maintainer: Myles Lewis <myles.lewis@qmul.ac.uk>
 BugReports: https://github.com/myles-lewis/nestedcv/issues
@@ -48,7 +52,6 @@ Suggests:
     hsstan,
     mda,
     mlbench,
-    MLmetrics,
     pbapply,
     pls,
     randomForest,

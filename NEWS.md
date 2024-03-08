@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.7.8
+###### 08/03/2024
+* Added `prc()` which enables easy building of precision-recall curves from
+'nestedcv' models and `repeatcv()` results.
+
 # nestedcv 0.7.7
 ###### 01/03/2024
 * Added `metrics()` which gives additional performance metrics for binary 

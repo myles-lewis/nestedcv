@@ -48,7 +48,7 @@ An object of S3 class 'prc' containing the following fields:
 \item{auc}{area under precision-recall curve value using trapezoid method}
 }
 \description{
-Builds a precision-recall curve for a nestedcv model using \code{prediction()} and
-\code{performance()} functions from the ROCR package and returns an object of
+Builds a precision-recall curve for a 'nestedcv' model using \code{prediction()}
+and \code{performance()} functions from the ROCR package and returns an object of
 class 'prc' for plotting.
 }
