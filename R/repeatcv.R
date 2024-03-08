@@ -48,7 +48,7 @@
 #' summary(res)
 #' 
 #' ## using magrittr nested pipe
-#' `%|>%` <- pipe_nested
+#' `%|>%` <- magrittr::pipe_nested
 #' res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
 #'                      n_outer_folds = 4) %|>%
 #'        repeatcv(3, rep.cores = 2)
