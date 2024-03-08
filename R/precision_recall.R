@@ -45,7 +45,7 @@ prc.default <- function(response, predictor, positive = 2, ...) {
 #' @export
 prc.data.frame <- function(output, ...) {
   if (!all(c("testy", "predyp") %in% colnames(output)))
-    stop("not a classification output dataframe")
+    stop("not binary classification")
   prc.default(output$testy, output$predyp, ...)
 }
 
