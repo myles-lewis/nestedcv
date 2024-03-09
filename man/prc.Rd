@@ -50,7 +50,7 @@ An object of S3 class 'prc' containing the following fields:
 \item{recall}{vector of recall values}
 \item{precision}{vector of precision values}
 \item{auc}{area under precision-recall curve value using trapezoid method}
-\item{baseline}{baseline precision}
+\item{baseline}{baseline precision value}
 }
 \description{
 Builds a precision-recall curve for a 'nestedcv' model using \code{prediction()}

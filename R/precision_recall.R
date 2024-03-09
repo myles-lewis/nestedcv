@@ -20,7 +20,7 @@
 #' \item{recall}{vector of recall values}
 #' \item{precision}{vector of precision values}
 #' \item{auc}{area under precision-recall curve value using trapezoid method}
-#' \item{baseline}{baseline precision}
+#' \item{baseline}{baseline precision value}
 #' @export
 prc <- function(...) {
   UseMethod("prc")
