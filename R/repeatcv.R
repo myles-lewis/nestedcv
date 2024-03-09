@@ -130,8 +130,10 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
       return(ret)
     }
     s <- metrics(fit, extra = extra)
-    if (keep) return(list(s, fit$output))
-    s
+    if (!keep) return(s)
+    output <- fit$output
+    output$rep <- i
+    list(s, output)
   }, mc.cores = rep.cores)
   if (progress) {
     if (rep.cores == 1) {close(pb)
