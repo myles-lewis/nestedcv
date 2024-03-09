@@ -18,6 +18,27 @@ No return value
 Plots a precision-recall curve using base graphics. It accepts an S3 object
 of class 'prc', see \code{\link[=prc]{prc()}}.
 }
+\examples{
+\donttest{
+data(iris)
+x <- iris[, 1:4]
+y <- iris$Species
+## convert to a binary classification problem
+y <- factor(y, labels = c("other", "versicolor", "other"))
+
+fit1 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1, cv.cores = 2)
+
+fit1$prc <- prc(fit1)  # calculate precision-recall curve
+fit1$prc$auc  # precision-recall AUC value
+
+fit2 <- nestcv.train(y, x, method = "gbm", cv.cores = 2)
+fit2$prc <- prc(fit2)
+fit2$prc$auc
+
+plot(fit1$prc, ylim = c(0, 1))
+lines(fit2$prc, col = "red")
+}
+}
 \seealso{
 \code{\link[=prc]{prc()}}
 }

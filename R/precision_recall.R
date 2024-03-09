@@ -21,6 +21,34 @@
 #' \item{precision}{vector of precision values}
 #' \item{auc}{area under precision-recall curve value using trapezoid method}
 #' \item{baseline}{baseline precision value}
+#' @examples
+#' \donttest{
+#' data(iris)
+#' x <- iris[, 1:4]
+#' y <- iris$Species
+#' ## convert to a binary classification problem
+#' y <- factor(y, labels = c("other", "versicolor", "other"))
+#' 
+#' fit1 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1, cv.cores = 2)
+#' 
+#' fit1$prc <- prc(fit1)  # calculate precision-recall curve
+#' fit1$prc$auc  # precision-recall AUC value
+#' 
+#' fit2 <- nestcv.train(y, x, method = "gbm", cv.cores = 2)
+#' fit2$prc <- prc(fit2)
+#' fit2$prc$auc
+#' 
+#' plot(fit1$prc, ylim = c(0, 1))
+#' lines(fit2$prc, col = "red")
+#' 
+#' ## use magritte pipe
+#' `%|>%` <- magrittr::pipe_nested
+#' res <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1) %|>%
+#'   repeatcv(n = 4, rep.cores = 2)
+#' 
+#' res$prc <- prc(res)  # precision-recall curve on repeated predictions
+#' plot(res$prc)
+#' }
 #' @export
 prc <- function(...) {
   UseMethod("prc")
@@ -100,6 +128,26 @@ auc_calc <- function(x, y) {
 #' @param ... Optional graphical arguments passed to [plot()]
 #' @return No return value
 #' @seealso [prc()]
+#' @examples
+#' \donttest{
+#' data(iris)
+#' x <- iris[, 1:4]
+#' y <- iris$Species
+#' ## convert to a binary classification problem
+#' y <- factor(y, labels = c("other", "versicolor", "other"))
+#' 
+#' fit1 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1, cv.cores = 2)
+#' 
+#' fit1$prc <- prc(fit1)  # calculate precision-recall curve
+#' fit1$prc$auc  # precision-recall AUC value
+#' 
+#' fit2 <- nestcv.train(y, x, method = "gbm", cv.cores = 2)
+#' fit2$prc <- prc(fit2)
+#' fit2$prc$auc
+#' 
+#' plot(fit1$prc, ylim = c(0, 1))
+#' lines(fit2$prc, col = "red")
+#' }
 #' @export
 plot.prc <- function(x, ...) {
   new.args <- list(...)
