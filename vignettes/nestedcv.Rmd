@@ -819,9 +819,9 @@ metrics(fit2, extra = TRUE)
 
 ## Precision-recall curves
 
-While ROC curves are generated automatically for binary models, precision-recall
-curves can be quickly generated for `nestedcv` models using the convenience
-function `prc()` which employs the package ROCR.
+While ROC curve objects are generated automatically for binary models,
+precision-recall curves can be quickly generated for `nestedcv` models using the
+convenience function `prc()` which employs the package ROCR.
 
 ```{r, fig.dim = c(10, 5)}
 fit1$prc <- prc(fit1)
