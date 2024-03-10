@@ -59,11 +59,10 @@ class 'prc' for plotting.
 }
 \examples{
 \donttest{
-data(iris)
-x <- iris[, 1:4]
-y <- iris$Species
-## convert to a binary classification problem
-y <- factor(y, labels = c("other", "versicolor", "other"))
+library(mlbench)
+data(Sonar)
+y <- Sonar$Class
+x <- Sonar[, -61]
 
 fit1 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1, cv.cores = 2)
 

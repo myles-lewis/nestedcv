@@ -23,11 +23,10 @@
 #' \item{baseline}{baseline precision value}
 #' @examples
 #' \donttest{
-#' data(iris)
-#' x <- iris[, 1:4]
-#' y <- iris$Species
-#' ## convert to a binary classification problem
-#' y <- factor(y, labels = c("other", "versicolor", "other"))
+#' library(mlbench)
+#' data(Sonar)
+#' y <- Sonar$Class
+#' x <- Sonar[, -61]
 #' 
 #' fit1 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1, cv.cores = 2)
 #' 
@@ -130,22 +129,18 @@ auc_calc <- function(x, y) {
 #' @seealso [prc()]
 #' @examples
 #' \donttest{
-#' data(iris)
-#' x <- iris[, 1:4]
-#' y <- iris$Species
-#' ## convert to a binary classification problem
-#' y <- factor(y, labels = c("other", "versicolor", "other"))
+#' library(mlbench)
+#' data(Sonar)
+#' y <- Sonar$Class
+#' x <- Sonar[, -61]
 #' 
 #' fit1 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1, cv.cores = 2)
-#' 
 #' fit1$prc <- prc(fit1)  # calculate precision-recall curve
-#' fit1$prc$auc  # precision-recall AUC value
 #' 
 #' fit2 <- nestcv.train(y, x, method = "gbm", cv.cores = 2)
 #' fit2$prc <- prc(fit2)
-#' fit2$prc$auc
 #' 
-#' plot(fit1$prc, ylim = c(0, 1))
+#' plot(fit1$prc)
 #' lines(fit2$prc, col = "red")
 #' }
 #' @export
