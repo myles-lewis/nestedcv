@@ -337,11 +337,12 @@ summary(res.rtx)
 
 ### One-hot encoding (dummy variables)
 
-`glmnet` can only accept a numeric matrix of predictors. Dataframes of
-predictors with factors or character variables can be converted to a matrix
-using one-hot encoding to create dummy variables using the function `one_hot()`.
-For `nestcv.glmnet` models, `one_hot()` should be used with the argument
-`all_levels = FALSE` to avoid the predictor matrix not being full rank.
+`glmnet` and some caret models (e.g. SVM) can only accept a numeric matrix of
+predictors. Dataframes of predictors with factors or character variables can be
+converted to a matrix using one-hot encoding to create dummy variables using the
+function `one_hot()`. For `nestcv.glmnet` models, `one_hot()` should be used
+with the argument `all_levels = FALSE` to avoid the predictor matrix not being
+full rank.
 
 # Filters
 
@@ -639,7 +640,7 @@ fit4$summary
 Finally we plot ROC curves to illustrate the differences between these
 approaches.
 
-```{r}
+```{r, fig.dim = c(5, 5)}
 plot(fit1$roc, col='green')
 lines(fit1b$roc, col='red')
 lines(fit2$roc, col='blue')
@@ -789,6 +790,56 @@ multiple columns (e.g. response + one or more grouping variables), try
 # Bayesian shrinkage models
 
 See the accompanying vignette "Using *outercv* with Bayesian shrinkage models".
+
+# Extra performance metrics
+
+For binary classification models, the function `metrics()` can be used to obtain
+additional performance metrics including area under precision-recall curve,
+Cohen's kappa, F1 score and Matthews correlation coefficient. Some of these vary
+depending on which category is considered the positive or relevant class. The
+default setting is that factors are ordered as 'controls' then 'cases' (factor 
+level 1 then 2). Setting the argument `positive = 1` or to the character value
+of the positive factor level alters which factor level is considered positive or
+relevant.
+
+```{r}
+library(mlbench)
+data(Sonar)
+y <- Sonar$Class
+x <- Sonar[, -61]
+
+fit1 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                      n_outer_folds = 4, cv.cores = 2)
+
+fit2 <- nestcv.train(y, x, method = "gbm", n_outer_folds = 4, cv.cores = 2)
+
+metrics(fit1, extra = TRUE)
+metrics(fit2, extra = TRUE)
+```
+
+## Precision-recall curves
+
+While ROC curves are generated automatically for binary models, precision-recall
+curves can be quickly generated for `nestedcv` models using the convenience
+function `prc()` which employs the package ROCR.
+
+```{r, fig.dim = c(10, 5)}
+fit1$prc <- prc(fit1)
+fit2$prc <- prc(fit2)
+
+# precision-recall AUC values
+fit1$prc$auc
+fit2$prc$auc
+
+# plot ROC and PR curves
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 2, 2) +.1)
+plot(fit1$roc, col = "red", main = "ROC", las = 1)
+lines(fit2$roc, col = "blue")
+
+plot(fit1$prc, col = "red", main = "Precision-recall")
+lines(fit2$prc, col = "blue")
+par(op)
+```
 
 # Making predictions
 

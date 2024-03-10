@@ -34,7 +34,7 @@ metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
   met <- object$summary$metrics
   if (extra && nlevels(object$y) == 2) {
     # binary classification
-    aucpr <- prc(object)$auc
+    aucpr <- prc(object, positive = positive)$auc
     tab <- object$summary$table
     mcc <- mcc(tab)
     if (is.numeric(positive)) positive <- colnames(tab)[positive]
