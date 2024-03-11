@@ -63,9 +63,30 @@ cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1),
 #' @param object Fitted `cva.glmnet` object.
 #' @param ... Other arguments passed to `coef.glmnet()` e.g. `s` the value of
 #'   lambda at which coefficients are required.
+#' @returns Sparse matrix containing coefficients from a `cv.glmnet` model
 #' @export
 coef.cva.glmnet <- function(object, ...) {
   coef(object$fits[[object$which_alpha]], ...)
+}
+
+
+#' Predict method for cva.glmnet models
+#' 
+#' Makes predictions from a cross-validated glmnet model with optimal value of 
+#' lambda and alpha.
+#' 
+#' @param object Fitted `cva.glmnet` object.
+#' @param newx Matrix of new values for `x` at which predictions are to be made.
+#' @param s Value of penalty parameter lambda. Default value is `s="lambda.1se"`
+#'   for consistency with glmnet. Alternatively `s="lambda.min"` can be used.
+#' @param ... Other arguments passed to `predict.cv.glmnet()`.
+#' @returns Object returned depends on arguments in `...` such as `type`.  
+#' @export
+predict.cva.glmnet <- function(object, newx,
+                               s = "lambda.1se", ...) {
+  w <- object$which_alpha
+  fit <- object$fits[[w]]
+  predict(fit, newx = newx, s = s, ...)
 }
 
 

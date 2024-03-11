@@ -12,6 +12,9 @@
 \item{...}{Other arguments passed to \code{coef.glmnet()} e.g. \code{s} the value of
 lambda at which coefficients are required.}
 }
+\value{
+Sparse matrix containing coefficients from a \code{cv.glmnet} model
+}
 \description{
 Extracts model coefficients from a fitted \code{\link[=cva.glmnet]{cva.glmnet()}} object.
 }
