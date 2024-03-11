@@ -187,7 +187,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
       res2 <- lapply(res, "[[", 2)
       output <- do.call(rbind, res2)
       out <- list(call = ex0, result = result, output = output)
-      if ("AUC" %in% colnames(result)) {
+      if ("AUC" %in% colnames(result) & !all(is.na(output))) {
         out$roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
                              quiet = TRUE)
       }
