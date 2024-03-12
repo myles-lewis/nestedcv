@@ -31,6 +31,10 @@ metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
     }
     return(c(met, nvar(object)))
   }
+  if (inherits(object, "nestcv.glmnet") && object$call$family == "mgaussian") {
+    # mgaussian
+    return(object$summary)
+  }
   met <- object$summary$metrics
   if (extra && nlevels(object$y) == 2) {
     # binary classification
