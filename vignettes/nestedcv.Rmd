@@ -356,6 +356,8 @@ Multiple filters for variable reduction are available including:
 
 `glmnet_filter`   uses sparsity of elastic net regression using glmnet to
                   restrict variables
+                  
+`pls_filter`      partial least squares regression filter using pls package
 
 `boruta_filter`   Boruta
 
