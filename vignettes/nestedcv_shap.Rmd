@@ -55,8 +55,16 @@ vs
 
 Variable stability can be plotted using `plot_var_stability()`.
 
-```{r}
-plot_var_stability(fit)
+```{r, fig.dim = c(10, 5)}
+p1 <- plot_var_stability(fit)
+
+# overlay directionality using colour
+p2 <- plot_var_stability(fit, final = FALSE, direction = 1)
+
+# or show directionality with the sign of the variable importance
+# plot_var_stability(fit, final = FALSE, percent = F)
+
+ggpubr::ggarrange(p1, p2, ncol=2)
 ```
 
 By default only the predictors chosen in the final model are shown. If the
@@ -80,16 +88,6 @@ classification or the sign of regression coefficient for continuous outcomes
 (not available for multiclass caret models). To better understand relationship
 and direction of effect of each predictor within the final model, we recommend
 using SHAP values.
-
-```{r, fig.width = 9, fig.height = 5}
-# overlay directionality using colour
-p1 <- plot_var_stability(fit, final = FALSE, direction = 1)
-
-# show directionality with the sign of the variable importance
-p2 <- plot_var_stability(fit, final = FALSE, percent = F)
-
-ggpubr::ggarrange(p1, p2, ncol=2)
-```
 
 Alternatively a barplot is available using `barplot_var_stability()`.
 
@@ -166,7 +164,7 @@ package.
 The process for a caret model fitted using `nestedcv` is similar. Use the
 `pred_train` wrapper when calling `explain()`.
 
-```{r}
+```{r, eval=FALSE}
 # Only 3 outer folds to speed up process
 fit <- nestcv.train(y, x,
                     method = "gbm",

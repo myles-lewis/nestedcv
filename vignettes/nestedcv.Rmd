@@ -312,17 +312,6 @@ legend("bottomright", legend = paste0("AUC = ", signif(pROC::auc(rtx.inroc), 3))
 knitr::include_graphics("roc.png")
 ```
 
-The overall expression level of each gene selected in the final model can be 
-compared with a boxplot.
-
-```{r eval = FALSE}
-boxplot_expression(res.rtx, ylab = "VST")
-```
-
-```{r, out.width='70%', fig.align="center", echo=FALSE}
-knitr::include_graphics("boxplot.png")
-```
-
 Leave-one-out cross-validation (LOOCV) can be performed on the outer folds.
 
 ```{r eval = FALSE}
@@ -811,10 +800,7 @@ x <- Sonar[, -61]
 fit1 <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
                       n_outer_folds = 4, cv.cores = 2)
 
-fit2 <- nestcv.train(y, x, method = "gbm", n_outer_folds = 4, cv.cores = 2)
-
 metrics(fit1, extra = TRUE)
-metrics(fit2, extra = TRUE)
 ```
 
 ## Precision-recall curves
@@ -825,19 +811,15 @@ convenience function `prc()` which employs the package ROCR.
 
 ```{r, fig.dim = c(10, 5)}
 fit1$prc <- prc(fit1)
-fit2$prc <- prc(fit2)
 
 # precision-recall AUC values
 fit1$prc$auc
-fit2$prc$auc
 
 # plot ROC and PR curves
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 2, 2) +.1)
 plot(fit1$roc, col = "red", main = "ROC", las = 1)
-lines(fit2$roc, col = "blue")
 
 plot(fit1$prc, col = "red", main = "Precision-recall")
-lines(fit2$prc, col = "blue")
 par(op)
 ```
 
