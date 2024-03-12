@@ -160,7 +160,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
       result <- lapply(seq_len(yn), function(i) {
         res1b <- lapply(res1, "[[", i)
         res1b <- do.call(rbind, res1b)
-        rownames(res1b) <- seq_len(n)
+        rownames(res1b) <- seq_len(nrow(res1b))
         res1b
       })
       names(result) <- names(res1[[1]])
@@ -172,7 +172,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
       result <- lapply(seq_len(yn), function(i) {
         res1b <- lapply(res, "[[", i)
         res1b <- do.call(rbind, res1b)
-        rownames(res1b) <- seq_len(n)
+        rownames(res1b) <- seq_len(nrow(res1b))
         res1b
       })
       names(result) <- names(res[[1]])
@@ -183,7 +183,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
     if (keep) {
       res1 <- lapply(res, "[[", 1)
       result <- do.call(rbind, res1)
-      rownames(result) <- seq_len(n)
+      rownames(result) <- seq_len(nrow(result))
       res2 <- lapply(res, "[[", 2)
       output <- do.call(rbind, res2)
       out <- list(call = ex0, result = result, output = output)
@@ -193,7 +193,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
       }
     } else {
       result <- do.call(rbind, res)
-      rownames(result) <- seq_len(n)
+      rownames(result) <- seq_len(nrow(result))
       out <- list(call = ex0, result = result)
     }
   }
