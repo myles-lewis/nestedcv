@@ -86,7 +86,7 @@ predict.cva.glmnet <- function(object, newx,
                                s = "lambda.1se", ...) {
   w <- object$which_alpha
   fit <- object$fits[[w]]
-  predict(fit, newx = newx, s = s, ...)
+  predict(fit, newx = as.matrix(newx), s = s, ...)
 }
 
 
