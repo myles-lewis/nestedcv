@@ -1,9 +1,14 @@
 # Filters to reduce number of predictors in nested CV
 
-#' t-test filter
+#' Univariate filters
 #'
-#' Simple univariate filter using t-test using the Rfast package for speed.
-#' Can be applied to all or a subset of predictors.
+#' A selection of simple univariate filters using t-test, Wilcoxon test, one-way
+#' ANOVA or correlation (Pearson or Spearman) for ranking variables. These
+#' filters are designed for speed. `ttest_filter` uses the `Rfast` package,
+#' `wilcoxon_filter` (Mann-Whitney) test uses
+#' [matrixTests::row_wilcoxon_twosample], `anova_filter` uses
+#' [matrixTests::col_oneway_welch] (Welch's F-test) from the `matrixTests`
+#' package. Can be applied to all or a subset of predictors.
 #'
 #' @param y Response vector
 #' @param x Matrix or dataframe of predictors
@@ -26,6 +31,9 @@
 #'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
 #'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
 #'   removed.
+#' @param exact Logical whether exact or approximate p-value is calculated.
+#'   Default is `FALSE` for speed.
+#' @param method Type of correlation, either "pearson" or "spearman".
 #' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
 #'
 #' @return Integer vector of indices of filtered parameters (type = "index") or
@@ -48,6 +56,13 @@
 #' ttest_filter(y2, dt)  # returns index of filtered predictors
 #' ttest_filter(y2, dt, type = "name")  # shows names of predictors
 #' ttest_filter(y2, dt, type = "full")  # full results table
+#'
+#' data(iris)
+#' dt <- iris[, 1:4]
+#' y3 <- iris[, 5]
+#' anova_filter(y3, dt)  # returns index of filtered predictors
+#' anova_filter(y3, dt, type = "full")  # shows names of predictors
+#' anova_filter(y3, dt, type = "name")  # full results table
 #'
 #' @importFrom Rfast ttests
 #' @export
@@ -106,46 +121,7 @@ filter_end <- function(pval, x, force_vars, nfilter, p_cutoff, rsq_cutoff,
 }
 
 
-#' ANOVA filter
-#' 
-#' Simple univariate filter using anova (Welch's F-test) using the `matrixTests`
-#' package for speed.
-#' 
-#' @param y Response vector
-#' @param x Matrix or dataframe of predictors
-#' @param force_vars Vector of column names within `x` which are always retained
-#'   in the model (i.e. not filtered). Default `NULL` means all predictors will
-#'   be passed to `filterFUN`.
-#' @param nfilter Number of predictors to return. If `NULL` all predictors with 
-#' p values < `p_cutoff` are returned.
-#' @param p_cutoff p value cut-off
-#' @param rsq_cutoff r^2 cutoff for removing predictors due to collinearity.
-#'   Default `NULL` means no collinearity filtering. Predictors are ranked based
-#'   on anova test. If 2 or more predictors are collinear, the first ranked
-#'   predictor by anova is retained, while the other collinear predictors are
-#'   removed. See [collinear()].
-#' @param type Type of vector returned. Default "index" returns indices,
-#' "names" returns predictor names, "full" returns a matrix of p values.
-#' @param keep_factors Logical affecting factors with 3 or more levels.
-#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
-#'   factors are converted to numeric values 0/1 and analysed as such. If
-#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
-#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
-#'   removed.
-#' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
-#' @return Integer vector of indices of filtered parameters (type = "index") or
-#'   character vector of names (type = "names") of filtered parameters. If
-#'   `type` is `"full"` full output from [matrixTests::col_oneway_welch()] is
-#'   returned.
-#' 
-#' @examples
-#' data(iris)
-#' dt <- iris[, 1:4]
-#' y3 <- iris[, 5]
-#' anova_filter(y3, dt)  # returns index of filtered predictors
-#' anova_filter(y3, dt, type = "full")  # shows names of predictors
-#' anova_filter(y3, dt, type = "name")  # full results table
-#' 
+#' @rdname ttest_filter
 #' @importFrom matrixTests col_oneway_welch
 #' @export
 #' 
@@ -175,42 +151,7 @@ anova_filter <- function(y,
 }
 
 
-#' Wilcoxon test filter
-#' 
-#' Simple univariate filter using Wilcoxon (Mann-Whitney) test using the 
-#' matrixTests package.
-#' 
-#' @param y Response vector
-#' @param x Matrix or dataframe of predictors
-#' @param force_vars Vector of column names within `x` which are always retained
-#'   in the model (i.e. not filtered). Default `NULL` means all predictors will
-#'   be passed to `filterFUN`.
-#' @param nfilter Number of predictors to return. If `NULL` all predictors with 
-#' p values < `p_cutoff` are returned.
-#' @param p_cutoff p value cut-off
-#' @param rsq_cutoff r^2 cutoff for removing predictors due to collinearity.
-#'   Default `NULL` means no collinearity filtering. Predictors are ranked based
-#'   on Wilcoxon test. If 2 or more predictors are collinear, the first ranked
-#'   predictor by Wilcoxon test is retained, while the other collinear predictors are
-#'   removed. See [collinear()].
-#' @param rsq_method character string indicating which correlation coefficient
-#'   is to be computed. One of "pearson" (default), "kendall", or "spearman".
-#'   See [collinear()].
-#' @param type Type of vector returned. Default "index" returns indices,
-#' "names" returns predictor names, "full" returns a matrix of p-values.
-#' @param exact Logical whether exact or approximate p-value is calculated. 
-#' Default is `FALSE` for speed.
-#' @param keep_factors Logical affecting factors with 3 or more levels.
-#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
-#'   factors are converted to numeric values 0/1 and analysed as such. If
-#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
-#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
-#'   removed.
-#' @param ... Further arguments passed to [matrixTests::row_wilcoxon_twosample]
-#' @return Integer vector of indices of filtered parameters (type = "index") or 
-#' character vector of names (type = "names") of filtered parameters. If 
-#' `type` is `"full"` full output from [matrixTests::row_wilcoxon_twosample] 
-#' is returned.
+#' @rdname ttest_filter
 #' @importFrom matrixTests row_wilcoxon_twosample
 #' @export
 #' 
@@ -220,7 +161,6 @@ wilcoxon_filter <- function(y,
                             nfilter = NULL,
                             p_cutoff = 0.05,
                             rsq_cutoff = NULL,
-                            rsq_method = "pearson",
                             type = c("index", "names", "full"),
                             exact = FALSE,
                             keep_factors = TRUE,
@@ -242,7 +182,7 @@ wilcoxon_filter <- function(y,
   }
   filter_end(res[, "pvalue"],
              x, force_vars, nfilter, p_cutoff, rsq_cutoff, type,
-             rsq_method = rsq_method, keep_factors, factor_ind)
+             keep_factors, factor_ind)
 }
 
 
@@ -292,36 +232,7 @@ correls2 <- function(y, x,
 }
 
 
-#' Correlation filter
-#' 
-#' Filter using correlation (Pearson or Spearman) for ranking variables.
-#' 
-#' @param y Response vector
-#' @param x Matrix or dataframe of predictors
-#' @param method Type of correlation, either "pearson" or "spearman".
-#' @param force_vars Vector of column names within `x` which are always retained
-#'   in the model (i.e. not filtered). Default `NULL` means all predictors will
-#'   be passed to `filterFUN`.
-#' @param nfilter Number of predictors to return. If `NULL` all predictors with 
-#' p values < `p_cutoff` are returned.
-#' @param p_cutoff p value cut-off
-#' @param rsq_cutoff r^2 cutoff for removing predictors due to collinearity.
-#'   Default `NULL` means no collinearity filtering. Predictors are ranked based
-#'   on correlation with the response vector `y`. If 2 or more predictors are
-#'   collinear, the first ranked predictor is retained, while the other
-#'   collinear predictors are removed. See [collinear()].
-#' @param type Type of vector returned. Default "index" returns indices,
-#' "names" returns predictor names, "full" returns a matrix of p-values.
-#' @param keep_factors Logical affecting factors with 3 or more levels.
-#'   Dataframes are coerced to a matrix using [data.matrix]. Binary
-#'   factors are converted to numeric values 0/1 and analysed as such. If
-#'   `keep_factors` is `TRUE` (the default), factors with 3 or more levels are
-#'   not filtered and are retained. If `keep_factors` is `FALSE`, they are
-#'   removed.
-#' @param ... Further arguments passed to [correls]
-#' @return Integer vector of indices of filtered parameters (type = "index") or 
-#' character vector of names (type = "names") of filtered parameters. If 
-#' `type` is `"full"` full output from [correls] is returned.
+#' @rdname ttest_filter
 #' @export
 #' 
 correl_filter <- function(y,
