@@ -861,37 +861,30 @@ The main commands `nestcv.glmnet()`, `nestcv.train()`, `nestcv.SuperLearner()`
 and `outercv()` perform nested CV once, giving an estimate of performance from
 the outer CV folds across the whole data. Repeating this process many
 times, which is called 'repeated nested CV', gives a more accurate overall
-estimate of performance. This can be performed by wrapping a call to one of the
-above `nestedcv` model functions in `repeatcv()`.
+estimate of performance. This can be performed by piping a call to one of the
+above `nestedcv` model functions to `repeatcv()` using the nested pipe from the
+`magrittr` package (the standard pipe `%>%` will _not_ work).
 
 ```{r results='hide'}
-data("iris")
-dat <- iris
-y <- dat$Species
-x <- dat[, 1:4]
+data(Sonar)
+y <- Sonar$Class
+x <- Sonar[, -61]
 
 # single fit
-fit <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1)
+fit <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                     n_outer_folds = 4, cv.cores = 2)
+
+# using nested pipe from magrittr
+`%|>%` <- magrittr::pipe_nested
 
 # repeated nested CV
-res <- repeatcv(n = 5, nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
-                                     n_outer_folds = 4), rep.cores = 2)
+repcv <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                       n_outer_folds = 4) %|>%
+         repeatcv(8, rep.cores = 2)
 ```
 ```{r}
-res
-summary(res)
-```
-
-Or for those that prefer using pipes to lay out code, the nested pipe from the
-`magrittr` package can be employed (the standard pipe `%>%` will _not_ work).
-
-```{r eval=FALSE}
-# using nested pipe from magrittr
-`%|>%` <- pipe_nested
-
-res <- nestcv.glmnet(y, x,
-                     family = "multinomial", alphaSet = 1) %|>%
-       repeatcv(5, rep.cores = 2)
+repcv
+summary(repcv)
 ```
 
 If you are using repeated nested CV to compare performance between models, it is
@@ -903,15 +896,37 @@ each repeat.
 set.seed(123, "L'Ecuyer-CMRG")
 folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
 
-res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
-                     n_outer_folds = 4) %|>%
-       repeatcv(3, repeat_folds = folds, rep.cores = 2)
-res
+repcv <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                       n_outer_folds = 4) %|>%
+         repeatcv(3, repeat_folds = folds, rep.cores = 2)
+repcv
 ```
 
-Repeated nested CV is computationally intensive and can be very time consuming.
-We strongly recommend that these calls fully exploit parallelisation as
-explained below.
+`repeatcv()` applied to binary `nestedcv` models will store a `pROC` object
+which concatenates all of the test fold predictions across all repeats. This can
+be easily plotted and shows a smoother ROC curve compared to the ROC curve from
+a single model.
+
+Similarly, a more refined precision-recall curve can also be generated from the
+repeated nested CV predictions.
+
+```{r, fig.dim = c(10, 5)}
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 2, 2) +.1)
+plot(fit1$roc, col = "red", las = 1, main = "ROC")  # single nested cv
+lines(repcv$roc)  # repeated nested cv
+
+repcv$prc <- prc(repcv)  # calculate precision-recall curve
+
+plot(fit1$prc, col = "red", main = "Precision-recall")  # single nested cv
+lines(repcv$prc)  # repeated nested cv
+legend("topright", legend = c("single nested cv", "repeat nested cv"),
+       col = c("red", "black"), lwd = 2, bty = "n")
+par(op)
+```
+
+Repeated nested CV is computationally intensive and very time consuming. We
+strongly recommend that these calls fully exploit parallelisation as explained
+below.
 
 # Parallelisation
 
