@@ -76,9 +76,7 @@ fit2$prc$auc
 plot(fit1$prc, ylim = c(0, 1))
 lines(fit2$prc, col = "red")
 
-## use magritte pipe
-`\%|>\%` <- magrittr::pipe_nested
-res <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1) \%|>\%
+res <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1) |>
   repeatcv(n = 4, rep.cores = 2)
 
 res$prc <- prc(res)  # precision-recall curve on repeated predictions

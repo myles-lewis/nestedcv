@@ -6,6 +6,8 @@ News
 * Added `prc()` which enables easy building of precision-recall curves from
 'nestedcv' models and `repeatcv()` results.
 * Added `predict` method for `cva.glmnet`.
+* Removed magrittr as an imported package. The standard R pipe `|>` can be used 
+instead.
 
 # nestedcv 0.7.7
 ###### 01/03/2024

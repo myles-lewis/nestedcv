@@ -30,7 +30,6 @@ Imports:
     foreach,
     ggplot2,
     glmnet,
-    magrittr,
     matrixStats,
     matrixTests,
     methods,

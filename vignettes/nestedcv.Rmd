@@ -846,8 +846,8 @@ and `outercv()` perform nested CV once, giving an estimate of performance from
 the outer CV folds across the whole data. Repeating this process many
 times, which is called 'repeated nested CV', gives a more accurate overall
 estimate of performance. This can be performed by piping a call to one of the
-above `nestedcv` model functions to `repeatcv()` using the nested pipe from the
-`magrittr` package (the standard pipe `%>%` will _not_ work).
+above `nestedcv` model functions to `repeatcv()` using the pipe `|>` (the
+standard magrittr pipe `%>%` will _not_ work).
 
 ```{r results='hide'}
 data(Sonar)
@@ -858,12 +858,9 @@ x <- Sonar[, -61]
 fit <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
                      n_outer_folds = 4, cv.cores = 2)
 
-# using nested pipe from magrittr
-`%|>%` <- magrittr::pipe_nested
-
 # repeated nested CV
 repcv <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
-                       n_outer_folds = 4) %|>%
+                       n_outer_folds = 4) |>
          repeatcv(8, rep.cores = 2)
 ```
 ```{r}
@@ -881,7 +878,7 @@ set.seed(123, "L'Ecuyer-CMRG")
 folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
 
 repcv <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
-                       n_outer_folds = 4) %|>%
+                       n_outer_folds = 4) |>
          repeatcv(3, repeat_folds = folds, rep.cores = 2)
 repcv
 ```
