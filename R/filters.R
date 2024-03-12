@@ -8,7 +8,8 @@
 #' `wilcoxon_filter` (Mann-Whitney) test uses
 #' [matrixTests::row_wilcoxon_twosample], `anova_filter` uses
 #' [matrixTests::col_oneway_welch] (Welch's F-test) from the `matrixTests`
-#' package. Can be applied to all or a subset of predictors.
+#' package. Can be applied to all or a subset of predictors. For mixed datasets
+#' (combined continuous & categorical) see [stat_filter()]
 #'
 #' @param y Response vector
 #' @param x Matrix or dataframe of predictors
@@ -34,13 +35,14 @@
 #' @param exact Logical whether exact or approximate p-value is calculated.
 #'   Default is `FALSE` for speed.
 #' @param method Type of correlation, either "pearson" or "spearman".
-#' @param ... optional arguments, e.g. `rsq_method`: see [collinear()].
-#'
+#' @param ... optional arguments, including `rsq_method` passed to [collinear()]
+#'   or arguments passed to [matrixTests::row_wilcoxon_twosample] in
+#'   [wilcoxon_filter()].
 #' @return Integer vector of indices of filtered parameters (type = "index") or
 #'   character vector of names (type = "names") of filtered parameters in order
 #'   of t-test p-value. If `type` is `"full"` full output from
 #'   [Rfast::ttests] is returned.
-#'
+#' @seealso [lm_filter()] [stat_filter()]
 #' @examples
 #' ## sigmoid function
 #' sigmoid <- function(x) {1 / (1 + exp(-x))}
