@@ -48,6 +48,8 @@ Performs repeated calls to a \code{nestedcv} model to determine performance acro
 repeated runs of nested CV.
 }
 \details{
+We recommend using this with the R pipe \verb{|>} (see examples).
+
 When comparing models, it is recommended to fix the sets of outer CV folds
 used across each repeat for comparing performance between models. The
 function \code{\link[=repeatfolds]{repeatfolds()}} can be used to create a fixed set of outer CV folds

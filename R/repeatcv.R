@@ -16,6 +16,8 @@
 #' @param progress Logical whether to show progress.
 #' @param rep.cores Integer specifying number of cores/threads to invoke.
 #' @details
+#' We recommend using this with the R pipe `|>` (see examples).
+#' 
 #' When comparing models, it is recommended to fix the sets of outer CV folds
 #' used across each repeat for comparing performance between models. The
 #' function [repeatfolds()] can be used to create a fixed set of outer CV folds
@@ -208,15 +210,12 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
 #' y <- dat$Species
 #' x <- dat[, 1:4]
 #' 
-#' ## using magrittr nested pipe
-#' `%|>%` <- magrittr::pipe_nested
-#' 
 #' ## set up fixed fold indices
 #' set.seed(123, "L'Ecuyer-CMRG")
 #' folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
 #' 
 #' res <- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
-#'                      n_outer_folds = 4, cv.cores = 2) %|>%
+#'                      n_outer_folds = 4, cv.cores = 2) |>
 #'        repeatcv(3, repeat_folds = folds)
 #' res
 #' }
