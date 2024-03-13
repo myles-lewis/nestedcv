@@ -859,6 +859,7 @@ fit <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
                      n_outer_folds = 4, cv.cores = 2)
 
 # repeated nested CV
+set.seed(123, "L'Ecuyer-CMRG")
 repcv <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
                        n_outer_folds = 4) |>
          repeatcv(8, rep.cores = 2)
@@ -874,7 +875,6 @@ function `repeatfolds()` can be used to create a fixed set of outer CV folds for
 each repeat.
 
 ```{r eval=FALSE}
-set.seed(123, "L'Ecuyer-CMRG")
 folds <- repeatfolds(y, repeats = 3, n_outer_folds = 4)
 
 repcv <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
