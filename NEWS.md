@@ -8,17 +8,11 @@ News
 * Added `predict` method for `cva.glmnet`.
 * Removed magrittr as an imported package. The standard R pipe `|>` can be used 
 instead.
-
-# nestedcv 0.7.7
-###### 01/03/2024
 * Added `metrics()` which gives additional performance metrics for binary 
 classification models such as F1 score, Matthew's correlation coefficient and 
 precision recall AUC.
 * Added `pls_filter()` which uses partial least squares regression to filter 
 features.
-
-# nestedcv 0.7.6
-###### 13/02/2024
 * Enabled parallelisation over repeats in `repeatedcv()` leading to significant 
 improvement in speed.
 
