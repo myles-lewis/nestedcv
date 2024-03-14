@@ -21,6 +21,9 @@
 #' @export
 #'
 metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
+  if (!inherits(object, c("nestcv.glmnet", "nestcv.train",
+                          "nestcv.SuperLearner", "outercv")))
+    stop("not a nestedcv model")
   if (!is.list(object$summary)) {
     # regression
     met <- object$summary
