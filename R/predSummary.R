@@ -63,8 +63,8 @@ predSummary <- function(output, family = "") {
     }
     summary <- list(table = cm, metrics = metrics)
   } else {
-    df <- data.frame(obs = output$testy, pred = output$predy)
-    summary <- caret::defaultSummary(df)
+    # regression
+    summary <- metrics_reg(output)
   }
   class(summary) <- "predSummary"
   summary
@@ -88,4 +88,19 @@ print.predSummaryMulti <- function(x,
                                    digits = max(3L, getOption("digits") - 3L),
                                    ...) {
   print(unclass(x), digits = digits, print.gap = 3L)
+}
+
+
+metrics_reg <- function(output) {
+  pred <- output$predy
+  obs <- output$testy
+  
+  rmse <- sqrt(mean((pred - obs)^2))
+  mae <- mean(abs(pred - obs))
+  
+  rss <- sum((pred - obs)^2)
+  tss <- sum((obs - mean(obs))^2)
+  Rsq <- 1 - rss/tss
+  
+  setNames(c(rmse, Rsq, mae), c("RMSE", "R-squared", "MAE"))
 }
