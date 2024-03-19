@@ -65,7 +65,7 @@ nvar <- function(object) {
     if (identical(object$final_coef, NA)) {
       # from outer CV results
       ncf <- unlist(lapply(object$outer_result, function(i) length(i$coef)))
-      round(median(ncf) -1)
+      round(median(ncf) -1L)
     } else {
       if (!is.data.frame(object$final_coef)) {
         # multinomial glmnet
@@ -73,8 +73,8 @@ nvar <- function(object) {
         cflist <- lapply(cf, as.matrix)
         cf <- do.call(cbind, cflist)
         ok <- rowSums(cf != 0)
-        sum(ok != 0) -1
-      } else nrow(object$final_coef) -1
+        sum(ok != 0) -1L
+      } else nrow(object$final_coef) -1L
     }
   } else if (inherits(object, c("nestcv.train", "nestcv.SuperLearner")) &&
              (is.null(object$final_vars) | identical(object$final_vars, NA))) {
