@@ -102,5 +102,5 @@ metrics_reg <- function(output) {
   tss <- sum((obs - mean(obs))^2)
   Rsq <- 1 - rss/tss
   
-  setNames(c(rmse, Rsq, mae), c("RMSE", "R-squared", "MAE"))
+  setNames(c(rmse, Rsq, mae), c("RMSE", "R.squared", "MAE"))
 }
