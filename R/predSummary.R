@@ -25,8 +25,8 @@ predSummary <- function(output, family = "") {
   if (family == "mgaussian") {
     nc <- ncol(output) /2
     summary <- lapply(1:nc, function(i) {
-      df <- data.frame(obs = output[, i], pred = output[, i+nc])
-      caret::defaultSummary(df)
+      df <- data.frame(testy = output[, i], predy = output[, i+nc])
+      metrics_reg(df)
     })
     names(summary) <- colnames(output)[nc+ 1:nc]
     class(summary) <- "predSummaryMulti"
