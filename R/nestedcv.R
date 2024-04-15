@@ -211,7 +211,7 @@ nestcv.glmnet <- function(y, x,
   if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
   ok <- checkxy(y, x, na.option, weights)
   y <- if (is.matrix(y)) y[ok$r, ] else y[ok$r]
-  x <- x[ok$r, ok$c]
+  x <- x[ok$r, ok$c, drop = FALSE]
   weights <- weights[ok$r]
   if (!is.null(balance) && !is.null(weights)) {
     stop("`balance` and `weights` cannot be used at the same time")}

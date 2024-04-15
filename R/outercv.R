@@ -215,7 +215,7 @@ outercv.default <- function(y, x,
   }
   ok <- checkxy(y, x, na.option, weights)
   y <- y[ok$r]
-  x <- x[ok$r, ok$c]
+  x <- x[ok$r, ok$c, drop = FALSE]
   weights <- weights[ok$r]
   if (!is.null(balance) & !is.null(weights)) {
     stop("`balance` and `weights` cannot be used at the same time")}
