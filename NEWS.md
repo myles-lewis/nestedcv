@@ -2,7 +2,7 @@ News
 =====
 
 # nestedcv 0.7.9
-###### 18/03/2024
+###### 15/04/2024
 
 ## Important change
 * Rsquared performance metric for regression/continuous outcomes was previously
@@ -11,6 +11,9 @@ of Pearson correlation coefficient (r-squared), instead of the correct
 coefficient of determination which is calculated as `1 - rss/tss`, where `rss` = 
 residual sum of squares, `tss` = total sum of squares. The correct formula for 
 R-squared is now being applied.
+
+## Bugfix
+* Prevent bug if `x` is a single predictor.
 
 # nestedcv 0.7.8
 ###### 11/03/2024
