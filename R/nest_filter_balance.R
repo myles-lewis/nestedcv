@@ -31,7 +31,7 @@ nest_filt_bal <- function(test, y, x,
     args <- list(y = ytrain, x = xtrain)
     args <- append(args, filter_options)
     fset <- do.call(filterFUN, args)
-    filt_xtrain <- xtrain[, fset]
+    filt_xtrain <- xtrain[, fset, drop = FALSE]
     filt_xtest <- xtest[, fset, drop = FALSE]
     filt_pen.factor <- penalty.factor[fset]
   }
