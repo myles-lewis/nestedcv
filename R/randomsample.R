@@ -119,7 +119,7 @@ randomsample <- function(y, x, minor = NULL, major = 1, yminor = NULL) {
   }
   
   y <- y[out]
-  x <- x[out, ]
+  x <- x[out, , drop = FALSE]
   rownames(x) <- make.names(rownames(x), unique = TRUE)
   list(y = y, x = x)
 }
