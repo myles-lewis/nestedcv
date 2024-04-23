@@ -423,7 +423,7 @@ nestcv.train <- function(y, x,
   summary <- predSummary(output)
   caret.roc <- NULL
   if (is.factor(y) & nlevels(y) == 2) {
-    caret.roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
+    caret.roc <- pROC::roc(output$testy, output$predyp, direction = c("auto", "<", ">"), 
                            quiet = TRUE)
   }
   bestTunes <- lapply(outer_res, function(i) i$fit$bestTune)
