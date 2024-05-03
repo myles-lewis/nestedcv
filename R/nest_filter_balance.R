@@ -79,7 +79,7 @@ nest_filt_bal <- function(test, y, x,
   out <- list(ytrain = ytrain, ytest = ytest,
               filt_xtrain = filt_xtrain, filt_xtest = filt_xtest,
               filt_pen.factor = filt_pen.factor)
-  if (modifyX_useY) out$modify_fit <- modfit
+  if (!is.null(modifyX) & modifyX_useY) out$modify_fit <- modfit
   out
 }
 
