@@ -99,7 +99,7 @@ weight <- function(y) {
   tab <- c(table(y))
   props <- 1/tab
   weights <- props[as.numeric(y)]
-  weights <- weights / sum(weights, na.rm = TRUE)
+  weights <- weights / mean(weights, na.rm = TRUE)
   weights
 }
 
