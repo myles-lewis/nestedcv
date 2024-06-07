@@ -21,7 +21,7 @@
 #'   [glmnet]
 #' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
 #'   Any function can be provided and is passed `y` and `x`. Must return a
-#'   character vector with names of filtered predictors.
+#'   numeric vector with indices of filtered predictors.
 #' @param filter_options List of additional arguments passed to the filter
 #'   function specified by `filterFUN`.
 #' @param balance Specifies method for dealing with imbalanced class data.

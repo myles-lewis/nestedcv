@@ -46,7 +46,7 @@ families, or else a \code{glm()} family object. Passed to \link{cv.glmnet} and
 
 \item{filterFUN}{Filter function, e.g. \link{ttest_filter} or \link{relieff_filter}.
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
-character vector with names of filtered predictors.}
+numeric vector with indices of filtered predictors.}
 
 \item{filter_options}{List of additional arguments passed to the filter
 function specified by \code{filterFUN}.}

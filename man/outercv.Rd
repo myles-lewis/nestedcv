@@ -62,9 +62,11 @@ outercv(y, ...)
 \item{model}{Character value or function of the model to be fitted.}
 
 \item{filterFUN}{Filter function, e.g. \link{ttest_filter} or \link{relieff_filter}.
-Any function can be provided and is passed \code{y} and \code{x}. Must return a
-character vector with names of filtered predictors. Not available if
-\code{outercv} is called with a formula.}
+Any function can be provided and is passed \code{y} and \code{x}. Ideally returns a
+numeric vector with indices of filtered predictors. The custom function can
+return a character vector of names of the filtered predictors, but this
+will not work with the \code{penalty.factor} argument in \code{\link[=nestcv.glmnet]{nestcv.glmnet()}}. Not
+available if \code{outercv} is called with a formula.}
 
 \item{filter_options}{List of additional arguments passed to the filter
 function specified by \code{filterFUN}.}

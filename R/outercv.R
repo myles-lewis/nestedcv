@@ -15,9 +15,11 @@
 #' @param data A matrix or data frame containing variables in the model.
 #' @param model Character value or function of the model to be fitted.
 #' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
-#'   Any function can be provided and is passed `y` and `x`. Must return a
-#'   character vector with names of filtered predictors. Not available if
-#'   `outercv` is called with a formula.
+#'   Any function can be provided and is passed `y` and `x`. Ideally returns a
+#'   numeric vector with indices of filtered predictors. The custom function can
+#'   return a character vector of names of the filtered predictors, but this
+#'   will not work with the `penalty.factor` argument in [nestcv.glmnet()]. Not
+#'   available if `outercv` is called with a formula.
 #' @param filter_options List of additional arguments passed to the filter
 #'   function specified by `filterFUN`.
 #' @param weights Weights applied to each sample for models which can use

@@ -13,8 +13,10 @@
 #' @param method String specifying which model to use. See [caret::train()] for
 #'   details.
 #' @param filterFUN Filter function, e.g. [ttest_filter()] or [relieff_filter()].
-#'   Any function can be provided and is passed `y` and `x`. Must return a
-#'   character vector with names of filtered predictors.
+#'   Any function can be provided and is passed `y` and `x`. Ideally returns a
+#'   numeric vector with indices of filtered predictors. The custom function can
+#'   return a character vector of names of the filtered predictors, but this
+#'   will not work with the `penalty.factor` argument in [nestcv.glmnet()].
 #' @param filter_options List of additional arguments passed to the filter
 #'   function specified by `filterFUN`.
 #' @param weights Weights applied to each sample for models which can use
