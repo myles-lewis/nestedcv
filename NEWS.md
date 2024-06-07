@@ -15,6 +15,9 @@ R-squared is now being applied.
 ## Bugfix
 * Prevent bug if `x` is a single predictor.
 
+## Other updates
+* Updated documentation for custom filter functions.
+
 # nestedcv 0.7.8
 ###### 11/03/2024
 * Added `prc()` which enables easy building of precision-recall curves from
