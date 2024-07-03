@@ -2,8 +2,8 @@
 
 0 errors | 0 warnings | 0 note
 
-* Added new features such as precision-recall curves and additional performance 
-metrics
-* Improved parallelisation of `repeatcv()`
-* Switched to using standard R pipe `|>` instead of magrittr
-* Improved documentation and vignette
+* Important fix to correct the calculation of R-squared as a performance metric.
+The previous version relied on caret which actually calculates Pearson 
+correlation coefficient. This has been corrected.
+* Bugfixes for edge cases such as a `x` being a single predictor instead of a 
+dataframe.
