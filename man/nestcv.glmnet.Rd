@@ -97,7 +97,7 @@ no balancing is applied.}
 
 \item{keep}{Logical indicating whether inner CV predictions are retained for
 calculating left-out inner CV fold accuracy etc. See argument \code{keep} in
-\link{cv.glmnet}.}
+\link[glmnet:cv.glmnet]{glmnet::cv.glmnet}.}
 
 \item{outer_train_predict}{Logical whether to save predictions on outer
 training folds to calculate performance on outer training folds.}
@@ -132,7 +132,7 @@ removes cases if there are \code{NA} in 'y', but columns (predictors) containing
 
 \item{verbose}{Logical whether to print messages and show progress}
 
-\item{...}{Optional arguments passed to \link{cv.glmnet}}
+\item{...}{Optional arguments passed to \link[glmnet:cv.glmnet]{glmnet::cv.glmnet}}
 }
 \value{
 An object with S3 class "nestcv.glmnet"

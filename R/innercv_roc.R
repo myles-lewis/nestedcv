@@ -5,7 +5,7 @@
 #' 
 #' Build ROC (receiver operating characteristic) curve from left-out folds 
 #' from inner CV. Object can be plotted using `plot()` or passed to functions 
-#' [auc()] etc.
+#' [pROC::auc()] etc.
 #' 
 #' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
 #' @param direction Set ROC directionality [pROC::roc]
@@ -237,8 +237,8 @@ train_summary <- function(x) {
 #' Build ROC curve from outer CV training folds
 #' 
 #' Build ROC (receiver operating characteristic) curve from outer training
-#' folds. Object can be plotted using `plot()` or passed to functions [auc()]
-#' etc.
+#' folds. Object can be plotted using `plot()` or passed to functions
+#' [pROC::auc()] etc.
 #' 
 #' @param x a `nestcv.glmnet`, `nestcv.train` or `outercv` object
 #' @param direction Set ROC directionality [pROC::roc]

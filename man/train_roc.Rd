@@ -18,8 +18,8 @@ train_roc(x, direction = "<", ...)
 }
 \description{
 Build ROC (receiver operating characteristic) curve from outer training
-folds. Object can be plotted using \code{plot()} or passed to functions \code{\link[=auc]{auc()}}
-etc.
+folds. Object can be plotted using \code{plot()} or passed to functions
+\code{\link[pROC:auc]{pROC::auc()}} etc.
 }
 \details{
 Note: the argument \code{outer_train_predict} must be set to \code{TRUE} in

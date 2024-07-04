@@ -21,7 +21,7 @@ glmnet_filter(
 \item{x}{Matrix of predictors}
 
 \item{family}{Either a character string representing one of the built-in
-families, or else a \code{glm()} family object. See \code{\link[=glmnet]{glmnet()}}. If not
+families, or else a \code{glm()} family object. See \code{\link[glmnet:glmnet]{glmnet::glmnet()}}. If not
 specified, the function tries to set this automatically to one of either
 "gaussian", "binomial" or "multinomial".}
 
@@ -38,7 +38,7 @@ the model across all values of lambda.}
 \item{type}{Type of vector returned. Default "index" returns indices, "names"
 returns predictor names, "full" returns full output.}
 
-\item{...}{Other arguments passed to \link{glmnet}}
+\item{...}{Other arguments passed to \link[glmnet:glmnet]{glmnet::glmnet}}
 }
 \value{
 Integer vector of indices of filtered parameters (type = "index") or
@@ -54,8 +54,8 @@ The glmnet elastic net mixing parameter alpha can be varied to
 include a larger number of predictors. Default alpha = 1 is pure LASSO,
 resulting in greatest sparsity, while alpha = 0 is pure ridge regression,
 retaining all predictors in the regression model. Note, the \code{family}
-argument is commonly needed, see \link{glmnet}.
+argument is commonly needed, see \link[glmnet:glmnet]{glmnet::glmnet}.
 }
 \seealso{
-\link{glmnet}
+\link[glmnet:glmnet]{glmnet::glmnet}
 }

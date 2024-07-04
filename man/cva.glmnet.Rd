@@ -18,12 +18,12 @@ cva.glmnet(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), foldid = NULL, ...)
 \item{foldid}{Optional vector of values between 1 and \code{nfolds} identifying
 what fold each observation is in.}
 
-\item{...}{Other arguments passed to \link{cv.glmnet}}
+\item{...}{Other arguments passed to \link[glmnet:cv.glmnet]{glmnet::cv.glmnet}}
 }
 \value{
 Object of S3 class "cva.glmnet", which is a list of the cv.glmnet
 objects for each value of alpha and \code{alphaSet}.
-\item{fits}{List of fitted \link{cv.glmnet} objects}
+\item{fits}{List of fitted \link[glmnet:cv.glmnet]{glmnet::cv.glmnet} objects}
 \item{alphaSet}{Sequence of alpha values used}
 \item{alpha_cvm}{The mean cross-validated error - a vector of length
 \code{length(alphaSet)}.}
@@ -34,7 +34,7 @@ objects for each value of alpha and \code{alphaSet}.
 Performs k-fold cross-validation for glmnet, including alpha mixing parameter.
 }
 \seealso{
-\link{cv.glmnet}, \link{glmnet}
+\link[glmnet:cv.glmnet]{glmnet::cv.glmnet}, \link[glmnet:glmnet]{glmnet::glmnet}
 }
 \author{
 Myles Lewis

@@ -446,7 +446,7 @@ combo_filter <- function(y, x,
 #' @param y Response vector
 #' @param x Matrix of predictors
 #' @param family Either a character string representing one of the built-in
-#'   families, or else a `glm()` family object. See [glmnet()]. If not
+#'   families, or else a `glm()` family object. See [glmnet::glmnet()]. If not
 #'   specified, the function tries to set this automatically to one of either
 #'   "gaussian", "binomial" or "multinomial".
 #' @param force_vars Vector of column names `x` which have no shrinkage and are
@@ -458,16 +458,16 @@ combo_filter <- function(y, x,
 #'   the model across all values of lambda.
 #' @param type Type of vector returned. Default "index" returns indices, "names"
 #'   returns predictor names, "full" returns full output.
-#' @param ... Other arguments passed to [glmnet]
+#' @param ... Other arguments passed to [glmnet::glmnet]
 #' @details The glmnet elastic net mixing parameter alpha can be varied to
 #'   include a larger number of predictors. Default alpha = 1 is pure LASSO,
 #'   resulting in greatest sparsity, while alpha = 0 is pure ridge regression,
 #'   retaining all predictors in the regression model. Note, the `family`
-#'   argument is commonly needed, see [glmnet].
+#'   argument is commonly needed, see [glmnet::glmnet].
 #' @return Integer vector of indices of filtered parameters (type = "index") or
 #'   character vector of names (type = "names") of filtered parameters. If
 #'   `type` is `"full"` a named vector of variable importance is returned.
-#' @seealso [glmnet]
+#' @seealso [glmnet::glmnet]
 #' @importFrom glmnet glmnet
 #' @export
 #' 

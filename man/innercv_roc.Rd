@@ -19,7 +19,7 @@ innercv_roc(x, direction = "<", ...)
 \description{
 Build ROC (receiver operating characteristic) curve from left-out folds
 from inner CV. Object can be plotted using \code{plot()} or passed to functions
-\code{\link[=auc]{auc()}} etc.
+\code{\link[pROC:auc]{pROC::auc()}} etc.
 }
 \examples{
 \donttest{

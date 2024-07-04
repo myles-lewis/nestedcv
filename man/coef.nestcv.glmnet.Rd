@@ -12,7 +12,7 @@
 \item{s}{Value of penalty parameter lambda. Default is the mean of lambda
 values selected across each outer fold.}
 
-\item{...}{Other arguments passed to \link{coef.glmnet}}
+\item{...}{Other arguments passed to \code{\link[glmnet:predict.glmnet]{glmnet::coef.glmnet()}}}
 }
 \value{
 Vector or list of coefficients ordered with the intercept first,

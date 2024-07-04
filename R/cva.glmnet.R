@@ -9,16 +9,16 @@
 #' @param alphaSet Sequence of alpha values to cross-validate
 #' @param foldid Optional vector of values between 1 and `nfolds` identifying
 #'   what fold each observation is in.
-#' @param ... Other arguments passed to [cv.glmnet]
+#' @param ... Other arguments passed to [glmnet::cv.glmnet]
 #' @return Object of S3 class "cva.glmnet", which is a list of the cv.glmnet 
 #' objects for each value of alpha and `alphaSet`.
-#' \item{fits}{List of fitted [cv.glmnet] objects}
+#' \item{fits}{List of fitted [glmnet::cv.glmnet] objects}
 #' \item{alphaSet}{Sequence of alpha values used}
 #' \item{alpha_cvm}{The mean cross-validated error - a vector of length 
 #' `length(alphaSet)`.}
 #' \item{best_alpha}{Value of alpha giving lowest `alpha_cvm`.}
 #' \item{which_alpha}{Index of `alphaSet` with lowest `alpha_cvm`}
-#' @seealso [cv.glmnet], [glmnet]
+#' @seealso [glmnet::cv.glmnet], [glmnet::glmnet]
 #' @author Myles Lewis
 #' @importFrom glmnet cv.glmnet
 #' @importFrom utils tail
@@ -92,13 +92,14 @@ predict.cva.glmnet <- function(object, newx,
 
 #' glmnet coefficients
 #' 
-#' Convenience function for retrieving coefficients from a [cv.glmnet] model at 
-#' a specified lambda. Sparsity is removed and non-intercept coefficients are 
-#' ranked by absolute value.
+#' Convenience function for retrieving coefficients from a [glmnet::cv.glmnet]
+#' model at a specified lambda. Sparsity is removed and non-intercept
+#' coefficients are ranked by absolute value.
 #' 
-#' @param fit A [cv.glmnet] fitted model object.
-#' @param s Value of lambda. See [coef.glmnet] and [predict.cv.glmnet]
-#' @param ... Other arguments passed to [coef.glmnet]
+#' @param fit A [glmnet::cv.glmnet] fitted model object.
+#' @param s Value of lambda. See [glmnet::coef.glmnet] and
+#'   [glmnet::predict.cv.glmnet]
+#' @param ... Other arguments passed to [glmnet::coef.glmnet]
 #' @return Vector or list of coefficients ordered with the intercept first, 
 #' followed by highest absolute value to lowest.
 #' @importFrom stats coef
@@ -132,7 +133,7 @@ glmnet_coefs <- function(fit, s, ...) {
 #' @param object Object of class `"nestcv.glmnet"`
 #' @param s Value of penalty parameter lambda. Default is the mean of lambda 
 #' values selected across each outer fold.
-#' @param ... Other arguments passed to [coef.glmnet]
+#' @param ... Other arguments passed to [glmnet::coef.glmnet()]
 #' @return Vector or list of coefficients ordered with the intercept first, 
 #' followed by highest absolute value to lowest.
 #' @export

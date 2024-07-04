@@ -58,7 +58,7 @@
 #'   0=lambda.min to 1=lambda.1se
 #' @param keep Logical indicating whether inner CV predictions are retained for
 #'   calculating left-out inner CV fold accuracy etc. See argument `keep` in
-#'   [cv.glmnet].
+#'   [glmnet::cv.glmnet].
 #' @param outer_train_predict Logical whether to save predictions on outer
 #'   training folds to calculate performance on outer training folds.
 #' @param weights Weights applied to each sample. Note `weights` and `balance`
@@ -85,7 +85,7 @@
 #'   `NA` are removed from 'x' to preserve cases. Any other value means that
 #'   `NA` are ignored (a message is given).
 #' @param verbose Logical whether to print messages and show progress
-#' @param ... Optional arguments passed to [cv.glmnet]
+#' @param ... Optional arguments passed to [glmnet::cv.glmnet]
 #' @return An object with S3 class "nestcv.glmnet"
 #'   \item{call}{the matched call}
 #'   \item{output}{Predictions on the left-out outer folds}
