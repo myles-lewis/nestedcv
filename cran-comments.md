@@ -7,3 +7,4 @@ The previous version relied on caret which actually calculates Pearson
 correlation coefficient. This has been corrected.
 * Bugfixes for edge cases such as a `x` being a single predictor instead of a 
 dataframe.
+* Fixed Rd package anchor links as requested.

@@ -17,8 +17,8 @@
 #' @param x Matrix of predictors. Dataframes will be coerced to a matrix as
 #'   is necessary for glmnet.
 #' @param family Either a character string representing one of the built-in
-#'   families, or else a `glm()` family object. Passed to [cv.glmnet] and
-#'   [glmnet]
+#'   families, or else a `glm()` family object. Passed to [glmnet::cv.glmnet]
+#'   and [glmnet::glmnet]
 #' @param filterFUN Filter function, e.g. [ttest_filter] or [relieff_filter].
 #'   Any function can be provided and is passed `y` and `x`. Must return a
 #'   numeric vector with indices of filtered predictors.
@@ -67,8 +67,8 @@
 #' @param penalty.factor Separate penalty factors can be applied to each
 #'   coefficient. Can be 0 for some variables, which implies no shrinkage, and
 #'   that variable is always included in the model. Default is 1 for all
-#'   variables. See [glmnet]. Note this works separately from filtering. For
-#'   some `nestedcv` filter functions you might need to set `force_vars` to
+#'   variables. See [glmnet::glmnet]. Note this works separately from filtering.
+#'   For some `nestedcv` filter functions you might need to set `force_vars` to
 #'   avoid filtering out features.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`

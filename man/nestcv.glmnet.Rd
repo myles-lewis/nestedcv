@@ -41,8 +41,8 @@ nestcv.glmnet(
 is necessary for glmnet.}
 
 \item{family}{Either a character string representing one of the built-in
-families, or else a \code{glm()} family object. Passed to \link{cv.glmnet} and
-\link{glmnet}}
+families, or else a \code{glm()} family object. Passed to \link[glmnet:cv.glmnet]{glmnet::cv.glmnet}
+and \link[glmnet:glmnet]{glmnet::glmnet}}
 
 \item{filterFUN}{Filter function, e.g. \link{ttest_filter} or \link{relieff_filter}.
 Any function can be provided and is passed \code{y} and \code{x}. Must return a
@@ -109,8 +109,8 @@ in filters.}
 \item{penalty.factor}{Separate penalty factors can be applied to each
 coefficient. Can be 0 for some variables, which implies no shrinkage, and
 that variable is always included in the model. Default is 1 for all
-variables. See \link{glmnet}. Note this works separately from filtering. For
-some \code{nestedcv} filter functions you might need to set \code{force_vars} to
+variables. See \link[glmnet:glmnet]{glmnet::glmnet}. Note this works separately from filtering.
+For some \code{nestedcv} filter functions you might need to set \code{force_vars} to
 avoid filtering out features.}
 
 \item{cv.cores}{Number of cores for parallel processing of the outer loops.
