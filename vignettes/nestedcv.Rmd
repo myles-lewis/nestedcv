@@ -158,7 +158,7 @@ the _whole_ dataset. Unfortunately this is commonly observed in many studies
 which apply differential expression analysis on the whole dataset to select
 predictors which are then passed to machine learning algorithms.
 
-```{r, out.width='75%', fig.align="center", echo=FALSE}
+```{r, fig.align="center", echo=FALSE}
 knitr::include_graphics("fig1.svg")
 ```
 
@@ -173,7 +173,7 @@ is applied to each outer CV training fold. The key advantage of nested CV is
 that outer CV test folds are collated to give an improved estimate of
 performance compared to scheme C since the numbers for total testing are larger.
 
-```{r, out.width='75%', fig.align="center", echo=FALSE}
+```{r, fig.align="center", echo=FALSE}
 knitr::include_graphics("fig2.svg")
 ```
 
