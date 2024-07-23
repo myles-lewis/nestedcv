@@ -2,8 +2,9 @@ News
 =====
 
 # nestedcv 0.7.10
-###### 17/07/2024
+###### 23/07/2024
 * Fixed oversized SVG figures in vignette.
+* Fixed bug in computing multi-class balanced accuracy.
 
 # nestedcv 0.7.9
 ###### 15/04/2024
