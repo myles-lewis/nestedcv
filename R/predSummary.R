@@ -48,18 +48,20 @@ predSummary <- function(output, family = "") {
     cm <- table(output$predy, output$testy, dnn=c("Predicted", "Reference"))
     acc <- sum(diag(cm))/ sum(cm)
     ccm <- caret::confusionMatrix(cm)
-    b_acc <- ccm$byClass[11]
     if (nlevels(output$testy) == 2) {
+      b_acc <- ccm$byClass[11]
       outputroc <- pROC::roc(output$testy, output$predyp, direction = "<", 
                              quiet = TRUE)
       auc <- outputroc$auc
       metrics <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
     } else {
+      b_acc <- ccm$byClass[, 11]
       auc <- try(pROC::multiclass.roc(output$testy, output[, -c(1,2)])$auc,
                  silent = TRUE)
       if (inherits(auc, "try-error")) auc <- NA
-      metrics <- setNames(c(auc, acc, b_acc), c("Multiclass AUC", "Accuracy", 
-                                                "Balanced accuracy"))
+      metrics <- setNames(c(auc, acc, b_acc),
+                          c("Multiclass AUC", "Accuracy", 
+                            paste0("Balanced accuracy.", colnames(cm))))
     }
     summary <- list(table = cm, metrics = metrics)
   } else {
