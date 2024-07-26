@@ -1,25 +1,36 @@
 
 #' Summarise prediction performance metrics
-#' 
+#'
 #' Quick function to calculate performance metrics: confusion matrix, accuracy
 #' and balanced accuracy for classification; ROC AUC for binary classification;
-#' RMSE and R^2 for regression. Multi-class AUC is returned for multinomial
+#' RMSE, R^2 and MAE for regression. Multi-class AUC is returned for multinomial
 #' classification.
-#' 
+#'
 #' @param output data.frame with columns `testy` containing observed response
 #'   from test folds; `predy` predicted response; `predyp` (optional) predicted
-#'   probabilities for classification to calculate ROC AUC
+#'   probabilities for classification to calculate ROC AUC. For multiclass
+#'   `output`, columns 3 onwards contain probabilities for each class in
+#'   columns.
 #' @param family Optional character value to support specific glmnet models e.g.
 #'   'mgaussian', 'cox'.
 #' @return An object of class 'predSummary'. For classification a list is
 #'   returned containing the confusion matrix table and a vector containing
-#'   accuracy and balanced accuracy for classification, ROC AUC for 
-#'   classification. For regression a vector containing RMSE and R^2 is
-#'   returned.
-#' @details
-#' For multinomial classification, multi-class AUC as defined by Hand and Till
-#' is calculated using [pROC::multiclass.roc()].
-#' 
+#'   accuracy and balanced accuracy for classification, ROC AUC for
+#'   classification. For regression a vector containing RMSE, R^2 and MAE is
+#'   returned. For glmnet 'cox' models, Harrell's C-index is returned.
+#'
+#'   For glmnet 'mgaussian' models, an object of class 'predSummaryMulti' is
+#'   returned which is a list of vectors with regression metrics (RMSE, R^2,
+#'   MAE) for each response variable (i.e. each `y` column).
+#' @details For multinomial classification, multi-class AUC as defined by Hand
+#' and Till is calculated using [pROC::multiclass.roc()].
+#'
+#' Multi-class balanced accuracy is calculated as the mean of the Recall for
+#' each class.
+#'
+#' R^2 is calculated as 1 - rss / tss, where rss = residual sum of squares, tss
+#' = total sum of squares.
+#'
 #' @export
 predSummary <- function(output, family = "") {
   if (family == "mgaussian") {
@@ -47,21 +58,19 @@ predSummary <- function(output, family = "") {
     }
     cm <- table(output$predy, output$testy, dnn=c("Predicted", "Reference"))
     acc <- sum(diag(cm))/ sum(cm)
+    b_acc <- multi_bal_acc(cm)
     ccm <- caret::confusionMatrix(cm)
     if (nlevels(output$testy) == 2) {
-      b_acc <- ccm$byClass[11]
       outputroc <- pROC::roc(output$testy, output$predyp, direction = "<", 
                              quiet = TRUE)
       auc <- outputroc$auc
       metrics <- setNames(c(auc, acc, b_acc), c("AUC", "Accuracy", "Balanced accuracy"))
     } else {
-      b_acc <- ccm$byClass[, 11]
       auc <- try(pROC::multiclass.roc(output$testy, output[, -c(1,2)])$auc,
                  silent = TRUE)
       if (inherits(auc, "try-error")) auc <- NA
-      metrics <- setNames(c(auc, acc, b_acc),
-                          c("Multiclass AUC", "Accuracy", 
-                            paste0("Balanced accuracy.", colnames(cm))))
+      metrics <- setNames(c(auc, acc, b_acc), c("Multiclass AUC", "Accuracy",
+                                                "Balanced accuracy"))
     }
     summary <- list(table = cm, metrics = metrics)
   } else {
@@ -105,4 +114,11 @@ metrics_reg <- function(output) {
   Rsq <- 1 - rss/tss
   
   setNames(c(rmse, Rsq, mae), c("RMSE", "R.squared", "MAE"))
+}
+
+# multiclass balanced accuracy
+# table with reference in columns, predicted in rows
+multi_bal_acc <- function(tab) {
+  recall <- diag(tab) / colSums(tab)
+  mean(recall)
 }

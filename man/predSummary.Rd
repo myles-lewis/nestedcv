@@ -9,7 +9,9 @@ predSummary(output, family = "")
 \arguments{
 \item{output}{data.frame with columns \code{testy} containing observed response
 from test folds; \code{predy} predicted response; \code{predyp} (optional) predicted
-probabilities for classification to calculate ROC AUC}
+probabilities for classification to calculate ROC AUC. For multiclass
+\code{output}, columns 3 onwards contain probabilities for each class in
+columns.}
 
 \item{family}{Optional character value to support specific glmnet models e.g.
 'mgaussian', 'cox'.}
@@ -18,16 +20,26 @@ probabilities for classification to calculate ROC AUC}
 An object of class 'predSummary'. For classification a list is
 returned containing the confusion matrix table and a vector containing
 accuracy and balanced accuracy for classification, ROC AUC for
-classification. For regression a vector containing RMSE and R^2 is
-returned.
+classification. For regression a vector containing RMSE, R^2 and MAE is
+returned. For glmnet 'cox' models, Harrell's C-index is returned.
+
+For glmnet 'mgaussian' models, an object of class 'predSummaryMulti' is
+returned which is a list of vectors with regression metrics (RMSE, R^2,
+MAE) for each response variable (i.e. each \code{y} column).
 }
 \description{
 Quick function to calculate performance metrics: confusion matrix, accuracy
 and balanced accuracy for classification; ROC AUC for binary classification;
-RMSE and R^2 for regression. Multi-class AUC is returned for multinomial
+RMSE, R^2 and MAE for regression. Multi-class AUC is returned for multinomial
 classification.
 }
 \details{
-For multinomial classification, multi-class AUC as defined by Hand and Till
-is calculated using \code{\link[pROC:multiclass]{pROC::multiclass.roc()}}.
+For multinomial classification, multi-class AUC as defined by Hand
+and Till is calculated using \code{\link[pROC:multiclass]{pROC::multiclass.roc()}}.
+
+Multi-class balanced accuracy is calculated as the mean of the Recall for
+each class.
+
+R^2 is calculated as 1 - rss / tss, where rss = residual sum of squares, tss
+= total sum of squares.
 }
