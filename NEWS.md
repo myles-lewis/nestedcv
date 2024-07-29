@@ -2,10 +2,12 @@ News
 =====
 
 # nestedcv 0.7.10
-###### 26/07/2024
+###### 29/07/2024
 * Fixed oversized SVG figures in vignette.
 * Fixed bug in computing multi-class balanced accuracy. This is now calculated 
 as the mean of the Recall for each class.
+* Added multi-class Matthew's correlation coefficient (MCC) and multi-class F1 
+macro score.
 
 # nestedcv 0.7.9
 ###### 15/04/2024
