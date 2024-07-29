@@ -39,16 +39,26 @@ metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
     return(object$summary)
   }
   met <- object$summary$metrics
-  if (extra && nlevels(object$y) == 2) {
-    # binary classification
-    aucpr <- prc(object, positive = positive)$auc
-    tab <- object$summary$table
-    mcc <- mcc(tab)
-    if (is.numeric(positive)) positive <- colnames(tab)[positive]
-    ccm <- caret::confusionMatrix(tab, mode = "everything", positive = positive)
-    extra <- setNames(c(aucpr, ccm$overall["Kappa"], ccm$byClass["F1"], mcc), 
-                      c("PR.AUC", "Kappa", "F1", "MCC"))
-    met <- c(met, extra)
+  if (extra) {
+    if (nlevels(object$y) == 2) {
+      # binary classification
+      aucpr <- prc(object, positive = positive)$auc
+      tab <- object$summary$table
+      mcc <- mcc(tab)
+      if (is.numeric(positive)) positive <- colnames(tab)[positive]
+      ccm <- caret::confusionMatrix(tab, mode = "everything", positive = positive)
+      extra <- setNames(c(aucpr, ccm$overall["Kappa"], ccm$byClass["F1"], mcc), 
+                        c("PR.AUC", "Kappa", "F1", "MCC"))
+      met <- c(met, extra)
+    } else if (nlevels(object$y) > 2) {
+      # multiclass
+      tab <- object$summary$table
+      mcc <- mcc_multi(tab)
+      if (is.numeric(positive)) positive <- colnames(tab)[positive]
+      ccm <- caret::confusionMatrix(tab, mode = "everything", positive = positive)
+      extra <- setNames(c(ccm$overall["Kappa"], mcc), c("Kappa", "MCC"))
+      met <- c(met, extra)
+    }
   }
   if (innerCV && inherits(object, c("nestcv.glmnet", "nestcv.train"))) {
     inner_met <- innercv_summary(object)$metrics
@@ -95,3 +105,14 @@ mcc <- function(cm) {
   (tp*tn - fp*fn) /
     sqrt((tp+fp) * (tp+fn) * (tn+fp) * (tn+fn))
 }
+
+# Multiclass Matthew's correlation coefficient
+# table with reference in columns, predicted in rows
+mcc_multi <- function(cm) {
+  N <- sum(cm)
+  tt <- colSums(cm)
+  pp <- rowSums(cm)
+  RK <- (N * sum(diag(cm)) - sum(tt * pp)) / (sqrt(N^2 - sum(tt^2)) * sqrt(N^2 - sum(pp^2)))
+  RK
+}
+
