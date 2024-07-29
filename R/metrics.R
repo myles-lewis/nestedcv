@@ -56,7 +56,10 @@ metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
       mcc <- mcc_multi(tab)
       if (is.numeric(positive)) positive <- colnames(tab)[positive]
       ccm <- caret::confusionMatrix(tab, mode = "everything", positive = positive)
-      extra <- setNames(c(ccm$overall["Kappa"], mcc), c("Kappa", "MCC"))
+      f1 <- ccm$byClass[, "F1"]
+      f1.macro <- mean(f1)
+      extra <- setNames(c(ccm$overall["Kappa"], f1.macro, mcc),
+                        c("Kappa", "F1.macro", "MCC"))
       met <- c(met, extra)
     }
   }
@@ -116,3 +119,5 @@ mcc_multi <- function(cm) {
   RK
 }
 
+# https://pubmed.ncbi.nlm.nih.gov/15556477/
+# Gorodkin
