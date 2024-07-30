@@ -146,6 +146,3 @@ mcc_multi <- function(cm) {
   RK <- (N * sum(diag(cm)) - sum(tt * pp)) / (sqrt(N^2 - sum(tt^2)) * sqrt(N^2 - sum(pp^2)))
   RK
 }
-
-# https://pubmed.ncbi.nlm.nih.gov/15556477/
-# Gorodkin
