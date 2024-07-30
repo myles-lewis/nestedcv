@@ -7,7 +7,7 @@
 #'   'outercv' object.
 #' @param extra Logical whether additional performance metrics are gathered for
 #'   classification models: area under precision recall curve (PR.AUC, binary
-#'   classification only), Cohen's kappa, F1 score, Matthew's correlation
+#'   classification only), Cohen's kappa, F1 score, Matthews correlation
 #'   coefficient (MCC).
 #' @param innerCV Whether to calculate metrics for inner CV folds. Only
 #'   available for 'nestcv.glmnet' and 'nestcv.train' objects.
@@ -19,7 +19,7 @@
 #' Area under precision recall curve is estimated by trapezoidal estimation 
 #' using `MLmetrics::PRAUC()`.
 #' 
-#' For multi-class classification models, Matthew's correlation coefficient is
+#' For multi-class classification models, Matthews correlation coefficient is
 #' calculated using Gorodkin's method. Multi-class F1 score (macro F1) is
 #' calculated as the arithmetic mean of the class-wise F1 scores.
 #' @returns A named numeric vector of performance metrics.
