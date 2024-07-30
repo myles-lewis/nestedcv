@@ -14,8 +14,8 @@ mcc_multi(cm)
 reference classes in columns and predicted classes in rows.}
 }
 \value{
-Returns a value between −1 and +1. A coefficient of +1
-represents a perfect prediction, 0 no better than random prediction and −1
+Returns a value between -1 and +1. A coefficient of +1
+represents a perfect prediction, 0 no better than random prediction and -1
 indicates total disagreement between prediction and observation.
 }
 \description{

@@ -120,8 +120,8 @@ nvar <- function(object) {
 #' @details Use `mcc()` for 2x2 tables (binary classification). `mcc_multi()` is
 #'   for multi-class classification with k x k tables and is calculated using
 #'   Gorodkin's method.
-#' @returns Returns a value between −1 and +1. A coefficient of +1
-#' represents a perfect prediction, 0 no better than random prediction and −1
+#' @returns Returns a value between -1 and +1. A coefficient of +1
+#' represents a perfect prediction, 0 no better than random prediction and -1
 #' indicates total disagreement between prediction and observation.
 #' @references
 #' Gorodkin, J. (2004). \emph{Comparing two K-category assignments by a
