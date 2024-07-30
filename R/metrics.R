@@ -6,8 +6,9 @@
 #' @param object A 'nestcv.glmnet', 'nestcv.train', 'nestcv.SuperLearner' or
 #'   'outercv' object.
 #' @param extra Logical whether additional performance metrics are gathered for
-#'   binary classification models: area under precision recall curve (PR.AUC),
-#'   Cohen's kappa, F1 score, Matthew's correlation coefficient (MCC).
+#'   classification models: area under precision recall curve (PR.AUC, binary
+#'   classification only), Cohen's kappa, F1 score, Matthew's correlation
+#'   coefficient (MCC).
 #' @param innerCV Whether to calculate metrics for inner CV folds. Only
 #'   available for 'nestcv.glmnet' and 'nestcv.train' objects.
 #' @param positive For binary classification, either an integer 1 or 2 for the
@@ -17,7 +18,16 @@
 #' @details
 #' Area under precision recall curve is estimated by trapezoidal estimation 
 #' using `MLmetrics::PRAUC()`.
+#' 
+#' For multi-class classification models, Matthew's correlation coefficient is
+#' calculated using Gorodkin's method. Multi-class F1 score (macro F1) is
+#' calculated as the arithmetic mean of the class-wise F1 scores.
 #' @returns A named numeric vector of performance metrics.
+#' @references
+#' Gorodkin, J. (2004). \emph{Comparing two K-category assignments by a
+#' K-category correlation coefficient}. Computational Biology and Chemistry. 28
+#' (5): 367–374.
+#' @seealso [mcc()]
 #' @export
 #'
 metrics <- function(object, extra = FALSE, innerCV = FALSE, positive = 2) {
@@ -99,7 +109,25 @@ nvar <- function(object) {
 }
 
 
-# Matthew's correlation coefficient
+#' Matthews correlation coefficient
+#' 
+#' Calculates Matthews correlation coefficient (MCC) which is in essence a
+#' correlation coefficient between the observed and predicted binary
+#' classifications. It has also been generalised to multi-class classification.
+#' 
+#' @param cm A contingency table or matrix of predicted vs observed classes with
+#'   reference classes in columns and predicted classes in rows.
+#' @details Use `mcc()` for 2x2 tables (binary classification). `mcc_multi()` is
+#'   for multi-class classification with k x k tables and is calculated using
+#'   Gorodkin's method.
+#' @returns Returns a value between −1 and +1. A coefficient of +1
+#' represents a perfect prediction, 0 no better than random prediction and −1
+#' indicates total disagreement between prediction and observation.
+#' @references
+#' Gorodkin, J. (2004). \emph{Comparing two K-category assignments by a
+#' K-category correlation coefficient}. Computational Biology and Chemistry. 28
+#' (5): 367–374.
+#' @export
 mcc <- function(cm) {
   tp <- cm[2, 2]
   tn <- cm[1, 1]
@@ -109,8 +137,8 @@ mcc <- function(cm) {
     sqrt((tp+fp) * (tp+fn) * (tn+fp) * (tn+fn))
 }
 
-# Multiclass Matthew's correlation coefficient
-# table with reference in columns, predicted in rows
+#' @rdname mcc
+#' @export
 mcc_multi <- function(cm) {
   N <- sum(cm)
   tt <- colSums(cm)

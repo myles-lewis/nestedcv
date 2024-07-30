@@ -11,8 +11,9 @@ metrics(object, extra = FALSE, innerCV = FALSE, positive = 2)
 'outercv' object.}
 
 \item{extra}{Logical whether additional performance metrics are gathered for
-binary classification models: area under precision recall curve (PR.AUC),
-Cohen's kappa, F1 score, Matthew's correlation coefficient (MCC).}
+classification models: area under precision recall curve (PR.AUC, binary
+classification only), Cohen's kappa, F1 score, Matthew's correlation
+coefficient (MCC).}
 
 \item{innerCV}{Whether to calculate metrics for inner CV folds. Only
 available for 'nestcv.glmnet' and 'nestcv.train' objects.}
@@ -31,4 +32,16 @@ Returns model metrics from nestedcv models. Extended metrics including
 \details{
 Area under precision recall curve is estimated by trapezoidal estimation
 using \code{MLmetrics::PRAUC()}.
+
+For multi-class classification models, Matthew's correlation coefficient is
+calculated using Gorodkin's method. Multi-class F1 score (macro F1) is
+calculated as the arithmetic mean of the class-wise F1 scores.
+}
+\references{
+Gorodkin, J. (2004). \emph{Comparing two K-category assignments by a
+K-category correlation coefficient}. Computational Biology and Chemistry. 28
+(5): 367–374.
+}
+\seealso{
+\code{\link[=mcc]{mcc()}}
 }

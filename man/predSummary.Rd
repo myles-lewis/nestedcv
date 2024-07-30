@@ -43,3 +43,6 @@ each class.
 R^2 is calculated as 1 - rss / tss, where rss = residual sum of squares, tss
 = total sum of squares.
 }
+\seealso{
+\code{\link[=metrics]{metrics()}}
+}
