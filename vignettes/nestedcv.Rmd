@@ -784,14 +784,16 @@ See the accompanying vignette "Using *outercv* with Bayesian shrinkage models".
 
 # Extra performance metrics
 
-For binary classification models, the function `metrics()` can be used to obtain
+For classification models, the function `metrics()` can be used to obtain
 additional performance metrics including area under precision-recall curve,
-Cohen's kappa, F1 score and Matthews correlation coefficient. Some of these vary
-depending on which category is considered the positive or relevant class. The
-default setting is that factors are ordered as 'controls' then 'cases' (factor 
-level 1 then 2). Setting the argument `positive = 1` or to the character value
-of the positive factor level alters which factor level is considered positive or
-relevant.
+Cohen's kappa, F1 score and Matthews correlation coefficient. For binary
+classification, some of these vary depending on which category is considered the
+positive or relevant class. The default setting is that factors are ordered as
+'controls' then 'cases' (factor level 1 then 2). Setting the argument 
+`positive = 1` or to the character value of the positive factor level alters 
+which factor level is considered positive or relevant. Cohen's kappa, F1 macro 
+score and Matthews correlation coefficient are also available for multi-class 
+classification.
 
 ```{r}
 library(mlbench)
