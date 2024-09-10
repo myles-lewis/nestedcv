@@ -40,8 +40,10 @@ and Till is calculated using \code{\link[pROC:multiclass]{pROC::multiclass.roc()
 Multi-class balanced accuracy is calculated as the mean of the Recall for
 each class.
 
-R^2 is calculated as 1 - rss / tss, where rss = residual sum of squares, tss
-= total sum of squares.
+R^2 (coefficient of determination) is calculated as 1 - rss / tss, where rss
+= residual sum of squares, tss = total sum of squares. Pearson r^2 is also
+provided. Pearson r^2 can only range from 0 to 1, whereas R^2 can range from
+1 to -Inf.
 }
 \seealso{
 \code{\link[=metrics]{metrics()}}
