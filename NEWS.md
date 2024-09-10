@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.7.11
+###### 10/09/2024
+* Added back Pearson r^2 as a metric for comparison in regression analyses.
+
 # nestedcv 0.7.10
 ###### 29/07/2024
 * Fixed oversized SVG figures in vignette.

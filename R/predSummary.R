@@ -28,8 +28,10 @@
 #' Multi-class balanced accuracy is calculated as the mean of the Recall for
 #' each class.
 #'
-#' R^2 is calculated as 1 - rss / tss, where rss = residual sum of squares, tss
-#' = total sum of squares.
+#' R^2 (coefficient of determination) is calculated as 1 - rss / tss, where rss
+#' = residual sum of squares, tss = total sum of squares. Pearson r^2 is also
+#' provided. Pearson r^2 can only range from 0 to 1, whereas R^2 can range from
+#' 1 to -Inf.
 #' @seealso [metrics()]
 #' @export
 predSummary <- function(output, family = "") {
@@ -105,6 +107,9 @@ print.predSummaryMulti <- function(x,
 metrics_reg <- function(output) {
   pred <- output$predy
   obs <- output$testy
+  ok <- complete.cases(pred, obs)
+  pred <- pred[ok]
+  obs <- obs[ok]
   
   rmse <- sqrt(mean((pred - obs)^2))
   mae <- mean(abs(pred - obs))
@@ -112,8 +117,9 @@ metrics_reg <- function(output) {
   rss <- sum((pred - obs)^2)
   tss <- sum((obs - mean(obs))^2)
   Rsq <- 1 - rss/tss
+  r <- cor(pred, obs, use = "na.or.complete")
   
-  setNames(c(rmse, Rsq, mae), c("RMSE", "R.squared", "MAE"))
+  setNames(c(rmse, Rsq, r^2, mae), c("RMSE", "R.squared", "Pearson.r^2", "MAE"))
 }
 
 # multiclass balanced accuracy
