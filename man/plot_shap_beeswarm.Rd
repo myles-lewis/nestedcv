@@ -41,7 +41,8 @@ dataframe is supplied it is converted to a numeric matrix using
 all variables. If \code{top} is set then variables are sorted and \code{sort} is
 overrode.}
 
-\item{...}{Other arguments passed to \code{ggbeeswarm::geom_beeswarm()}}
+\item{...}{Other arguments passed to \code{ggbeeswarm::geom_beeswarm()} e.g.
+\code{size}.}
 }
 \value{
 A ggplot2 plot

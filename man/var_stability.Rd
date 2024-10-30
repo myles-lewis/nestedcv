@@ -8,16 +8,28 @@
 \usage{
 var_stability(x, ...)
 
-\method{var_stability}{nestcv.glmnet}(x, ranks = FALSE, percent = TRUE, level = 1, sort = TRUE, ...)
+\method{var_stability}{nestcv.glmnet}(
+  x,
+  ranks = FALSE,
+  summary = TRUE,
+  percent = TRUE,
+  level = 1,
+  sort = TRUE,
+  ...
+)
 
-\method{var_stability}{nestcv.train}(x, ranks = FALSE, sort = TRUE, ...)
+\method{var_stability}{nestcv.train}(x, ranks = FALSE, summary = TRUE, sort = TRUE, ...)
 }
 \arguments{
-\item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object}
+\item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object or a list of
+these.}
 
 \item{...}{Optional arguments for compatibility}
 
 \item{ranks}{Logical whether to rank variables by importance}
+
+\item{summary}{Logical whether to return summary statistics on variable
+importance. Ignored if \code{ranks} is \code{TRUE}.}
 
 \item{percent}{Logical for \code{nestcv.glmnet} objects only, whether to scale
 coefficients to percentage of the largest coefficient in each model}
@@ -29,9 +41,10 @@ specified as a character value}
 \item{sort}{Logical whether to sort variables by mean importance}
 }
 \value{
-If \code{ranks = FALSE}, returns a dataframe containing mean, sd, sem of
-variable importance and frequency by which each variable is selected in
-outer folds. If \code{ranks = TRUE}, a matrix of variables rankings across the
+If \code{ranks} is \code{FALSE} and \code{summary} is \code{TRUE}, returns a dataframe
+containing mean, sd, sem of variable importance and frequency by which each
+variable is selected in outer folds. If \code{summary} is \code{FALSE}, a matrix of
+either variable importance or, if \code{ranks = TRUE}, rankings  across the
 outer folds and the final model is returned, with variables in rows and
 folds in columns.
 }

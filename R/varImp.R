@@ -29,6 +29,20 @@ cv_coef <- function(x, level = 1) {
 }
 
 
+list_coef <- function(x, level = 1) {
+  lset <- lapply(x, function(xi) {
+    if (!inherits(xi, "nestcv.glmnet")) stop("Not a `nestcv.glmnet` object")
+    cfset <- lapply(xi$outer_result, function(i) {
+      if (is.list(i$coef)) {
+        coef(i$cvafit)[[level]][,1][-1]  # multinomial
+      } else i$coef[-1]
+    })
+    cfset
+  })
+  lset <- unlist(lset, recursive = FALSE)
+  list2matrix(lset)
+}
+
 #' Extract variable importance from outer CV caret models
 #' 
 #' Extracts variable importance or coefficients from outer CV glmnet models from
@@ -54,6 +68,16 @@ cv_varImp <- function(x) {
     vset$Final <- extractImp(x$final_fit)
   }
   list2matrix(vset)
+}
+
+
+list_varImp <- function(x) {
+  lset <- lapply(x, function(xi) {
+    if (!inherits(xi, "nestcv.train")) stop("Not a `nestcv.train` object")
+    lapply(xi$outer_result, function(j) extractImp(j$fit))
+  })
+  lset <- unlist(lset, recursive = FALSE)
+  list2matrix(lset)
 }
 
 
@@ -99,8 +123,11 @@ list2matrix <- function(x, na.val = 0) {
 #' recommend using SHAP values - see the vignette "Explaining nestedcv models
 #' with Shapley values". See [pred_train()] for an example.
 #' 
-#' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
+#' @param x a `nestcv.glmnet` or `nestcv.train` fitted object or a list of
+#'   these.
 #' @param ranks Logical whether to rank variables by importance
+#' @param summary Logical whether to return summary statistics on variable
+#'   importance. Ignored if `ranks` is `TRUE`.
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model
 #' @param level For multinomial `nestcv.glmnet` models only, either an integer
@@ -108,9 +135,10 @@ list2matrix <- function(x, na.val = 0) {
 #'   specified as a character value
 #' @param sort Logical whether to sort variables by mean importance
 #' @param ... Optional arguments for compatibility
-#' @return If `ranks = FALSE`, returns a dataframe containing mean, sd, sem of
-#'   variable importance and frequency by which each variable is selected in
-#'   outer folds. If `ranks = TRUE`, a matrix of variables rankings across the
+#' @return If `ranks` is `FALSE` and `summary` is `TRUE`, returns a dataframe
+#'   containing mean, sd, sem of variable importance and frequency by which each
+#'   variable is selected in outer folds. If `summary` is `FALSE`, a matrix of
+#'   either variable importance or, if `ranks = TRUE`, rankings  across the
 #'   outer folds and the final model is returned, with variables in rows and
 #'   folds in columns.
 #' @details
@@ -129,10 +157,12 @@ var_stability <- function(x, ...) {
 #' @export
 var_stability.nestcv.glmnet <- function(x,
                                         ranks = FALSE,
+                                        summary = TRUE,
                                         percent = TRUE,
                                         level = 1,
                                         sort = TRUE, ...) {
-  m <- cv_coef(x, level)
+  m <- if (inherits(x, "list")) {list_coef(x, level)
+  } else cv_coef(x, level)
   vdir <- sign(rowMeans(m))
   if (percent) {
     # cm <- Rfast::colMaxs(m, value = TRUE)
@@ -148,6 +178,7 @@ var_stability.nestcv.glmnet <- function(x,
     mrank <- apply(abs(m), 2, function(x) rank(-x, ties.method = "average"))
     return(mrank)
   }
+  if (!summary) return(m)
   
   mm <- rowMeans(m)
   msd <- apply(m, 1, sd)
@@ -158,9 +189,11 @@ var_stability.nestcv.glmnet <- function(x,
   df$sign <- vdir[rownames(df)]
   df$direction <- factor(df$sign, levels = c(-1, 1),
                          labels = c("negative", "positive"))
-  df$final <- "no"
-  df$final[m[, "Final"] != 0] <- "yes"
-  df$final <- factor(df$final)
+  if ("Final" %in% colnames(m)) {
+    df$final <- "no"
+    df$final[m[, "Final"] != 0] <- "yes"
+    df$final <- factor(df$final)
+  }
   if (!sort) return(df)
   df[order(abs(df$mean), decreasing = TRUE), ]
 }
@@ -170,13 +203,16 @@ var_stability.nestcv.glmnet <- function(x,
 #' @export
 var_stability.nestcv.train <- function(x,
                                        ranks = FALSE,
+                                       summary = TRUE,
                                        sort = TRUE, ...) {
-  m <- cv_varImp(x)
+  m <- if (inherits(x, "list")) {list_varImp(x)
+  } else m <- cv_varImp(x)
   
   if (ranks) {
     mrank <- apply(m, 2, function(x) rank(-x, ties.method = "average"))
     return(mrank)
   }
+  if (!summary) return(m)
   
   mm <- rowMeans(m)
   msd <- apply(m, 1, sd)
@@ -198,6 +234,16 @@ var_stability.nestcv.train <- function(x,
   df <- df[df$frequency > 0, ]
   if (!sort) return(df)
   df[order(abs(df$mean), decreasing = TRUE), ]
+}
+
+
+#' @export
+var_stability.list <- function(x, ...) {
+  if (inherits(x[[1]], "nestcv.glmnet"))
+    return(var_stability.nestcv.glmnet(x, ...))
+  if (inherits(x[[1]], "nestcv.train"))
+    return(var_stability.nestcv.train(x, ...))
+  stop("not a nestcv.glmnet or nestcv.train object")
 }
 
 
@@ -248,7 +294,7 @@ plot_var_stability <- function(x,
                                sort = TRUE) {
   df <- var_stability(x, percent = percent, level = level, sort = sort)
   df$name <- factor(rownames(df), levels = rownames(df))
-  if (!sort) final <- FALSE
+  if (!sort | inherits(x, "list")) final <- FALSE
   if (final) {
     fv <- if (inherits(x, "nestcv.glmnet")) {
       if (is.list(coef(x))) {
@@ -274,8 +320,12 @@ plot_var_stability <- function(x,
   } else xtitle <- "Variable importance"
   if (is.null(breaks)) {
     nof <- length(x$outer_folds)
-    pr <- unique(round(pretty(c(1, nof), n = 4)))
-    breaks <- setNames(c(pr, nof+1), c(as.character(pr), "all"))
+    if (nof > 0) {
+      pr <- unique(round(pretty(c(1, nof), n = 4)))
+      breaks <- setNames(c(pr, nof+1), c(as.character(pr), "all"))
+    } else {
+      breaks <- pretty(c(1, max(df$frequency)))
+    }
   }
   
   if (direction != 0 && !"direction" %in% colnames(df)) {
@@ -442,7 +492,8 @@ barplot_var_stability <- function(x,
 #'   `ggbeeswarm::geom_beeswarm()`.
 #' @param corral.width Numeric specifying width of corral, passed to
 #'   `geom_beeswarm`
-#' @param ... Optional arguments passed to `ggbeeswarm::geom_beeswarm()`.
+#' @param ... Optional arguments passed to `ggbeeswarm::geom_beeswarm()` e.g.
+#'   `size`.
 #' @returns A ggplot2 scatter plot.
 #' @importFrom ggplot2 stat_summary scale_x_continuous
 #' @export

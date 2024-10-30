@@ -122,7 +122,8 @@ pred_SuperLearner <- function(x, newdata) {
 #' @param top Sets a limit on the number of variables plotted or `NULL` to plot
 #'   all variables. If `top` is set then variables are sorted and `sort` is
 #'   overrode.
-#' @param ... Other arguments passed to `ggbeeswarm::geom_beeswarm()`
+#' @param ... Other arguments passed to `ggbeeswarm::geom_beeswarm()` e.g.
+#'   `size`.
 #' @return A ggplot2 plot
 #' @importFrom ggplot2 scale_color_gradient2 guide_colorbar rel
 #' @importFrom utils stack

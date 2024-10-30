@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.7.12
+###### 30/10/2024
+* Analyse and plot variable importance by ranking of variables.
+
 # nestedcv 0.7.11
 ###### 10/09/2024
 * Added back Pearson r^2 as a metric for comparison in regression analyses.

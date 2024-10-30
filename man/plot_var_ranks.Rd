@@ -17,7 +17,8 @@ plot_var_ranks(x, sort = TRUE, cex = 1, corral.width = 0.75, ...)
 \item{corral.width}{Numeric specifying width of corral, passed to
 \code{geom_beeswarm}}
 
-\item{...}{Optional arguments passed to \code{ggbeeswarm::geom_beeswarm()}.}
+\item{...}{Optional arguments passed to \code{ggbeeswarm::geom_beeswarm()} e.g.
+\code{size}.}
 }
 \value{
 A ggplot2 scatter plot.
