@@ -100,6 +100,7 @@ list2matrix <- function(x, na.val = 0) {
 #' with Shapley values". See [pred_train()] for an example.
 #' 
 #' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
+#' @param ranks Logical whether to rank variables by importance
 #' @param percent Logical for `nestcv.glmnet` objects only, whether to scale
 #'   coefficients to percentage of the largest coefficient in each model
 #' @param level For multinomial `nestcv.glmnet` models only, either an integer
@@ -107,8 +108,11 @@ list2matrix <- function(x, na.val = 0) {
 #'   specified as a character value
 #' @param sort Logical whether to sort variables by mean importance
 #' @param ... Optional arguments for compatibility
-#' @return Dataframe containing mean, sd, sem of variable importance and
-#'   frequency by which each variable is selected in outer folds.
+#' @return If `ranks = FALSE`, returns a dataframe containing mean, sd, sem of
+#'   variable importance and frequency by which each variable is selected in
+#'   outer folds. If `ranks = TRUE`, a matrix of variables rankings across the
+#'   outer folds and the final model is returned, with variables in rows and
+#'   folds in columns.
 #' @details
 #' Note that for caret models [caret::varImp()] may require the model package to
 #' be fully loaded in order to function. During the fitting process `caret`
@@ -124,6 +128,7 @@ var_stability <- function(x, ...) {
 #' @importFrom stats sd
 #' @export
 var_stability.nestcv.glmnet <- function(x,
+                                        ranks = FALSE,
                                         percent = TRUE,
                                         level = 1,
                                         sort = TRUE, ...) {
@@ -138,6 +143,12 @@ var_stability.nestcv.glmnet <- function(x,
     }
     m <- t(t(abs(m)) / cm * 100)
   }
+  
+  if (ranks) {
+    mrank <- apply(abs(m), 2, function(x) rank(-x, ties.method = "average"))
+    return(mrank)
+  }
+  
   mm <- rowMeans(m)
   msd <- apply(m, 1, sd)
   msem <- msd/sqrt(ncol(m))
@@ -158,8 +169,15 @@ var_stability.nestcv.glmnet <- function(x,
 #' @rdname var_stability
 #' @export
 var_stability.nestcv.train <- function(x,
+                                       ranks = FALSE,
                                        sort = TRUE, ...) {
   m <- cv_varImp(x)
+  
+  if (ranks) {
+    mrank <- apply(m, 2, function(x) rank(-x, ties.method = "average"))
+    return(mrank)
+  }
+  
   mm <- rowMeans(m)
   msd <- apply(m, 1, sd)
   msem <- msd/sqrt(ncol(m))
@@ -177,7 +195,7 @@ var_stability.nestcv.train <- function(x,
   df$final <- "no"
   df$final[rownames(df) %in% x$final_vars] <- "yes"
   df$final <- factor(df$final)
-  df <- df[df$freq > 0, ]
+  df <- df[df$frequency > 0, ]
   if (!sort) return(df)
   df[order(abs(df$mean), decreasing = TRUE), ]
 }
@@ -410,4 +428,44 @@ barplot_var_stability <- function(x,
       theme_minimal() +
       theme(axis.text = element_text(colour = "black"))
   }
+}
+
+
+#' Plot variable importance rankings
+#' 
+#' Plots variables selected in models ranked by variable importance across the
+#' outer folds as well as the final model.
+#' 
+#' @param x A `nestcv.glmnet` or `nestcv.train` fitted model.
+#' @param sort Logical whether to sort variable by mean rank.
+#' @param cex Scaling for adjusting point spacing. See
+#'   `ggbeeswarm::geom_beeswarm()`.
+#' @param corral.width Numeric specifying width of corral, passed to
+#'   `geom_beeswarm`
+#' @param ... Optional arguments passed to `ggbeeswarm::geom_beeswarm()`.
+#' @returns A ggplot2 scatter plot.
+#' @importFrom ggplot2 stat_summary scale_x_continuous
+#' @export
+plot_var_ranks <- function(x, sort = TRUE,
+                           cex = 1,
+                           corral.width = 0.75, ...) {
+  vr <- var_stability(x, ranks = TRUE)
+  meanrank <- rowMeans(vr)
+  v_ord <- rownames(vr)[order(meanrank)]
+  df <- data.frame(var = rep(rownames(vr), each = ncol(vr)),
+                   rank = as.vector(t(vr)))
+  df$var <- factor(df$var, if (sort) rev(v_ord) else rev(rownames(vr)))
+  
+  ggplot(data = df, aes(x = .data$rank, y = .data$var, fill = .data$var,
+                        col = .data$var)) +
+    ggbeeswarm::geom_beeswarm(cex = cex,
+                              corral = "random",
+                              corral.width = corral.width, ...) +
+    stat_summary(fun = mean, geom = 'point', size = 4, shape = 5,
+                 col = "black") +
+    scale_x_continuous(n.breaks = 8) +
+    ylab("") + xlab("Variable ranking") +
+    theme_classic() +
+    theme(axis.text = element_text(colour = "black"),
+          legend.position = "none")
 }

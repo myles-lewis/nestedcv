@@ -8,14 +8,16 @@
 \usage{
 var_stability(x, ...)
 
-\method{var_stability}{nestcv.glmnet}(x, percent = TRUE, level = 1, sort = TRUE, ...)
+\method{var_stability}{nestcv.glmnet}(x, ranks = FALSE, percent = TRUE, level = 1, sort = TRUE, ...)
 
-\method{var_stability}{nestcv.train}(x, sort = TRUE, ...)
+\method{var_stability}{nestcv.train}(x, ranks = FALSE, sort = TRUE, ...)
 }
 \arguments{
 \item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object}
 
 \item{...}{Optional arguments for compatibility}
+
+\item{ranks}{Logical whether to rank variables by importance}
 
 \item{percent}{Logical for \code{nestcv.glmnet} objects only, whether to scale
 coefficients to percentage of the largest coefficient in each model}
@@ -27,8 +29,11 @@ specified as a character value}
 \item{sort}{Logical whether to sort variables by mean importance}
 }
 \value{
-Dataframe containing mean, sd, sem of variable importance and
-frequency by which each variable is selected in outer folds.
+If \code{ranks = FALSE}, returns a dataframe containing mean, sd, sem of
+variable importance and frequency by which each variable is selected in
+outer folds. If \code{ranks = TRUE}, a matrix of variables rankings across the
+outer folds and the final model is returned, with variables in rows and
+folds in columns.
 }
 \description{
 Uses variable importance across models trained and tested across outer CV
