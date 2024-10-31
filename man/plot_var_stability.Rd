@@ -18,7 +18,8 @@ plot_var_stability(
 )
 }
 \arguments{
-\item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object}
+\item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object or a list of
+these.}
 
 \item{final}{Logical whether to restrict variables to only those which ended
 up in the final fitted model or to include all variables selected across

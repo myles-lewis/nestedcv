@@ -254,7 +254,8 @@ var_stability.list <- function(x, ...) {
 #' which variables are selected across the outer folds and optionally overlays
 #' directionality for binary response outcome.
 #'
-#' @param x a `nestcv.glmnet` or `nestcv.train` fitted object
+#' @param x a `nestcv.glmnet` or `nestcv.train` fitted object or a list of
+#'   these.
 #' @param final Logical whether to restrict variables to only those which ended
 #'   up in the final fitted model or to include all variables selected across
 #'   all outer folds.
@@ -490,7 +491,7 @@ barplot_var_stability <- function(x,
 #' Plots variables selected in models ranked by variable importance across the
 #' outer folds as well as the final model.
 #' 
-#' @param x A `nestcv.glmnet` or `nestcv.train` fitted model.
+#' @param x A `nestcv.glmnet` or `nestcv.train` fitted model or a list of these.
 #' @param sort Logical whether to sort variable by mean rank.
 #' @param cex Scaling for adjusting point spacing. See
 #'   `ggbeeswarm::geom_beeswarm()`.
@@ -498,7 +499,7 @@ barplot_var_stability <- function(x,
 #'   `geom_beeswarm`
 #' @param ... Optional arguments passed to `ggbeeswarm::geom_beeswarm()` e.g.
 #'   `size`.
-#' @returns A ggplot2 scatter plot.
+#' @returns A ggplot2 plot.
 #' @importFrom ggplot2 stat_summary scale_x_continuous
 #' @export
 plot_var_ranks <- function(x, sort = TRUE,
@@ -526,6 +527,7 @@ plot_var_ranks <- function(x, sort = TRUE,
 }
 
 
+#' @rdname plot_var_ranks
 #' @export
 hist_var_ranks <- function(x, sort = TRUE) {
   vr <- var_stability(x, ranks = TRUE)
@@ -535,15 +537,18 @@ hist_var_ranks <- function(x, sort = TRUE) {
                    rank = as.vector(t(vr)))
   df$var <- factor(df$var, if (sort) v_ord else rownames(vr))
   
-  ggplot(data = df, aes(x = .data$rank, fill = .data$var,
-                        col = .data$var)) +
+  vline <- data.frame(mean = meanrank, var = rownames(vr))
+  vline$var <- factor(vline$var, if (sort) v_ord else rownames(vr))
+    
+  ggplot(data = df, aes(x = .data$rank, fill = .data$var, col = .data$var)) +
     geom_histogram(alpha = 0.6, binwidth = 1) +
     scale_x_continuous(n.breaks = 8) +
+    geom_vline(data = vline, aes(xintercept = .data$mean)) +
     ylab("Frequency") + xlab("Variable ranking") +
-    facet_wrap(~var, ncol = 1) +
+    facet_wrap(~var, ncol = 1, strip.position = "right") +
     theme_minimal() +
     theme(axis.text = element_text(colour = "black"),
-          strip.text.x = element_text(hjust = 0),
+          strip.text.y.right = element_text(angle = 0),
           legend.position = "none")
 }
 

@@ -2,12 +2,15 @@
 % Please edit documentation in R/varImp.R
 \name{plot_var_ranks}
 \alias{plot_var_ranks}
+\alias{hist_var_ranks}
 \title{Plot variable importance rankings}
 \usage{
 plot_var_ranks(x, sort = TRUE, cex = 1, corral.width = 0.75, ...)
+
+hist_var_ranks(x, sort = TRUE)
 }
 \arguments{
-\item{x}{A \code{nestcv.glmnet} or \code{nestcv.train} fitted model.}
+\item{x}{A \code{nestcv.glmnet} or \code{nestcv.train} fitted model or a list of these.}
 
 \item{sort}{Logical whether to sort variable by mean rank.}
 
@@ -21,7 +24,7 @@ plot_var_ranks(x, sort = TRUE, cex = 1, corral.width = 0.75, ...)
 \code{size}.}
 }
 \value{
-A ggplot2 scatter plot.
+A ggplot2 plot.
 }
 \description{
 Plots variables selected in models ranked by variable importance across the
