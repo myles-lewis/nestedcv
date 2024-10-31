@@ -528,6 +528,7 @@ plot_var_ranks <- function(x, sort = TRUE,
 
 
 #' @rdname plot_var_ranks
+#' @importFrom ggplot2 geom_histogram facet_wrap
 #' @export
 hist_var_ranks <- function(x, sort = TRUE) {
   vr <- var_stability(x, ranks = TRUE)
