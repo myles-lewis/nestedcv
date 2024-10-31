@@ -524,3 +524,26 @@ plot_var_ranks <- function(x, sort = TRUE,
     theme(axis.text = element_text(colour = "black"),
           legend.position = "none")
 }
+
+
+#' @export
+hist_var_ranks <- function(x, sort = TRUE) {
+  vr <- var_stability(x, ranks = TRUE)
+  meanrank <- rowMeans(vr)
+  v_ord <- rownames(vr)[order(meanrank)]
+  df <- data.frame(var = rep(rownames(vr), each = ncol(vr)),
+                   rank = as.vector(t(vr)))
+  df$var <- factor(df$var, if (sort) v_ord else rownames(vr))
+  
+  ggplot(data = df, aes(x = .data$rank, fill = .data$var,
+                        col = .data$var)) +
+    geom_histogram(alpha = 0.6, binwidth = 1) +
+    scale_x_continuous(n.breaks = 8) +
+    ylab("Frequency") + xlab("Variable ranking") +
+    facet_wrap(~var, ncol = 1) +
+    theme_minimal() +
+    theme(axis.text = element_text(colour = "black"),
+          strip.text.x = element_text(hjust = 0),
+          legend.position = "none")
+}
+
