@@ -32,6 +32,7 @@ var_dir <- function(y, x) {
 var_direction <- function(object) {
   y <- object$y
   x <- object$xsub
+  if (length(x) == 1 && is.na(x)) return(NA)
   var_dir(y, x)
 }
 

@@ -146,6 +146,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
     }
   }
   
+  # wrap up
   if (!is.null(ex$family) && ex$family == "mgaussian") {
     # glmnet mgaussian
     if (keep) {

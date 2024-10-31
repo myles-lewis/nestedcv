@@ -295,6 +295,7 @@ plot_var_stability <- function(x,
   df <- var_stability(x, percent = percent, level = level, sort = sort)
   df$name <- factor(rownames(df), levels = rownames(df))
   if (!sort | inherits(x, "list")) final <- FALSE
+  
   if (final) {
     fv <- if (inherits(x, "nestcv.glmnet")) {
       if (is.list(coef(x))) {
@@ -304,13 +305,16 @@ plot_var_stability <- function(x,
     } else if (inherits(x, "nestcv.train")) {
       x$final_vars
     }
-    if (!all(fv %in% rownames(df))) {
-      message(paste(fv[!fv %in% rownames(df)], collapse = ", "),
-              " not in final model")
-      fv <- fv[fv %in% rownames(df)]
+    if (!is.null(fv)) {
+      if (!all(fv %in% rownames(df))) {
+        message(paste(fv[!fv %in% rownames(df)], collapse = ", "),
+                " not in final model")
+        fv <- fv[fv %in% rownames(df)]
+      }
+      df <- df[rownames(df) %in% fv, ]
     }
-    df <- df[rownames(df) %in% fv, ]
   }
+  
   if (!is.null(top) && top < nrow(df)) df <- df[1:top, ]
   if (!percent & inherits(x, "nestcv.glmnet")) {
     if (direction == 1) {
