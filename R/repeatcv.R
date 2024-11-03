@@ -120,7 +120,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
     fit <- try(eval.parent(ex), silent = TRUE)
     if (progress & rep.cores == 1) setTxtProgressBar(pb, i / n)
     if (inherits(fit, "try-error")) {
-      ret <-  if (keep) list(NA, NA) else NA
+      ret <-  if (keep) list(NA, NA, NA) else NA
       if (progress) {
         if (rep.cores > 1) cat_parallel("x")
         attr(ret, "error") <- fit[1]
@@ -131,7 +131,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
     if (!keep) return(s)
     output <- fit$output
     output$rep <- i
-    list(s, output)
+    list(s, output, fit)
   }, mc.cores = rep.cores)
   if (progress) {
     if (rep.cores == 1) {close(pb)
@@ -161,7 +161,8 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
       names(result) <- names(res1[[1]])
       res2 <- lapply(res, "[[", 2)
       output <- do.call(rbind, res2)
-      out <- list(call = ex0, result = result, output = output)
+      fits <- lapply(res, "[[", 3)
+      out <- list(call = ex0, result = result, output = output, fits = fits)
     } else {
       yn <- length(res[[1]])
       result <- lapply(seq_len(yn), function(i) {
@@ -181,7 +182,8 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = TRUE,
       rownames(result) <- seq_len(nrow(result))
       res2 <- lapply(res, "[[", 2)
       output <- do.call(rbind, res2)
-      out <- list(call = ex0, result = result, output = output)
+      fits <- lapply(res, "[[", 3)
+      out <- list(call = ex0, result = result, output = output, fits = fits)
       if ("AUC" %in% colnames(result) & !all(is.na(output))) {
         out$roc <- pROC::roc(output$testy, output$predyp, direction = "<", 
                              quiet = TRUE)
