@@ -9,8 +9,8 @@
 #' @param n Number of repeats
 #' @param repeat_folds Optional list containing fold indices to be applied to
 #'   the outer CV folds.
-#' @param keep Logical whether to save repeated outer CV predictions for ROC
-#'   curves etc.
+#' @param keep Logical whether to save repeated outer CV fitted models and
+#'   predictions for ROC curves etc.
 #' @param extra Logical whether additional performance metrics are gathered for
 #'   binary classification models. See [metrics()].
 #' @param progress Logical whether to show progress.

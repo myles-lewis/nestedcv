@@ -4,6 +4,7 @@
 \alias{var_stability}
 \alias{var_stability.nestcv.glmnet}
 \alias{var_stability.nestcv.train}
+\alias{var_stability.repeatcv}
 \title{Variable stability}
 \usage{
 var_stability(x, ...)
@@ -19,6 +20,8 @@ var_stability(x, ...)
 )
 
 \method{var_stability}{nestcv.train}(x, ranks = FALSE, summary = TRUE, sort = TRUE, ...)
+
+\method{var_stability}{repeatcv}(x, ...)
 }
 \arguments{
 \item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object or a list of

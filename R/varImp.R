@@ -247,6 +247,13 @@ var_stability.list <- function(x, ...) {
 }
 
 
+#' @rdname var_stability
+#' @export
+var_stability.repeatcv <- function(x, ...) {
+  var_stability.list(x$fits, ...)
+}
+
+
 #' Plot variable stability
 #'
 #' Produces a ggplot2 plot of stability (as SEM) of variable importance across
