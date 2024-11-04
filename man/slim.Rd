@@ -7,14 +7,17 @@
 slim(x)
 }
 \arguments{
-\item{x}{A 'nestedcv' fitted model object.}
+\item{x}{A 'nestedcv' or 'cva.glmnet' fitted model object.}
 }
 \value{
-A list object of the same class but only containing \code{outer_result}.
+For 'nestedcv' objects, a list object of the same class but only
+containing \code{outer_result}. For 'cva.glmnet' models, only the cv.glmnet
+model with the best alpha value is kept. Models for all other values of
+alpha are discarded.
 }
 \description{
 Slims nestedcv objects to only the models in the outer CV folds.
 }
 \seealso{
-\code{\link[=nestcv.glmnet]{nestcv.glmnet()}} \code{\link[=nestcv.train]{nestcv.train()}} \code{\link[=outercv]{outercv()}}
+\code{\link[=nestcv.glmnet]{nestcv.glmnet()}} \code{\link[=nestcv.train]{nestcv.train()}} \code{\link[=outercv]{outercv()}} \code{\link[=cva.glmnet]{cva.glmnet()}}
 }

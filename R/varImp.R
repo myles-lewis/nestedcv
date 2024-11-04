@@ -549,7 +549,7 @@ hist_var_ranks <- function(x, sort = TRUE) {
   
   vline <- data.frame(mean = meanrank, var = rownames(vr))
   vline$var <- factor(vline$var, if (sort) v_ord else rownames(vr))
-    
+  
   ggplot(data = df, aes(x = .data$rank, fill = .data$var, col = .data$var)) +
     geom_histogram(alpha = 0.6, binwidth = 1) +
     scale_x_continuous(n.breaks = 8) +
@@ -561,4 +561,3 @@ hist_var_ranks <- function(x, sort = TRUE) {
           strip.text.y.right = element_text(angle = 0),
           legend.position = "none")
 }
-
