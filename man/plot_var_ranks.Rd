@@ -10,7 +10,8 @@ plot_var_ranks(x, sort = TRUE, cex = 1, corral.width = 0.75, ...)
 hist_var_ranks(x, sort = TRUE)
 }
 \arguments{
-\item{x}{A \code{nestcv.glmnet} or \code{nestcv.train} fitted model or a list of these.}
+\item{x}{A \code{nestcv.glmnet} or \code{nestcv.train} fitted object or a list of
+these, or a \code{repeatcv} object.}
 
 \item{sort}{Logical whether to sort variable by mean rank.}
 

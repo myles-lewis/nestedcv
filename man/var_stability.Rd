@@ -25,7 +25,7 @@ var_stability(x, ...)
 }
 \arguments{
 \item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} fitted object or a list of
-these.}
+these, or a \code{repeatcv} object.}
 
 \item{...}{Optional arguments for compatibility}
 

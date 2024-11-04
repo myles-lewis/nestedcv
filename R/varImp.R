@@ -124,7 +124,7 @@ list2matrix <- function(x, na.val = 0) {
 #' with Shapley values". See [pred_train()] for an example.
 #' 
 #' @param x a `nestcv.glmnet` or `nestcv.train` fitted object or a list of
-#'   these.
+#'   these, or a `repeatcv` object.
 #' @param ranks Logical whether to rank variables by importance
 #' @param summary Logical whether to return summary statistics on variable
 #'   importance. Ignored if `ranks` is `TRUE`.
@@ -250,6 +250,7 @@ var_stability.list <- function(x, ...) {
 #' @rdname var_stability
 #' @export
 var_stability.repeatcv <- function(x, ...) {
+  if (is.null(x$fits)) stop("missing outer CV fitted models", call. = FALSE)
   var_stability.list(x$fits, ...)
 }
 
@@ -262,7 +263,7 @@ var_stability.repeatcv <- function(x, ...) {
 #' directionality for binary response outcome.
 #'
 #' @param x a `nestcv.glmnet` or `nestcv.train` fitted object or a list of
-#'   these.
+#'   these, or a `repeatcv` object.
 #' @param final Logical whether to restrict variables to only those which ended
 #'   up in the final fitted model or to include all variables selected across
 #'   all outer folds.
@@ -498,7 +499,8 @@ barplot_var_stability <- function(x,
 #' Plots variables selected in models ranked by variable importance across the
 #' outer folds as well as the final model.
 #' 
-#' @param x A `nestcv.glmnet` or `nestcv.train` fitted model or a list of these.
+#' @param x A `nestcv.glmnet` or `nestcv.train` fitted object or a list of
+#'   these, or a `repeatcv` object.
 #' @param sort Logical whether to sort variable by mean rank.
 #' @param cex Scaling for adjusting point spacing. See
 #'   `ggbeeswarm::geom_beeswarm()`.
