@@ -3,7 +3,10 @@ News
 
 # nestedcv 0.7.12
 ###### 04/11/2024
-* Analyse and plot variable importance by ranking of variables.
+
+## New features
+* Analyse and plot variable importance by ranking of variables across outer CV 
+folds and repeats.
 * Changed `repeatcv` to enable return of fitted models from the outer CV for 
 variable importance or SHAP value calculation.
 

@@ -537,7 +537,7 @@ plot_var_ranks <- function(x, sort = TRUE,
 
 
 #' @rdname plot_var_ranks
-#' @importFrom ggplot2 geom_histogram facet_wrap
+#' @importFrom ggplot2 geom_histogram scale_y_continuous facet_wrap
 #' @export
 hist_var_ranks <- function(x, sort = TRUE) {
   vr <- var_stability(x, ranks = TRUE)
@@ -553,6 +553,7 @@ hist_var_ranks <- function(x, sort = TRUE) {
   ggplot(data = df, aes(x = .data$rank, fill = .data$var, col = .data$var)) +
     geom_histogram(alpha = 0.6, binwidth = 1) +
     scale_x_continuous(n.breaks = 8) +
+    scale_y_continuous(n.breaks = 3) +
     geom_vline(data = vline, aes(xintercept = .data$mean)) +
     ylab("Frequency") + xlab("Variable ranking") +
     facet_wrap(~var, ncol = 1, strip.position = "right") +
