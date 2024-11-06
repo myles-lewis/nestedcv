@@ -3,6 +3,11 @@ title: "Explaining nestedcv models with Shapley values"
 author: "Myles Lewis"
 output:
   html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 3
+    number_sections: false
 fig_width: 6
 vignette: >
   %\VignetteIndexEntry{Explaining nestedcv models with Shapley values}
@@ -21,7 +26,7 @@ knitr::opts_chunk$set(
 these is to plot variable importance. The newer method is to calculate Shapley
 values for each predictor.
 
-### Variable importance and variable stability
+### Variable importance & stability
 
 For regression model systems such as glmnet variable importance is represented
 as the coefficients of the model scaled by absolute value from largest to
@@ -104,6 +109,24 @@ To change the colour scheme for `direction = 1` overwrite `scale_fill_manual()`.
 # change bubble colour scheme
 p1 + scale_fill_manual(values=c("orange", "green3"))
 ```
+
+### Ranking variables
+
+Variable importance can be displayed by showing how variables are ranked by
+variable importance across the outer CV folds.
+
+```{r, fig.dim = c(10, 5)}
+# beeswarm plot of variable ranks 
+p1 <- plot_var_ranks(fit)
+
+# histogram of variable ranks
+p2 <- hist_var_ranks(fit)
+
+ggpubr::ggarrange(p1, p2, ncol=2)
+```
+
+All of the above plotting functions can also be applied to repeated nested CV
+objects generated using `repeatcv()`.
 
 ### Explainable AI with Shapley values
 
