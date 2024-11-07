@@ -16,9 +16,13 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
+knitr::knit_hooks$set(pngquant = knitr::hook_pngquant)
 knitr::opts_chunk$set(
   collapse = TRUE,
-  warning = FALSE
+  warning = FALSE,
+  dev = "ragg_png",
+  fig.retina = 2,
+  pngquant = "--speed=1 --quality=50"
 )
 library(nestedcv)
 library(pROC)

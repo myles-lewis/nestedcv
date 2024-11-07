@@ -3,11 +3,6 @@ title: "Explaining nestedcv models with Shapley values"
 author: "Myles Lewis"
 output:
   html_document:
-    toc: true
-    toc_float:
-      collapsed: false
-    toc_depth: 3
-    number_sections: false
 fig_width: 6
 vignette: >
   %\VignetteIndexEntry{Explaining nestedcv models with Shapley values}
@@ -16,9 +11,13 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
+knitr::knit_hooks$set(pngquant = knitr::hook_pngquant)
 knitr::opts_chunk$set(
   collapse = TRUE,
-  warning = FALSE
+  warning = FALSE,
+  dev = "ragg_png",
+  fig.retina = 2,
+  pngquant = "--speed=1"
 )
 ```
 
