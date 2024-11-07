@@ -502,6 +502,10 @@ barplot_var_stability <- function(x,
 #' @param x A `nestcv.glmnet` or `nestcv.train` fitted object or a list of
 #'   these, or a `repeatcv` object.
 #' @param sort Logical whether to sort variable by mean rank.
+#' @param scheme Optional vector of colours which is passed to
+#'   `ggplot2::scale_color_manual()`. The vector is recycled, so a single value
+#'   will colour all points in the same colour, while two values will lead to
+#'   alternating row colours.
 #' @param cex Scaling for adjusting point spacing. See
 #'   `ggbeeswarm::geom_beeswarm()`.
 #' @param corral.width Numeric specifying width of corral, passed to
@@ -509,9 +513,10 @@ barplot_var_stability <- function(x,
 #' @param ... Optional arguments passed to `ggbeeswarm::geom_beeswarm()` e.g.
 #'   `size`.
 #' @returns A ggplot2 plot.
-#' @importFrom ggplot2 stat_summary scale_x_continuous
+#' @importFrom ggplot2 stat_summary scale_x_continuous scale_color_manual
 #' @export
 plot_var_ranks <- function(x, sort = TRUE,
+                           scheme = NULL,
                            cex = 1,
                            corral.width = 0.75, ...) {
   vr <- var_stability(x, ranks = TRUE)
@@ -520,15 +525,16 @@ plot_var_ranks <- function(x, sort = TRUE,
   df <- data.frame(var = rep(rownames(vr), each = ncol(vr)),
                    rank = as.vector(t(vr)))
   df$var <- factor(df$var, if (sort) rev(v_ord) else rev(rownames(vr)))
+  if (!is.null(scheme)) scheme <- rep_len(scheme, length(meanrank))
   
-  ggplot(data = df, aes(x = .data$rank, y = .data$var, fill = .data$var,
-                        col = .data$var)) +
+  ggplot(data = df, aes(x = .data$rank, y = .data$var, col = .data$var)) +
     ggbeeswarm::geom_beeswarm(cex = cex,
                               corral = "random",
                               corral.width = corral.width, ...) +
     stat_summary(fun = mean, geom = 'point', size = 4, shape = 5,
                  col = "black") +
     scale_x_continuous(n.breaks = 8) +
+    (if (!is.null(scheme)) scale_color_manual(values = scheme)) +
     ylab("") + xlab("Variable ranking") +
     theme_classic() +
     theme(axis.text = element_text(colour = "black"),
@@ -539,7 +545,8 @@ plot_var_ranks <- function(x, sort = TRUE,
 #' @rdname plot_var_ranks
 #' @importFrom ggplot2 geom_histogram scale_y_continuous facet_wrap
 #' @export
-hist_var_ranks <- function(x, sort = TRUE) {
+hist_var_ranks <- function(x, sort = TRUE,
+                           scheme = NULL) {
   vr <- var_stability(x, ranks = TRUE)
   meanrank <- rowMeans(vr)
   v_ord <- rownames(vr)[order(meanrank)]
@@ -549,11 +556,14 @@ hist_var_ranks <- function(x, sort = TRUE) {
   
   vline <- data.frame(mean = meanrank, var = rownames(vr))
   vline$var <- factor(vline$var, if (sort) v_ord else rownames(vr))
+  if (!is.null(scheme)) scheme <- rep_len(scheme, length(meanrank))
   
   ggplot(data = df, aes(x = .data$rank, fill = .data$var, col = .data$var)) +
     geom_histogram(alpha = 0.6, binwidth = 1) +
     scale_x_continuous(n.breaks = 8) +
     scale_y_continuous(n.breaks = 3) +
+    (if (!is.null(scheme)) scale_color_manual(values = scheme)) +
+    (if (!is.null(scheme)) scale_fill_manual(values = scheme)) +
     geom_vline(data = vline, aes(xintercept = .data$mean)) +
     ylab("Frequency") + xlab("Variable ranking") +
     facet_wrap(~var, ncol = 1, strip.position = "right") +

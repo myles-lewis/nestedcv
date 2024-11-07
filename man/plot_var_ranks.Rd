@@ -5,15 +5,27 @@
 \alias{hist_var_ranks}
 \title{Plot variable importance rankings}
 \usage{
-plot_var_ranks(x, sort = TRUE, cex = 1, corral.width = 0.75, ...)
+plot_var_ranks(
+  x,
+  sort = TRUE,
+  scheme = NULL,
+  cex = 1,
+  corral.width = 0.75,
+  ...
+)
 
-hist_var_ranks(x, sort = TRUE)
+hist_var_ranks(x, sort = TRUE, scheme = NULL)
 }
 \arguments{
 \item{x}{A \code{nestcv.glmnet} or \code{nestcv.train} fitted object or a list of
 these, or a \code{repeatcv} object.}
 
 \item{sort}{Logical whether to sort variable by mean rank.}
+
+\item{scheme}{Optional vector of colours which is passed to
+\code{ggplot2::scale_color_manual()}. The vector is recycled, so a single value
+will colour all points in the same colour, while two values will lead to
+alternating row colours.}
 
 \item{cex}{Scaling for adjusting point spacing. See
 \code{ggbeeswarm::geom_beeswarm()}.}
