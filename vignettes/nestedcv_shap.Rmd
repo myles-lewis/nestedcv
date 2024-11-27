@@ -125,7 +125,7 @@ ggpubr::ggarrange(p1, p2, ncol=2)
 ```
 
 All of the above plotting functions can also be applied to repeated nested CV
-objects generated using `repeatcv()`.
+objects generated using `repeatcv()` provided the argument `keep = TRUE`.
 
 ### Explainable AI with Shapley values
 
