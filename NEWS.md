@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.7.13
+###### 23/12/2024
+* Fix check of `inner_folds` in `nestcv.train()`.
+
 # nestedcv 0.7.12
 ###### 04/11/2024
 
