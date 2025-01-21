@@ -9,6 +9,12 @@
 #' @param alphaSet Sequence of alpha values to cross-validate
 #' @param foldid Optional vector of values between 1 and `nfolds` identifying
 #'   what fold each observation is in.
+
+#' @param parallel_method parallelization options "mclapply" (default) or "future"
+#' @details With "future" option nested parallelisation is performed over `alphaSet` and then over
+#'   the folds using the future framework. (Parallelization over lambda is not
+#'   necessary due to the way glmnet works. See [glmnet::glmnet()].)
+
 #' @param ... Other arguments passed to [glmnet::cv.glmnet]
 #' @return Object of S3 class "cva.glmnet", which is a list of the cv.glmnet 
 #' objects for each value of alpha and `alphaSet`.
@@ -30,9 +36,7 @@ cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), parallel_
     foldid <- sample(rep(seq_len(nfolds), length = NROW(y)))
   }
   if(parallel_method=="mclapply"){
-  
-  fit1 <- cv.glmnet(x = x, y = y, 
-                    alpha = tail(alphaSet, 1), foldid = foldid, ...)
+    fit1 <- cv.glmnet(x = x, y = y, alpha = tail(alphaSet, 1), foldid = foldid, ...)
   }else{
  local_registerDoFuture()
   # Use run cv.glmnet inside a "useless" future_lapply here so that it is always
@@ -45,8 +49,7 @@ cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), parallel_
   if (length(alphaSet) > 1) {
     if(parallel_method=="mclapply"){
     fits <- lapply(alphaSet[1:(length(alphaSet)-1)], function(alpha) {
-      cv.glmnet(x = x, y = y, 
-                alpha = alpha, foldid = foldid, lambda = fit1$lambda, ...)
+      cv.glmnet(x = x, y = y, alpha = alpha, foldid = foldid, lambda = fit1$lambda, ...)
     })
   }else{
       fits <- future_lapply(alphaSet[1:(length(alphaSet)-1)], function(alpha) {
