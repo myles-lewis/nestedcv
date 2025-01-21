@@ -9,12 +9,10 @@
 #' @param alphaSet Sequence of alpha values to cross-validate
 #' @param foldid Optional vector of values between 1 and `nfolds` identifying
 #'   what fold each observation is in.
-
-#' @param parallel_method parallelization options "mclapply" (default) or "future"
+#' @param parallel_method parallelisation options "mclapply" (default) or "future"
 #' @details With "future" option nested parallelisation is performed over `alphaSet` and then over
 #'   the folds using the future framework. (Parallelization over lambda is not
 #'   necessary due to the way glmnet works. See [glmnet::glmnet()].)
-
 #' @param ... Other arguments passed to [glmnet::cv.glmnet]
 #' @return Object of S3 class "cva.glmnet", which is a list of the cv.glmnet 
 #' objects for each value of alpha and `alphaSet`.
