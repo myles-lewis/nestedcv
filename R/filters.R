@@ -606,7 +606,9 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #' @param method Integer determining linear model method. See
 #'   [RcppEigen::fastLmPure()]
 #' @param mc.cores Number of cores for parallelisation using
-#'   [parallel::mclapply()].
+#'   [parallel::mclapply()]. if parallel_method="future"
+#'   mc.cores will be ignored for backward-compatibilty of [future::plan()].
+#' @param parallel_method parallelisation options "mclapply" (default) or "future".
 #' @return Integer vector of indices of filtered parameters (`type = "index"`)
 #'   or character vector of names (`type = "names"`) of filtered parameters in
 #'   order of linear model AIC. Any variables in `force_vars` which are
@@ -622,13 +624,15 @@ collinear <- function(x, rsq_cutoff = 0.9, rsq_method = "pearson",
 #' estimation of p-value with variables of zero variance. The algorithm attempts
 #' to detect these and set their stats to `NA`. `NA` in `x` are not tolerated.
 #' 
-#' Parallelisation is available via [mclapply()]. This is provided mainly for
+#' Parallelisation is available via [mclapply()] or [future.apply::future_lapply()]. This is provided mainly for
 #' the use case of the filter being used as standalone. Nesting parallelisation
 #' inside of parallelised [nestcv.glmnet()] or [nestcv.train()] loops is not
-#' recommended.
+#' recommended (but when parallel_method="future" it can be done as documented in the future package).
 #' 
 #' @export
 #'
+#' @importFrom future.apply future_lapply
+
 lm_filter <- function(y, x,
                       force_vars = NULL,
                       nfilter = NULL,
@@ -638,7 +642,13 @@ lm_filter <- function(y, x,
                       type = c("index", "names", "full"),
                       keep_factors = TRUE,
                       method = 0L,
-                      mc.cores = 1) {
+                      mc.cores = 1, parallel_method="mclapply") {
+
+  
+  if (!missing(mc.cores) & parallel_method=="future") {
+    warning("When parallel_method is future, mc.cores argument will be ignored for backward-compatibilty")
+  }
+  
   if (!requireNamespace("RcppEigen", quietly = TRUE)) {
     stop("Package 'RcppEigen' must be installed to use this filter",
          call. = FALSE)
@@ -658,6 +668,8 @@ lm_filter <- function(y, x,
     xset0 <- x[, force_vars, drop = FALSE]
     xset <- cbind(startx, xset0)
   } else xset <- startx
+
+  if(parallel_method="mclapply"){
   res <- mclapply(check_vars, function(i) {
     xset[, 2] <- x[, i]
     fit <- RcppEigen::fastLmPure(xset, y, method = method)
@@ -665,6 +677,15 @@ lm_filter <- function(y, x,
     rss <- sum(fit$residuals^2)
     c(rss, fit$coefficients[2], fit$se[2])
   }, mc.cores = mc.cores)
+ }else{
+  res <- future_lapply(check_vars, function(i) {
+    xset[, 2] <- x[, i]
+    fit <- RcppEigen::fastLmPure(xset, y, method = method)
+    if (any(is.na(fit$coefficients))) return(rep(NA, 3))  # check for rank deficient
+    rss <- sum(fit$residuals^2)
+    c(rss, fit$coefficients[2], fit$se[2])
+  })
+ }
   res <- simplify2array(res)
   colnames(res) <- check_vars
   rss <- res[1,]
