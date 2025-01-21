@@ -11,7 +11,7 @@
 #'   what fold each observation is in.
 #' @param parallel_method parallelisation options "mclapply" (default) or "future"
 #' @details With "future" option nested parallelisation is performed over `alphaSet` and then over
-#'   the folds using the future framework. (Parallelization over lambda is not
+#'   the folds using the future framework. (Parallelisation over lambda is not
 #'   necessary due to the way glmnet works. See [glmnet::glmnet()].)
 #' @param ... Other arguments passed to [glmnet::cv.glmnet]
 #' @return Object of S3 class "cva.glmnet", which is a list of the cv.glmnet 
