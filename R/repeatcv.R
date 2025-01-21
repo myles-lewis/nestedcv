@@ -14,9 +14,15 @@
 #'   large.
 #' @param extra Logical whether additional performance metrics are gathered for
 #'   binary classification models. See [metrics()].
-#' @param progress Logical whether to show progress.
-#' @param rep.cores Integer specifying number of cores/threads to invoke.
+#' @param parallel_method parallelisation options "mclapply" (default) or "future".
+#' @param progress Logical whether to show progress. Ignored if parallel_method="future".
+#' @param rep.cores Integer specifying number of cores/threads to invoke. Ignored if parallel_method="future".
 #' @details
+#' @param allow_multithreading can be used if parallel_method="future". 
+#' It takes logical value whether to enable (TRUE) or disable
+#'   (FALSE) multithreading for caret models that are able to use it. It is
+#'   generally recommended to disable multithreading when using multiple
+#'   processes.
 #' We recommend using this with the R pipe `|>` (see examples).
 #' 
 #' When comparing models, it is recommended to fix the sets of outer CV folds
@@ -24,12 +30,17 @@
 #' function [repeatfolds()] can be used to create a fixed set of outer CV folds
 #' for each repeat.
 #' 
-#' Parallelisation over repeats is performed using `parallel::mclapply` (not
+#' If  parallel_method="mclapply", parallelisation over repeats is performed using `parallel::mclapply` (not
 #' available on windows). Beware that `cv.cores` can still be set within calls
 #' to `nestedcv` models (= nested parallelisation). This means that `rep.cores`
 #' x `cv.cores` number of processes/forks will be spawned, so be careful not to
 #' overload your CPU. In general parallelisation of repeats using `rep.cores` is
 #' faster than parallelisation using `cv.cores`.
+#' If parallel_method="future". Parallelisation over repeats is performed using
+#' [future.apply::future_apply()], following the normal rules for nested
+#' parallelisation. In general parallelisation of the repeats is faster than
+#' parallelisation of the nested CV.
+
 #' 
 #' @returns List of S3 class 'repeatcv' containing:
 #' \item{call}{the model call}
@@ -42,6 +53,8 @@
 #' \item{fits}{(if `keep = TRUE`) list of length `n` containing slimmed 
 #' 'nestedcv' model objects for calculating variable importance or SHAP values}
 #' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom future.apply future_lapply
+#' @importFrom withr local_options
 #' @examples
 #' \donttest{
 #' data("iris")
@@ -66,14 +79,22 @@
 #' @export
 
 repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
-                     extra = FALSE,
+                     extra = FALSE, parallel_method="mclapply",
+                     allow_multithreading = if(is(plan(), "sequential") & parallel_method="future"){TRUE}else{FALSE},
                      progress = TRUE, rep.cores = 1L) {
+  
+ if ((!missing(rep.cores) | !missing(progress)) & parallel_method=="future") {
+    warning("When parallel_method is future, rep.cores and progress arguments will be ignored for backward-compatibilty")
+  }
+  
   start <- Sys.time()
   cl <- match.call()
   if (!is.null(repeat_folds) && length(repeat_folds) != n)
     stop("mismatch between n and repeat_folds")
   ex0 <- ex <- substitute(expr)
   # modify args in expr call
+  
+  if(parallel_method=="mclapply"){
   d <- deparse(ex[[1]])
   if (d == "nestcv.glmnet" | d == "nestcv.train") ex$finalCV <- NA
   if (d == "nestcv.SuperLearner" | d == "outercv") ex$final <- FALSE
@@ -148,7 +169,47 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       for (i in errs) {warning(i, call. = FALSE)}
     }
   }
-  
+}else{
+  d <- deparse1(ex[[1]])
+  if (d == "nestcv.glmnet" || d == "nestcv.train") ex$finalCV <- NA
+  if (d == "nestcv.SuperLearner" || d == "outercv") ex$final <- FALSE
+  if (d == "nestcv.train") d <- ex$method
+  d <- gsub("nestcv.", "", d)
+  cat_parallel("Nested cv with ", n, " repeats")
+
+  local_options(future.fork.multithreading.enable = allow_multithreading)
+  # We need to do little song and dance to make the function and all its
+  # arguments available inside the future_lapply without relying on shared
+  # memory from forking. This is needed becuase future doesn't see the
+  # unevaluated arguments inside "ex", so it doesn't know that it needs to send
+  # them to the workers.
+  ex_fun_name <- ex[[1]]
+  ex_fun <- eval(ex_fun_name)
+  ex_arg_exprs <- as.list(ex[-1])
+  ex_args <- lapply(ex_arg_exprs, eval, envir = parent.frame())
+  res <- future_lapply(seq_len(n), function(i) {
+    if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
+    # TODO: Need to get globals from ex
+    fit <- try(do.call(ex_fun, ex_args), silent = TRUE)
+    if (inherits(fit, "try-error")) {
+      ret <-  if (keep) list(NA, NA, NA) else list(NA, NA)
+      attr(ret, "error") <- fit[1]
+      return(ret)
+    }
+    s <- metrics(fit, extra = extra)
+    output <- fit$output
+    output$rep <- i
+    if (!keep) return(list(s, output))
+    list(s, output, slim(fit))
+  }, future.seed = TRUE)
+
+  # error messages
+  errs <- unique(unlist(lapply(res, function(i) attr(i, "error"))))
+  if (length(errs) > 0) {
+    for (i in errs) {warning(i, call. = FALSE)}
+  }
+}
+          
   # wrap up
   if (!is.null(ex$family) && ex$family == "mgaussian") {
     # glmnet mgaussian
