@@ -24,18 +24,34 @@
 #' @importFrom utils tail
 #' @export
 #' 
-cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1),
+cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), parallel_method = "mclapply",
                        foldid = NULL, ...) {
   if (is.null(foldid)) {
     foldid <- sample(rep(seq_len(nfolds), length = NROW(y)))
   }
+  if(parallel_method=="mclapply"){
+  
   fit1 <- cv.glmnet(x = x, y = y, 
                     alpha = tail(alphaSet, 1), foldid = foldid, ...)
+  }else{
+ local_registerDoFuture()
+  # Use run cv.glmnet inside a "useless" future_lapply here so that it is always
+  # run at the same future parallel nesting level.
+  fit1 <- future_lapply(tail(alphaSet, 1), function(alpha) {
+    cv.glmnet(x = x, y = y,
+              alpha = alpha, foldid = foldid, ..., parallel = TRUE)
+  })[[1]]
+  }
   if (length(alphaSet) > 1) {
+    if(parallel_method=="mclapply"){
     fits <- lapply(alphaSet[1:(length(alphaSet)-1)], function(alpha) {
       cv.glmnet(x = x, y = y, 
                 alpha = alpha, foldid = foldid, lambda = fit1$lambda, ...)
     })
+  }else{
+      fits <- future_lapply(alphaSet[1:(length(alphaSet)-1)], function(alpha) {
+      cv.glmnet(x = x, y = y, alpha = alpha, foldid = foldid, lambda = fit1$lambda, ..., parallel = TRUE)
+  }    
     fits <- append(fits, list(fit1))
   } else fits <- list(fit1)
   if (fit1$name %in% c("AUC", "C-index")) {
