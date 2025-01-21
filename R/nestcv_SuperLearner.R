@@ -41,9 +41,11 @@
 #' @param n_outer_folds Number of outer CV folds
 #' @param outer_folds Optional list containing indices of test folds for outer
 #'   CV. If supplied, `n_outer_folds` is ignored.
+#' @param parallel_method parallelisation options "mclapply" (default) or "future".
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
-#'   on windows.
+#'   on windows. if parallel_method="future" cv.cores will be ignored 
+#'   for backward-compatibilty of [future::plan()].
 #' @param final Logical whether to fit final model.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
@@ -88,6 +90,7 @@
 #' 
 #' @seealso [SuperLearner::SuperLearner()]
 #' @importFrom parallel clusterEvalQ
+#' @importFrom future.apply future_lapply
 #' @export
 
 nestcv.SuperLearner <- function(y, x,
@@ -102,11 +105,17 @@ nestcv.SuperLearner <- function(y, x,
                                 outer_method = c("cv", "LOOCV"),
                                 n_outer_folds = 10,
                                 outer_folds = NULL,
+                                parallel_method="mclapply",
                                 cv.cores = 1,
                                 final = TRUE,
                                 na.option = "pass",
                                 verbose = TRUE,
                                 ...) {
+
+  if (!missing(cv.cores) & parallel_method=="future") {
+    warning("When parallel_method is future, cv.cores argument will be ignored for backward-compatibilty")
+  }
+  
   if (!requireNamespace("SuperLearner", quietly = TRUE)) {
     stop("Package 'SuperLearner' must be installed", call. = FALSE)
   }
@@ -151,15 +160,36 @@ nestcv.SuperLearner <- function(y, x,
     })
     
   } else {
+
+
+    
     if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {
+      if(parallel_method=="future"){
       message("Performing ", n_outer_folds, "-fold outer CV, using ",
-              plural(cv.cores, "core(s)"))}
+              plural(cv.cores, "core(s)"))
+      }else{
+      message("Performing ", n_outer_folds, "-fold outer CV")
+      }  
+    }
+
+    if(parallel_method=="future"){
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
       nestSLcore(i, y, x, outer_folds,
                  filterFUN, filter_options, weights,
                  balance, balance_options,
                  modifyX, modifyX_useY, modifyX_options, verbose, ...)
     }, mc.cores = cv.cores)
+    }else{
+          outer_res <- future_lapply(seq_along(outer_folds), function(i) {
+          nestSLcore(i, y, x, outer_folds,
+                 filterFUN, filter_options, weights,
+                 balance, balance_options,
+                 modifyX, modifyX_useY, modifyX_options, verbose, ...)
+    }, future.seed = TRUE)
+    }
+
+
+    
   }
   
   predslist <- lapply(outer_res, '[[', 'preds')
