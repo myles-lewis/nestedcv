@@ -80,7 +80,7 @@
 
 repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
                      extra = FALSE, parallel_method="mclapply",
-                     allow_multithreading = if(is(plan(), "sequential") & parallel_method="future"){TRUE}else{FALSE},
+                     allow_multithreading = if(is(plan(), "sequential") & parallel_method=="future"){TRUE}else{FALSE},
                      progress = TRUE, rep.cores = 1L) {
   
  if ((!missing(rep.cores) | !missing(progress)) & parallel_method=="future") {
