@@ -286,7 +286,7 @@ nestcv.train <- function(y, x,
   if (!is.null(balance) & is.numeric(y)) {
     stop("`balance` can only be used for classification")}
   
-  if(parallel_method="mclapply"){
+  if(parallel_method=="mclapply"){
       ok <- checkxy(y, x, na.option, weights)
     }else{
     stopifnot(length(finalCV) == 1 && is.logical(finalCV))
