@@ -67,3 +67,40 @@ inspectGrid <- function(method, tuneLength = 3, y = NA, x = NA) {
 spaces <- function(n) {
   paste0(rep(" ", n), collapse = "")
 }
+
+
+#' Locally `registerDoFuture()` until end of the current function
+#'
+#' This function will call [doFuture::registerDoFuture()], which will be in
+#' effect until the end of the current function. After that, the originally
+#' registered foreach backend will be restored.
+#'
+#' @param .local_envir The environment to which exit handlers should be
+#'   attached. Users should generally not need to set this argument. See the
+#'   `envir` option of [withr::defer()].
+#'
+#' @export
+#' @importFrom doFuture registerDoFuture
+#' @importFrom foreach setDoPar
+#'
+#' @examples
+#' library(foreach)
+#' library(future)
+#'
+#' # This function will always use the registered future plan for
+#' # parallelization, even if a different foreach backend is registered.
+#' my_parallel_sqrt_function <- function(x) {
+#'   local_registerDoFuture()
+#'   foreach(x = x) %dopar% { sqrt(x) }
+#' }
+#' my_parallel_sqrt_function(1:10)
+local_registerDoFuture <- withr::local_(
+  set = registerDoFuture,
+  reset = function(old_dopar) {
+    # Need to remove any elements that are NULL because they should not be
+    # passed as arguments to setDoPar().
+    old_dopar <- Filter(\(x) !is.null(x), old_dopar)
+    res <- do.call(setDoPar, old_dopar)
+  },
+  get = \(...) getNamespace("doFuture")$.getDoPar()
+)
