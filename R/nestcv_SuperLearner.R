@@ -164,7 +164,7 @@ nestcv.SuperLearner <- function(y, x,
 
     
     if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {
-      if(parallel_method=="future"){
+      if(parallel_method=="mclapply"){
       message("Performing ", n_outer_folds, "-fold outer CV, using ",
               plural(cv.cores, "core(s)"))
       }else{
@@ -172,7 +172,7 @@ nestcv.SuperLearner <- function(y, x,
       }  
     }
 
-    if(parallel_method=="future"){
+    if(parallel_method=="mclapply"){
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
       nestSLcore(i, y, x, outer_folds,
                  filterFUN, filter_options, weights,
