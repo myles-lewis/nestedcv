@@ -669,7 +669,7 @@ lm_filter <- function(y, x,
     xset <- cbind(startx, xset0)
   } else xset <- startx
 
-  if(parallel_method="mclapply"){
+  if(parallel_method=="mclapply"){
   res <- mclapply(check_vars, function(i) {
     xset[, 2] <- x[, i]
     fit <- RcppEigen::fastLmPure(xset, y, method = method)
