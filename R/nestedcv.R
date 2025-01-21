@@ -70,9 +70,11 @@
 #'   variables. See [glmnet::glmnet]. Note this works separately from filtering.
 #'   For some `nestedcv` filter functions you might need to set `force_vars` to
 #'   avoid filtering out features.
+#' @param parallel_method parallelisation options "mclapply" (default) or "future".
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
-#'   on windows.
+#'   on windows. If parallel_method="future" cv.cores will be ignored 
+#'   for backward-compatibilty of [future::plan()].
 #' @param finalCV Logical whether to perform one last round of CV on the whole
 #'   dataset to determine the final model parameters. If set to `FALSE`, the
 #'   median of hyperparameters from outer CV folds are used for the final model.
@@ -174,6 +176,8 @@
 #' }
 #' @export
 #' 
+#' @importFrom future.apply future_lapply
+
 nestcv.glmnet <- function(y, x,
                           family = c("gaussian", "binomial", "poisson", 
                                      "multinomial", "cox", "mgaussian"),
@@ -195,11 +199,17 @@ nestcv.glmnet <- function(y, x,
                           outer_train_predict = FALSE,
                           weights = NULL,
                           penalty.factor = rep(1, ncol(x)),
+                          parallel_method="mclapply",
                           cv.cores = 1,
                           finalCV = TRUE,
                           na.option = "omit",
                           verbose = FALSE,
                           ...) {
+  
+  if (!missing(cv.cores) & parallel_method=="future") {
+    warning("When parallel_method is future, cv.cores argument will be ignored for backward-compatibilty")
+  }
+  
   start <- Sys.time()
   family <- match.arg(family)
   nestcv.call <- match.call(expand.dots = TRUE)
@@ -231,8 +241,9 @@ nestcv.glmnet <- function(y, x,
     }
     n_outer_folds <- length(outer_folds)
   }
-  
+ 
   verbose <- as.numeric(verbose)
+  if(parallel_method=="mclapply"){
   if (verbose == 1) message("Performing ", n_outer_folds, "-fold outer CV, using ",
                        plural(cv.cores, "core(s)"))
   if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
@@ -285,7 +296,17 @@ nestcv.glmnet <- function(y, x,
                         verbose, ...)
     }, mc.cores = cv.cores)
   }
-  
+}else{
+ if (verbose == 1) message("Performing ", n_outer_folds, "-fold outer CV")
+  outer_res <- future_lapply(seq_along(outer_folds), function(i) {
+      nestcv.glmnetCore(i, y, x, outer_folds, filterFUN, filter_options,
+                        balance, balance_options,
+                        modifyX, modifyX_useY, modifyX_options,
+                        alphaSet, min_1se, n_inner_folds, keep, family,
+                        weights, penalty.factor, outer_train_predict,
+                        verbose, ...)
+  }, future.seed = TRUE)
+}
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
