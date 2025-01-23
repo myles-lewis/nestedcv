@@ -411,10 +411,17 @@ outercvCore <- function(i, y, x, outer_folds, model, reg,
   predy <- predict(fit, newdata = filt_xtest)
   preds <- data.frame(predy=predy, testy=ytest)
   # for AUC
-  if (!reg & nlevels(y) == 2) {
+  if (!reg) {
     predyp <- predict(fit, newdata = filt_xtest, type = predict_type)
-    if (!is.vector(predyp)) predyp <- predyp[,2]
-    preds$predyp <- predyp
+    if (nlevels(y) == 2) {
+      # binary
+      if (!is.vector(predyp)) predyp <- predyp[,2]
+      preds$predyp <- predyp
+    } else {
+      # multiclass
+      if (ncol(predyp) != nlevels(y)) warning("non-standard multiclass probabilities")
+      preds <- cbind(preds, predyp)
+    }
   }
   rownames(preds) <- rownames(filt_xtest)
   if (outer_train_predict) {
@@ -422,9 +429,9 @@ outercvCore <- function(i, y, x, outer_folds, model, reg,
     train_preds <- data.frame(ytrain=ytrain, predy=predy)
     rownames(train_preds) <- rownames(filt_xtrain)
     # for AUC
-    if (!reg & nlevels(y) == 2) {
+    if (!reg) {
       predyp <- predict(fit, newdata = filt_xtrain, type = predict_type)
-      if (!is.vector(predyp)) predyp <- predyp[,2]
+      if (nlevels(y) == 2 && !is.vector(predyp)) predyp <- predyp[,2]
       train_preds <- cbind(train_preds, predyp)
     }
   } else train_preds <- NULL
@@ -578,19 +585,26 @@ outercvFormulaCore <- function(i, outer_folds, formula, data, y, model,
   predy <- predict(fit, newdata = data[test, ])
   preds <- data.frame(predy=predy, testy=y[test])
   # for AUC
-  if (!reg & nlevels(y) == 2) {
+  if (!reg) {
     predyp <- predict(fit, newdata = data[test, ], type = predict_type)
-    if (!is.vector(predyp)) predyp <- predyp[,2]
-    preds$predyp <- predyp
+    if (nlevels(y) == 2) {
+      # binary
+      if (!is.vector(predyp)) predyp <- predyp[,2]
+      preds$predyp <- predyp
+    } else {
+      # multiclass
+      if (ncol(predyp) != nlevels(y)) warning("non-standard multiclass probabilities")
+      preds <- cbind(preds, predyp)
+    }
   }
   rownames(preds) <- rownames(data)[test]
   if (outer_train_predict) {
     predy <- predict(fit, newdata = data[test, ])
     train_preds <- data.frame(ytrain=y[-test], predy=predy)
     # for AUC
-    if (!reg & nlevels(y) == 2) {
+    if (!reg) {
       predyp <- predict(fit, newdata = data[-test, ], type = predict_type)
-      if (!is.vector(predyp)) predyp <- predyp[,2]
+      if (nlevels(y) == 2 && !is.vector(predyp)) predyp <- predyp[,2]
       train_preds <- cbind(train_preds, predyp)
     }
     rownames(train_preds) <- rownames(data)[-test]
