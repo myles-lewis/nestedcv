@@ -52,9 +52,9 @@ cva.glmnet <- function(x, y, nfolds = 10, alphaSet = seq(0.1, 1, 0.1), parallel_
   }else{
       fits <- future_lapply(alphaSet[1:(length(alphaSet)-1)], function(alpha) {
       cv.glmnet(x = x, y = y, alpha = alpha, foldid = foldid, lambda = fit1$lambda, ..., parallel = TRUE)
-  }    
+  })    
     fits <- append(fits, list(fit1))
-  } else fits <- list(fit1)
+  }else{ fits <- list(fit1)}
   if (fit1$name %in% c("AUC", "C-index")) {
     alpha_cvm <- unlist(lapply(fits, function(i) max(i$cvm)))
     which_alpha <- which.max(alpha_cvm)
