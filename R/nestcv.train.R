@@ -349,7 +349,7 @@ nestcv.train <- function(y, x,
     }
   }
 
- if(parallel_method="mclapply"){
+ if(parallel_method=="mclapply"){
   # disable openMP multithreading (fix for xgboost)
   if (cv.cores >= 2) {
     threads <- RhpcBLASctl::omp_get_max_threads()
@@ -385,7 +385,7 @@ nestcv.train <- function(y, x,
         } else message("Cannot pass `outer_folds` to final CV")
       }
 
-      if(parallel_method="mclapply"){
+      if(parallel_method=="mclapply"){
       if (cv.cores >= 2) {
         if (Sys.info()["sysname"] == "Windows") {
           cl <- makeCluster(cv.cores)
@@ -409,7 +409,7 @@ nestcv.train <- function(y, x,
       })
       finalTune <- final_fit$bestTune
 
-      if(parallel_method="mclapply"){
+      if(parallel_method=="mclapply"){
       if (cv.cores >= 2) {
         if (Sys.info()["sysname"] == "Windows") stopCluster(cl)
         foreach::registerDoSEQ()
@@ -418,7 +418,7 @@ nestcv.train <- function(y, x,
     }
   }
 
-  if(parallel_method="mclapply"){
+  if(parallel_method=="mclapply"){
   if (verbose == 1 && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
