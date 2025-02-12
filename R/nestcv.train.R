@@ -277,7 +277,7 @@ nestcv.train <- function(y, x,
                          ...) {
    
   if ((!missing(cv.cores) | !missing(multicore_fork)) & parallel_method=="future") {
-    warning("When parallel_method is future, cv.cores and multicore_fork arguments will be ignored for backward-compatibilty")
+    warning("When parallel_method is future, cv.cores and multicore_fork arguments will be ignored for backward-compatibilty. Use future::plan() instead.")
   }
   
   start <- Sys.time()
