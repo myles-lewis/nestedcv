@@ -76,13 +76,6 @@
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
 #' If parallel_method="future" cv.cores will be ignored 
 #'   for backward-compatibilty of [future::plan()].
-#' @param multicore_fork Logical whether to use forked multicore parallel
-#'   processing. Forked multicore processing uses `parallel::mclapply`. It is
-#'   only available on unix/mac as windows does not allow forking. It is set to
-#'   `FALSE` by default in windows and `TRUE` in unix/mac. Non-forked parallel
-#'   processing is executed using `parallel::parLapply` or `pbapply::pblapply`
-#'   if `verbose` is `TRUE`. If parallel_method="future" multicore_fork will be ignored 
-#'   for backward-compatibilty of [future::plan()].
 #' @param allow_multithreading can be used if parallel_method="future". 
 #' It takes logical value whether to enable (TRUE) or disable
 #'   (FALSE) multithreading for caret models that are able to use it. It is
@@ -132,10 +125,7 @@
 #' `caret` using `registerDoParallel`. `caret` itself uses `foreach`.
 #' 
 #' When parallel_method="mclapply"`, parallelisation is performed on the outer CV folds using `parallel::mclapply`
-#' by default on unix/mac and `parallel::parLapply` on windows. `mclapply` uses
-#' forking which is faster. But some models use multi-threading which may cause
-#' issues in some circumstances with forked multicore processing. Setting
-#' `multicore_fork` to `FALSE` is slower but can alleviate some caret errors.
+#' by default on unix/mac and `parallel::parLapply` on windows. 
 #'   
 #' If the outer folds are run using parallelisation, then parallelisation in
 #' caret must be off, otherwise an error will be generated. Alternatively if you
@@ -264,7 +254,6 @@ nestcv.train <- function(y, x,
                          pass_outer_folds = FALSE,
                          parallel_method="mclapply",
                          cv.cores = 1,
-                         multicore_fork = (Sys.info()["sysname"] != "Windows"),
                          metric = ifelse(is.factor(y), "logLoss", "RMSE"),
                          trControl = NULL,
                          tuneGrid = NULL,
@@ -275,8 +264,8 @@ nestcv.train <- function(y, x,
                          verbose = TRUE,
                          ...) {
    
-  if ((!missing(cv.cores) | !missing(multicore_fork)) & parallel_method=="future") {
-    warning("When parallel_method is future, cv.cores and multicore_fork arguments will be ignored for backward-compatibilty")
+  if (!missing(cv.cores) & parallel_method=="future") {
+    warning("When parallel_method is future, cv.cores argument will be ignored for backward-compatibilty")
   }
   
   start <- Sys.time()
@@ -419,10 +408,10 @@ nestcv.train <- function(y, x,
   }
 
   if(parallel_method=="mclapply"){
-  if (verbose == 1 && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
+  if (verbose == 1 && Sys.getenv("RSTUDIO") == "1"){
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
-  if (!multicore_fork && cv.cores >= 2) {
+  if (cv.cores >= 2) {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
     varlist <- c("outer_folds", "inner_train_folds", "y", "x", "method", "filterFUN",
