@@ -262,6 +262,7 @@ nestcv.train <- function(y, x,
                          finalCV = TRUE,
                          na.option = "pass",
                          verbose = TRUE,
+                         allow_multithreading = if (is(plan(), "sequential")) TRUE else FALSE,
                          ...) {
    
   if (!missing(cv.cores) & parallel_method=="future") {
