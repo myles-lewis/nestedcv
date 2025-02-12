@@ -262,7 +262,6 @@ nestcv.train <- function(y, x,
                          outer_folds = NULL,
                          inner_folds = NULL,
                          pass_outer_folds = FALSE,
-                         parallel_method="mclapply",
                          cv.cores = 1,
                          multicore_fork = (Sys.info()["sysname"] != "Windows"),
                          metric = ifelse(is.factor(y), "logLoss", "RMSE"),
@@ -273,6 +272,8 @@ nestcv.train <- function(y, x,
                          finalCV = TRUE,
                          na.option = "pass",
                          verbose = TRUE,
+                         parallel_method="mclapply",
+                         allow_multithreading = if (is(plan(), "sequential")) TRUE else FALSE,
                          ...) {
    
   if ((!missing(cv.cores) | !missing(multicore_fork)) & parallel_method=="future") {
@@ -418,7 +419,7 @@ nestcv.train <- function(y, x,
     }
   }
 
-  if(parallel_method=="mclapply"){
+  if(parallel_method %in% c("mclapply","parLapply","pblapply")){
   if (verbose == 1 && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
