@@ -287,7 +287,7 @@ nestcv.train <- function(y, x,
   if (!is.null(balance) & is.numeric(y)) {
     stop("`balance` can only be used for classification")}
   
-  if(parallel_method=="mclapply"){
+if(parallel_method %in% c("mclapply","parLapply","pblapply")){
       ok <- checkxy(y, x, na.option, weights)
     }else{
     stopifnot(length(finalCV) == 1 && is.logical(finalCV))
@@ -350,7 +350,7 @@ nestcv.train <- function(y, x,
     }
   }
 
- if(parallel_method=="mclapply"){
+if(parallel_method %in% c("mclapply","parLapply","pblapply")){
   # disable openMP multithreading (fix for xgboost)
   if (cv.cores >= 2) {
     threads <- RhpcBLASctl::omp_get_max_threads()
@@ -386,7 +386,7 @@ nestcv.train <- function(y, x,
         } else message("Cannot pass `outer_folds` to final CV")
       }
 
-      if(parallel_method=="mclapply"){
+if(parallel_method %in% c("mclapply","parLapply","pblapply")){
       if (cv.cores >= 2) {
         if (Sys.info()["sysname"] == "Windows") {
           cl <- makeCluster(cv.cores)
@@ -410,7 +410,7 @@ nestcv.train <- function(y, x,
       })
       finalTune <- final_fit$bestTune
 
-      if(parallel_method=="mclapply"){
+if(parallel_method %in% c("mclapply","parLapply","pblapply")){
       if (cv.cores >= 2) {
         if (Sys.info()["sysname"] == "Windows") stopCluster(cl)
         foreach::registerDoSEQ()
