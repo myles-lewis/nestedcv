@@ -132,7 +132,7 @@
 #' caret must be off, otherwise an error will be generated. Alternatively if you
 #' wish to use parallelisation in caret, then parallelisation in `nestcv.train`
 #' can be fully disabled by leaving `cv.cores = 1`.
-#'
+#'   
 #' xgboost models fitted via caret using `method = "xgbTree"` or `"xgbLinear"`
 #' invoke openMP multithreading on linux/windows by default which causes
 #' `nestcv.train` to fail when `cv.cores` >1 (nested parallelisation). Mac OS is
@@ -305,7 +305,7 @@ nestcv.train <- function(y, x,
       inner_train_folds <- NULL
     }
   }
-  
+
   # disable openMP multithreading (fix for xgboost)
   if (cv.cores >= 2) {
     threads <- RhpcBLASctl::omp_get_max_threads()
@@ -337,7 +337,7 @@ nestcv.train <- function(y, x,
           trControlFinal$indexOut <- outer_folds
         } else message("Cannot pass `outer_folds` to final CV")
       }
-      
+
       if (cv.cores >= 2) {
         if (Sys.info()["sysname"] == "Windows") {
           cl <- makeCluster(cv.cores)
@@ -362,7 +362,7 @@ nestcv.train <- function(y, x,
       }
     }
   }
-  
+
   if (verbose == 1 && (!multicore_fork || Sys.getenv("RSTUDIO") == "1")) {
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
@@ -416,7 +416,7 @@ nestcv.train <- function(y, x,
                        verbose, ...)
     }, mc.cores = cv.cores, mc.allow.recursive = FALSE)
   }
-  
+
   predslist <- lapply(outer_res, '[[', 'preds')
   output <- data.table::rbindlist(predslist)
   output <- as.data.frame(output)
@@ -658,4 +658,3 @@ plural <- function(n, text) {
   text <- if (n == 1) gsub("\\(s\\)", "", text) else gsub("\\(|\\)", "", text)
   paste(n, text)
 }
-
