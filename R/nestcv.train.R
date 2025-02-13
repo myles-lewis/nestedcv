@@ -279,7 +279,12 @@ nestcv.train <- function(y, x,
   if ((!missing(cv.cores) | !missing(multicore_fork)) & parallel_method=="future") {
     warning("When parallel_method is future, cv.cores and multicore_fork arguments will be ignored for backward-compatibilty. Use future::plan() instead.")
   }
-  
+
+  if(multicore_fork & (Sys.info()["sysname"] == "Windows")){
+    warning("On Windows machines, multicore_fork argument will be ignored.")
+    multicore_fork <- F
+  }
+                           
   start <- Sys.time()
   nestcv.call <- match.call(expand.dots = TRUE)
   outer_method <- match.arg(outer_method)
