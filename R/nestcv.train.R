@@ -287,18 +287,7 @@ nestcv.train <- function(y, x,
   if (!is.null(balance) & is.numeric(y)) {
     stop("`balance` can only be used for classification")}
   
-if(parallel_method %in% c("mclapply","parLapply","pblapply")){
-      ok <- checkxy(y, x, na.option, weights)
-    }else{
-    stopifnot(length(finalCV) == 1 && is.logical(finalCV))
-    stopifnot(length(verbose) == 1 && is.logical(verbose) && !is.na(verbose))
-    stopifnot(length(modifyX_useY) == 1 && is.logical(modifyX_useY) && !is.na(modifyX_useY))
-    ok <- checkxy(y, x, na.option, weights)
-    if (any(!ok$r) && (!is.null(outer_folds) || !is.null(inner_folds))) {
-    stop("If manually created folds are provided, observations cannot be filtered out due to missing data.")
-    }   
-    }
-  
+  ok <- checkxy(y, x, na.option, weights)
   y <- y[ok$r]
   x <- x[ok$r, ok$c, drop = FALSE]
   weights <- weights[ok$r]
@@ -424,7 +413,7 @@ if(parallel_method %in% c("mclapply","parLapply","pblapply")){
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
   if (!multicore_fork && cv.cores >= 2) {
-    cl <- makeCluster(cv.cores)
+    cl <- make cluster(cv.cores)
     dots <- list(...)
     varlist <- c("outer_folds", "inner_train_folds", "y", "x", "method", "filterFUN",
                  "filter_options", "weights", "balance", "balance_options",
