@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.7.14
+###### 26/02/2025
+* Use function factory for `pred_nestcv_glmnet_class()` and `pred_train_class()` 
+(thanks to SamGG).
+
 # nestedcv 0.7.13
 ###### 23/12/2024
 * Fix check of `inner_folds` in `nestcv.train()`.
