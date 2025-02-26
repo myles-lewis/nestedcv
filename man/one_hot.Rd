@@ -53,10 +53,10 @@ design matrix object for regression models, use \code{\link[=model.matrix]{model
 data(iris)
 x <- iris
 x2 <- one_hot(x)
-head(x2)  # 3 columns for Species
-
-x2 <- one_hot(x, all_levels = FALSE)
 head(x2)  # 2 columns for Species
+
+x2 <- one_hot(x, all_levels = TRUE)
+head(x2)  # 3 columns for Species
 
 }
 \seealso{
