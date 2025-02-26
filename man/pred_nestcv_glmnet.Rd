@@ -2,31 +2,19 @@
 % Please edit documentation in R/shap.R
 \name{pred_nestcv_glmnet}
 \alias{pred_nestcv_glmnet}
-\alias{pred_nestcv_glmnet_class1}
-\alias{pred_nestcv_glmnet_class2}
-\alias{pred_nestcv_glmnet_class3}
+\alias{pred_nestcv_glmnet_class}
 \alias{pred_train}
-\alias{pred_train_class1}
-\alias{pred_train_class2}
-\alias{pred_train_class3}
+\alias{pred_train_class}
 \alias{pred_SuperLearner}
 \title{Prediction wrappers to use fastshap with nestedcv}
 \usage{
 pred_nestcv_glmnet(x, newdata)
 
-pred_nestcv_glmnet_class1(x, newdata)
-
-pred_nestcv_glmnet_class2(x, newdata)
-
-pred_nestcv_glmnet_class3(x, newdata)
+pred_nestcv_glmnet_class(cl)
 
 pred_train(x, newdata)
 
-pred_train_class1(x, newdata)
-
-pred_train_class2(x, newdata)
-
-pred_train_class3(x, newdata)
+pred_train_class(cl)
 
 pred_SuperLearner(x, newdata)
 }
@@ -34,6 +22,8 @@ pred_SuperLearner(x, newdata)
 \item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} object}
 
 \item{newdata}{a matrix of new data}
+
+\item{cl}{integer representing which class to predict}
 }
 \value{
 prediction wrapper function designed for use with
@@ -49,10 +39,9 @@ These prediction wrapper functions are designed to be used with the
 for \code{nestcv.glmnet} and \code{nestcv.train} models respectively for either binary
 classification or regression.
 
-For multiclass classification use \code{pred_nestcv_glmnet_class1}, \code{2} and \code{3}
-for the first 3 classes. Similarly \code{pred_train_class1} etc for \link{nestcv.train}
-objects. These functions can be inspected and easily modified to analyse
-further classes.
+For multiclass classification use \code{pred_nestcv_glmnet_class(1)},
+\code{pred_nestcv_glmnet_class(2)} etc for each class. Similarly
+\code{pred_train_class(1)}, \code{pred_train_class(2)} etc for \link{nestcv.train} objects.
 }
 \examples{
 library(fastshap)

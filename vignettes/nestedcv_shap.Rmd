@@ -195,13 +195,12 @@ plot_shap_beeswarm(sh, x, size = 1)
 ```
 
 For multinomial classification, a wrapper is needed for each class. For
-`nestcv.glmnet` models, we provide wrappers for the first 3 classes:
-`pred_nestcv_glmnet_class1`, `pred_nestcv_glmnet_class2` etc. They are very
-simple functions and easy to extend to other classes.
+`nestcv.glmnet` models, we provide a function factory which acts as a wrapper
+for each class: `pred_nestcv_glmnet_class(1)`, `pred_nestcv_glmnet_class(2)`
+etc.
 
-For `nestcv.train()` models, similarly we provide `pred_train_class1`,
-`pred_train_class2` etc for the first 3 classes. Again these are easily
-extended.
+For `nestcv.train()` models, similarly we provide `pred_train_class(cl)`,
+where `cl` specifies which class is being predicted.
 
 As a toy example, we show the iris dataset which has 3 classes.
 
@@ -216,9 +215,9 @@ x <- dat[, 1:4]
 fit <- nestcv.glmnet(y, x, family = "multinomial", n_outer_folds = 3, alphaSet = 0.6)
 
 # SHAP values for each of the 3 classes
-sh1 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class1, nsim = 5)
-sh2 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class2, nsim = 5)
-sh3 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class3, nsim = 5)
+sh1 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class(1), nsim = 5)
+sh2 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class(2), nsim = 5)
+sh3 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class(3), nsim = 5)
 
 s1 <- plot_shap_bar(sh1, x, sort = FALSE) +
   ggtitle("Setosa")

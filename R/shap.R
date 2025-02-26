@@ -8,6 +8,7 @@
 #' 
 #' @param x a `nestcv.glmnet` or `nestcv.train` object
 #' @param newdata a matrix of new data
+#' @param cl integer representing which class to predict
 #' @return prediction wrapper function designed for use with
 #'   [fastshap::explain()]
 #' @details
@@ -16,10 +17,9 @@
 #' for `nestcv.glmnet` and `nestcv.train` models respectively for either binary
 #' classification or regression.
 #' 
-#' For multiclass classification use `pred_nestcv_glmnet_class1`, `2` and `3`
-#' for the first 3 classes. Similarly `pred_train_class1` etc for [nestcv.train]
-#' objects. These functions can be inspected and easily modified to analyse
-#' further classes.
+#' For multiclass classification use `pred_nestcv_glmnet_class(1)`,
+#' `pred_nestcv_glmnet_class(2)` etc for each class. Similarly
+#' `pred_train_class(1)`, `pred_train_class(2)` etc for [nestcv.train] objects.
 #' 
 #' @examples
 #' library(fastshap)
@@ -53,22 +53,12 @@ pred_nestcv_glmnet <- function(x, newdata) {
 
 #' @rdname pred_nestcv_glmnet
 #' @export
-pred_nestcv_glmnet_class1 <- function(x, newdata) {
-  predict(x, newdata)[, 1, 1]
+pred_nestcv_glmnet_class <- function(cl) {
+  function(x, newdata) {
+    predict(x, newdata)[, cl, 1]
+  }
 }
-
-#' @rdname pred_nestcv_glmnet
-#' @export
-pred_nestcv_glmnet_class2 <- function(x, newdata) {
-  predict(x, newdata)[, 2, 1]
-}
-
-#' @rdname pred_nestcv_glmnet
-#' @export
-pred_nestcv_glmnet_class3 <- function(x, newdata) {
-  predict(x, newdata)[, 3, 1]
-}
-
+  
 #' @rdname pred_nestcv_glmnet
 #' @export
 pred_train <- function(x, newdata) {
@@ -81,20 +71,10 @@ pred_train <- function(x, newdata) {
 
 #' @rdname pred_nestcv_glmnet
 #' @export
-pred_train_class1 <- function(x, newdata) {
-  predict(x, newdata, type="prob")[,1]
-}
-
-#' @rdname pred_nestcv_glmnet
-#' @export
-pred_train_class2 <- function(x, newdata) {
-  predict(x, newdata, type="prob")[,2]
-}
-
-#' @rdname pred_nestcv_glmnet
-#' @export
-pred_train_class3 <- function(x, newdata) {
-  predict(x, newdata, type="prob")[,3]
+pred_train_class <- function(cl) {
+  function(x, newdata) {
+    predict(x, newdata, type="prob")[,cl]
+  }
 }
 
 #' @rdname pred_nestcv_glmnet
