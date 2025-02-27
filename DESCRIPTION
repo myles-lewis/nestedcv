@@ -28,6 +28,7 @@ Imports:
     data.table,
     doParallel,
     foreach,
+    future.apply,
     ggplot2,
     glmnet,
     matrixStats,
