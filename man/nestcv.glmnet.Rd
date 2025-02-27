@@ -26,7 +26,7 @@ nestcv.glmnet(
   outer_train_predict = FALSE,
   weights = NULL,
   penalty.factor = rep(1, ncol(x)),
-  parallel_method = NULL,
+  parallel_mode = NULL,
   cv.cores = 1,
   finalCV = TRUE,
   na.option = "omit",
@@ -114,12 +114,12 @@ variables. See \link[glmnet:glmnet]{glmnet::glmnet}. Note this works separately 
 For some \code{nestedcv} filter functions you might need to set \code{force_vars} to
 avoid filtering out features.}
 
-\item{parallel_method}{Either "mclapply", "parLapply" or "future". This
+\item{parallel_mode}{Either "mclapply", "parLapply" or "future". This
 determines which parallel backend to use. The default is
 \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply} on windows.}
 
 \item{cv.cores}{Number of cores for parallel processing of the outer loops.
-Ignored if \code{parallel_method = "future"}.}
+Ignored if \code{parallel_mode = "future"}.}
 
 \item{finalCV}{Logical whether to perform one last round of CV on the whole
 dataset to determine the final model parameters. If set to \code{FALSE}, the

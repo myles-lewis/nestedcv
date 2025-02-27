@@ -22,7 +22,7 @@ nestcv.train(
   outer_folds = NULL,
   inner_folds = NULL,
   pass_outer_folds = FALSE,
-  parallel_method = NULL,
+  parallel_mode = NULL,
   cv.cores = 1,
   metric = ifelse(is.factor(y), "logLoss", "RMSE"),
   trControl = NULL,
@@ -101,12 +101,12 @@ only be applied when \code{n_outer_folds} and the number of inner CV folds
 specified in \code{n_inner_folds} or \code{trControl} are the same and that no
 balancing is applied.}
 
-\item{parallel_method}{Either "mclapply", "parLapply" or "future". This
+\item{parallel_mode}{Either "mclapply", "parLapply" or "future". This
 determines which parallel backend to use. The default is
 \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply} on windows.}
 
 \item{cv.cores}{Number of cores for parallel processing of the outer loops.
-Ignored if \code{parallel_method = "future"}.}
+Ignored if \code{parallel_mode = "future"}.}
 
 \item{metric}{A string that specifies what summary metric will be used to
 select the optimal model. By default, "logLoss" is used for classification

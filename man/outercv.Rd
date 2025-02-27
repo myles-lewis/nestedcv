@@ -23,7 +23,7 @@ outercv(y, ...)
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   outer_folds = NULL,
-  parallel_method = NULL,
+  parallel_mode = NULL,
   cv.cores = 1,
   predict_type = "prob",
   outer_train_predict = FALSE,
@@ -42,7 +42,7 @@ outercv(y, ...)
   outer_method = c("cv", "LOOCV"),
   n_outer_folds = 10,
   outer_folds = NULL,
-  parallel_method = NULL,
+  parallel_mode = NULL,
   cv.cores = 1,
   predict_type = "prob",
   outer_train_predict = FALSE,
@@ -106,12 +106,12 @@ to do k-fold CV or leave one out CV (LOOCV) for the outer folds}
 \item{outer_folds}{Optional list containing indices of test folds for outer
 CV. If supplied, \code{n_outer_folds} is ignored.}
 
-\item{parallel_method}{Either "mclapply", "parLapply" or "future". This
+\item{parallel_mode}{Either "mclapply", "parLapply" or "future". This
 determines which parallel backend to use. The default is
 \code{parallel::mclapply} on unix/mac and \code{parallel::parLapply} on windows.}
 
 \item{cv.cores}{Number of cores for parallel processing of the outer loops.
-Ignored if \code{parallel_method = "future"}.}
+Ignored if \code{parallel_mode = "future"}.}
 
 \item{predict_type}{Only used with binary classification. Calculation of ROC
 AUC requires predicted class probabilities from fitted models. Most model

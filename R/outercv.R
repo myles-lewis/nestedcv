@@ -48,11 +48,11 @@
 #' @param n_outer_folds Number of outer CV folds
 #' @param outer_folds Optional list containing indices of test folds for outer
 #'   CV. If supplied, `n_outer_folds` is ignored.
-#' @param parallel_method Either "mclapply", "parLapply" or "future". This
+#' @param parallel_mode Either "mclapply", "parLapply" or "future". This
 #'   determines which parallel backend to use. The default is
 #'   `parallel::mclapply` on unix/mac and `parallel::parLapply` on windows.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
-#'   Ignored if `parallel_method = "future"`.
+#'   Ignored if `parallel_mode = "future"`.
 #' @param predict_type Only used with binary classification. Calculation of ROC
 #'   AUC requires predicted class probabilities from fitted models. Most model
 #'   functions use syntax of the form `predict(..., type = "prob")`. However,
@@ -198,7 +198,7 @@ outercv.default <- function(y, x,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
                             outer_folds = NULL,
-                            parallel_method = NULL,
+                            parallel_mode = NULL,
                             cv.cores = 1,
                             predict_type = "prob",
                             outer_train_predict = FALSE,
@@ -234,22 +234,22 @@ outercv.default <- function(y, x,
   if (outercv.call$model == "glm") predict_type <- "response"
   if (outercv.call$model == "mda") predict_type <- "posterior"
   
-  if (is.null(parallel_method)) {
-    parallel_method <- if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+  if (is.null(parallel_mode)) {
+    parallel_mode <- if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
       "parLapply"
     } else "mclapply"
   } else {
-    parallel_method <- match.arg(parallel_method,
+    parallel_mode <- match.arg(parallel_mode,
                                  c("mclapply", "parLapply", "future"))
   }
   
   verbose <- as.numeric(verbose)
-  if (verbose == 1 && (parallel_method != "mclapply" || Sys.getenv("RSTUDIO") == "1")) {
+  if (verbose == 1 && (parallel_mode != "mclapply" || Sys.getenv("RSTUDIO") == "1")) {
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
   
   dots <- list(...)
-  if (parallel_method == "parLapply") {
+  if (parallel_mode == "parLapply") {
     cl <- makeCluster(cv.cores)
     varlist <- c("outer_folds", "y", "x", "model", "reg","filterFUN", 
                  "filter_options", "weights", "balance", "balance_options",
@@ -289,7 +289,7 @@ outercv.default <- function(y, x,
         do.call(outercvCore, args)
       })
     }
-  } else if (parallel_method == "future") {
+  } else if (parallel_mode == "future") {
     # future
     outer_res <- future_lapply(seq_along(outer_folds), function(i) {
       outercvCore(i, y, x, outer_folds, model, reg,
@@ -475,7 +475,7 @@ outercv.formula <- function(formula, data,
                             outer_method = c("cv", "LOOCV"),
                             n_outer_folds = 10,
                             outer_folds = NULL,
-                            parallel_method = NULL,
+                            parallel_mode = NULL,
                             cv.cores = 1,
                             predict_type = "prob",
                             outer_train_predict = FALSE,
@@ -506,21 +506,21 @@ outercv.formula <- function(formula, data,
                      data.frame(m))
     out <- outercv.default(y, m, outer_method = outer_method, 
                            n_outer_folds = n_outer_folds,
-                           parallel_method = parallel_method, cv.cores = cv.cores, ...)
+                           parallel_mode = parallel_mode, cv.cores = cv.cores, ...)
     return(out)
   }
   # for models designed for formula method
-  if (is.null(parallel_method)) {
-    parallel_method <- if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+  if (is.null(parallel_mode)) {
+    parallel_mode <- if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
       "parLapply"
     } else "mclapply"
   } else {
-    parallel_method <- match.arg(parallel_method,
+    parallel_mode <- match.arg(parallel_mode,
                                  c("mclapply", "parLapply", "future"))
   }
   
   verbose <- as.numeric(verbose)
-  if (verbose == 1 && (parallel_method != "mclapply" || Sys.getenv("RSTUDIO") == "1")) {
+  if (verbose == 1 && (parallel_mode != "mclapply" || Sys.getenv("RSTUDIO") == "1")) {
     message("Performing ", n_outer_folds, "-fold outer CV, using ",
             plural(cv.cores, "core(s)"))}
   
@@ -536,7 +536,7 @@ outercv.formula <- function(formula, data,
   
   dots <- list(...)
   
-  if (parallel_method == "parLapply") {
+  if (parallel_mode == "parLapply") {
     cl <- makeCluster(cv.cores)
     clusterExport(cl, varlist = c("outer_folds", "formula", "data", "y", 
                                   "model", "reg", "predict_type",
@@ -551,7 +551,7 @@ outercv.formula <- function(formula, data,
                 dots)
       do.call(outercvFormulaCore, args)
     })
-  } else if (parallel_method == "future") {
+  } else if (parallel_mode == "future") {
     # future
     outer_res <- future_lapply(seq_along(outer_folds), function(i) {
       outercvFormulaCore(i, outer_folds, formula, data, y, model,

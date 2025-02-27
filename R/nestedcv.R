@@ -70,11 +70,11 @@
 #'   variables. See [glmnet::glmnet]. Note this works separately from filtering.
 #'   For some `nestedcv` filter functions you might need to set `force_vars` to
 #'   avoid filtering out features.
-#' @param parallel_method Either "mclapply", "parLapply" or "future". This
+#' @param parallel_mode Either "mclapply", "parLapply" or "future". This
 #'   determines which parallel backend to use. The default is
 #'   `parallel::mclapply` on unix/mac and `parallel::parLapply` on windows.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
-#'   Ignored if `parallel_method = "future"`.
+#'   Ignored if `parallel_mode = "future"`.
 #' @param finalCV Logical whether to perform one last round of CV on the whole
 #'   dataset to determine the final model parameters. If set to `FALSE`, the
 #'   median of hyperparameters from outer CV folds are used for the final model.
@@ -198,7 +198,7 @@ nestcv.glmnet <- function(y, x,
                           outer_train_predict = FALSE,
                           weights = NULL,
                           penalty.factor = rep(1, ncol(x)),
-                          parallel_method = NULL,
+                          parallel_mode = NULL,
                           cv.cores = 1,
                           finalCV = TRUE,
                           na.option = "omit",
@@ -239,16 +239,16 @@ nestcv.glmnet <- function(y, x,
   verbose <- as.numeric(verbose)
   if (verbose == 1) message("Performing ", n_outer_folds, "-fold outer CV, using ",
                        plural(cv.cores, "core(s)"))
-  if (is.null(parallel_method)) {
-    parallel_method <- if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+  if (is.null(parallel_mode)) {
+    parallel_mode <- if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
       "parLapply"
     } else "mclapply"
   } else {
-    parallel_method <- match.arg(parallel_method,
+    parallel_mode <- match.arg(parallel_mode,
                                  c("mclapply", "parLapply", "future"))
   }
   
-  if (parallel_method == "parLapply") {
+  if (parallel_mode == "parLapply") {
     cl <- makeCluster(cv.cores)
     dots <- list(...)
     varlist = c("outer_folds", "y", "x", "filterFUN", "filter_options",
@@ -287,7 +287,7 @@ nestcv.glmnet <- function(y, x,
         do.call(nestcv.glmnetCore, args)
       })
     }
-  } else if (parallel_method == "future") {
+  } else if (parallel_mode == "future") {
     # future
     outer_res <- future_lapply(seq_along(outer_folds), function(i) {
       nestcv.glmnetCore(i, y, x, outer_folds, filterFUN, filter_options,
