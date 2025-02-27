@@ -22,8 +22,8 @@ nestcv.train(
   outer_folds = NULL,
   inner_folds = NULL,
   pass_outer_folds = FALSE,
+  parallel_mode = NULL,
   cv.cores = 1,
-  multicore_fork = (Sys.info()["sysname"] != "Windows"),
   metric = ifelse(is.factor(y), "logLoss", "RMSE"),
   trControl = NULL,
   tuneGrid = NULL,
@@ -101,14 +101,12 @@ only be applied when \code{n_outer_folds} and the number of inner CV folds
 specified in \code{n_inner_folds} or \code{trControl} are the same and that no
 balancing is applied.}
 
-\item{cv.cores}{Number of cores for parallel processing of the outer loops.}
+\item{parallel_mode}{Either "mclapply", "parLapply" or "future". This
+determines which parallel backend to use. The default is
+\code{parallel::mclapply} on unix/mac and \code{parallel::parLapply} on windows.}
 
-\item{multicore_fork}{Logical whether to use forked multicore parallel
-processing. Forked multicore processing uses \code{parallel::mclapply}. It is
-only available on unix/mac as windows does not allow forking. It is set to
-\code{FALSE} by default in windows and \code{TRUE} in unix/mac. Non-forked parallel
-processing is executed using \code{parallel::parLapply} or \code{pbapply::pblapply}
-if \code{verbose} is \code{TRUE}.}
+\item{cv.cores}{Number of cores for parallel processing of the outer loops.
+Ignored if \code{parallel_mode = "future"}.}
 
 \item{metric}{A string that specifies what summary metric will be used to
 select the optimal model. By default, "logLoss" is used for classification
@@ -190,8 +188,8 @@ Parallelisation of the final fit when \code{finalCV = TRUE} is performed in
 Parallelisation is performed on the outer CV folds using \code{parallel::mclapply}
 by default on unix/mac and \code{parallel::parLapply} on windows. \code{mclapply} uses
 forking which is faster. But some models use multi-threading which may cause
-issues in some circumstances with forked multicore processing. Setting
-\code{multicore_fork} to \code{FALSE} is slower but can alleviate some caret errors.
+issues in some circumstances with forked multicore processing. \code{future} is
+another option as a parallel system. We find \code{mclapply} to be faster.
 
 If the outer folds are run using parallelisation, then parallelisation in
 caret must be off, otherwise an error will be generated. Alternatively if you
