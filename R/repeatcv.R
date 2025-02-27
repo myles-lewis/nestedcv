@@ -15,7 +15,10 @@
 #' @param extra Logical whether additional performance metrics are gathered for
 #'   binary classification models. See [metrics()].
 #' @param progress Logical whether to show progress.
+#' @param rep.parallel Either "mclapply" or "future". This determines which
+#'   parallel backend to use.
 #' @param rep.cores Integer specifying number of cores/threads to invoke.
+#' Ignored if `rep.parallel = "future"`.
 #' @details
 #' We recommend using this with the R pipe `|>` (see examples).
 #' 
@@ -25,11 +28,13 @@
 #' for each repeat.
 #' 
 #' Parallelisation over repeats is performed using `parallel::mclapply` (not
-#' available on windows). Beware that `cv.cores` can still be set within calls
-#' to `nestedcv` models (= nested parallelisation). This means that `rep.cores`
-#' x `cv.cores` number of processes/forks will be spawned, so be careful not to
-#' overload your CPU. In general parallelisation of repeats using `rep.cores` is
-#' faster than parallelisation using `cv.cores`.
+#' available on windows) or `future` depending on how `rep.parallel` is set.
+#' Beware that `cv.cores` can still be set within calls to `nestedcv` models (=
+#' nested parallelisation). This means that `rep.cores` x `cv.cores` number of
+#' processes/forks will be spawned, so be careful not to overload your CPU. In
+#' general parallelisation of repeats using `rep.cores` is faster than
+#' parallelisation using `cv.cores`. `rep.cores` is ignored if you are using
+#' future. Set the number of workers for future using `future::plan()`.
 #' 
 #' @returns List of S3 class 'repeatcv' containing:
 #' \item{call}{the model call}
@@ -66,13 +71,14 @@
 #' @export
 
 repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
-                     extra = FALSE,
-                     progress = TRUE, rep.cores = 1L) {
+                     extra = FALSE, progress = TRUE,
+                     rep.parallel = "mclapply", rep.cores = 1L) {
   start <- Sys.time()
   cl <- match.call()
   if (!is.null(repeat_folds) && length(repeat_folds) != n)
     stop("mismatch between n and repeat_folds")
   ex0 <- ex <- substitute(expr)
+  if (!is.call(ex)) stop("expr must be a function call")
   # modify args in expr call
   d <- deparse(ex[[1]])
   if (d == "nestcv.glmnet" | d == "nestcv.train") ex$finalCV <- NA
@@ -80,27 +86,28 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
   if (d == "nestcv.train") d <- ex$method
   d <- gsub("nestcv.", "", d)
   
-  if (Sys.info()["sysname"] == "Windows" & rep.cores > 1) {
-    message("'rep.cores' > 1 is not supported on Windows. Set to 1.")
-    rep.cores <- 1L
-  }
-  
+  rep.parallel <- match.arg(rep.parallel, c("mclapply", "future"))
   cv.cores <- ex$cv.cores
   if (is.null(cv.cores)) cv.cores <- 1
   if (progress) {
-    if (rep.cores == 1) {pb <- txtProgressBar2(title = d)
-    } else {
-      cat_parallel("Nested cv with ", n, " repeats")
-      if (cv.cores > 1) {
-        message_parallel(":\n", rep.cores, " cores for repeats x ",
-                         cv.cores, " cores for CV = ",
-                         rep.cores * cv.cores, " cores total (",
-                         parallel::detectCores(logical = FALSE), "-core CPU)")
+    if (rep.parallel != "future") {
+      if (rep.cores == 1) {
+        pb <- txtProgressBar2(title = d)
       } else {
-        message_parallel(" over ", rep.cores, " cores (",
-                         parallel::detectCores(logical = FALSE), "-core CPU)")
+        cat_parallel("Nested cv with ", n, " repeats")
+        if (cv.cores > 1) {
+          message_parallel(":\n", rep.cores, " cores for repeats x ",
+                           cv.cores, " cores for CV = ",
+                           rep.cores * cv.cores, " cores total (",
+                           parallel::detectCores(logical = FALSE), "-core CPU)")
+        } else {
+          message_parallel(" over ", rep.cores, " cores (",
+                           parallel::detectCores(logical = FALSE), "-core CPU)")
+        }
+        cat_parallel(d, "  |")
       }
-      cat_parallel(d, "  |")
+    } else {
+      cat_parallel("Nested cv with ", n, " repeats  ")
     }
   }
   
@@ -113,42 +120,74 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     }
   }
   
-  res <- mclapply(seq_len(n), function(i) {
-    if (progress & rep.cores > 1 & i %% rep.cores == 1) {
-      pc <- round(((i-1) / rep.cores) / ceiling(n / rep.cores) * 100)
-      if (pc > 0 & pc < 100) cat_parallel(pc, "%")
-      ex$verbose <- 2
-    } else ex$verbose <- 0
-    if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
-    fit <- try(eval.parent(ex), silent = TRUE)
-    if (progress & rep.cores == 1) setTxtProgressBar(pb, i / n)
-    if (inherits(fit, "try-error")) {
-      ret <-  if (keep) list(NA, NA, NA) else list(NA, NA)
-      if (progress) {
-        if (rep.cores > 1) cat_parallel("x")
+  if (rep.parallel == "mclapply") { 
+    res <- mclapply(seq_len(n), function(i) {
+      if (progress & rep.cores > 1 & i %% rep.cores == 1) {
+        pc <- round(((i-1) / rep.cores) / ceiling(n / rep.cores) * 100)
+        if (pc > 0 & pc < 100) cat_parallel(pc, "%")
+        ex$verbose <- 2
+      } else ex$verbose <- 0
+      if (!is.null(repeat_folds)) ex$outer_folds <- repeat_folds[[i]]
+      fit <- try(eval.parent(ex), silent = TRUE)
+      if (progress & rep.cores == 1) setTxtProgressBar(pb, i / n)
+      if (inherits(fit, "try-error")) {
+        ret <-  if (keep) list(NA, NA, NA) else list(NA, NA)
+        if (progress) {
+          if (rep.cores > 1) cat_parallel("x")
+        }
         attr(ret, "error") <- fit[1]
+        return(ret)
       }
-      return(ret)
+      s <- metrics(fit, extra = extra)
+      output <- fit$output
+      output$rep <- i
+      if (!keep) return(list(s, output))
+      list(s, output, slim(fit))
+    }, mc.cores = rep.cores)
+    
+    if (progress) {
+      if (rep.cores == 1) {close(pb)
+      } else {
+        end <- Sys.time()
+        message_parallel("|  (", format(end - start, digits = 3), ")")
+      }
     }
-    s <- metrics(fit, extra = extra)
-    output <- fit$output
-    output$rep <- i
-    if (!keep) return(list(s, output))
-    list(s, output, slim(fit))
-  }, mc.cores = rep.cores)
-  if (progress) {
-    if (rep.cores == 1) {close(pb)
-    } else {
+    
+  } else if (rep.parallel == "future") {
+    ex$verbose <- 0
+    # make call function and args available inside future_lapply
+    ex_fun_name <- ex[[1]]
+    ex_fun <- eval(ex_fun_name)
+    ex_arg_exprs <- as.list(ex[-1])
+    ex_args <- lapply(ex_arg_exprs, eval, envir = parent.frame())
+    
+    res <- future_lapply(seq_len(n), function(i) {
+      if (!is.null(repeat_folds)) ex_args$outer_folds <- repeat_folds[[i]]
+      fit <- try(do.call(ex_fun, ex_args), silent = TRUE)
+      if (inherits(fit, "try-error")) {
+        ret <-  if (keep) list(NA, NA, NA) else list(NA, NA)
+        attr(ret, "error") <- fit[1]
+        return(ret)
+      }
+      s <- metrics(fit, extra = extra)
+      output <- fit$output
+      output$rep <- i
+      if (!keep) return(list(s, output))
+      list(s, output, slim(fit))
+    }, future.seed = TRUE)
+    
+    if (progress) {
       end <- Sys.time()
-      message_parallel("|  (", format(end - start, digits = 3), ")")
-    }
-    # error messages
-    errs <- unique(unlist(lapply(res, function(i) attr(i, "error"))))
-    if (length(errs) > 0) {
-      for (i in errs) {warning(i, call. = FALSE)}
+      message_parallel("(", format(end - start, digits = 3), ")")
     }
   }
-      
+  
+  # error messages
+  errs <- unique(unlist(lapply(res, function(i) attr(i, "error"))))
+  if (length(errs) > 0) {
+    for (i in errs) {warning(i, call. = FALSE)}
+  }
+   
   # wrap up
   if (!is.null(ex$family) && ex$family == "mgaussian") {
     # glmnet mgaussian
