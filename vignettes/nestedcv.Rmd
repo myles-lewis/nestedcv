@@ -919,8 +919,13 @@ all allow parallelisation of the outer CV loop using `mclapply` from the
 `parallel` package on unix/mac and `parLapply` on windows. This is enabled by
 specifying the number of cores using the argument `cv.cores`. Since in some
 cases the filtering process can be time consuming (e.g. `rf_filter`,
-`relieff_filter`), we tend to recommend parallelisation of the outer CV loop
-over parallelisation of the inner CV loop.
+`relieff_filter`), we recommend parallelisation of the outermost loop, e.g.
+parallelisation of outer CV instead of inner CV tuning if you are using
+`nestcv.*`; or parallelisation of repeats if you are using `repeatcv`.
+Parallelisation is also possible using the `future` framework by setting the
+argument `parallel_method = "future"` in `nestcv.*` functions or `rep.parallel`
+in `repeatcv`. We find no speed advantage over `mclapply` which is clearly the
+fastest.
 
 To maintain consistency with random numbers during parallelisation set the
 random number seed in the following way:
