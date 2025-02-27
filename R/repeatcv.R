@@ -174,7 +174,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       output$rep <- i
       if (!keep) return(list(s, output))
       list(s, output, slim(fit))
-    }, future.seed = TRUE)
+    }, future.seed = TRUE) |> suppressMessages()
     
     if (progress) {
       end <- Sys.time()
