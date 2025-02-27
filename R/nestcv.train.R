@@ -423,7 +423,7 @@ nestcv.train <- function(y, x,
                        modifyX, modifyX_useY, modifyX_options,
                        metric, trControl, tuneGrid, outer_train_predict,
                        verbose, ...)
-    })
+    }, future.seed = TRUE)
   } else {
     # linux/mac, using forked parallel processing
     outer_res <- mclapply(seq_along(outer_folds), function(i) {

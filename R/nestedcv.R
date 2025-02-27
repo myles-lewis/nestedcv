@@ -296,7 +296,7 @@ nestcv.glmnet <- function(y, x,
                         alphaSet, min_1se, n_inner_folds, keep, family,
                         weights, penalty.factor, outer_train_predict,
                         verbose, ...)
-    })
+    }, future.seed = TRUE)
   } else {
     # linux/mac
     outer_res <- mclapply(seq_along(outer_folds), function(i) {

@@ -172,7 +172,7 @@ nestcv.SuperLearner <- function(y, x,
                  filterFUN, filter_options, weights,
                  balance, balance_options,
                  modifyX, modifyX_useY, modifyX_options, verbose, ...)
-    })
+    }, future.seed = TRUE)
     
   } else {
     # mclapply

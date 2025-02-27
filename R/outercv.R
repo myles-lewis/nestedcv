@@ -298,7 +298,7 @@ outercv.default <- function(y, x,
                   modifyX, modifyX_useY, modifyX_options,
                   predict_type,
                   outer_train_predict, verbose, suppressMsg, ...)
-    })
+    }, future.seed = TRUE)
   } else {
     # linux/mac, forked
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
@@ -557,7 +557,7 @@ outercv.formula <- function(formula, data,
       outercvFormulaCore(i, outer_folds, formula, data, y, model,
                          reg, predict_type, outer_train_predict, verbose,
                          suppressMsg, ...)
-    })
+    }, future.seed = TRUE)
   } else {
     # mclapply
     outer_res <- mclapply(seq_along(outer_folds), function(i) {
