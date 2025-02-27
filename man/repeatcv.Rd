@@ -11,7 +11,7 @@ repeatcv(
   keep = FALSE,
   extra = FALSE,
   progress = TRUE,
-  rep.parallel = "mclapply",
+  rep_parallel = "mclapply",
   rep.cores = 1L
 )
 }
@@ -33,11 +33,11 @@ binary classification models. See \code{\link[=metrics]{metrics()}}.}
 
 \item{progress}{Logical whether to show progress.}
 
-\item{rep.parallel}{Either "mclapply" or "future". This determines which
+\item{rep_parallel}{Either "mclapply" or "future". This determines which
 parallel backend to use.}
 
 \item{rep.cores}{Integer specifying number of cores/threads to invoke.
-Ignored if \code{rep.parallel = "future"}.}
+Ignored if \code{rep_parallel = "future"}.}
 }
 \value{
 List of S3 class 'repeatcv' containing:
@@ -64,7 +64,7 @@ function \code{\link[=repeatfolds]{repeatfolds()}} can be used to create a fixed
 for each repeat.
 
 Parallelisation over repeats is performed using \code{parallel::mclapply} (not
-available on windows) or \code{future} depending on how \code{rep.parallel} is set.
+available on windows) or \code{future} depending on how \code{rep_parallel} is set.
 Beware that \code{cv.cores} can still be set within calls to \code{nestedcv} models (=
 nested parallelisation). This means that \code{rep.cores} x \code{cv.cores} number of
 processes/forks will be spawned, so be careful not to overload your CPU. In

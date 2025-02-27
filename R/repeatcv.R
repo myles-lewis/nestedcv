@@ -15,10 +15,10 @@
 #' @param extra Logical whether additional performance metrics are gathered for
 #'   binary classification models. See [metrics()].
 #' @param progress Logical whether to show progress.
-#' @param rep.parallel Either "mclapply" or "future". This determines which
+#' @param rep_parallel Either "mclapply" or "future". This determines which
 #'   parallel backend to use.
 #' @param rep.cores Integer specifying number of cores/threads to invoke.
-#' Ignored if `rep.parallel = "future"`.
+#' Ignored if `rep_parallel = "future"`.
 #' @details
 #' We recommend using this with the R pipe `|>` (see examples).
 #' 
@@ -28,7 +28,7 @@
 #' for each repeat.
 #' 
 #' Parallelisation over repeats is performed using `parallel::mclapply` (not
-#' available on windows) or `future` depending on how `rep.parallel` is set.
+#' available on windows) or `future` depending on how `rep_parallel` is set.
 #' Beware that `cv.cores` can still be set within calls to `nestedcv` models (=
 #' nested parallelisation). This means that `rep.cores` x `cv.cores` number of
 #' processes/forks will be spawned, so be careful not to overload your CPU. In
@@ -72,7 +72,7 @@
 
 repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
                      extra = FALSE, progress = TRUE,
-                     rep.parallel = "mclapply", rep.cores = 1L) {
+                     rep_parallel = "mclapply", rep.cores = 1L) {
   start <- Sys.time()
   cl <- match.call()
   if (!is.null(repeat_folds) && length(repeat_folds) != n)
@@ -86,11 +86,11 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
   if (d == "nestcv.train") d <- ex$method
   d <- gsub("nestcv.", "", d)
   
-  rep.parallel <- match.arg(rep.parallel, c("mclapply", "future"))
+  rep_parallel <- match.arg(rep_parallel, c("mclapply", "future"))
   cv.cores <- ex$cv.cores
   if (is.null(cv.cores)) cv.cores <- 1
   if (progress) {
-    if (rep.parallel != "future") {
+    if (rep_parallel != "future") {
       if (rep.cores == 1) {
         pb <- txtProgressBar2(title = d)
       } else {
@@ -120,7 +120,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
     }
   }
   
-  if (rep.parallel == "mclapply") { 
+  if (rep_parallel == "mclapply") { 
     res <- mclapply(seq_len(n), function(i) {
       if (progress & rep.cores > 1 & i %% rep.cores == 1) {
         pc <- round(((i-1) / rep.cores) / ceiling(n / rep.cores) * 100)
@@ -153,7 +153,7 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
       }
     }
     
-  } else if (rep.parallel == "future") {
+  } else if (rep_parallel == "future") {
     ex$verbose <- 0
     # make call function and args available inside future_lapply
     ex_fun_name <- ex[[1]]

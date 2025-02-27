@@ -923,7 +923,7 @@ cases the filtering process can be time consuming (e.g. `rf_filter`,
 parallelisation of outer CV instead of inner CV tuning if you are using
 `nestcv.*`; or parallelisation of repeats if you are using `repeatcv`.
 Parallelisation is also possible using the `future` framework by setting the
-argument `parallel_mode = "future"` in `nestcv.*` functions or `rep.parallel`
+argument `parallel_mode = "future"` in `nestcv.*` functions or `rep_parallel`
 in `repeatcv`. We find no speed advantage over `mclapply` which is clearly the
 fastest.
 
