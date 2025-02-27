@@ -3,8 +3,9 @@ News
 
 # nestedcv 0.8.0
 ###### 27/02/2025
-* Add future to `nestcv.glmnet`, `nestcv.train`, `nestcv.SuperLearner` and 
-`outercv`.
+* Add future to `nestcv.glmnet`, `nestcv.train`, `nestcv.SuperLearner`,
+`outercv` and `repeatcv` (thanks to Ryan Thompson for useful code for
+`repeatcv`).
 
 ## Important change
 * With the addition of future the argument `multicore_fork` has been removed.
