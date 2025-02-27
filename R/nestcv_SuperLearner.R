@@ -41,9 +41,12 @@
 #' @param n_outer_folds Number of outer CV folds
 #' @param outer_folds Optional list containing indices of test folds for outer
 #'   CV. If supplied, `n_outer_folds` is ignored.
+#' @param parallel_method Either "mclapply", "snow" or "future". This
+#'   determines which parallel backend to use. The default is
+#'   `parallel::mclapply` on unix/mac and `snow` on windows. `snow` uses
+#'   parallelisation via `SuperLearner::snowSuperLearner`.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
-#'   NOTE: this uses `parallel::mclapply` on unix/mac and `parallel::parLapply`
-#'   on windows.
+#'   Ignored if `parallel_method = "future"`.
 #' @param final Logical whether to fit final model.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
@@ -102,6 +105,7 @@ nestcv.SuperLearner <- function(y, x,
                                 outer_method = c("cv", "LOOCV"),
                                 n_outer_folds = 10,
                                 outer_folds = NULL,
+                                parallel_method = NULL,
                                 cv.cores = 1,
                                 final = TRUE,
                                 na.option = "pass",
@@ -132,8 +136,17 @@ nestcv.SuperLearner <- function(y, x,
                           LOOCV = 1:length(y))
   }
   
+  if (is.null(parallel_method)) {
+    parallel_method <- if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+      "snow"
+    } else "mclapply"
+  } else {
+    parallel_method <- match.arg(parallel_method,
+                                 c("mclapply", "snow", "future"))
+  }
   verbose <- as.numeric(verbose)
-  if (Sys.info()["sysname"] == "Windows" & cv.cores >= 2) {
+  
+  if (parallel_method == "snow") {
     if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {
       message("Performing ", n_outer_folds, "-fold outer CV (using snow)")}
     dots <- list(...)
@@ -149,8 +162,20 @@ nestcv.SuperLearner <- function(y, x,
                      modifyX_options=modifyX_options, verbose=verbose), dots)
       do.call(cl_nestSLcore, args)
     })
+  
+  } else if (parallel_method == "future") {
+    # future
+    if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {
+      message("Performing ", n_outer_folds, "-fold outer CV")}
+    outer_res <- future_lapply(seq_along(outer_folds), function(i) {
+      nestSLcore(i, y, x, outer_folds,
+                 filterFUN, filter_options, weights,
+                 balance, balance_options,
+                 modifyX, modifyX_useY, modifyX_options, verbose, ...)
+    })
     
   } else {
+    # mclapply
     if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {
       message("Performing ", n_outer_folds, "-fold outer CV, using ",
               plural(cv.cores, "core(s)"))}
