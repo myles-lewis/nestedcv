@@ -23,6 +23,8 @@ Description: Implements nested k*l-fold cross-validation for lasso and elastic-n
 Language: en-gb
 License: MIT + file LICENSE
 Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
 Imports:
     caret,
     data.table,
