@@ -124,7 +124,7 @@
 #' by default on unix/mac and `parallel::parLapply` on windows. `mclapply` uses
 #' forking which is faster. But some models use multi-threading which may cause
 #' issues in some circumstances with forked multicore processing. `future` is
-#' another option as a parallel system. We find `mclapply` to be faster.
+#' another option as a parallel system.
 #'
 #' If the outer folds are run using parallelisation, then parallelisation in
 #' caret must be off, otherwise an error will be generated. Alternatively if you

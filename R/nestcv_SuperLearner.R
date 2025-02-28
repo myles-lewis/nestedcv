@@ -41,12 +41,11 @@
 #' @param n_outer_folds Number of outer CV folds
 #' @param outer_folds Optional list containing indices of test folds for outer
 #'   CV. If supplied, `n_outer_folds` is ignored.
-#' @param parallel_mode Either "mclapply", "snow" or "future". This
-#'   determines which parallel backend to use. The default is
-#'   `parallel::mclapply` on unix/mac and `snow` on windows. `snow` uses
-#'   parallelisation via `SuperLearner::snowSuperLearner`.
+#' @param parallel_mode Either "mclapply" or "snow". This determines which
+#'   parallel backend to use. The default is `parallel::mclapply` on unix/mac
+#'   and `snow` on windows. `snow` uses parallelisation via
+#'   `SuperLearner::snowSuperLearner`.
 #' @param cv.cores Number of cores for parallel processing of the outer loops.
-#'   Ignored if `parallel_mode = "future"`.
 #' @param final Logical whether to fit final model.
 #' @param na.option Character value specifying how `NA`s are dealt with.
 #'   `"omit"` is equivalent to `na.action = na.omit`. `"omitcol"` removes cases
@@ -142,13 +141,14 @@ nestcv.SuperLearner <- function(y, x,
     } else "mclapply"
   } else {
     parallel_mode <- match.arg(parallel_mode,
-                                 c("mclapply", "snow", "future"))
+                                 c("mclapply", "snow"))
   }
   verbose <- as.numeric(verbose)
   
   if (parallel_mode == "snow") {
     if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {
-      message("Performing ", n_outer_folds, "-fold outer CV (using snow)")}
+      message("Performing ", n_outer_folds, "-fold outer CV (using snow, ", 
+              plural(cv.cores, "core(s)"), ")")}
     dots <- list(...)
     cl <- parallel::makeCluster(cv.cores)
     on.exit(stopCluster(cl))
@@ -163,17 +163,6 @@ nestcv.SuperLearner <- function(y, x,
       do.call(cl_nestSLcore, args)
     })
   
-  } else if (parallel_mode == "future") {
-    # future
-    if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {
-      message("Performing ", n_outer_folds, "-fold outer CV")}
-    outer_res <- future_lapply(seq_along(outer_folds), function(i) {
-      nestSLcore(i, y, x, outer_folds,
-                 filterFUN, filter_options, weights,
-                 balance, balance_options,
-                 modifyX, modifyX_useY, modifyX_options, verbose, ...)
-    }, future.seed = TRUE)
-    
   } else {
     # mclapply
     if (verbose == 1 && Sys.getenv("RSTUDIO") == "1") {

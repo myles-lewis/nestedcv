@@ -924,8 +924,7 @@ parallelisation of outer CV instead of inner CV tuning if you are using
 `nestcv.*`; or parallelisation of repeats if you are using `repeatcv`.
 Parallelisation is also possible using the `future` framework by setting the
 argument `parallel_mode = "future"` in `nestcv.*` functions or `rep_parallel`
-in `repeatcv`. We find no speed advantage over `mclapply` which is clearly the
-fastest.
+in `repeatcv`.
 
 To maintain consistency with random numbers during parallelisation set the
 random number seed in the following way:
