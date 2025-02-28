@@ -322,6 +322,11 @@ nestcv.train <- function(y, x,
                                  c("mclapply", "parLapply", "future"))
   }
   
+  if (cv.cores >= 2 & parallel_mode == "mclapply" & 
+      Sys.info()["sysname"] == "Darwin" & Sys.getenv("RSTUDIO") != "1") {
+    verbose <- FALSE  # prevent all messages in mac gui
+  }
+  
   verbose <- as.numeric(verbose)
   if (is.na(finalCV)) {
     final_fit <- finalTune <- filtx <- yfinal <- xsub <- NA
