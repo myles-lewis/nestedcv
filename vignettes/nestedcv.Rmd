@@ -926,10 +926,33 @@ Parallelisation is also possible using the `future` framework by setting the
 argument `parallel_mode = "future"` in `nestcv.*` functions or `rep_parallel`
 in `repeatcv`.
 
+```{r eval=FALSE}
+# example parallelisation across outer CV
+res <- nestcv.train(y, x, method = "gbm", cv.cores = 8)
+
+# same using future
+library(future)
+# on linux/mac
+plan(multicore, workers = 8)
+
+# on windows or with Rstudio use
+plan(multisession, workers = 8)
+
+res <- nestcv.train(y, x, method = "gbm", parallel_mode = "future")
+
+# parallelisation of repeat CV
+res <- nestcv.train(y, x, method = "gbm") |>
+  	repeatcv(16, rep.cores = 8)
+
+# same using future
+res <- nestcv.train(y, x, method = "gbm") |>
+  	repeatcv(16, rep_parallel = "future")
+```
+
 To maintain consistency with random numbers during parallelisation set the
 random number seed in the following way:
 
-```{r eval = FALSE}
+```{r eval=FALSE}
 set.seed(123, "L'Ecuyer-CMRG")
 ```
 
