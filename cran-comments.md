@@ -2,4 +2,5 @@
 
 0 errors | 0 warnings | 0 note
 
-* Added features (variable importance and rank for repeated CV)
+* Added features: future backend for parallelisation
+* A couple of bugfixes
