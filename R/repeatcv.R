@@ -87,7 +87,6 @@ repeatcv <- function(expr, n = 5, repeat_folds = NULL, keep = FALSE,
   d <- gsub("nestcv.", "", d)
   
   rep_parallel <- match.arg(rep_parallel, c("mclapply", "future"))
-  
   if (Sys.info()["sysname"] == "Windows" & rep.cores > 1 &
       rep_parallel == "mclapply") {
     message("'rep.cores' > 1 is not supported on Windows. Set to 1.")
