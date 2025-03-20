@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.8.1
+###### 20/03/2025
+* Switched to matrixTests package for `ttest_filter()`.
+
 # nestedcv 0.8.0
 ###### 28/02/2025
 * Add future to `nestcv.glmnet`, `nestcv.train`, `outercv` and `repeatcv` 
