@@ -85,7 +85,8 @@ ttest_filter <- function(y,
   factor_ind <- which_factor(x)
   if (is.data.frame(x)) x <- data.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
-  res <- Rfast::ttests(x[indx1, ], x[indx2, ])
+  res <- Rfast::ttests(x[indx1, ], x[indx2, ]) |>
+    suppressWarnings()
   rownames(res) <- colnames(x)
   if (type == "full") {
     if (length(factor_ind) == 0) {
