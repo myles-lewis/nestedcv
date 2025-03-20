@@ -66,7 +66,7 @@
 #' anova_filter(y3, dt, type = "full")  # shows names of predictors
 #' anova_filter(y3, dt, type = "name")  # full results table
 #'
-#' @importFrom matrixTests col_t_welch
+#' @importFrom Rfast ttests
 #' @export
 #'
 ttest_filter <- function(y,
@@ -85,8 +85,8 @@ ttest_filter <- function(y,
   factor_ind <- which_factor(x)
   if (is.data.frame(x)) x <- data.matrix(x)
   if (is.null(colnames(x))) colnames(x) <- seq_len(ncol(x))
-  res <- col_t_welch(x[indx1, ], x[indx2, ]) |>
-    suppressWarnings()
+  res <- Rfast::ttests(x[indx1, ], x[indx2, ])
+  rownames(res) <- colnames(x)
   if (type == "full") {
     if (length(factor_ind) == 0) {
       return(res)
