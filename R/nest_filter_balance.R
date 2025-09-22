@@ -68,7 +68,7 @@ nest_filt_bal <- function(test, y, x,
     }
   }
   
-  if (!is.null(balance)) {
+  if (!is.null(balance) && !(balance %in% c("", "none"))) {
     args <- list(y = ytrain, x = filt_xtrain)
     args <- append(args, balance_options)
     bal_dat <- do.call(balance, args)
