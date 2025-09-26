@@ -23,7 +23,7 @@ nest_filt_bal <- function(test, y, x,
     }
   }
   
-  if (is.null(filterFUN)) {
+  if (is.none(filterFUN)) {
     filt_xtrain <- xtrain
     filt_xtest <- xtest
     filt_pen.factor <- penalty.factor
@@ -36,7 +36,7 @@ nest_filt_bal <- function(test, y, x,
     filt_pen.factor <- penalty.factor[fset]
   }
   
-  if (!is.null(modifyX)) {
+  if (!is.none(modifyX)) {
     if (!modifyX_useY) {
       # only modify X
       args <- list(x = filt_xtrain)
@@ -68,7 +68,7 @@ nest_filt_bal <- function(test, y, x,
     }
   }
   
-  if (!is.null(balance) && !(balance %in% c("", "none"))) {
+  if (!is.none(balance)) {
     args <- list(y = ytrain, x = filt_xtrain)
     args <- append(args, balance_options)
     bal_dat <- do.call(balance, args)
@@ -81,6 +81,11 @@ nest_filt_bal <- function(test, y, x,
               filt_pen.factor = filt_pen.factor)
   if (!is.null(modifyX) & modifyX_useY) out$modify_fit <- modfit
   out
+}
+
+
+is.none <- function(x) {
+  is.null(x) || (is.character(x) && x == "none")
 }
 
 
