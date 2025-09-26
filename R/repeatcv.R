@@ -308,6 +308,12 @@ print.summary.repeatcv <- function(x,
 
 # Prints using shell echo from inside mclapply when run in Rstudio
 cat_parallel <- function(...) {
-  if (Sys.getenv("RSTUDIO") != "1") return()
+  if (!checkenv()) return()
   system(sprintf('echo "%s', paste0(..., '\\c"', collapse = "")))
 }
+
+# returns TRUE if in Rstudio or Linux
+checkenv <- function() {
+  Sys.getenv("RSTUDIO") == "1" || Sys.info()['sysname'] == "Linux"
+}
+
