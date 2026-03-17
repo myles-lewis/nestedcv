@@ -129,7 +129,7 @@
 #' @importFrom pROC roc
 #' @importFrom stats as.formula predict setNames
 #' @examples
-#' 
+#' if (requireNamespace("randomForest")) {
 #' ## Classification example
 #' 
 #' ## sigmoid function
@@ -174,7 +174,7 @@
 #' cvfit <- outercv(y, x, "randomForest", filterFUN = lm_filter,
 #'                  filter_options = list(nfilter = 2, p_cutoff = NULL))
 #' summary(cvfit)
-#' 
+#' }
 #' @export
 #' 
 outercv <- function(y, ...) {
