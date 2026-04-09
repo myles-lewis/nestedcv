@@ -44,6 +44,7 @@ For multiclass classification use \code{pred_nestcv_glmnet_class(1)},
 \code{pred_train_class(1)}, \code{pred_train_class(2)} etc for \link{nestcv.train} objects.
 }
 \examples{
+if (requireNamespace("fastshap") & requireNamespace("mlbench")) {
 library(fastshap)
 
 # Boston housing dataset
@@ -66,5 +67,5 @@ plot_shap_bar(sh, x)
 
 # Plot beeswarm plot
 plot_shap_beeswarm(sh, x, size = 1)
-
+}
 }

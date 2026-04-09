@@ -22,6 +22,7 @@
 #' `pred_train_class(1)`, `pred_train_class(2)` etc for [nestcv.train] objects.
 #' 
 #' @examples
+#' if (requireNamespace("fastshap") & requireNamespace("mlbench")) {
 #' library(fastshap)
 #' 
 #' # Boston housing dataset
@@ -44,7 +45,7 @@
 #' 
 #' # Plot beeswarm plot
 #' plot_shap_beeswarm(sh, x, size = 1)
-#' 
+#' }
 #' @export
 #' 
 pred_nestcv_glmnet <- function(x, newdata) {
