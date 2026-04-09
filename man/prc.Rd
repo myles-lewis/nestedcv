@@ -59,6 +59,7 @@ class 'prc' for plotting.
 }
 \examples{
 \donttest{
+if (requireNamespace("mlbench")) {
 library(mlbench)
 data(Sonar)
 y <- Sonar$Class
@@ -81,5 +82,6 @@ res <- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1) |>
 
 res$prc <- prc(res)  # precision-recall curve on repeated predictions
 plot(res$prc)
+}
 }
 }

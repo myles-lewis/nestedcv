@@ -20,6 +20,7 @@ of class 'prc', see \code{\link[=prc]{prc()}}.
 }
 \examples{
 \donttest{
+if (requireNamespace("mlbench")) {
 library(mlbench)
 data(Sonar)
 y <- Sonar$Class
@@ -33,6 +34,7 @@ fit2$prc <- prc(fit2)
 
 plot(fit1$prc)
 lines(fit2$prc, col = "red")
+}
 }
 }
 \seealso{

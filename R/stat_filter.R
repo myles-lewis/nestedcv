@@ -53,6 +53,7 @@
 #' to numeric (integer) levels and analysed as if continuous.
 #' 
 #' @examples
+#' if (requireNamespace("mlbench")) {
 #' library(mlbench)
 #' data(BostonHousing2)
 #' dat <- BostonHousing2
@@ -67,7 +68,7 @@
 #' y <- iris$Species  ## 3 class outcome
 #' x <- subset(iris, select = -Species)
 #' stat_filter(y, x, type = "full")
-#' 
+#' }
 #' @export
 #' 
 stat_filter <- function(y, x, ...) {

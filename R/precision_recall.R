@@ -23,6 +23,7 @@
 #' \item{baseline}{baseline precision value}
 #' @examples
 #' \donttest{
+#' if (requireNamespace("mlbench")) {
 #' library(mlbench)
 #' data(Sonar)
 #' y <- Sonar$Class
@@ -45,6 +46,7 @@
 #' 
 #' res$prc <- prc(res)  # precision-recall curve on repeated predictions
 #' plot(res$prc)
+#' }
 #' }
 #' @export
 prc <- function(...) {
@@ -127,6 +129,7 @@ auc_calc <- function(x, y) {
 #' @seealso [prc()]
 #' @examples
 #' \donttest{
+#' if (requireNamespace("mlbench")) {
 #' library(mlbench)
 #' data(Sonar)
 #' y <- Sonar$Class
@@ -140,6 +143,7 @@ auc_calc <- function(x, y) {
 #' 
 #' plot(fit1$prc)
 #' lines(fit2$prc, col = "red")
+#' }
 #' }
 #' @export
 plot.prc <- function(x, ...) {

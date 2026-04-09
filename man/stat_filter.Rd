@@ -109,6 +109,7 @@ binary, multiclass or continuous respectively. Ordered factors are converted
 to numeric (integer) levels and analysed as if continuous.
 }
 \examples{
+if (requireNamespace("mlbench")) {
 library(mlbench)
 data(BostonHousing2)
 dat <- BostonHousing2
@@ -123,5 +124,5 @@ data(iris)
 y <- iris$Species  ## 3 class outcome
 x <- subset(iris, select = -Species)
 stat_filter(y, x, type = "full")
-
+}
 }
