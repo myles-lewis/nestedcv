@@ -493,7 +493,9 @@ glmnet_filter <- function(y,
     penalty.factor[keep] <- 0
   } else keep <- NULL
   fit <- glmnet(x, y, family = family, penalty.factor = penalty.factor, ...)
-  cf <- as.matrix(coef(fit))
+  cf <- coef(fit)
+  if (family == "multinomial") cf <- do.call(cbind, cf)
+  cf <- as.matrix(cf)
   if (method == "mean") {
     cf <- abs(cf)
     out <- rowMeans(cf)  # mean abs coefs
