@@ -59,6 +59,7 @@ then 40 processes will be invoked simultaneously.
 }
 \examples{
 \donttest{
+if (requireNamespace("hsstan")) {
 # Cross-validation is used to apply univariate filtering of predictors.
 # only one CV split is needed (outercv) as the Bayesian model does not
 # require learning of meta-parameters.
@@ -109,6 +110,7 @@ options(oldopt)  # reset configuation
 # KL-divergence from the full model to the submodel. Adding `marker3` does
 # not improve the model fit: no decrease of KL-divergence from the full model
 # to the submodel.
+}
 }
 }
 \seealso{

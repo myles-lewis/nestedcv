@@ -203,7 +203,7 @@ method. The \code{na.option} argument takes a character string, while the more
 typical \code{na.action} argument takes a function.
 }
 \examples{
-
+if (requireNamespace("randomForest")) {
 ## Classification example
 
 ## sigmoid function
@@ -248,5 +248,5 @@ summary(cvfit)
 cvfit <- outercv(y, x, "randomForest", filterFUN = lm_filter,
                  filter_options = list(nfilter = 2, p_cutoff = NULL))
 summary(cvfit)
-
+}
 }

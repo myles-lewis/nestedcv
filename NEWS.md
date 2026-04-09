@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.8.2
+###### 09/04/2026
+* Fix examples for noSuggests CRAN check
+
 # nestedcv 0.8.1
 ###### 26/09/2025
 * Fixed showing progress on linux
