@@ -162,6 +162,7 @@ plot_shap_beeswarm <- function(shap, x,
     xlab("SHAP value") +
     theme_classic() +
     theme(axis.text = element_text(colour = "black"),
+          axis.ticks = element_line(color = "black"),
           legend.title = element_text(angle = 90, hjust = 0.5, vjust = 0,
                                                        size = rel(0.9)))
 }
@@ -225,6 +226,7 @@ plot_shap_bar <- function(shap, x,
     xlab("mean(|SHAP|)") +
     ylab("") +
     theme_classic() +
-    theme(axis.text = element_text(colour = "black"))
+    theme(axis.text = element_text(colour = "black"),
+          axis.ticks = element_line(color = "black"))
 }
 
