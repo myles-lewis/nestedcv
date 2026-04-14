@@ -582,10 +582,10 @@ summary.nestcv.train <- function(object,
     cat("Method: ", object$call$method, "\n")
   } else cat("Method:  rf\n")
   if (!is.null(object$call$filterFUN)) {
-    cat("Filter: ", object$call$filterFUN, "\n")
+    cat("Filter: ", as.character2(object$call$filterFUN), "\n")
   } else cat("No filter\n")
   if (!is.null(object$call$modifyX))
-    cat("Modifier: ", object$call$modifyX, "\n")
+    cat("Modifier: ", as.character2(object$call$modifyX), "\n")
   cat("Outer loop: ", switch(object$outer_method,
                              cv = paste0(length(object$outer_folds), "-fold cv\n"),
                              LOOCV = "leave-one-out CV\n"))
@@ -593,7 +593,7 @@ summary.nestcv.train <- function(object,
                              object$trControl$method, "\n"))
   balance <- object$call$balance
   if (!is.null(balance)) {
-    cat("Balancing: ", balance, "\n")
+    cat("Balancing: ", as.character2(balance), "\n")
   }
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
   if (!is.numeric(object$y)) print(c(table(object$y)))

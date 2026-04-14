@@ -1,6 +1,10 @@
 News
 =====
 
+# nestedcv 0.8.3
+###### 14/04/2026
+* Fix issue #44 (print/summary with filter functions as calls)
+
 # nestedcv 0.8.2
 ###### 09/04/2026
 * Fix examples for noSuggests CRAN check

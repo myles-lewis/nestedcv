@@ -64,6 +64,14 @@ inspectGrid <- function(method, tuneLength = 3, y = NA, x = NA) {
   invisible(choices)
 }
 
+
 spaces <- function(n) {
   paste0(rep(" ", n), collapse = "")
+}
+
+
+# handle calls
+as.character2 <- function(x) {
+  if (is.call(x)) x <- as.expression(x)
+  as.character(x)
 }

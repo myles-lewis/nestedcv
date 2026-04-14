@@ -339,10 +339,10 @@ summary.nestcv.SuperLearner <- function(object,
   cat(paste0("\nInner loop:  ", object$outer_result[[1]]$fit$cvControl$V,
              "-fold CV (SuperLearner)\n"))
   if (!is.null(object$call$modifyX))
-    cat("Modifier: ", object$call$modifyX, "\n")
+    cat("Modifier: ", as.character2(object$call$modifyX), "\n")
   balance <- object$call$balance
   if (!is.null(balance)) {
-    cat("Balancing: ", balance, "\n")
+    cat("Balancing: ", as.character2(balance), "\n")
   }
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
   if (!is.numeric(object$y)) print(c(table(object$y)))
@@ -354,7 +354,7 @@ summary.nestcv.SuperLearner <- function(object,
   SLrisk <- do.call(cbind, SLrisk)
   
   if (!is.null(object$call$filterFUN)) {
-    cat("Filter: ", object$call$filterFUN, "\n")
+    cat("Filter: ", as.character2(object$call$filterFUN), "\n")
     nfilter <- unlist(lapply(object$outer_result, '[[', 'nfilter'))
     nfilter <- data.frame(n.filter = nfilter,
                           row.names = paste("Fold", seq_along(nfilter)))

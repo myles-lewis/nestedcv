@@ -146,8 +146,9 @@ coef.nestcv.glmnet <- function(object, s = object$final_param["lambda"], ...) {
 #' @export
 print.nestcv.glmnet <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
   cat("Nested cross-validation with glmnet\n")
-  if (!is.null(x$call$filterFUN)) 
-    cat("Filter: ", x$call$filterFUN, "\n") else cat("No filter\n")
+  if (!is.null(x$call$filterFUN)) {
+    cat("Filter: ", as.character2(x$call$filterFUN), "\n")
+  } else cat("No filter\n")
   cat("\nFinal parameters:\n")
   if (length(x$final_param)==1 && is.na(x$final_param)) {
     cat("NA\n")
@@ -162,19 +163,22 @@ print.nestcv.glmnet <- function(x, digits = max(3L, getOption("digits") - 3L), .
 
 
 #' @export
-summary.nestcv.glmnet <- function(object, digits = max(3L, getOption("digits") - 3L), ...) {
+summary.nestcv.glmnet <- function(object,
+                                  digits = max(3L, getOption("digits") - 3L),
+                                  ...) {
   cat("Nested cross-validation with glmnet\n")
-  if (!is.null(object$call$filterFUN)) 
-    cat("Filter: ", object$call$filterFUN, "\n") else cat("No filter\n")
+  if (!is.null(object$call$filterFUN)) {
+    cat("Filter: ", as.character2(object$call$filterFUN), "\n")
+  } else cat("No filter\n")
   if (!is.null(object$call$modifyX))
-    cat("Modifier: ", object$call$modifyX, "\n")
+    cat("Modifier: ", as.character2(object$call$modifyX), "\n")
   cat("Outer loop: ", switch(object$outer_method,
                              cv = paste0(length(object$outer_folds), "-fold CV"),
                              LOOCV = "leave-one-out CV"))
   cat("\nInner loop: ", paste0(object$n_inner_folds, "-fold CV\n"))
   balance <- object$call$balance
   if (!is.null(balance)) {
-    cat("Balancing: ", balance, "\n")
+    cat("Balancing: ", as.character2(balance), "\n")
   }
   cat(object$dimx[1], "observations,", object$dimx[2], "predictors\n")
   if (!is.numeric(object$y)) print(c(table(object$y)))
