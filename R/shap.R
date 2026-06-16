@@ -106,7 +106,7 @@ pred_SuperLearner <- function(x, newdata) {
 #' @param ... Other arguments passed to `ggbeeswarm::geom_beeswarm()` e.g.
 #'   `size`.
 #' @return A ggplot2 plot
-#' @importFrom ggplot2 scale_color_gradient2 guide_colorbar rel
+#' @importFrom ggplot2 scale_color_gradient2 guide_colorbar rel element_line element_text
 #' @importFrom utils stack
 #' @export
 #' 
@@ -189,7 +189,7 @@ clip_scale <- function(x) {
 #'   all variables. If `top` is set then variables are sorted and `sort` is
 #'   overrode.
 #' @return A ggplot2 plot
-#' @importFrom ggplot2 geom_bar
+#' @importFrom ggplot2 geom_bar element_line element_text
 #' @export
 #' 
 plot_shap_bar <- function(shap, x,
