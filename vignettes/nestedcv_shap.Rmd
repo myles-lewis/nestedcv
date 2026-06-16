@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE
 )
+fastshap_eval <- requireNamespace("fastshap", quietly = TRUE)
 ```
 
 `nestedcv` provides two methods for understanding fitted models. The simplest of
@@ -140,7 +141,7 @@ using the model. `nestedcv` provides `pred_nestcv_glmnet` which is a wrapper
 function for binary classification or regression with `nestcv.glmnet` fitted
 models.
 
-```{r}
+```{r, eval = fastshap_eval}
 library(fastshap)
 
 # Generate SHAP values using fastshap::explain
@@ -170,7 +171,7 @@ Be careful if you have massive numbers of predictors in `x` (see
 generating ggplot2 beeswarm plots similar to those made by the original python
 `shap` package.
 
-```{r}
+```{r, eval = fastshap_eval}
 # Plot beeswarm plot
 plot_shap_beeswarm(sh, x, size = 1)
 ```
@@ -204,7 +205,7 @@ where `cl` specifies which class is being predicted.
 
 As a toy example, we show the iris dataset which has 3 classes.
 
-```{r, fig.width = 9, fig.height = 3.5}
+```{r, eval = fastshap_eval, fig.width = 9, fig.height = 3.5}
 library(ggplot2)
 data("iris")
 dat <- iris
@@ -231,7 +232,7 @@ ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "bottom", common.legend = TRUE)
 
 Or using beeswarm plots.
 
-```{r, fig.width = 9.5, fig.height = 3.5}
+```{r, eval = fastshap_eval, fig.width = 9.5, fig.height = 3.5}
 s1 <- plot_shap_beeswarm(sh1, x, sort = FALSE, cex = 0.7) +
   ggtitle("Setosa")
 s2 <- plot_shap_beeswarm(sh2, x, sort = FALSE, cex = 0.7) +
