@@ -450,8 +450,12 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
     # cox
     predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s))
     preds <- as.data.frame(cbind(ytest, predy))
+  } else if (family %in% c("poisson", "gaussian")) {
+    # poisson, gaussian
+    predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "response"))
+    preds <- data.frame(testy=ytest, predy=predy)
   } else {
-    # default
+    # binomial, multinomial, default
     predy <- as.vector(predict(alphafit, newx = filt_xtest, s = s, type = "class"))
     preds <- data.frame(testy=ytest, predy=predy)
   }
@@ -471,7 +475,12 @@ nestcv.glmnetCore <- function(i, y, x, outer_folds, filterFUN, filter_options,
       if (family == "mgaussian") {
         colnames(train_preds)[1:ncol(y)] <- paste0("ytrain.", colnames(ytrain))
       }
+    } else if (family %in% c("poisson", "gaussian")) {
+      # poisson, gaussian
+      train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "response"))
+      train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
     } else {
+      # binomial, multinomial, default
       train_predy <- as.vector(predict(alphafit, newx = filt_xtrain, s = s, type = "class"))
       train_preds <- data.frame(ytrain=ytrain, predy=train_predy)
     }
