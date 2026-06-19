@@ -1,6 +1,11 @@
 News
 =====
 
+# nestedcv 0.8.4
+###### 19/06/2026
+* Fix issue #49 (Poisson model in `nestcv.glmnet`)
+* Fix CRAN check errors due to fastshap package being removed from CRAN.
+
 # nestedcv 0.8.3
 ###### 14/04/2026
 * Fix issue #44 (print/summary with filter functions as calls)
