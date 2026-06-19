@@ -2,5 +2,5 @@
 
 0 errors | 0 warnings | 0 note
 
-* Wrapped examples in `if (requireNamespace()) {}` to stop 'donttest' and 
-'noSuggests' CRAN check errors under Additional issues.
+* Fix CRAN check errors due to fastshap package being removed from CRAN.
+* Bugfix for Poisson model for `nestcv.glmnet` function.
