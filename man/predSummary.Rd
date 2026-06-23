@@ -35,7 +35,7 @@ classification.
 }
 \details{
 For multinomial classification, multi-class AUC as defined by Hand
-and Till is calculated using \code{\link[pROC:multiclass]{pROC::multiclass.roc()}}.
+and Till is calculated using \code{\link[pROC:multiclass.roc]{pROC::multiclass.roc()}}.
 
 Multi-class balanced accuracy is calculated as the mean of the Recall for
 each class.

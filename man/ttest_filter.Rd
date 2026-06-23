@@ -88,7 +88,7 @@ not filtered and are retained. If \code{keep_factors} is \code{FALSE}, they are
 removed.}
 
 \item{...}{optional arguments, including \code{rsq_method} passed to \code{\link[=collinear]{collinear()}}
-or arguments passed to \link[matrixTests:wilcoxon]{matrixTests::row_wilcoxon_twosample} in
+or arguments passed to \link[matrixTests:row_wilcoxon_twosample]{matrixTests::row_wilcoxon_twosample} in
 \code{\link[=wilcoxon_filter]{wilcoxon_filter()}}.}
 
 \item{exact}{Logical whether exact or approximate p-value is calculated.
@@ -107,8 +107,8 @@ A selection of simple univariate filters using t-test, Wilcoxon test, one-way
 ANOVA or correlation (Pearson or Spearman) for ranking variables. These
 filters are designed for speed. \code{ttest_filter} uses the \code{Rfast} package,
 \code{wilcoxon_filter} (Mann-Whitney) test uses
-\link[matrixTests:wilcoxon]{matrixTests::row_wilcoxon_twosample}, \code{anova_filter} uses
-\link[matrixTests:oneway]{matrixTests::col_oneway_welch} (Welch's F-test) from the \code{matrixTests}
+\link[matrixTests:row_wilcoxon_twosample]{matrixTests::row_wilcoxon_twosample}, \code{anova_filter} uses
+\link[matrixTests:col_oneway_welch]{matrixTests::col_oneway_welch} (Welch's F-test) from the \code{matrixTests}
 package. Can be applied to all or a subset of predictors. For mixed datasets
 (combined continuous & categorical) see \code{\link[=stat_filter]{stat_filter()}}
 }

@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE
 )
-fastshap_eval <- requireNamespace("fastshap", quietly = TRUE)
+shapr_eval <- requireNamespace("shapr", quietly = TRUE)
 ```
 
 `nestedcv` provides two methods for understanding fitted models. The simplest of
@@ -129,24 +129,36 @@ objects generated using `repeatcv()` provided the argument `keep = TRUE`.
 
 The original implementation of [shap](https://github.com/shap/shap) by
 Scott Lundberg is a python package. We suggest using the R package
-[fastshap](https://cran.r-project.org/package=fastshap) for examining `nestedcv`
+[shapr](https://cran.r-project.org/package=shapr) for examining `nestedcv`
 models since it works with classification or regression as well as any model
 type (regression such as glmnet or tree based such as random forest, GBM or
 xgboost).
 
+`shapr` implements an extended version of the Kernel SHAP method that accounts
+for dependence between features (Aas, Jullum & Løland, 2021), giving more
+accurate Shapley values when predictors are correlated. Multiple estimation
+approaches are available, and by default `nestcv.explain()` auto-selects one
+based on `x_train`'s column types: `"categorical"` for all-factor/character
+data, `"ctree"` for a mix of numeric and factor/character columns, and for
+all-numeric data, `"empirical"` (accounts for feature correlation) when there
+are enough observations per feature, otherwise `"gaussian"`. See
+[Overriding phi0 and choosing an approach](#overriding-phi0-and-choosing-an-approach)
+below to override this.
+
 In the example below using the same glmnet regression model, the variable
-importance for predictors is measured using Shapley values. The function
-`explain()` from the `fastshap` package needs a wrapper function for prediction
-using the model. `nestedcv` provides `pred_nestcv_glmnet` which is a wrapper
-function for binary classification or regression with `nestcv.glmnet` fitted
-models.
+importance for predictors is measured using Shapley values. `nestedcv` provides
+the convenience function `nestcv.explain()` which wraps `shapr::explain()`,
+automatically computes the baseline (`phi0`) as the mean predicted value over
+the data, and returns the `shapr` object directly. This can be passed
+straight into the plotting functions below, or used with `shapr`'s own
+`print()`/`plot()` methods.
 
-```{r, eval = fastshap_eval}
-library(fastshap)
+```{r, eval = shapr_eval}
+library(shapr)
 
-# Generate SHAP values using fastshap::explain
-# Only using 5 repeats here for speed, but recommend higher values of nsim
-sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet, nsim = 5)
+# Generate SHAP values using shapr via nestcv.explain()
+# phi0 is auto-computed as mean(pred_nestcv_glmnet(fit, x))
+sh <- nestcv.explain(fit, x_explain = x, predict_model = pred_nestcv_glmnet)
 
 # Plot overall variable importance
 plot_shap_bar(sh, x)
@@ -171,7 +183,7 @@ Be careful if you have massive numbers of predictors in `x` (see
 generating ggplot2 beeswarm plots similar to those made by the original python
 `shap` package.
 
-```{r, eval = fastshap_eval}
+```{r, eval = shapr_eval}
 # Plot beeswarm plot
 plot_shap_beeswarm(sh, x, size = 1)
 ```
@@ -182,16 +194,16 @@ colours. Alternatively try the [shapviz](https://cran.r-project.org/package=shap
 package.
 
 The process for a caret model fitted using `nestedcv` is similar. Use the
-`pred_train` wrapper when calling `explain()`.
+`pred_train` wrapper when calling `nestcv.explain()`.
 
 ```{r, eval=FALSE}
 # Only 3 outer folds to speed up process
-fit <- nestcv.train(y, x,
-                    method = "gbm",
-                    n_outer_folds = 3, cv.cores = 2)
+fit_gbm <- nestcv.train(y, x,
+                        method = "gbm",
+                        n_outer_folds = 3, cv.cores = 2)
 
-# Only using 5 repeats here for speed, but recommend higher values of nsim
-sh <- explain(fit, X=x, pred_wrapper = pred_train, nsim = 5)
+# phi0 and approach are both auto-computed/auto-selected
+sh <- nestcv.explain(fit_gbm, x_explain = x, predict_model = pred_train)
 plot_shap_beeswarm(sh, x, size = 1)
 ```
 
@@ -203,9 +215,11 @@ etc.
 For `nestcv.train()` models, similarly we provide `pred_train_class(cl)`,
 where `cl` specifies which class is being predicted.
 
-As a toy example, we show the iris dataset which has 3 classes.
+As a toy example, we show the iris dataset which has 3 classes. A separate
+`nestcv.explain()` call is made for each class; `phi0` is auto-computed per
+class as the mean predicted class probability.
 
-```{r, eval = fastshap_eval, fig.width = 9, fig.height = 3.5}
+```{r, eval = shapr_eval, fig.width = 9, fig.height = 3.5}
 library(ggplot2)
 data("iris")
 dat <- iris
@@ -213,12 +227,17 @@ y <- dat$Species
 x <- dat[, 1:4]
 
 # Only 3 outer folds to speed up process
-fit <- nestcv.glmnet(y, x, family = "multinomial", n_outer_folds = 3, alphaSet = 0.6)
+fit_iris <- nestcv.glmnet(y, x, family = "multinomial", n_outer_folds = 3,
+                          alphaSet = 0.6)
 
 # SHAP values for each of the 3 classes
-sh1 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class(1), nsim = 5)
-sh2 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class(2), nsim = 5)
-sh3 <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet_class(3), nsim = 5)
+# phi0 is auto-computed per class as mean predicted probability
+sh1 <- nestcv.explain(fit_iris, x_explain = x,
+                      predict_model = pred_nestcv_glmnet_class(1))
+sh2 <- nestcv.explain(fit_iris, x_explain = x,
+                      predict_model = pred_nestcv_glmnet_class(2))
+sh3 <- nestcv.explain(fit_iris, x_explain = x,
+                      predict_model = pred_nestcv_glmnet_class(3))
 
 s1 <- plot_shap_bar(sh1, x, sort = FALSE) +
   ggtitle("Setosa")
@@ -232,7 +251,7 @@ ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "bottom", common.legend = TRUE)
 
 Or using beeswarm plots.
 
-```{r, eval = fastshap_eval, fig.width = 9.5, fig.height = 3.5}
+```{r, eval = shapr_eval, fig.width = 9.5, fig.height = 3.5}
 s1 <- plot_shap_beeswarm(sh1, x, sort = FALSE, cex = 0.7) +
   ggtitle("Setosa")
 s2 <- plot_shap_beeswarm(sh2, x, sort = FALSE, cex = 0.7) +
@@ -241,6 +260,37 @@ s3 <- plot_shap_beeswarm(sh3, x, sort = FALSE, cex = 0.7) +
   ggtitle("Virginica")
 
 ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "right", common.legend = TRUE)
+```
+
+### Overriding phi0 and choosing an approach
+
+By default `nestcv.explain()` computes `phi0` automatically as the mean
+prediction over the data supplied in `x_explain`. You can override this with
+any reference value, for example the mean of the response from a separate
+training set:
+
+```{r, eval=FALSE}
+sh <- nestcv.explain(fit, x_explain = x, predict_model = pred_nestcv_glmnet,
+                     phi0 = mean(y_train))
+```
+
+`nestcv.explain()` also auto-selects an `approach` for `shapr::explain()` based
+on `x_train`'s column types: `"categorical"` if all predictors are
+factor/character, `"ctree"` for a mix of numeric and factor/character
+predictors, and for all-numeric predictors, `"empirical"` (accounts for
+feature correlation) provided there are at least `min_obs_per_feature`
+(default `20`) observations per predictor, otherwise `"gaussian"` (with a
+warning, since multivariate normality is assumed but not checked). Adjust the
+threshold or force a specific approach as needed:
+
+```{r, eval=FALSE}
+# Lower the observations-per-feature threshold required for "empirical"
+sh <- nestcv.explain(fit, x_explain = x, predict_model = pred_nestcv_glmnet,
+                     min_obs_per_feature = 10)
+
+# Or override the approach directly
+sh <- nestcv.explain(fit, x_explain = x, predict_model = pred_nestcv_glmnet,
+                     approach = "independence")
 ```
 
 ### One-hot encoding for categorical predictors
@@ -254,17 +304,20 @@ multiple factors and character columns, producing a matrix as a result.
 
 ### Troubleshooting
 
-`explain()` runs progressively slowly with larger numbers of input predictors.
-So if you have a very large number of predictors in `x` it is much better to
-pass only the subset of predictors in the final model. These are stored in
-fitted `nestedcv` objects in list element `xsub`. Or you can subset `x` using
-`final_vars`. For example:
+`nestcv.explain()` (and the underlying `shapr::explain()`) runs progressively
+slowly with larger numbers of input predictors because the number of feature
+coalitions grows exponentially. So if you have a very large number of predictors
+in `x` it is much better to pass only the subset of predictors in the final
+model. These are stored in fitted `nestedcv` objects in list element `xsub`.
+Or you can subset `x` using `final_vars`. For example:
 
 ```{r eval=FALSE}
-sh <- explain(fit, X = fit$xsub, pred_wrapper = pred_nestcv_glmnet, nsim = 5)
+sh <- nestcv.explain(fit, x_explain = fit$xsub,
+                     predict_model = pred_nestcv_glmnet)
 plot_shap_bar(sh, fit$xsub)
 
-sh <- explain(fit, X = x[, fit$final_vars], pred_wrapper = pred_nestcv_glmnet, nsim = 5)
+sh <- nestcv.explain(fit, x_explain = x[, fit$final_vars],
+                     predict_model = pred_nestcv_glmnet)
 plot_shap_bar(sh, x[, fit$final_vars])
 ```
 
@@ -279,8 +332,14 @@ data. *Bioinformatics Advances*. https://doi.org/10.1093/bioadv/vbad048
 
 ### References
 
-Brandon Greenwell. [fastshap](https://cran.r-project.org/package=fastshap): Fast
-Approximate Shapley Values
+Aas K, Jullum M & Løland A (2021). Explaining individual predictions when
+features are dependent: More accurate approximations to Shapley values.
+*Artificial Intelligence* 298; 103502.
+https://doi.org/10.1016/j.artint.2021.103502
+
+Jullum M, Olsen LHB, Lachmann J & Redelmeier A (2025). shapr: Explaining
+Machine Learning Models with Conditional Shapley Values in R and Python.
+*arXiv preprint* arXiv:2504.01842. https://arxiv.org/abs/2504.01842
 
 Lundberg SM & Lee SI (2017). A Unified Approach to Interpreting Model
 Predictions. *Advances in Neural Information Processing Systems* 30; 4768–4777.

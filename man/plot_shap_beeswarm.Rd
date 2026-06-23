@@ -17,7 +17,8 @@ plot_shap_beeswarm(
 )
 }
 \arguments{
-\item{shap}{a matrix of SHAP values}
+\item{shap}{a matrix of SHAP values, or the \code{shapr} object returned by
+\code{\link[=nestcv.explain]{nestcv.explain()}}/\code{\link[shapr:explain]{shapr::explain()}}}
 
 \item{x}{a matrix or dataframe of feature values containing only features
 values from the training data. The rows must match rows in \code{shap}. If a
