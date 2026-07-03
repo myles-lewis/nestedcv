@@ -91,24 +91,19 @@ pred_SuperLearner <- function(x, newdata) {
 
 
 select_approach <- function(x_train, min_obs_per_feature) {
-  is_categorical <- vapply(x_train, function(col) is.factor(col) || is.character(col), logical(1))
+  is_categorical <- vapply(
+    x_train, function(col) is.factor(col) || is.character(col), logical(1)
+  )
   if (all(is_categorical)) {
-    message('nestcv.explain() selected approach: "categorical"')
     return("categorical")
   }
   if (any(is_categorical)) {
-    message('nestcv.explain() selected approach: "ctree"')
     return("ctree")
   }
   if (nrow(x_train) / ncol(x_train) >= min_obs_per_feature) {
-    message('nestcv.explain() selected approach: "empirical". ',
-            'Set approach: "gaussian" if data is multivariate normal.')
     return("empirical")
   }
-  message('nestcv.explain() selected approach: "gaussian". ',
-          "This assumes multivariate normality which has not been verified. ",
-          "Consider setting approach manually.")
-  return("gaussian")
+  return("independence")
 }
 
 #' Generate SHAP values from nestedcv models using shapr
@@ -136,10 +131,9 @@ select_approach <- function(x_train, min_obs_per_feature) {
 #'   column types: `"categorical"` if all columns are factor/character,
 #'   `"ctree"` if mixed numeric and factor/character, or for all-numeric
 #'   `x_train`, `"empirical"` if there are at least `min_obs_per_feature`
-#'   observations per feature, otherwise `"gaussian"` (with a warning, since
-#'   `"gaussian"` assumes multivariate normality, which isn't verified).
+#'   observations per feature, otherwise `"independence"`.
 #'   Pass any other value accepted by [shapr::explain()] (e.g. `"vaeac"`,
-#'   `"copula"`, `"independence"`) to override.
+#'   `"gaussian"`, `"copula"`) to override.
 #' @param phi0 Numeric scalar; the baseline (null) prediction (i.e. the
 #'   expected model output when no features are known). Defaults to `NULL`,
 #'   in which case it is automatically computed as

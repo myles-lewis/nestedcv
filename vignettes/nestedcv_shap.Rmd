@@ -141,7 +141,7 @@ approaches are available, and by default `nestcv.explain()` auto-selects one
 based on `x_train`'s column types: `"categorical"` for all-factor/character
 data, `"ctree"` for a mix of numeric and factor/character columns, and for
 all-numeric data, `"empirical"` (accounts for feature correlation) when there
-are enough observations per feature, otherwise `"gaussian"`. See
+are enough observations per feature, otherwise `"independence"`. See
 [Overriding phi0 and choosing an approach](#overriding-phi0-and-choosing-an-approach)
 below to override this.
 
@@ -279,9 +279,8 @@ on `x_train`'s column types: `"categorical"` if all predictors are
 factor/character, `"ctree"` for a mix of numeric and factor/character
 predictors, and for all-numeric predictors, `"empirical"` (accounts for
 feature correlation) provided there are at least `min_obs_per_feature`
-(default `20`) observations per predictor, otherwise `"gaussian"` (with a
-warning, since multivariate normality is assumed but not checked). Adjust the
-threshold or force a specific approach as needed:
+(default `20`) observations per predictor, otherwise `"independence"`. Adjust
+the threshold or force a specific approach as needed:
 
 ```{r, eval=FALSE}
 # Lower the observations-per-feature threshold required for "empirical"
@@ -290,7 +289,7 @@ sh <- nestcv.explain(fit, x_explain = x, predict_model = pred_nestcv_glmnet,
 
 # Or override the approach directly
 sh <- nestcv.explain(fit, x_explain = x, predict_model = pred_nestcv_glmnet,
-                     approach = "independence")
+                     approach = "gaussian")
 ```
 
 ### One-hot encoding for categorical predictors

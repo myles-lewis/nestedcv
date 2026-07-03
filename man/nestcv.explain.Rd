@@ -38,10 +38,9 @@ Defaults to \code{NULL}, in which case it is auto-selected from \code{x_train}'s
 column types: \code{"categorical"} if all columns are factor/character,
 \code{"ctree"} if mixed numeric and factor/character, or for all-numeric
 \code{x_train}, \code{"empirical"} if there are at least \code{min_obs_per_feature}
-observations per feature, otherwise \code{"gaussian"} (with a warning, since
-\code{"gaussian"} assumes multivariate normality, which isn't verified).
+observations per feature, otherwise \code{"independence"}.
 Pass any other value accepted by \code{\link[shapr:explain]{shapr::explain()}} (e.g. \code{"vaeac"},
-\code{"copula"}, \code{"independence"}) to override.}
+\code{"gaussian"}, \code{"copula"}) to override.}
 
 \item{phi0}{Numeric scalar; the baseline (null) prediction (i.e. the
 expected model output when no features are known). Defaults to \code{NULL},
