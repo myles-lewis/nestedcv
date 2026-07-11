@@ -9,10 +9,10 @@ glmnet_coefs(fit, s, ...)
 \arguments{
 \item{fit}{A \link[glmnet:cv.glmnet]{glmnet::cv.glmnet} fitted model object.}
 
-\item{s}{Value of lambda. See \link[glmnet:predict.glmnet]{glmnet::coef.glmnet} and
+\item{s}{Value of lambda. See \link[glmnet:coef.glmnet]{glmnet::coef.glmnet} and
 \link[glmnet:predict.cv.glmnet]{glmnet::predict.cv.glmnet}}
 
-\item{...}{Other arguments passed to \link[glmnet:predict.glmnet]{glmnet::coef.glmnet}}
+\item{...}{Other arguments passed to \link[glmnet:coef.glmnet]{glmnet::coef.glmnet}}
 }
 \value{
 Vector or list of coefficients ordered with the intercept first,

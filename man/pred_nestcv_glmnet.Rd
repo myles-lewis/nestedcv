@@ -6,7 +6,7 @@
 \alias{pred_train}
 \alias{pred_train_class}
 \alias{pred_SuperLearner}
-\title{Prediction wrappers to use fastshap with nestedcv}
+\title{Prediction wrappers to use shapr with nestedcv}
 \usage{
 pred_nestcv_glmnet(x, newdata)
 
@@ -21,51 +21,53 @@ pred_SuperLearner(x, newdata)
 \arguments{
 \item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} object}
 
-\item{newdata}{a matrix of new data}
+\item{newdata}{a matrix or data frame of new data}
 
 \item{cl}{integer representing which class to predict}
 }
 \value{
 prediction wrapper function designed for use with
-\code{\link[fastshap:explain]{fastshap::explain()}}
+\code{\link[=nestcv.explain]{nestcv.explain()}} or \code{\link[shapr:explain]{shapr::explain()}}
 }
 \description{
-Prediction wrapper functions to enable the use of the \code{fastshap} package for
+Prediction wrapper functions to enable the use of the \code{shapr} package for
 generating SHAP values from \code{nestedcv} trained models.
 }
 \details{
 These prediction wrapper functions are designed to be used with the
-\code{fastshap} package. The functions \code{pred_nestcv_glmnet} and \code{pred_train} work
-for \code{nestcv.glmnet} and \code{nestcv.train} models respectively for either binary
-classification or regression.
+\code{shapr} package via \code{\link[=nestcv.explain]{nestcv.explain()}}. The functions
+\code{pred_nestcv_glmnet} and \code{pred_train} work for \code{nestcv.glmnet} and
+\code{nestcv.train} models respectively for either binary classification or
+regression.
 
 For multiclass classification use \code{pred_nestcv_glmnet_class(1)},
 \code{pred_nestcv_glmnet_class(2)} etc for each class. Similarly
-\code{pred_train_class(1)}, \code{pred_train_class(2)} etc for \link{nestcv.train} objects.
+\code{pred_train_class(1)}, \code{pred_train_class(2)} etc for \link{nestcv.train}
+objects.
 }
 \examples{
-if (requireNamespace("fastshap") & requireNamespace("mlbench")) {
-library(fastshap)
+if (requireNamespace("shapr") & requireNamespace("mlbench")) {
+  library(shapr)
 
-# Boston housing dataset
-library(mlbench)
-data(BostonHousing2)
-dat <- BostonHousing2
-y <- dat$cmedv
-x <- subset(dat, select = -c(cmedv, medv, town, chas))
+  # Boston housing dataset
+  library(mlbench)
+  data(BostonHousing2)
+  dat <- BostonHousing2
+  y <- dat$cmedv
+  x <- subset(dat, select = -c(cmedv, medv, town, chas))
 
-# Fit a glmnet model using nested CV
-# Only 3 outer CV folds and 1 alpha value for speed
-fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
+  # Fit a glmnet model using nested CV
+  # Only 3 outer CV folds and 1 alpha value for speed
+  fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
 
-# Generate SHAP values using fastshap::explain
-# Only using 5 repeats here for speed, but recommend higher values of nsim
-sh <- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet, nsim = 1)
+  # Generate SHAP values using shapr via nestcv.explain()
+  # phi0 is auto-computed as mean(predict_model(model, x))
+  sh <- nestcv.explain(fit, x, pred_nestcv_glmnet)
 
-# Plot overall variable importance
-plot_shap_bar(sh, x)
+  # Plot overall variable importance
+  plot_shap_bar(sh, x)
 
-# Plot beeswarm plot
-plot_shap_beeswarm(sh, x, size = 1)
+  # Plot beeswarm plot
+  plot_shap_beeswarm(sh, x, size = 1)
 }
 }
