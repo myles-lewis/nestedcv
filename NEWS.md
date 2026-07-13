@@ -2,7 +2,7 @@ News
 =====
 
 # nestedcv 0.9.0
-###### 23/06/2026
+###### 13/07/2026
 * Added `nestcv.explain()`, a wrapper around `shapr::explain()`
 for generating SHAP values from `nestedcv` models, replacing the
 `fastshap`-based workflow due to the removal of `fastshap` from CRAN.
@@ -14,12 +14,7 @@ erroring when called with a `data.table` (as `shapr::explain()` does
 internally) by changing `newdata` to a data frame.
 * `nestedcv` still works with `fastshap` for users who prefer it; the
 `pred_*` wrapper functions remain usable directly with `fastshap::explain()`.
-* `nestcv.explain()` `approach` argument defaults to `NULL`, auto-selecting
-a `shapr` estimation approach from `x_train` column types: `"categorical"`
-for all-factor/character data, `"ctree"` for a mix of numeric and
-factor/character columns, and for all-numeric data, `"empirical"` or
-`"gaussian"` depending on `min_obs_per_feature` argument (default
-`20`). Pass `approach` explicitly to override.
+* Small fixes to handle updates to ggplot2.
 
 # nestedcv 0.8.4
 ###### 19/06/2026
