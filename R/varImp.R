@@ -355,7 +355,7 @@ plot_var_stability <- function(x,
     ggplot(df, aes(x = .data$mean, y = .data$name)) +
       (if (min(df$mean) < 0) geom_vline(xintercept = 0)) +
       geom_errorbarh(aes(xmin = .data$mean - .data$sem,
-                         xmax = .data$mean + .data$sem), height = 0.2) +
+                         xmax = .data$mean + .data$sem), width = 0.2) +
       geom_point(aes(size = .data$frequency,
                      fill = .data$direction), shape = 21) +
       scale_fill_manual(values = scheme, na.translate = FALSE) +
@@ -370,7 +370,7 @@ plot_var_stability <- function(x,
     ggplot(df, aes(x = .data$mean, y = .data$name)) +
       (if (min(df$mean) < 0) geom_vline(xintercept = 0)) +
       geom_errorbarh(aes(xmin = .data$mean - .data$sem,
-                         xmax = .data$mean + .data$sem), height = 0.2) +
+                         xmax = .data$mean + .data$sem), width = 0.2) +
       geom_point(aes(size = .data$frequency,
                      fill = .data$frequency), shape = 21) +
       scale_fill_distiller(guide = "legend", palette = "Spectral", direction = 1,
@@ -472,7 +472,7 @@ barplot_var_stability <- function(x,
       (if (min(df$mean) < 0) geom_vline(xintercept = 0)) +
       geom_col(width = 0.75) +
       geom_errorbarh(aes(xmin = .data$mean - .data$sem,
-                         xmax = .data$mean + .data$sem), height = 0.3) +
+                         xmax = .data$mean + .data$sem), width = 0.3) +
       scale_y_discrete(limits=rev) + ylab("") +
       xlab(xtitle) +
       theme_minimal() +
@@ -482,7 +482,7 @@ barplot_var_stability <- function(x,
       (if (min(df$mean) < 0) geom_vline(xintercept = 0)) +
       geom_col(aes(fill = .data$direction), width = 0.75) +
       geom_errorbarh(aes(xmin = .data$mean - .data$sem,
-                         xmax = .data$mean + .data$sem), height = 0.3) +
+                         xmax = .data$mean + .data$sem), width = 0.3) +
       scale_fill_manual(values = scheme, na.translate = FALSE) +
       scale_y_discrete(limits = rev) + ylab("") +
       xlab(xtitle) +
@@ -528,7 +528,8 @@ plot_var_ranks <- function(x, sort = TRUE,
   ggplot(data = df, aes(x = .data$rank, y = .data$var, col = .data$var)) +
     ggbeeswarm::geom_beeswarm(cex = cex,
                               corral = "random",
-                              corral.width = corral.width, ...) +
+                              corral.width = corral.width,
+                              orientation = "y", ...) +
     stat_summary(fun = mean, geom = 'point', size = 4, shape = 5,
                  col = "black") +
     scale_x_continuous(n.breaks = 8) +
