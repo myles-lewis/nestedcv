@@ -46,6 +46,7 @@ For multiclass classification use \code{pred_nestcv_glmnet_class(1)},
 objects.
 }
 \examples{
+\donttest{
 if (requireNamespace("shapr") & requireNamespace("mlbench")) {
   library(shapr)
 
@@ -70,5 +71,6 @@ if (requireNamespace("shapr") & requireNamespace("mlbench")) {
 
   # Plot beeswarm plot
   plot_shap_beeswarm(sh, x, size = 1)
+}
 }
 }

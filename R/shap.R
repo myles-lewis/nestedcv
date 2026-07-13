@@ -24,6 +24,7 @@
 #' objects.
 #'
 #' @examples
+#' \donttest{
 #' if (requireNamespace("shapr") & requireNamespace("mlbench")) {
 #'   library(shapr)
 #'
@@ -48,6 +49,7 @@
 #'
 #'   # Plot beeswarm plot
 #'   plot_shap_beeswarm(sh, x, size = 1)
+#' }
 #' }
 #' @export
 #'
