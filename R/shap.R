@@ -180,7 +180,7 @@ nestcv.explain <- function(model, predict_model,
   if (is.null(phi0)) {
     phi0 <- mean(model$y, na.rm = TRUE)
     # for classification
-    if (is.na(phi0)) mean(predict_model(model, x_explain), na.rm = TRUE)
+    if (is.na(phi0)) phi0 <- mean(predict_model(model, x_explain), na.rm = TRUE)
   }
   
   shapr::explain(
