@@ -6,7 +6,7 @@
 #' Prediction wrapper functions to enable the use of the `shapr` package for
 #' generating SHAP values from `nestedcv` trained models.
 #'
-#' @param x a `nestcv.glmnet` or `nestcv.train` object
+#' @param x a `nestcv.glmnet`, `nestcv.train` or `nestcv.SuperLearner` object
 #' @param newdata a matrix or data frame of new data
 #' @param cl integer representing which class to predict
 #' @return prediction wrapper function designed for use with
@@ -164,6 +164,9 @@ nestcv.explain <- function(model, predict_model,
                            ...) {
   if (!requireNamespace("shapr", quietly = TRUE)) {
     stop("Package 'shapr' must be installed to use nestcv.explain()", call. = FALSE)
+  }
+  if (!inherits(model, c("nestcv.glmnet", "nestcv.train", "nestcv.SuperLearner"))) {
+    stop("Not a nestedcv model")
   }
   
   if (is.null(x_explain)) {

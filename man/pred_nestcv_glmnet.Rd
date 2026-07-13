@@ -19,7 +19,7 @@ pred_train_class(cl)
 pred_SuperLearner(x, newdata)
 }
 \arguments{
-\item{x}{a \code{nestcv.glmnet} or \code{nestcv.train} object}
+\item{x}{a \code{nestcv.glmnet}, \code{nestcv.train} or \code{nestcv.SuperLearner} object}
 
 \item{newdata}{a matrix or data frame of new data}
 
