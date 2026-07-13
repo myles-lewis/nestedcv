@@ -153,12 +153,13 @@ the data, and returns the `shapr` object directly. This can be passed
 straight into the plotting functions below, or used with `shapr`'s own
 `print()`/`plot()` methods.
 
-```{r, eval = shapr_eval}
+```{r, eval = shapr_eval, message=FALSE}
 library(shapr)
 
 # Generate SHAP values using shapr via nestcv.explain()
-# phi0 is auto-computed as mean(pred_nestcv_glmnet(fit, x))
-sh <- nestcv.explain(fit, x_explain = x, predict_model = pred_nestcv_glmnet)
+# max_n_coalitions reduced for demo only, recommended default = NULL
+sh <- nestcv.explain(fit, predict_model = pred_nestcv_glmnet,
+                     max_n_coalitions = 400)
 
 # Plot overall variable importance
 plot_shap_bar(sh, x)

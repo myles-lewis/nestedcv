@@ -38,9 +38,10 @@
 #'   # Only 3 outer CV folds and 1 alpha value for speed
 #'   fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
 #'
-#'   # Generate SHAP values using shapr via nestcv.explain()
-#'   # phi0 is auto-computed as mean(predict_model(model, x))
-#'   sh <- nestcv.explain(fit, x, pred_nestcv_glmnet)
+#'   # Generate SHAP values using shapr
+#'   # Reduced `max_n_coalitions` for demo; best left as default (NULL)
+#'   sh <- nestcv.explain(fit, pred_nestcv_glmnet,
+#'                        max_n_coalitions = 20)
 #'
 #'   # Plot overall variable importance
 #'   plot_shap_bar(sh, x)
@@ -115,12 +116,12 @@ select_approach <- function(x_train, min_obs_per_feature) {
 #'
 #' @param model A `nestcv.glmnet`, `nestcv.train`, or other `nestedcv` model
 #'   object.
-#' @param x_explain A matrix or data frame of feature values to compute SHAP
-#'   values for.
 #' @param predict_model Prediction wrapper function with signature
 #'   `function(model, newdata)` returning a numeric vector of predictions.
 #'   Use [pred_nestcv_glmnet()], [pred_train()], [pred_nestcv_glmnet_class()],
 #'   [pred_train_class()], or [pred_SuperLearner()] as appropriate.
+#' @param x_explain A matrix or data frame of feature values to compute SHAP
+#'   values for.
 #' @param x_train A matrix or data frame of feature values used as the
 #'   background training data. Defaults to `model$xsub[, model$final_vars]`
 #'   when `model` stores these (e.g. a fitted `nestcv.glmnet`/`nestcv.train`);
@@ -152,8 +153,9 @@ select_approach <- function(x_train, min_obs_per_feature) {
 #'   `shapr`'s own `print()`/`plot()` methods on it.
 #' @importFrom stats predict
 #' @export
-nestcv.explain <- function(model, x_explain, predict_model,
-                           x_train  = NULL,
+nestcv.explain <- function(model, predict_model,
+                           x_explain = NULL,
+                           x_train  = x_explain,
                            approach = NULL,
                            phi0     = NULL,
                            min_obs_per_feature = 20,
@@ -161,17 +163,13 @@ nestcv.explain <- function(model, x_explain, predict_model,
   if (!requireNamespace("shapr", quietly = TRUE)) {
     stop("Package 'shapr' must be installed to use nestcv.explain()", call. = FALSE)
   }
-  x_explain <- as.data.frame(x_explain)
-
-  if (is.null(x_train)) {
+  
+  if (is.null(x_explain)) {
     if (!is.null(model$xsub) && is.character(model$final_vars)) {
-      x_train   <- model$xsub[, model$final_vars, drop = FALSE]
-      # match x_explain's columns to x_train's
-      x_explain <- x_explain[, model$final_vars, drop = FALSE]
-    } else {
-      x_train <- x_explain
+      x_explain <- model$xsub[, model$final_vars, drop = FALSE]
     }
   }
+  x_explain <- as.data.frame(x_explain)
   x_train <- as.data.frame(x_train)
 
   if (is.null(approach)) {
@@ -180,9 +178,11 @@ nestcv.explain <- function(model, x_explain, predict_model,
 
   # Compute phi0 if not supplied
   if (is.null(phi0)) {
-    phi0 <- mean(predict_model(model, x_explain), na.rm = TRUE)
+    phi0 <- mean(model$y, na.rm = TRUE)
+    # for classification
+    if (is.na(phi0)) mean(predict_model(model, x_explain), na.rm = TRUE)
   }
-
+  
   shapr::explain(
     model         = model,
     x_explain     = x_explain,
@@ -265,8 +265,8 @@ plot_shap_beeswarm <- function(shap, x,
     geom_vline(xintercept = 0) +
     ggbeeswarm::geom_beeswarm(cex = cex, corral = corral,
                               corral.width = corral.width,
-                              ...) +
-    scale_color_gradient2(low=scheme[1], mid=scheme[2], high=scheme[3],
+                              orientation = "y", ...) +
+    scale_color_gradient2(low = scheme[1], mid = scheme[2], high = scheme[3],
                           breaks = c(-1.5, 1.5),
                           labels = c("Low", "High"), name="Feature value",
                           guide = guide_colorbar(

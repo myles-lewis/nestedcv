@@ -208,8 +208,7 @@
 #' res$outer_folds
 #' res$final_fit$control$indexOut  # same as outer_folds
 #' }
-#' @importFrom caret createFolds train trainControl mnLogLoss confusionMatrix
-#'   defaultSummary
+#' @importFrom caret createFolds train trainControl mnLogLoss confusionMatrix defaultSummary
 #' @importFrom data.table rbindlist
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach registerDoSEQ

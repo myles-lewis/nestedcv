@@ -288,8 +288,7 @@ var_stability.repeatcv <- function(x, ...) {
 #'   [var_stability()].
 #' @return A ggplot2 plot
 #' @seealso [var_stability()]
-#' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller
-#'   scale_fill_manual scale_radius xlim
+#' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller scale_fill_manual scale_radius xlim
 #' @export
 plot_var_stability <- function(x,
                                final = TRUE,
@@ -418,8 +417,7 @@ plot_var_stability <- function(x,
 #'   [var_stability()].
 #' @return A ggplot2 plot
 #' @seealso [var_stability()]
-#' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller
-#'   scale_fill_manual scale_radius xlim
+#' @importFrom ggplot2 geom_vline geom_errorbarh scale_fill_distiller scale_fill_manual scale_radius xlim
 #' @export
 barplot_var_stability <- function(x,
                                   final = TRUE,

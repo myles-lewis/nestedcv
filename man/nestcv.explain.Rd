@@ -6,9 +6,9 @@
 \usage{
 nestcv.explain(
   model,
-  x_explain,
   predict_model,
-  x_train = NULL,
+  x_explain = NULL,
+  x_train = x_explain,
   approach = NULL,
   phi0 = NULL,
   min_obs_per_feature = 20,
@@ -19,13 +19,13 @@ nestcv.explain(
 \item{model}{A \code{nestcv.glmnet}, \code{nestcv.train}, or other \code{nestedcv} model
 object.}
 
-\item{x_explain}{A matrix or data frame of feature values to compute SHAP
-values for.}
-
 \item{predict_model}{Prediction wrapper function with signature
 \verb{function(model, newdata)} returning a numeric vector of predictions.
 Use \code{\link[=pred_nestcv_glmnet]{pred_nestcv_glmnet()}}, \code{\link[=pred_train]{pred_train()}}, \code{\link[=pred_nestcv_glmnet_class]{pred_nestcv_glmnet_class()}},
 \code{\link[=pred_train_class]{pred_train_class()}}, or \code{\link[=pred_SuperLearner]{pred_SuperLearner()}} as appropriate.}
+
+\item{x_explain}{A matrix or data frame of feature values to compute SHAP
+values for.}
 
 \item{x_train}{A matrix or data frame of feature values used as the
 background training data. Defaults to \code{model$xsub[, model$final_vars]}

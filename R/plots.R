@@ -318,8 +318,7 @@ boxplot_expression <- function(x,
 #' @param abs Logical whether to show absolute value of glmnet coefficients
 #' @param size Logical whether to show mean expression by size of points
 #' @return Returns a ggplot2 plot
-#' @importFrom ggplot2 ggplot geom_point scale_fill_viridis_c scale_y_discrete
-#'   xlab ylab theme_minimal aes theme element_text geom_col
+#' @importFrom ggplot2 ggplot geom_point scale_fill_viridis_c scale_y_discrete xlab ylab theme_minimal aes theme element_text geom_col
 #' @importFrom rlang .data
 #' @export
 #' 
