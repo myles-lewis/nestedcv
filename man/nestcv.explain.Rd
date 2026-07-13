@@ -9,9 +9,8 @@ nestcv.explain(
   predict_model,
   x_explain = x_train,
   x_train = NULL,
-  approach = NULL,
+  approach = "independence",
   phi0 = NULL,
-  min_obs_per_feature = 20,
   ...
 )
 }
@@ -34,26 +33,20 @@ background training data. Defaults to the original training data from
 data.}
 
 \item{approach}{Character string specifying the shapr estimation approach.
-Defaults to \code{NULL}, in which case it is auto-selected from \code{x_train}'s
-column types: \code{"categorical"} if all columns are factor/character,
-\code{"ctree"} if mixed numeric and factor/character, or for all-numeric
-\code{x_train}, \code{"empirical"} if there are at least \code{min_obs_per_feature}
-observations per feature, otherwise \code{"independence"}.
-Pass any other value accepted by \code{\link[shapr:explain]{shapr::explain()}} (e.g. \code{"vaeac"},
-\code{"gaussian"}, \code{"copula"}) to override.}
+Defaults to \code{"independence"}, which is the original method by Lundberg and
+is faster than other methods. The makers of \code{shapr} recommend \code{"gaussian"}
+for multivariate gaussian data or \code{"empirical"} as the main regression
+methods, i.e. if all \code{x} is numeric. For other approaches, see
+\code{\link[shapr:explain]{shapr::explain()}}.}
 
 \item{phi0}{Numeric scalar; the baseline (null) prediction (i.e. the
-expected model output when no features are known). Defaults to \code{NULL},
-in which case it is automatically computed as
-\code{mean(predict_model(model, x_explain))} on the supplied data. For
-regression this equals \code{mean(y_train)}; for classification it equals the
-mean predicted probability. Override this argument if you want to use a
-different reference value, e.g. computed on a held-out set.}
-
-\item{min_obs_per_feature}{Numeric scalar specifying the minimum ratio of
-\code{nrow(x_train)} to \code{ncol(x_train)} required to auto-select \code{"empirical"}
-for all-numeric \code{x_train} (see \code{approach} above). Defaults to \code{20}.
-Ignored if \code{approach} is supplied explicitly.}
+expected model output when no features are known). Defaults to \code{NULL}, in
+which case it is automatically computed as \code{mean(model$y)} or
+\code{mean(predict_model(model, x_explain))} on supplied data for
+classification. For regression this equals \code{mean(y_train)}; for
+classification it equals the mean predicted probability. Override this
+argument if you want to use a different reference value, e.g. computed on a
+held-out set.}
 
 \item{...}{Additional arguments passed to \code{\link[shapr:explain]{shapr::explain()}}, e.g.
 \code{verbose}.}

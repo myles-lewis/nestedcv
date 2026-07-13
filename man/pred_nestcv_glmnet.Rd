@@ -62,10 +62,8 @@ if (requireNamespace("shapr") & requireNamespace("mlbench")) {
   fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
 
   # Generate SHAP values using shapr
-  # Reduced `max_n_coalitions` for demo; best left as default (NULL)
-  sh <- nestcv.explain(fit, pred_nestcv_glmnet,
-                       max_n_coalitions = 20)
-
+  sh <- nestcv.explain(fit, pred_nestcv_glmnet)
+                       
   # Plot overall variable importance
   plot_shap_bar(sh, x)
 

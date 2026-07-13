@@ -40,10 +40,8 @@
 #'   fit <- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
 #'
 #'   # Generate SHAP values using shapr
-#'   # Reduced `max_n_coalitions` for demo; best left as default (NULL)
-#'   sh <- nestcv.explain(fit, pred_nestcv_glmnet,
-#'                        max_n_coalitions = 20)
-#'
+#'   sh <- nestcv.explain(fit, pred_nestcv_glmnet)
+#'                        
 #'   # Plot overall variable importance
 #'   plot_shap_bar(sh, x)
 #'
@@ -93,22 +91,6 @@ pred_SuperLearner <- function(x, newdata) {
 }
 
 
-select_approach <- function(x_train, min_obs_per_feature) {
-  is_categorical <- vapply(
-    x_train, function(col) is.factor(col) || is.character(col), logical(1)
-  )
-  if (all(is_categorical)) {
-    return("categorical")
-  }
-  if (any(is_categorical)) {
-    return("ctree")
-  }
-  if (nrow(x_train) / ncol(x_train) >= min_obs_per_feature) {
-    return("empirical")
-  }
-  return("independence")
-}
-
 #' Generate SHAP values from nestedcv models using shapr
 #'
 #' Convenience wrapper around [shapr::explain()] that works with `nestedcv`
@@ -130,24 +112,19 @@ select_approach <- function(x_train, min_obs_per_feature) {
 #'   `nestcv.glmnet`/`nestcv.train`). Or users can supply their own training
 #'   data.
 #' @param approach Character string specifying the shapr estimation approach.
-#'   Defaults to `NULL`, in which case it is auto-selected from `x_train`'s
-#'   column types: `"categorical"` if all columns are factor/character,
-#'   `"ctree"` if mixed numeric and factor/character, or for all-numeric
-#'   `x_train`, `"empirical"` if there are at least `min_obs_per_feature`
-#'   observations per feature, otherwise `"independence"`.
-#'   Pass any other value accepted by [shapr::explain()] (e.g. `"vaeac"`,
-#'   `"gaussian"`, `"copula"`) to override.
+#'   Defaults to `"independence"`, which is the original method by Lundberg and
+#'   is faster than other methods. The makers of `shapr` recommend `"gaussian"`
+#'   for multivariate gaussian data or `"empirical"` as the main regression
+#'   methods, i.e. if all `x` is numeric. For other approaches, see
+#'   [shapr::explain()].
 #' @param phi0 Numeric scalar; the baseline (null) prediction (i.e. the
-#'   expected model output when no features are known). Defaults to `NULL`,
-#'   in which case it is automatically computed as
-#'   `mean(predict_model(model, x_explain))` on the supplied data. For
-#'   regression this equals `mean(y_train)`; for classification it equals the
-#'   mean predicted probability. Override this argument if you want to use a
-#'   different reference value, e.g. computed on a held-out set.
-#' @param min_obs_per_feature Numeric scalar specifying the minimum ratio of
-#'   `nrow(x_train)` to `ncol(x_train)` required to auto-select `"empirical"`
-#'   for all-numeric `x_train` (see `approach` above). Defaults to `20`.
-#'   Ignored if `approach` is supplied explicitly.
+#'   expected model output when no features are known). Defaults to `NULL`, in
+#'   which case it is automatically computed as `mean(model$y)` or
+#'   `mean(predict_model(model, x_explain))` on supplied data for
+#'   classification. For regression this equals `mean(y_train)`; for
+#'   classification it equals the mean predicted probability. Override this
+#'   argument if you want to use a different reference value, e.g. computed on a
+#'   held-out set.
 #' @param ... Additional arguments passed to [shapr::explain()], e.g.
 #'   `verbose`.
 #' @return the `shapr` object returned by [shapr::explain()]. Pass it
@@ -158,9 +135,8 @@ select_approach <- function(x_train, min_obs_per_feature) {
 nestcv.explain <- function(model, predict_model,
                            x_explain = x_train,
                            x_train  = NULL,
-                           approach = NULL,
+                           approach = "independence",
                            phi0     = NULL,
-                           min_obs_per_feature = 20,
                            ...) {
   if (!requireNamespace("shapr", quietly = TRUE)) {
     stop("Package 'shapr' must be installed to use nestcv.explain()", call. = FALSE)
@@ -177,10 +153,6 @@ nestcv.explain <- function(model, predict_model,
   x_train <- as.data.frame(x_train)
   x_explain <- as.data.frame(x_explain)
   
-  if (is.null(approach)) {
-    approach <- select_approach(x_train, min_obs_per_feature)
-  }
-
   # Compute phi0 if not supplied
   if (is.null(phi0)) {
     phi0 <- mean(model$y, na.rm = TRUE)
@@ -245,7 +217,7 @@ plot_shap_beeswarm <- function(shap, x,
     shap <- as.matrix(shap)
   }  
   if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
-  meanshap <- colMeans(abs(as.matrix(shap)))
+  meanshap <- colMeans(abs(zapsmall(as.matrix(shap))))
   zeros <- if (sort) meanshap == 0 else FALSE
   if (any(zeros)) {
     message("Variables with mean(|SHAP|)=0: ",
@@ -328,7 +300,7 @@ plot_shap_bar <- function(shap, x,
     shap <- as.matrix(shap)
   }
   if (!identical(dim(shap), dim(x))) stop("`shap` and `x` are misaligned")
-  meanshap <- colMeans(abs(as.matrix(shap)))
+  meanshap <- colMeans(abs(zapsmall(as.matrix(shap))))
   x <- data.matrix(x)
   cor1 <- diag(suppressWarnings(cor(shap, x)))
   sign1 <- sign(cor1)

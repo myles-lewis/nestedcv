@@ -137,14 +137,11 @@ xgboost).
 `shapr` implements an extended version of the Kernel SHAP method that accounts
 for dependence between features (Aas, Jullum & Løland, 2021), giving more
 accurate Shapley values when predictors are correlated. Multiple estimation
-approaches are available, and by default `nestcv.explain()` auto-selects one
-based on `x_train`'s column types: `"categorical"` for all-factor/character
-data, `"ctree"` for a mix of numeric and factor/character columns, and for
-all-numeric data, `"empirical"` (accounts for feature correlation) when there
-are enough observations per feature, otherwise `"independence"`, which is
-closest to Lindberg's original `shap` approach. See
-[Overriding phi0 and choosing an approach](#overriding-phi0-and-choosing-an-approach)
-below to override this.
+approaches are available. By default `nestcv.explain()` uses `"independence"`
+which is closest to Lindberg's original `shap` approach and is faster than other
+methods. Other options for `approach` with all-numeric data are `"empirical"`
+(accounts for feature correlation) when there are enough observations per
+feature or `"gaussian"` for multivariate Gaussian data.
 
 In the example below using the same glmnet regression model, the variable
 importance for predictors is measured using Shapley values. `nestedcv` provides
@@ -158,9 +155,8 @@ methods.
 library(shapr)
 
 # Generate SHAP values using shapr via nestcv.explain()
-# max_n_coalitions reduced for demo only, recommended default = NULL
-sh <- nestcv.explain(fit, pred_nestcv_glmnet,
-                     max_n_coalitions = 400)
+# For regression, alternative `approach` could be "empirical" or "gaussian".
+sh <- nestcv.explain(fit, pred_nestcv_glmnet)
 
 # Plot overall variable importance
 plot_shap_bar(sh, x)
@@ -262,39 +258,6 @@ s3 <- plot_shap_beeswarm(sh3, x, sort = FALSE, cex = 0.7) +
   ggtitle("Virginica")
 
 ggpubr::ggarrange(s1, s2, s3, ncol=3, legend = "right", common.legend = TRUE)
-```
-
-### Overriding phi0 and choosing an approach
-
-By default `nestcv.explain()` computes `phi0` automatically as mean of the
-response, i.e. `mean(y)`. For classification mean prediction over the data
-supplied in `x_explain` using the `predict_model` wrapper is used since
-prediction needs to converted to 0/1 and this handles the classes. You can
-override this with any reference value, for example the mean of the response
-from a separate training set:
-
-```{r, eval=FALSE}
-sh <- nestcv.explain(fit, predict_model = pred_nestcv_glmnet,
-                     phi0 = mean(y_train))
-```
-
-`nestcv.explain()` also auto-selects an `approach` for `shapr::explain()` based
-on `x_train`'s column types: `"categorical"` if all predictors are factor/
-character, `"ctree"` for a mix of numeric and factor/ character predictors, and
-for all-numeric predictors (i.e. regression), `"empirical"` (accounts for
-feature correlation) provided there are at least `min_obs_per_feature` (default
-`20`) observations per predictor, otherwise `"independence"`, which is closest
-to the original shap python package of Lundberg. Adjust the threshold or force a
-specific approach as needed:
-
-```{r, eval=FALSE}
-# Lower the observations-per-feature threshold required for "empirical"
-sh <- nestcv.explain(fit, predict_model = pred_nestcv_glmnet,
-                     min_obs_per_feature = 10)
-
-# Or override the approach directly
-sh <- nestcv.explain(fit, predict_model = pred_nestcv_glmnet,
-                     approach = "gaussian")
 ```
 
 ### One-hot encoding for categorical predictors
