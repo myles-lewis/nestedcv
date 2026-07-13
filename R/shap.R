@@ -123,12 +123,12 @@ select_approach <- function(x_train, min_obs_per_feature) {
 #'   Use [pred_nestcv_glmnet()], [pred_train()], [pred_nestcv_glmnet_class()],
 #'   [pred_train_class()], or [pred_SuperLearner()] as appropriate.
 #' @param x_explain A matrix or data frame of feature values to compute SHAP
-#'   values for.
+#'   values for. Defaults to `x_train`.
 #' @param x_train A matrix or data frame of feature values used as the
-#'   background training data. Defaults to `model$xsub[, model$final_vars]`
-#'   when `model` stores these (e.g. a fitted `nestcv.glmnet`/`nestcv.train`);
-#'   otherwise falls back to `x_explain` (matching `fastshap` behaviour of
-#'   using the same data for both).
+#'   background training data. Defaults to the original training data from
+#'   `model`, which is stored as `model$xsub[, model$final_vars]` for fitted
+#'   `nestcv.glmnet`/`nestcv.train`). Or users can supply their own training
+#'   data.
 #' @param approach Character string specifying the shapr estimation approach.
 #'   Defaults to `NULL`, in which case it is auto-selected from `x_train`'s
 #'   column types: `"categorical"` if all columns are factor/character,
@@ -156,8 +156,8 @@ select_approach <- function(x_train, min_obs_per_feature) {
 #' @importFrom stats predict
 #' @export
 nestcv.explain <- function(model, predict_model,
-                           x_explain = NULL,
-                           x_train  = x_explain,
+                           x_explain = x_train,
+                           x_train  = NULL,
                            approach = NULL,
                            phi0     = NULL,
                            min_obs_per_feature = 20,
@@ -169,14 +169,14 @@ nestcv.explain <- function(model, predict_model,
     stop("Not a nestedcv model")
   }
   
-  if (is.null(x_explain)) {
+  if (is.null(x_train)) {
     if (!is.null(model$xsub) && is.character(model$final_vars)) {
-      x_explain <- model$xsub[, model$final_vars, drop = FALSE]
+      x_train <- model$xsub[, model$final_vars, drop = FALSE]
     }
   }
-  x_explain <- as.data.frame(x_explain)
   x_train <- as.data.frame(x_train)
-
+  x_explain <- as.data.frame(x_explain)
+  
   if (is.null(approach)) {
     approach <- select_approach(x_train, min_obs_per_feature)
   }

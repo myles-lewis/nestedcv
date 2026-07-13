@@ -7,8 +7,8 @@
 nestcv.explain(
   model,
   predict_model,
-  x_explain = NULL,
-  x_train = x_explain,
+  x_explain = x_train,
+  x_train = NULL,
   approach = NULL,
   phi0 = NULL,
   min_obs_per_feature = 20,
@@ -25,13 +25,13 @@ Use \code{\link[=pred_nestcv_glmnet]{pred_nestcv_glmnet()}}, \code{\link[=pred_t
 \code{\link[=pred_train_class]{pred_train_class()}}, or \code{\link[=pred_SuperLearner]{pred_SuperLearner()}} as appropriate.}
 
 \item{x_explain}{A matrix or data frame of feature values to compute SHAP
-values for.}
+values for. Defaults to \code{x_train}.}
 
 \item{x_train}{A matrix or data frame of feature values used as the
-background training data. Defaults to \code{model$xsub[, model$final_vars]}
-when \code{model} stores these (e.g. a fitted \code{nestcv.glmnet}/\code{nestcv.train});
-otherwise falls back to \code{x_explain} (matching \code{fastshap} behaviour of
-using the same data for both).}
+background training data. Defaults to the original training data from
+\code{model}, which is stored as \code{model$xsub[, model$final_vars]} for fitted
+\code{nestcv.glmnet}/\code{nestcv.train}). Or users can supply their own training
+data.}
 
 \item{approach}{Character string specifying the shapr estimation approach.
 Defaults to \code{NULL}, in which case it is auto-selected from \code{x_train}'s
